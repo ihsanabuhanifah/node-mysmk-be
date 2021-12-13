@@ -5,7 +5,7 @@ const authRouter = require("./authRouter");
 const logRouter = require("./logRouters")
 const identitasRouter = require("./indentitasRouter")
 router.get("/", (req, res) => {
-  res.send("Hello World");
+  res.send("Backend MySMK");
 });
 const jwtValidateMiddleware = require("../middleware/jwtValidateMiddleware");
 

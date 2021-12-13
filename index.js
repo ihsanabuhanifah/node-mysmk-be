@@ -18,6 +18,6 @@ app.use(cookieParser());
 app.use(morgan(':user-agent'))
 app.use(router);
 console.log(key);
-app.listen(port, () => {
+app.listen(process.env.APP_PORT ,() => {
   console.log(`Server berjalan di port ${port}`);
 });
