@@ -1,9 +1,21 @@
 const express = require("express");
 const userRouter = express.Router();
-const upload = require("../utils/multer");
+
 const userController = require("../controllers/UserController");
 const { check } = require("express-validator");
 const userModel = require("../models").User;
+const multer = require("multer");
+const fs = require('fs')
+const path = require('path')
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "public/data/uploads/");
+  },
+  filename: (req, file, cb) => {
+    cb(null, file.fieldname + "-" + Date.now() + "-" + file.originalname);
+  },
+});
+const upload = multer({ storage: storage });
 
 userRouter.post(
   "/",
@@ -40,4 +52,5 @@ userRouter.put("/:id/update", userController.update);
 userRouter.get("/", userController.index);
 userRouter.get("/:id/detail", userController.detail);
 userRouter.delete("/:id/delete", userController.destroy);
+userRouter.post("/import", upload.single("file"), userController.importUser);
 module.exports = userRouter;

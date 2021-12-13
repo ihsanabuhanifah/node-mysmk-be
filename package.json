@@ -9,7 +9,6 @@
     "sq": "npx sequelize"
   },
   "keywords": [],
-  
   "author": "",
   "license": "ISC",
   "dependencies": {
@@ -32,6 +31,7 @@
     "nodemon": "^2.0.15",
     "passport": "^0.5.0",
     "pg": "^8.7.1",
+    "read-excel-file": "^5.2.25",
     "sequelize": "^6.9.0",
     "sequelize-cli": "^6.3.0",
     "yup": "^0.32.11"

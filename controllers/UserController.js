@@ -1,12 +1,10 @@
 const userModel = require("../models").User;
-const alamatModel = require("../models").Alamat;
 
 const bcrypt = require("bcrypt");
 const { userAttribute } = require("../utils/attiributes");
-
-const { sequelize } = require("../models");
-const { QueryTypes } = require("sequelize");
-const attributes = ["id", "name", "email"];
+const readXlsxFile = require("read-excel-file/node");
+const fs = require("fs");
+const path = require("path");
 async function store(req, res) {
   const payload = req.body;
   payload.password = await bcrypt.hashSync(req.body.password, 10);
@@ -73,7 +71,6 @@ async function detail(req, res) {
   const { id } = req.params;
   const user = await userModel.findByPk(id, {
     attributes: userAttribute,
-   
   });
   if (user) {
     return res.json({
@@ -109,5 +106,43 @@ async function destroy(req, res) {
     message: "user tidak ditemukan",
   });
 }
+async function importUser(req, res) {
+  try {
+    if (req.file == undefined) {
+      return res.status(400).json({
+        msg: "Upload File Excel",
+      });
+    }
+    let path = "public/data/uploads/" + req.file.filename;
 
-module.exports = { store, index, detail, update, destroy };
+    readXlsxFile(path).then((rows) => {
+      // `rows` is an array of rows
+      rows.shift();
+      let users = [];
+      rows.forEach((row) => {
+        const user = {
+          name: row[1],
+          email: row[2],
+          password: row[3],
+          status: "active",
+        };
+        users.push(user);
+      });
+      console.log(users);
+      fs.unlinkSync(path);
+      users.map(async (user) => {
+        console.log(user);
+        await userModel.create(user);
+      });
+
+      res.json({
+        data: 'Data berhasil di upload',
+      });
+    });
+  } catch (error) {
+    res.status(500).json({
+      msg: "error",
+    });
+  }
+}
+module.exports = { store, index, detail, update, destroy, importUser };
