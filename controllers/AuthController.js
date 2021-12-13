@@ -1,0 +1,267 @@
+const userModel = require("../models").User;
+const EmailVerifiedModel = require("../models").EmailVerified;
+const LoginHistory = require("../models").LoginHistory;
+const bcrypt = require("bcrypt");
+const JWT = require("jsonwebtoken");
+const { OAuth2Client } = require("google-auth-library");
+const morgan = require("morgan");
+generator = require("generate-password");
+require("dotenv").config();
+const sendEmail = require("../utils/email");
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+async function login(req, res) {
+  let { email, password } = req.body;
+  const user = await userModel.findOne({
+    where: {
+      email: email,
+    },
+   
+  });
+
+  if (!user) {
+    return res.status(404).json({
+      status: "fail",
+      msg: "Email tidak ditemukan",
+    });
+  }
+  const verify = bcrypt.compareSync(password, user.password);
+  if (!verify) {
+    return res.status(404).json({
+      status: "fail",
+      msg: "Email dan Pasword tidak sama",
+    });
+  }
+
+  const token = JWT.sign(
+    {
+      email: user.email,
+      name: user.name,
+      id: user.id,
+    },
+    process.env.JWT_SECRET_ACCESS_TOKEN,
+    {
+      expiresIn: "7d",
+    }
+  );
+
+
+  return res.status(200).json({
+    status: "Success",
+    msg: "Berhasil Login",
+    user: user,
+    token: token,
+  });
+}
+
+async function register(req, res) {
+  const payload = req.body;
+  const { email } = payload;
+  payload.password = await bcrypt.hashSync(req.body.password, 10);
+  try {
+    await userModel.create(payload);
+    const user = await userModel.findOne({
+      where: {
+        email: email,
+      },
+      attributes: ["id", "name", "email", "createdAt", "updatedAt"],
+    });
+
+    const token = JWT.sign(
+      {
+        email: user.email,
+        name: user.name,
+        id: user.id,
+      },
+      process.env.JWT_SECRET_ACCESS_TOKEN,
+      {
+        expiresIn: "7d",
+      }
+    );
+
+    // const token = {
+    //   UserId: user.id,
+    //   token: generator.generate({
+    //     length: 100,
+    //     numbers: true,
+    //   }),
+    // };
+    // const message = `http://localhost:8000/users/verify/${user.id}/${token.token}`;
+    // const kirim = await sendEmail(email, "Verify Email", message);
+    // if (kirim === "email not sent")
+    //   return res.json({
+    //     status: "fail",
+    //     message: "Gunaka email valid",
+    //   });
+
+    // await EmailVerifiedModel.create(token);
+    // console.log(morgan("user-agent"))
+    // await LoginHistory.create({
+    //   UserId: user.id,
+    //   device: morgan(":user-agent"),
+    // });
+    return res.status(201).json({
+      status: "Success",
+      msg: "Registrasi Berhasil",
+      user: user,
+      token: token,
+    });
+  } catch (err) {
+    console.log(err);
+  }
+}
+
+async function authme(req, res) {
+  let name = req.name;
+  let id = req.id;
+  let email = req.email;
+ 
+  try {
+    const user = await userModel.findOne({
+      where: {
+        email: email,
+      },
+     
+    });
+    if (!user) {
+      return res.status(404).json({
+        status: "fail",
+        msg: "Email tidak ditemukan",
+      });
+    }
+    const token = JWT.sign(
+      {
+        email: user.email,
+        name: user.name,
+        id: user.id,
+      },
+      process.env.JWT_SECRET_ACCESS_TOKEN,
+      {
+        expiresIn: "7d",
+      }
+    );
+    return res.status(200).json({
+      status: "Success",
+      msg: "Berhasil Authme",
+      user: user,
+      token: token,
+    });
+  } catch (err) {
+    console.log(err);
+  }
+}
+
+async function googleRegister(req, res) {
+  const { tokenId } = req.body;
+  const data = await client.verifyIdToken({
+    idToken: tokenId,
+    audience: process.env.GOOGLE_CLIENT_ID,
+  });
+
+  const { email, email_verified, name, picture } = data.payload;
+  let password = generator.generate({
+    length: 100,
+    numbers: true,
+  });
+  const users = await userModel.findOne({
+    where: {
+      email: email,
+    },
+  });
+  if (users !== null)
+    return res.status(422).json({
+      status: "Email sudah terdaftar",
+    });
+  await userModel.create({
+    email: email,
+    name: name,
+    image: picture,
+    email_verified: email_verified,
+    password: password,
+  });
+
+  const user = await userModel.findOne({
+    where: {
+      email: email,
+    },
+  });
+
+  const token = JWT.sign(
+    {
+      email: user.email,
+      name: user.name,
+      id: user.id,
+    },
+    process.env.JWT_SECRET_ACCESS_TOKEN,
+    {
+      expiresIn: "7d",
+    }
+  );
+
+  // res.cookie("refreshToken", refreshToken, {
+  //   httpOnly: true,
+  //   maxAge: 7 * 24 * 60 * 60 * 6000,
+  //   secure: process.env.NODE_ENV === "production",
+  // });
+  return res.status(200).json({
+    status: "Success",
+    msg: "Registrasi Berhasil",
+    user: user,
+    token: token,
+  });
+}
+
+async function googleLogin(req, res) {
+  const { tokenId } = req.body;
+  const data = await client.verifyIdToken({
+    idToken: tokenId,
+    audience: process.env.GOOGLE_CLIENT_ID,
+  });
+
+  const { email } = data.payload;
+
+  const users = await userModel.findOne({
+    where: {
+      email: email,
+    },
+  });
+  if (users === null)
+    return res.status(422).json({
+      status: "Email belum terdaftar",
+    });
+
+  const token = JWT.sign(
+    {
+      email: users.email,
+      name: users.name,
+      id: users.id,
+    },
+    process.env.JWT_SECRET_ACCESS_TOKEN,
+    {
+      expiresIn: "7d",
+    }
+  );
+
+  return res.status(200).json({
+    status: "Success",
+    msg: "Berhasil Login",
+    user: users,
+    token: token,
+  });
+}
+
+async function logout(req, res) {
+  return res.clearCookie("refreshToken").status(200).json({
+    status: "Success",
+    message: "Anda telah berhasil logout",
+  });
+}
+
+module.exports = {
+  login,
+  logout,
+  register,
+  authme,
+  googleRegister,
+  googleLogin,
+};
