@@ -19,11 +19,7 @@ module.exports = (sequelize, DataTypes) => {
         { as: "loginHistory" },
         { foreignKey: "UserId" }
       );
-      User.hasMany(
-        models.Identitas,
-        { as: "identitas" },
-        { foreignKey: "UserId" }
-      );
+      
     }
   }
   User.init(
@@ -32,7 +28,7 @@ module.exports = (sequelize, DataTypes) => {
 
       email: DataTypes.STRING,
       password: DataTypes.STRING,
-      refreshToken: DataTypes.STRING,
+
       image: DataTypes.STRING,
       email_verified: DataTypes.BOOLEAN,
       status: DataTypes.STRING,

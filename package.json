@@ -1,5 +1,5 @@
 {
-  "name": "kontensmk",
+  "name": "mysmkgit",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -9,6 +9,7 @@
     "sq": "npx sequelize"
   },
   "keywords": [],
+  
   "author": "",
   "license": "ISC",
   "dependencies": {

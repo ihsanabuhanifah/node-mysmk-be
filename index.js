@@ -3,14 +3,11 @@ const app = express();
 const router = require("./routers");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
-const port = process.env.PORT || 3000;
+const port = process.env.APP_PORT || 6000;
 const key = process.env.KEY;
 const morgan = require('morgan')
 require("dotenv").config();
-// const corsOptions = {
-//   origin: 'http://localhost:3000',
-//   methods: ["*"],
-//   credentials: true,
+
  
   
 

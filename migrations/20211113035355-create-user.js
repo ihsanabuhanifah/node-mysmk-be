@@ -12,7 +12,7 @@ module.exports = {
         allowNull: false,
         type: Sequelize.STRING,
       },
-    
+
       email: {
         allowNull: false,
         type: Sequelize.STRING,
@@ -21,7 +21,7 @@ module.exports = {
       email_verified: {
         allowNull: false,
         type: Sequelize.BOOLEAN,
-        defaultValue : false
+        defaultValue: false,
       },
       password: {
         allowNull: false,
@@ -36,9 +36,7 @@ module.exports = {
         type: Sequelize.ENUM("active", "inactive"),
         defaultValue: "inactive",
       },
-      refreshToken: {
-        type: Sequelize.STRING,
-      },
+
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,
