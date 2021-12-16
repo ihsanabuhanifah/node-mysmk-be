@@ -1,20 +1,30 @@
 "use strict";
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable("Roles", {
+    await queryInterface.createTable("UserRoles", {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER,
       },
-      roleName: {
-        type: Sequelize.STRING,
-        allowNull: false,
+      UserId: {
+        type: Sequelize.INTEGER,
+        onDelete: "CASCADE",
+        references: {
+          model: "Users",
+          key: "id",
+          as: "userId",
+        },
       },
-      remarks: {
-        type: Sequelize.STRING,
-        allowNull: false,
+      roleId: {
+        type: Sequelize.INTEGER,
+        onDelete: "CASCADE",
+        references: {
+          model: "Roles",
+          key: "id",
+          as: "roleId",
+        },
       },
       createdAt: {
         allowNull: false,
@@ -27,6 +37,6 @@ module.exports = {
     });
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable("Roles");
+    await queryInterface.dropTable("UserRoles");
   },
 };

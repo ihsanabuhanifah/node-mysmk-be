@@ -1,5 +1,7 @@
 const userModel = require("../models").User;
-
+const userRoleModel = require("../models").UserRole;
+const dotenv = require("dotenv");
+dotenv.config();
 const bcrypt = require("bcrypt");
 const { userAttribute } = require("../utils/attiributes");
 const readXlsxFile = require("read-excel-file/node");
@@ -107,6 +109,13 @@ async function destroy(req, res) {
   });
 }
 async function importUser(req, res) {
+  let password = process.env.IMPORT_PASSWORD;
+
+  if (password !== req.body.password) {
+    return res.status(400).json({
+      msg: "Password Import Salah",
+    });
+  }
   try {
     if (req.file == undefined) {
       return res.status(400).json({
@@ -115,28 +124,62 @@ async function importUser(req, res) {
     }
     let path = "public/data/uploads/" + req.file.filename;
 
-    readXlsxFile(path).then((rows) => {
+    readXlsxFile(path).then(async (rows) => {
       // `rows` is an array of rows
       rows.shift();
       let users = [];
-      rows.forEach((row) => {
-        const user = {
-          name: row[1],
-          email: row[2],
-          password: row[3],
-          status: "active",
-        };
-        users.push(user);
-      });
+      let roles = [];
+      await Promise.all(
+        rows.forEach((row) => {
+          const user = {
+            name: row[1],
+            email: row[2],
+            password: row[3],
+            status: "active",
+          };
+          const role = {
+            email: row[1],
+            roles: row[5],
+          };
+          users.push(user);
+          roles.push(role);
+        })
+      );
       console.log(users);
-      fs.unlinkSync(path);
-      users.map(async (user) => {
-        console.log(user);
-        await userModel.create(user);
-      });
 
+      await Promise.all(
+        users.map(async (user) => {
+          console.log(user);
+          await userModel.create(user);
+        })
+      );
+
+      await Promise.all(
+        roles.forEach(async (role) => {
+          let userRole = `${role.roles}`;
+          const data = await userRole.split(".");
+          console.log("daa", data);
+
+          data.forEach(async (dt) => {
+            const user = await userModel.findOne({
+              where: {
+                email: role.email,
+              },
+            });
+            if (user.email === role.email) {
+              userRoleModel.create({
+                userId: user.id,
+                roleId: dt,
+              });
+            }
+          });
+        })
+      );
+      fs.unlinkSync(path);
       res.json({
-        data: 'Data berhasil di upload',
+        msg: "Data berhasil di upload",
+
+        roles: roles,
       });
     });
   } catch (error) {

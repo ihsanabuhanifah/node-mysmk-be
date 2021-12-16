@@ -1,12 +1,14 @@
 const userModel = require("../models").User;
+const userRoleModel = require("../models").UserRole;
 const EmailVerifiedModel = require("../models").EmailVerified;
 const LoginHistory = require("../models").LoginHistory;
 const bcrypt = require("bcrypt");
 const JWT = require("jsonwebtoken");
 const { OAuth2Client } = require("google-auth-library");
-const morgan = require("morgan");
+
 generator = require("generate-password");
-require("dotenv").config();
+const dotenv = require("dotenv");
+dotenv.config();
 const sendEmail = require("../utils/email");
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -61,16 +63,26 @@ async function login(req, res) {
 
 async function register(req, res) {
   const payload = req.body;
-  const { email } = payload;
+  const { email, secretKey } = payload;
+  if (process.env.SECRET_KEY_REGISTER_SUPER_ADMIN !== secretKey) {
+    return res.status(422).json({
+      status: "Fail",
+
+      msg: "Secret Key Salah, Anda tidak bisa mendaftar sebagai Super Admin",
+    });
+  }
   payload.password = await bcrypt.hashSync(req.body.password, 10);
   try {
     await userModel.create(payload);
+
     const user = await userModel.findOne({
       where: {
         email: email,
       },
-      attributes: ["id", "name", "email", "createdAt", "updatedAt"],
+      attributes: ["id", "name", "email"],
     });
+
+   
 
     const token = JWT.sign(
       {
