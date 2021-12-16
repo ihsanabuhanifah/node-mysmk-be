@@ -41,7 +41,7 @@ async function login(req, res) {
 
     const checkRole = await userRoleModel.findOne({
       where: {
-        [Op.and]: [{ UserId: user.id }, { roleId: loginAs }],
+        [Op.and]: [{ UserId: user.id }, { RoleId: loginAs }],
       },
     });
 
