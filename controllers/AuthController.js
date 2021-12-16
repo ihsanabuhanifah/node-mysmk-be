@@ -11,47 +11,52 @@ const sendEmail = require("../utils/email");
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 async function login(req, res) {
-  let { email, password } = req.body;
-  const user = await userModel.findOne({
-    where: {
-      email: email,
-    },
-   
-  });
-
-  if (!user) {
-    return res.status(404).json({
-      status: "fail",
-      msg: "Email tidak ditemukan",
+  try {
+    let { email, password } = req.body;
+    const user = await userModel.findOne({
+      where: {
+        email: email,
+      },
     });
-  }
-  const verify = bcrypt.compareSync(password, user.password);
-  if (!verify) {
-    return res.status(404).json({
-      status: "fail",
-      msg: "Email dan Pasword tidak sama",
-    });
-  }
 
-  const token = JWT.sign(
-    {
-      email: user.email,
-      name: user.name,
-      id: user.id,
-    },
-    process.env.JWT_SECRET_ACCESS_TOKEN,
-    {
-      expiresIn: "7d",
+    if (!user) {
+      return res.status(404).json({
+        status: "fail",
+        msg: "Email tidak ditemukan",
+      });
     }
-  );
+    const verify = bcrypt.compareSync(password, user.password);
+    if (!verify) {
+      return res.status(404).json({
+        status: "fail",
+        msg: "Email dan Pasword tidak sama",
+      });
+    }
 
+    const token = JWT.sign(
+      {
+        email: user.email,
+        name: user.name,
+        id: user.id,
+      },
+      process.env.JWT_SECRET_ACCESS_TOKEN,
+      {
+        expiresIn: "7d",
+      }
+    );
 
-  return res.status(200).json({
-    status: "Success",
-    msg: "Berhasil Login",
-    user: user,
-    token: token,
-  });
+    return res.status(200).json({
+      status: "Success",
+      msg: "Berhasil Login",
+      user: user,
+      token: token,
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: "fail",
+      msg: "Terjadi Kesalahan",
+    });
+  }
 }
 
 async function register(req, res) {
@@ -115,13 +120,12 @@ async function authme(req, res) {
   let name = req.name;
   let id = req.id;
   let email = req.email;
- 
+
   try {
     const user = await userModel.findOne({
       where: {
         email: email,
       },
-     
     });
     if (!user) {
       return res.status(404).json({
