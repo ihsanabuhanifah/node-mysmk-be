@@ -19,7 +19,7 @@ async function store(req, res) {
       });
     }
     let path = "public/data/uploads/" + req.file.filename;
-    readXlsxFile(path).then(async(rows) => {
+    readXlsxFile(path).then(async (rows) => {
       rows.shift();
       let roles = [];
 
@@ -33,9 +33,11 @@ async function store(req, res) {
       });
 
       fs.unlinkSync(path);
-     await Promise.all( roles.map(async (role) => {
-      await roleModel.create(role);
-    }))
+      await Promise.all(
+        roles.map(async (role) => {
+          await roleModel.create(role);
+        })
+      );
       res.json({
         status: "Success",
         msg: "import Roles berhasil",

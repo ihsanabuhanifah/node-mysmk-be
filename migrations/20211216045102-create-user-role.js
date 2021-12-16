@@ -17,7 +17,7 @@ module.exports = {
           as: "userId",
         },
       },
-      roleId: {
+      RoleId: {
         type: Sequelize.INTEGER,
         onDelete: "CASCADE",
         references: {

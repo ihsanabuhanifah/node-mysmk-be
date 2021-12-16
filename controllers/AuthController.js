@@ -105,7 +105,7 @@ async function register(req, res) {
 
     const userRole = await userRoleModel.create({
       UserId: user.id,
-      roleId: 1,
+      RoleId: 1,
     });
 
     const myRoles = await RolesModel.findByPk(userRole.id);
