@@ -177,7 +177,7 @@ async function importUser(req, res) {
             userRoles.map(async (userRole) => {
               await userRoleModel.create({
                 UserId: user.id,
-                roleId: userRole,
+                RoleId: userRole,
               });
             })
           );
