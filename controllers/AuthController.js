@@ -1,10 +1,12 @@
 const userModel = require("../models").User;
 const userRoleModel = require("../models").UserRole;
+const RolesModel = require("../models").Role;
 const EmailVerifiedModel = require("../models").EmailVerified;
 const LoginHistory = require("../models").LoginHistory;
 const bcrypt = require("bcrypt");
 const JWT = require("jsonwebtoken");
 const { OAuth2Client } = require("google-auth-library");
+const { Op } = require("sequelize");
 
 generator = require("generate-password");
 const dotenv = require("dotenv");
@@ -14,7 +16,7 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 async function login(req, res) {
   try {
-    let { email, password } = req.body;
+    let { email, password, loginAs } = req.body;
     const user = await userModel.findOne({
       where: {
         email: email,
@@ -35,11 +37,28 @@ async function login(req, res) {
       });
     }
 
+    const roleName = await RolesModel.findByPk(loginAs);
+
+    const checkRole = await userRoleModel.findOne({
+      where: {
+        [Op.and]: [{ UserId: user.id }, { roleId: loginAs }],
+      },
+    });
+
+    if (checkRole === null) {
+      return res.status(422).json({
+        status: "Fail",
+        msg: `Mohon Maaf anda tidak memiliki role sebagai ${roleName.roleName}  `,
+      });
+    }
+
     const token = JWT.sign(
       {
         email: user.email,
         name: user.name,
         id: user.id,
+        role: roleName.roleName,
+        roleId: loginAs,
       },
       process.env.JWT_SECRET_ACCESS_TOKEN,
       {
@@ -51,9 +70,11 @@ async function login(req, res) {
       status: "Success",
       msg: "Berhasil Login",
       user: user,
+      role: roleName.roleName,
       token: token,
     });
   } catch (err) {
+    console.log(err);
     res.status(400).json({
       status: "fail",
       msg: "Terjadi Kesalahan",
@@ -82,13 +103,19 @@ async function register(req, res) {
       attributes: ["id", "name", "email"],
     });
 
-   
+    const userRole = await userRoleModel.create({
+      UserId: user.id,
+      roleId: 1,
+    });
+
+    const myRoles = await RolesModel.findByPk(userRole.id);
 
     const token = JWT.sign(
       {
         email: user.email,
         name: user.name,
         id: user.id,
+        role: myRoles.roleName,
       },
       process.env.JWT_SECRET_ACCESS_TOKEN,
       {
@@ -121,6 +148,7 @@ async function register(req, res) {
       status: "Success",
       msg: "Registrasi Berhasil",
       user: user,
+      role: myRoles.roleName,
       token: token,
     });
   } catch (err) {

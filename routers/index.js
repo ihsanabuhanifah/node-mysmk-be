@@ -5,11 +5,13 @@ const authRouter = require("./authRouter");
 const logRouter = require("./logRouters");
 const identitasRouter = require("./indentitasRouter");
 const rolesRouter = require("./rolesRouter");
+const upload = require("../middleware/multerExcelMiddleware");
+const { store } = require("../controllers/Admin/RolesController");
 router.get("/", (req, res) => {
   res.send("Backend MySMK");
 });
 const jwtValidateMiddleware = require("../middleware/jwtValidateMiddleware");
-
+router.post("/roles/import", upload.single("file"), store);
 router.use(authRouter);
 router.use(jwtValidateMiddleware);
 router.use("/users", userRouter);

@@ -7,6 +7,7 @@ const { userAttribute } = require("../utils/attiributes");
 const readXlsxFile = require("read-excel-file/node");
 const fs = require("fs");
 const path = require("path");
+
 async function store(req, res) {
   const payload = req.body;
   payload.password = await bcrypt.hashSync(req.body.password, 10);
@@ -126,60 +127,69 @@ async function importUser(req, res) {
 
     readXlsxFile(path).then(async (rows) => {
       // `rows` is an array of rows
-      rows.shift();
       let users = [];
       let roles = [];
-      await Promise.all(
-        rows.forEach((row) => {
-          const user = {
-            name: row[1],
-            email: row[2],
-            password: row[3],
-            status: "active",
-          };
-          const role = {
-            email: row[1],
-            roles: row[5],
-          };
-          users.push(user);
-          roles.push(role);
-        })
-      );
-      console.log(users);
+      rows.shift();
+      rows.forEach(async (row) => {
+        // let password = await bcrypt.hashSync(`${row[3]}`, 10);
+        const user = {
+          name: row[1],
+          email: row[2],
+          password: row[3],
+          status: "active",
+        };
+        const role = {
+          email: row[2],
+          roles: row[5],
+        };
+        users.push(user);
+        roles.push(role);
+      });
 
+      let count = 0;
       await Promise.all(
         users.map(async (user) => {
-          console.log(user);
-          await userModel.create(user);
-        })
-      );
-
-      await Promise.all(
-        roles.forEach(async (role) => {
-          let userRole = `${role.roles}`;
-          const data = await userRole.split(".");
-          console.log("daa", data);
-
-          data.forEach(async (dt) => {
-            const user = await userModel.findOne({
-              where: {
-                email: role.email,
-              },
-            });
-            if (user.email === role.email) {
-              userRoleModel.create({
-                userId: user.id,
-                roleId: dt,
-              });
-            }
+          const userMail = await userModel.findOne({
+            where: {
+              email: user.email,
+            },
           });
+
+          if (userMail === null) {
+            user.password = await bcrypt.hashSync(user.password.toString(), 10);
+            await userModel.create(user);
+            count += 1;
+          }
         })
       );
+
+      roles.forEach(async (role) => {
+        console.log(role.email);
+        const user = await userModel.findOne({
+          where: {
+            email: role.email,
+          },
+        });
+
+        if (user !== null) {
+          const userRoles = `${role.roles}`.split(".");
+          await Promise.all(
+            userRoles.map(async (userRole) => {
+              await userRoleModel.create({
+                UserId: user.id,
+                roleId: userRole,
+              });
+            })
+          );
+        }
+      });
+
       fs.unlinkSync(path);
       res.json({
-        msg: "Data berhasil di upload",
-
-        roles: roles,
+        status: "Success",
+        msg: " import users berhasil",
+        successImport: count,
+        failedImport: users.length - count,
       });
     });
   } catch (error) {

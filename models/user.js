@@ -24,7 +24,6 @@ module.exports = (sequelize, DataTypes) => {
         { as: "userRole" },
         { foreignKey: "UserId" }
       );
-      
     }
   }
   User.init(
@@ -35,7 +34,7 @@ module.exports = (sequelize, DataTypes) => {
       password: DataTypes.STRING,
 
       image: DataTypes.STRING,
-      email_verified: DataTypes.BOOLEAN,
+      emailVerified: DataTypes.BOOLEAN,
       status: DataTypes.STRING,
     },
     {
