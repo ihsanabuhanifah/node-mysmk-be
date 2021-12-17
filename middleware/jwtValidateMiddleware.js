@@ -16,6 +16,8 @@ const jwtValidateMiddleware =  (req, res, next) => {
       req.id = decoded.id;
       req.email = decoded.email;
       req.name = decoded.name
+      req.role = decoded.role
+      req.roleId = decoded.roleId
       const user = await UserModel.findByPk(decoded.id)
      if (user === null) return res.status(404).json({
        status : "Fail",

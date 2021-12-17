@@ -60,6 +60,7 @@ async function update(req, res) {
 async function index(req, res) {
   const users = await userModel.findAll({
     attributes: userAttribute,
+    include : 'userRole'
   });
   if (users) {
     return res.json({

@@ -116,6 +116,7 @@ async function register(req, res) {
         name: user.name,
         id: user.id,
         role: myRoles.roleName,
+        
       },
       process.env.JWT_SECRET_ACCESS_TOKEN,
       {
@@ -178,6 +179,9 @@ async function authme(req, res) {
         email: user.email,
         name: user.name,
         id: user.id,
+        role : user.role,
+        roleId : user.RoleId
+        
       },
       process.env.JWT_SECRET_ACCESS_TOKEN,
       {
@@ -188,7 +192,10 @@ async function authme(req, res) {
       status: "Success",
       msg: "Berhasil Authme",
       user: user,
+      role : req.role,
       token: token,
+
+
     });
   } catch (err) {
     console.log(err);

@@ -33,9 +33,13 @@ async function store(req, res) {
       });
 
       fs.unlinkSync(path);
+      console.log(roles);
       await Promise.all(
         roles.map(async (role) => {
+         
+         if(role.id !== null){
           await roleModel.create(role);
+         }
         })
       );
       res.json({
