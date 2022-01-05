@@ -28,6 +28,11 @@ module.exports = {
         type: Sequelize.STRING,
         
       },
+      role: {
+        allowNull: false,
+        type: Sequelize.STRING,
+        
+      },
       image: {
         type: Sequelize.STRING,
       },

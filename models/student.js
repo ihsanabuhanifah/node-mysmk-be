@@ -20,8 +20,18 @@ module.exports = (sequelize, DataTypes) => {
     {
       UserId: DataTypes.INTEGER,
       name: DataTypes.STRING,
+      nis: DataTypes.STRING,
+      nisn: DataTypes.STRING,
+      nik: DataTypes.STRING,
       tempatLahir: DataTypes.STRING,
       tanggalLahir: DataTypes.DATE,
+      alamat: DataTypes.STRING,
+      sekolahAsal: DataTypes.STRING,
+      jenisKelamin: DataTypes.STRING,
+      anakKe: DataTypes.INTEGER,
+      tanggalDiterima: DataTypes.DATE,
+      angkatan: DataTypes.STRING,
+      tahunAjaran: DataTypes.STRING,
     },
     {
       sequelize,
