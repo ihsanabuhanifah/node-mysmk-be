@@ -1,5 +1,9 @@
 const roleModel = require("../../models").Role;
 const userModel = require("../../models").User;
+const taModel = require("../../models").Ta;
+const studentModel = require("../../models").Student;
+const teacherModel = require("../../models").Teacher;
+const parentModel = require("../../models").Parent;
 const userRoleModel = require("../../models").UserRole;
 const fs = require("fs");
 const readXlsxFile = require("read-excel-file/node");
@@ -85,10 +89,13 @@ async function importUsers(req, res) {
           email: row[2],
           password: row[3],
           status: "active",
+          
         };
         const role = {
+          name: row[1],
           email: row[2],
           roles: row[5],
+          posisi : row[6],
         };
         users.push(user);
         roles.push(role);
@@ -106,6 +113,7 @@ async function importUsers(req, res) {
           if (userMail === null) {
             user.password = await bcrypt.hashSync(user.password.toString(), 10);
             await userModel.create(user);
+           
             count += 1;
           }
         })
@@ -118,6 +126,16 @@ async function importUsers(req, res) {
             email: role.email,
           },
         });
+        role.UserId = user.id
+        if(role.posisi === 'guru') {
+          await teacherModel.create(role);
+        }
+        if(role.posisi === 'wali') {
+          await parentModel.create(role);
+        }
+        if(role.posisi === 'siswa') {
+          await studentModel.create(role);
+        }
 
         if (user !== null) {
           const userRoles = `${role.roles}`.split(".");
@@ -147,4 +165,57 @@ async function importUsers(req, res) {
     });
   }
 }
-module.exports = { importRoles, importUsers };
+async function importTa(req, res) {
+  try {
+    if (req.file == undefined) {
+      return res.status(400).json({
+        msg: "Upload File Excel",
+      });
+    }
+
+    let password = process.env.IMPORT_PASSWORD;
+
+    if (password !== req.body.password) {
+      return res.status(400).json({
+        msg: "Password Import Salah",
+      });
+    }
+    let path = "public/data/uploads/" + req.file.filename;
+    readXlsxFile(path).then(async (rows) => {
+      rows.shift();
+      let tas = [];
+
+      rows.forEach((row) => {
+        const ta = {
+          id: row[0],
+          name: row[1],
+         
+        };
+        tas.push(ta);
+      });
+
+    
+
+      fs.unlinkSync(path);
+     
+      await Promise.all(
+        tas.map(async (ta) => {
+          if (ta.id !== null) {
+            await taModel.create(ta);
+          }
+        })
+      );
+      res.json({
+        status: "Success",
+        msg: "import Tahun Ajaran berhasil",
+      });
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(400).json({
+      status: "Fail",
+      msg: "Terjadi Kesalahan",
+    });
+  }
+}
+module.exports = { importRoles, importUsers, importTa};

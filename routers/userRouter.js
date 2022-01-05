@@ -5,7 +5,6 @@ const userController = require("../controllers/UserController");
 const { check } = require("express-validator");
 const userModel = require("../models").User;
 
-
 userRouter.post(
   "/",
   check("name").isLength({ min: 1 }).withMessage("Nama wajib disi"),

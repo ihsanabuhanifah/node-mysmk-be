@@ -24,6 +24,21 @@ module.exports = (sequelize, DataTypes) => {
         { as: "userRole" },
         { foreignKey: "UserId" }
       );
+      User.hasMany(
+        models.Student,
+        { as: "student" },
+        { foreignKey: "UserId" }
+      );
+      User.hasMany(
+        models.Parent,
+        { as: "parent" },
+        { foreignKey: "UserId" }
+      );
+      User.hasMany(
+        models.Teacher,
+        { as: "teacher" },
+        { foreignKey: "UserId" }
+      );
     }
   }
   User.init(
