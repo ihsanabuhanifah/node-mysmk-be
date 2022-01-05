@@ -89,13 +89,14 @@ async function importUsers(req, res) {
           email: row[2],
           password: row[3],
           status: "active",
-          
+          roles: row[5],
+          posisi: row[6],
         };
         const role = {
           name: row[1],
           email: row[2],
           roles: row[5],
-          posisi : row[6],
+          posisi: row[6],
         };
         users.push(user);
         roles.push(role);
@@ -113,42 +114,39 @@ async function importUsers(req, res) {
           if (userMail === null) {
             user.password = await bcrypt.hashSync(user.password.toString(), 10);
             await userModel.create(user);
-           
+            const userInTable = await userModel.findOne({
+              where: {
+                email: user.email,
+              },
+            });
+            user.UserId = userInTable.id;
+            if (user.posisi === "guru") {
+              await teacherModel.create(user);
+            }
+            if (user.posisi === "wali") {
+              await parentModel.create(user);
+            }
+            if (user.posisi === "siswa") {
+              await studentModel.create(user);
+            }
+            if (userInTable !== null) {
+              const userRoles = `${user.roles}`.split(".");
+              await Promise.all(
+                userRoles.map(async (userRole) => {
+                  await userRoleModel.create({
+                    UserId: userInTable.id,
+                    RoleId: userRole,
+                  });
+                })
+              );
+            }
+
             count += 1;
           }
         })
       );
 
-      roles.forEach(async (role) => {
-        console.log(role.email);
-        const user = await userModel.findOne({
-          where: {
-            email: role.email,
-          },
-        });
-        role.UserId = user.id
-        if(role.posisi === 'guru') {
-          await teacherModel.create(role);
-        }
-        if(role.posisi === 'wali') {
-          await parentModel.create(role);
-        }
-        if(role.posisi === 'siswa') {
-          await studentModel.create(role);
-        }
-
-        if (user !== null) {
-          const userRoles = `${role.roles}`.split(".");
-          await Promise.all(
-            userRoles.map(async (userRole) => {
-              await userRoleModel.create({
-                UserId: user.id,
-                RoleId: userRole,
-              });
-            })
-          );
-        }
-      });
+     
 
       fs.unlinkSync(path);
       res.json({
@@ -189,15 +187,12 @@ async function importTa(req, res) {
         const ta = {
           id: row[0],
           name: row[1],
-         
         };
         tas.push(ta);
       });
 
-    
-
       fs.unlinkSync(path);
-     
+
       await Promise.all(
         tas.map(async (ta) => {
           if (ta.id !== null) {
@@ -218,4 +213,4 @@ async function importTa(req, res) {
     });
   }
 }
-module.exports = { importRoles, importUsers, importTa};
+module.exports = { importRoles, importUsers, importTa };
