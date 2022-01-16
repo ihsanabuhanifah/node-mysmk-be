@@ -20,8 +20,7 @@ module.exports = {
     database: process.env.DB_DATABASE_PRODUCTION,
     host: process.env.DB_HOST,
     dialect: process.env.DB_DIALECT,
-    // use_env_variable: process.env.DATABASE_URL,
-    dialect: process.env.DB_DIALECT,
+    // use_env_variable: process.env.DATABASE_URL
     dialectOptions: {
       ssl: {
         require: true,

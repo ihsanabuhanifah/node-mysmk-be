@@ -10,7 +10,11 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      // define association here
+      Mapel.hasMany(
+        models.AbsensiKelas,
+        { as: "absensikelas" },
+        { foreignKey: "MapelId" }
+      );
     }
   };
   Mapel.init({

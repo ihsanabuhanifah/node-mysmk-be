@@ -1,12 +1,8 @@
 const roleModel = require("../../models").Role;
-const userModel = require("../../models").User;
+const alquranModel = require("../../models").Alquran;
 const taModel = require("../../models").Ta;
 const mapelModel = require("../../models").Mapel;
 const kelasModel = require("../../models").Kelas;
-const studentModel = require("../../models").Student;
-const teacherModel = require("../../models").Teacher;
-const parentModel = require("../../models").Parent;
-const userRoleModel = require("../../models").UserRole;
 const fs = require("fs");
 const readXlsxFile = require("read-excel-file/node");
 const bcrypt = require("bcrypt");
@@ -136,7 +132,6 @@ async function importMapel(req, res) {
 
       rows.forEach((row) => {
         const mapel = {
-          
           namaMapel: row[1],
           kategori: row[2],
         };
@@ -188,7 +183,8 @@ async function importKelas(req, res) {
       rows.forEach((row) => {
         const ta = {
           id: row[0],
-          name: row[1],
+          namaKelas: row[1],
+          tahunAjaran: row[2],
         };
         tas.push(ta);
       });
@@ -198,13 +194,65 @@ async function importKelas(req, res) {
       await Promise.all(
         tas.map(async (ta) => {
           if (ta.id !== null) {
-            await taModel.create(ta);
+            await kelasModel.create(ta);
           }
         })
       );
       res.json({
         status: "Success",
-        msg: "import Tahun Ajaran berhasil",
+        msg: "import Kelas berhasil",
+      });
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(400).json({
+      status: "Fail",
+      msg: "Terjadi Kesalahan",
+    });
+  }
+}
+
+async function importAlquran(req, res) {
+  try {
+    if (req.file == undefined) {
+      return res.status(400).json({
+        msg: "Upload File Excel",
+      });
+    }
+
+    let password = process.env.IMPORT_PASSWORD;
+
+    if (password !== req.body.password) {
+      return res.status(400).json({
+        msg: "Password Import Salah",
+      });
+    }
+    let path = "public/data/uploads/" + req.file.filename;
+    readXlsxFile(path).then(async (rows) => {
+      rows.shift();
+      let mapels = [];
+
+      rows.forEach((row) => {
+        const mapel = {
+          namaSurat: row[1],
+          namaSuratArabic: row[2],
+          jumlahAyat : row[3]
+        };
+        mapels.push(mapel);
+      });
+
+      fs.unlinkSync(path);
+
+      await Promise.all(
+        mapels.map(async (mapel) => {
+          if (mapel.id !== null) {
+            await alquranModel.create(mapel);
+          }
+        })
+      );
+      res.json({
+        status: "Success",
+        msg: "import Alquran berhasil",
       });
     });
   } catch (err) {
@@ -217,7 +265,7 @@ async function importKelas(req, res) {
 }
 module.exports = {
   importRoles,
- 
+importAlquran,
   importTa,
   importMapel,
   importKelas,

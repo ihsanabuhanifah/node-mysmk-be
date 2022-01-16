@@ -8,10 +8,10 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      nameSurah: {
+      namaSurat: {
         type: Sequelize.STRING
       },
-      nameSurahArabic: {
+      namaSuratArabic: {
         type: Sequelize.STRING
       },
       jumlahAyat : {
