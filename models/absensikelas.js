@@ -13,7 +13,7 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       AbsensiKelas.belongsTo(models.Kelas),
       AbsensiKelas.belongsTo(models.Student);
-      AbsensiKelas,this.belongsTo(models.Mapel)
+      AbsensiKelas.belongsTo(models.Mapel)
     }
   };
   AbsensiKelas.init({
