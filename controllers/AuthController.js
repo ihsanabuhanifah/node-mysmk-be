@@ -52,6 +52,7 @@ async function login(req, res) {
       });
     }
 
+    
     const token = JWT.sign(
       {
         email: user.email,
@@ -59,6 +60,7 @@ async function login(req, res) {
         id: user.id,
         role: roleName.roleName,
         roleId: loginAs,
+        idSiswa : 1,
       },
       process.env.JWT_SECRET_ACCESS_TOKEN,
       {

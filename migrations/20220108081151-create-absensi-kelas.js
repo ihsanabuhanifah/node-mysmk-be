@@ -16,7 +16,7 @@ module.exports = {
 
         onDelete: "CASCADE",
         references: {
-          model: "Student",
+          model: "Students",
           key: "id",
           as: "StudentId",
         },
@@ -36,7 +36,7 @@ module.exports = {
 
         onDelete: "CASCADE",
         references: {
-          model: "Maple",
+          model: "Mapels",
           key: "id",
           as: "MapelId",
         },

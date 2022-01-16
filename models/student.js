@@ -30,7 +30,7 @@ module.exports = (sequelize, DataTypes) => {
   Student.init(
     {
       UserId: DataTypes.INTEGER,
-      name: DataTypes.STRING,
+      namaSiswa: DataTypes.STRING,
       nis: DataTypes.STRING,
       nisn: DataTypes.STRING,
       nik: DataTypes.STRING,

@@ -73,14 +73,10 @@ async function importGuru(req, res) {
             });
             user.UserId = userInTable.id;
             if (user.role === "guru") {
+              user.namaGuru = user.name
               await teacherModel.create(user);
             }
-            if (user.role === "wali") {
-              await parentModel.create(user);
-            }
-            if (user.role === "siswa") {
-              await studentModel.create(user);
-            }
+           
             if (userInTable !== null) {
               const userRoles = `${user.roles}`.split(".");
               await Promise.all(
@@ -184,6 +180,7 @@ async function importSiswa(req, res) {
               },
             });
             user.UserId = userInTable.id;
+            user.namaSiswa = user.name
 
             if (user.role === "siswa") {
               await studentModel.create(user);
@@ -285,8 +282,10 @@ async function importWali(req, res) {
                 nisn: user.nisn,
               },
             });
+            user.namaWali = userInTable?.name
             user.UserId = userInTable?.id;
             user.StudentId = student?.id;
+          
             console.log("user", user);
             if (user.role === "wali") {
               await parentModel.create(user);

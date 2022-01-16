@@ -6,6 +6,7 @@ const logRouter = require("./logRouters");
 const identitasRouter = require("./indentitasRouter");
 const rolesRouter = require("./rolesRouter");
 const importRouter = require("./importRouter");
+const waliRouter = require("./Wali")
 router.get("/", (req, res) => {
   res.send("Backend MySMK");
 });
@@ -18,4 +19,5 @@ router.use("/users", userRouter);
 router.use("/info", logRouter);
 router.use("/identitas", identitasRouter);
 router.use("/admin/roles", rolesRouter);
+router.use("/wali" , waliRouter),
 module.exports = router;

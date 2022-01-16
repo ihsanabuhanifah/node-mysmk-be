@@ -17,7 +17,7 @@ module.exports = {
           as: "userId",
         },
       },
-      name :  {
+      namaGuru :  {
         type : Sequelize.STRING,
         allowNull : false,
       },
