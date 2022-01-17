@@ -22,9 +22,9 @@ module.exports = (sequelize, DataTypes) => {
       MapelId: DataTypes.INTEGER,
       materi: DataTypes.STRING,
 
-      statusKehadiran: DataTypes.TINYINT,
+      statusKehadiran: DataTypes.INTEGER,
       keterangan: DataTypes.STRING,
-      semester: DataTypes.TINYINT,
+      semester: DataTypes.INTEGER,
       tahunAjaran: DataTypes.STRING,
     },
     {

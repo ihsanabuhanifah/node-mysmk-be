@@ -29,13 +29,13 @@ module.exports = {
         },
       },
       semester: {
-        type: Sequelize.TINYINT,
+        type: Sequelize.INTEGER,
       },
       tahunAjaran: {
         type: Sequelize.STRING,
       },
       status: {
-        type: Sequelize.TINYINT,
+        type: Sequelize.INTEGER,
       },
       createdAt: {
         allowNull: false,

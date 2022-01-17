@@ -45,14 +45,14 @@ module.exports = {
         type: Sequelize.STRING,
       },
       statusKehadiran: {
-        type: Sequelize.TINYINT,
+        type: Sequelize.INTEGER,
       },
       keterangan: {
         type: Sequelize.STRING,
       },
       
       semester: {
-        type: Sequelize.TINYINT,
+        type: Sequelize.INTEGER,
       },
       tahunAjaran: {
         type: Sequelize.STRING,
