@@ -17,13 +17,15 @@ module.exports = (sequelize, DataTypes) => {
     }
   };
   AbsensiKelas.init({
-    date: DataTypes.DATEONLY,
+    tanggal: DataTypes.DATEONLY,
     StudentId: DataTypes.INTEGER,
     KelasId: DataTypes.INTEGER,
     MapelId: DataTypes.INTEGER,
     materi: DataTypes.STRING,
     materi: DataTypes.STRING,
     alasan: DataTypes.TINYINT,
+   semester : DataTypes.TINYINT,
+   tahunAjaran : DataTypes.STRING,
     keterangan: DataTypes.STRING
   }, {
     sequelize,

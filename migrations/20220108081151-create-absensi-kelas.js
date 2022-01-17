@@ -8,7 +8,7 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER,
       },
-      date: {
+      tanggal: {
         type: Sequelize.DATE,
       },
       StudentId: {
@@ -45,9 +45,18 @@ module.exports = {
         type: Sequelize.STRING,
       },
       alasan: {
+        type: Sequelize.TINYINT,
+      },
+      keterangan: {
         type: Sequelize.STRING,
       },
       keterangan: {
+        type: Sequelize.STRING,
+      },
+      semester: {
+        type: Sequelize.TINYINT,
+      },
+      tahunAjaran: {
         type: Sequelize.STRING,
       },
       createdAt: {
