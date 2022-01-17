@@ -20,13 +20,22 @@ module.exports = {
       },
       StudentId: {
         type: Sequelize.INTEGER,
-        
+
         onDelete: "CASCADE",
         references: {
           model: "Students",
           key: "id",
           as: "StudentId",
         },
+      },
+      semester: {
+        type: Sequelize.TINYINT,
+      },
+      tahunAjaran: {
+        type: Sequelize.STRING,
+      },
+      status: {
+        type: Sequelize.TINYINT,
       },
       createdAt: {
         allowNull: false,

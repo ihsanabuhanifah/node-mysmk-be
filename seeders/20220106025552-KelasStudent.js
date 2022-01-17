@@ -18,12 +18,18 @@ module.exports = {
         {
           KelasId: 1,
           StudentId: 1,
+          semester: 1,
+          tahunAjaran: "2021/2022",
+          status : 1,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
         {
           KelasId: 1,
           StudentId: 2,
+          semester: 1,
+          tahunAjaran: "2021/2022",
+          status : 1,
           createdAt: new Date(),
           updatedAt: new Date(),
         },

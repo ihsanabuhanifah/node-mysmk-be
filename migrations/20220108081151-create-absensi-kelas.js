@@ -44,15 +44,13 @@ module.exports = {
       materi: {
         type: Sequelize.STRING,
       },
-      alasan: {
+      statusKehadiran: {
         type: Sequelize.TINYINT,
       },
       keterangan: {
         type: Sequelize.STRING,
       },
-      keterangan: {
-        type: Sequelize.STRING,
-      },
+      
       semester: {
         type: Sequelize.TINYINT,
       },

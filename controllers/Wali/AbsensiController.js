@@ -2,25 +2,56 @@ const AbsensiKelasModel = require("../../models").AbsensiKelas;
 const { sequelize } = require("../../models");
 const { QueryTypes } = require("sequelize");
 const dotenv = require("dotenv");
+const { paramsQueryAND } = require("../../utils/paramsQuery");
 dotenv.config();
 
 async function list(req, res) {
-  const tahunAjaran = req.query.tahunAjaran;
-  const params = (a) => {
-      const keyword = ''
-    if (tahunAjaran !== undefined) {
-      return (a = `${tahunAjaran}`);
-    }
-  };
+  let { tahunAjaran, semester, statusKehadiran, tanggal, namaMapel, page, pageSize } =
+    req.query;
+     
+  if (tahunAjaran !== undefined) {
+    tahunAjaran = `AND a.tahunAjaran = '${tahunAjaran}'`;
+  } else {
+    tahunAjaran = "";
+  }
+  // paramsQueryAND(tahunAjaran, 'tahunAjaran')
+  if (semester !== undefined) {
+    semester = `AND a.semester = '${semester}'`;
+  } else {
+    semester = "";
+  }
+  if (statusKehadiran !== undefined ) {
+    statusKehadiran = `AND a.statusKehadiran = '${statusKehadiran}'`;
+  } else {
+    statusKehadiran = "";
+  }
+  if (namaMapel !== undefined) {
+    namaMapel = `AND a.MapelId = '${namaMapel}'`;
+  } else {
+    namaMapel = "";
+  }
+  if (tanggal !== undefined) {
+    tanggal = `AND a.tanggal = '${tanggal}'`;
+  } else {
+    tanggal = "";
+  }
+  
   try {
     const absensi = await sequelize.query(
-      `SELECT a.id ,a.tanggal , b.namaSiswa , c.namaKelas , d.namaMapel , a.materi,
-        a.alasan,a.keterangan, a.semester , a.tahunAjaran,a.createdAt,a.updatedAt FROM 
+      `SELECT a.id ,a.tanggal ,a.MapelId, b.namaSiswa , c.namaKelas , d.namaMapel , a.materi,
+        a.statusKehadiran,a.keterangan, a.semester , a.tahunAjaran,a.createdAt,a.updatedAt FROM 
         AbsensiKelas AS a JOIN Students AS b ON (a.StudentId =b.id) 
         JOIN Kelas AS c ON (a.KelasId = c.id ) 
-        JOIN Mapels as d ON (a.MapelId = d.id) WHERE a.StudentId = ${
-          req.idSiswa
-        } AND ${params(`a.tahunAjaran`)}  ;`,
+        JOIN Mapels as d ON (a.MapelId = d.id) 
+        WHERE a.StudentId = ${req.idSiswa}
+        ${namaMapel}
+       ${tahunAjaran}
+       ${semester}
+        ${tanggal}
+        ${statusKehadiran}
+
+        LIMIT ${page},${pageSize}
+        ;`,
       {
         type: QueryTypes.SELECT,
       }
@@ -29,12 +60,21 @@ async function list(req, res) {
     if (absensi.length === 0) {
       return res.json({
         status: "Success",
+       
         absensi: "Data tidak ditemukan",
       });
     }
     return res.json({
       status: "Success",
+      page : page+1,
+      nextPage : page+2,
+      previousPage : page-2,
+      pageSize : pageSize,
       absensi: absensi,
+      filter : {
+
+      }
+     
     });
   } catch (err) {
     console.log(err);
