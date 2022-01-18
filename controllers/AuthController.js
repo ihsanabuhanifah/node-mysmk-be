@@ -4,6 +4,7 @@ const RolesModel = require("../models").Role;
 const KelasStudentModel = require("../models").KelasStudent;
 const ParentModel = require("../models").Parent;
 const EmailVerifiedModel = require("../models").EmailVerified;
+const TokenModel = require("../models").tokenResetPassword;
 const LoginHistory = require("../models").LoginHistory;
 const { sequelize } = require("../models");
 const bcrypt = require("bcrypt");
@@ -16,6 +17,7 @@ const dotenv = require("dotenv");
 dotenv.config();
 const sendEmail = require("../utils/email");
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const crypto = require("crypto");
 
 async function login(req, res) {
   try {
@@ -356,10 +358,10 @@ async function logout(req, res) {
     message: "Anda telah berhasil logout",
   });
 }
-async function resetPassword (req, res) {
-  try{
-    let {oldPassword, newPassword} = req.body
-    let email = req.email
+async function resetPassword(req, res) {
+  try {
+    let { oldPassword, newPassword } = req.body;
+    let email = req.email;
     const user = await userModel.findOne({
       where: {
         email: email,
@@ -374,27 +376,105 @@ async function resetPassword (req, res) {
     }
 
     newPassword = await bcrypt.hashSync(newPassword, 10);
-    const update = await userModel.update({
-      password : newPassword
-    }, {
-      where : {
-        id : user.id
+    const update = await userModel.update(
+      {
+        password: newPassword,
+      },
+      {
+        where: {
+          id: user.id,
+        },
       }
-    })
+    );
 
-    console.log(update)
+    console.log(update);
     return res.status(201).json({
-      status : "Success",
-      msg : "Password berhasil di perbaharui"
-    })
-
-  }catch (err){
-    console.log(err)
+      status: "Success",
+      msg: "Password berhasil di perbaharui",
+    });
+  } catch (err) {
+    console.log(err);
     res.status(400).json({
       status: "fail",
       msg: "Terjadi Kesalahan",
     });
   }
+}
+
+async function forgotPassword(req, res) {
+  let { email } = req.body;
+
+  const user = await userModel.findOne({
+    where: {
+      email: email,
+    },
+  });
+
+  console.log(user);
+  if (!user) {
+    return res.status(404).json({
+      status: "fail",
+      msg: "Email tidak ditemukan, Silahkan gunakan Email yang terdaftar",
+    });
+  }
+  let token = crypto.randomBytes(32).toString("hex");
+  const tokenSave = await TokenModel.create({
+    UserId: user.id,
+    token: token,
+  });
+
+  const link = `${process.env.BASE_URL}/resetPassword/${user.id}/${token}`;
+  await sendEmail(user.email, "Password Reset", link);
+  return res.json({
+    status: "Success",
+    msg: "Silahkan Periksa Email Masuk",
+  });
+}
+
+async function resetPasswordEmail(req, res) {
+  let { UserId, token } = req.params;
+  let { newPassword } = req.body;
+  const verify = await TokenModel.findOne({
+    where: {
+      [Op.and]: [{ UserId: UserId }, { token: token }],
+    },
+  });
+
+  if (verify === null) {
+    return res.json({
+      status: "fail",
+      msg: "Token tidak Valid",
+    });
+  }
+
+  newPassword = await bcrypt.hashSync(newPassword, 10);
+  await userModel.update(
+    {
+      password: newPassword,
+    },
+    {
+      where: {
+        id: UserId,
+      },
+    }
+  );
+
+  await TokenModel.destroy({
+    where: {
+      UserId: UserId,
+    },
+  });
+
+  
+  return res.status(201).json({
+    status: "Success",
+    msg: "Password berhasil di perbaharui",
+  });
+
+ 
+  return res.json({
+    status: verify,
+  });
 }
 module.exports = {
   login,
@@ -403,5 +483,7 @@ module.exports = {
   authme,
   googleRegister,
   googleLogin,
-  resetPassword
+  resetPassword,
+  forgotPassword,
+  resetPasswordEmail,
 };

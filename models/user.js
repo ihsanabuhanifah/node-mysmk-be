@@ -25,6 +25,11 @@ module.exports = (sequelize, DataTypes) => {
         { foreignKey: "UserId" }
       );
       User.hasMany(
+        models.tokenResetPassword,
+        { as: "token" },
+        { foreignKey: "UserId" }
+      );
+      User.hasMany(
         models.Student,
         { as: "student" },
         { foreignKey: "UserId" }
