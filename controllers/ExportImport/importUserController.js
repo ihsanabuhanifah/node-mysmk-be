@@ -286,7 +286,7 @@ async function importWali(req, res) {
             user.UserId = userInTable?.id;
             user.StudentId = student?.id;
           
-            console.log("user", user);
+            
             if (user.role === "wali") {
               await parentModel.create(user);
             }
