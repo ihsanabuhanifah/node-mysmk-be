@@ -6,9 +6,16 @@ const { paramsQueryAND } = require("../../utils/paramsQuery");
 dotenv.config();
 
 async function list(req, res) {
-  let { tahunAjaran, semester, statusKehadiran, tanggal, namaMapel, page, pageSize } =
-    req.query;
-     
+  let {
+    tahunAjaran,
+    semester,
+    statusKehadiran,
+    tanggal,
+    namaMapel,
+    page,
+    pageSize,
+  } = req.query;
+
   if (tahunAjaran !== undefined) {
     tahunAjaran = `AND a.tahunAjaran = '${tahunAjaran}'`;
   } else {
@@ -20,7 +27,7 @@ async function list(req, res) {
   } else {
     semester = "";
   }
-  if (statusKehadiran !== undefined ) {
+  if (statusKehadiran !== undefined) {
     statusKehadiran = `AND a.statusKehadiran = '${statusKehadiran}'`;
   } else {
     statusKehadiran = "";
@@ -35,22 +42,29 @@ async function list(req, res) {
   } else {
     tanggal = "";
   }
-  
+  let limit = '';
+  if (page !== undefined && pageSize !== undefined) {
+   
+    limit = `LIMIT ${page}, ${pageSize}`;
+  }
+
   try {
     const absensi = await sequelize.query(
-      `SELECT a.id ,a.tanggal ,a.MapelId, b.namaSiswa , c.namaKelas , d.namaMapel , a.materi,
+      `SELECT a.id ,a.tanggal ,a.MapelId, e.namaGuru, b.namaSiswa , c.namaKelas , d.namaMapel , a.materi,
         a.statusKehadiran,a.keterangan, a.semester , a.tahunAjaran,a.createdAt,a.updatedAt FROM 
         AbsensiKelas AS a JOIN Students AS b ON (a.StudentId =b.id) 
         JOIN Kelas AS c ON (a.KelasId = c.id ) 
-        JOIN Mapels as d ON (a.MapelId = d.id) 
-        WHERE a.StudentId = ${req.idSiswa}
+       
+        JOIN Mapels AS d ON (a.MapelId = d.id) 
+        JOIN Teachers As e ON (a.TeacherId = e.id)
+        WHERE a.StudentId = ${req.StudentId}
         ${namaMapel}
        ${tahunAjaran}
        ${semester}
         ${tanggal}
         ${statusKehadiran}
 
-        LIMIT ${page},${pageSize}
+        ${limit}
         ;`,
       {
         type: QueryTypes.SELECT,
@@ -60,21 +74,18 @@ async function list(req, res) {
     if (absensi.length === 0) {
       return res.json({
         status: "Success",
-       
+
         absensi: "Data tidak ditemukan",
       });
     }
     return res.json({
       status: "Success",
-      page : page+1,
-      nextPage : page+2,
-      previousPage : page-2,
-      pageSize : pageSize,
+      page: page + 1,
+      nextPage: page + 2,
+      previousPage: page - 2,
+      pageSize: pageSize,
+      totalData : absensi.length,
       absensi: absensi,
-      filter : {
-
-      }
-     
     });
   } catch (err) {
     console.log(err);

@@ -16,6 +16,7 @@ module.exports = {
       [
         {
           tanggal: "2022-01-17",
+          TeacherId: 2,
           StudentId: 1,
           KelasId: 1,
           MapelId: 9,
@@ -29,6 +30,7 @@ module.exports = {
         },
         {
           tanggal: "2022-01-18",
+          TeacherId: 1,
           StudentId: 1,
           KelasId: 1,
           MapelId: 1,
@@ -42,6 +44,7 @@ module.exports = {
         },
         {
           tanggal: "2022-01-18",
+          TeacherId: 2,
           StudentId: 1,
           KelasId: 1,
           MapelId: 9,
@@ -55,6 +58,7 @@ module.exports = {
         },
         {
           tanggal: "2022-01-17",
+          TeacherId: 3,
           StudentId: 1,
           KelasId: 1,
           MapelId: 9,
@@ -68,6 +72,7 @@ module.exports = {
         },
         {
           tanggal: "2022-01-17",
+          TeacherId: 3,
           StudentId: 2,
           KelasId: 1,
           MapelId: 9,
@@ -81,6 +86,7 @@ module.exports = {
         },
         {
           tanggal: "2022-08-17",
+          TeacherId: 2,
           StudentId: 1,
           KelasId: 1,
           MapelId: 9,
@@ -94,6 +100,7 @@ module.exports = {
         },
         {
           tanggal: "2022-08-17",
+          TeacherId: 1,
           StudentId: 1,
           KelasId: 1,
           MapelId: 9,
@@ -107,6 +114,7 @@ module.exports = {
         },
         {
           tanggal: "2023-01-17",
+          TeacherId: 1,
           StudentId: 1,
           KelasId: 1,
           MapelId: 9,

@@ -13,12 +13,16 @@ const jwtValidateMiddleware =  (req, res, next) => {
         data: err,
       });
     } else {
+
+      console.log(decoded)
       req.id = decoded.id;
       req.email = decoded.email;
       req.name = decoded.name
       req.role = decoded.role
       req.roleId = decoded.roleId
-      req.idSiswa = decoded.idSiswa
+      req.StudentId = decoded?.StudentId
+      req.semesterAktif = decoded?.semesterAktif,
+      req.tahunAjaranAktif = decoded?.tahunAjaranAktif
       const user = await UserModel.findByPk(decoded.id)
      if (user === null) return res.status(404).json({
        status : "Fail",

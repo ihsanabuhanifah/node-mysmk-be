@@ -11,6 +11,16 @@ module.exports = {
       tanggal: {
         type: Sequelize.DATE,
       },
+      TeacherId: {
+        type: Sequelize.INTEGER,
+
+        onDelete: "CASCADE",
+        references: {
+          model: "Teachers",
+          key: "id",
+          as: "TeacherId",
+        },
+      },
       StudentId: {
         type: Sequelize.INTEGER,
 

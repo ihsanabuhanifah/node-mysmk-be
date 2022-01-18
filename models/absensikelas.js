@@ -12,11 +12,13 @@ module.exports = (sequelize, DataTypes) => {
       AbsensiKelas.belongsTo(models.Kelas),
         AbsensiKelas.belongsTo(models.Student);
       AbsensiKelas.belongsTo(models.Mapel);
+      AbsensiKelas.belongsTo(models.Teacher);
     }
   }
   AbsensiKelas.init(
     {
       tanggal: DataTypes.DATEONLY,
+      TeacherId: DataTypes.INTEGER,
       StudentId: DataTypes.INTEGER,
       KelasId: DataTypes.INTEGER,
       MapelId: DataTypes.INTEGER,

@@ -1,13 +1,16 @@
 const userModel = require("../models").User;
 const userRoleModel = require("../models").UserRole;
 const RolesModel = require("../models").Role;
+const KelasStudentModel = require("../models").KelasStudent;
+const ParentModel = require("../models").Parent;
 const EmailVerifiedModel = require("../models").EmailVerified;
 const LoginHistory = require("../models").LoginHistory;
+const { sequelize } = require("../models");
 const bcrypt = require("bcrypt");
 const JWT = require("jsonwebtoken");
 const { OAuth2Client } = require("google-auth-library");
 const { Op } = require("sequelize");
-
+const { QueryTypes } = require("sequelize");
 generator = require("generate-password");
 const dotenv = require("dotenv");
 dotenv.config();
@@ -51,8 +54,27 @@ async function login(req, res) {
         msg: `Mohon Maaf anda tidak memiliki role sebagai ${roleName.roleName}  `,
       });
     }
+    let parent;
+    let KelasStudent;
+    if (loginAs === 8) {
+      parent = await ParentModel.findOne({
+        where: {
+          UserId: user.id,
+        },
+      });
+    }
+    console.log("ee", parent);
+    if (parent !== undefined) {
+      KelasStudent = await sequelize.query(
+        `SELECT semester , tahunAjaran FROM KelasStudents 
+        WHERE StudentId = ${parent?.StudentId}`,
+        {
+          type: QueryTypes.SELECT,
+        }
+      );
+    }
+    console.log(parent?.StudentId);
 
-    
     const token = JWT.sign(
       {
         email: user.email,
@@ -60,7 +82,11 @@ async function login(req, res) {
         id: user.id,
         role: roleName.roleName,
         roleId: loginAs,
-        idSiswa : 1,
+        StudentId: parent?.StudentId,
+        semesterAktif:
+          parent?.StudentId !== undefined ? KelasStudent[0]?.semester : "",
+        tahunAjaranAktif:
+          parent?.StudentId !== undefined ? KelasStudent[0]?.tahunAjaran : "",
       },
       process.env.JWT_SECRET_ACCESS_TOKEN,
       {
@@ -68,12 +94,26 @@ async function login(req, res) {
       }
     );
 
+    if(loginAs === 8) {
+      return res.status(200).json({
+        status: "Success",
+        msg: "Berhasil Login",
+        user: user,
+        role: roleName.roleName,
+        token: token,
+        semesterAktif: KelasStudent[0]?.semester ,
+        tahunAjaranAktif: KelasStudent[0]?.semester,
+
+      });
+    }
+
     return res.status(200).json({
       status: "Success",
       msg: "Berhasil Login",
       user: user,
       role: roleName.roleName,
       token: token,
+     
     });
   } catch (err) {
     console.log(err);
@@ -118,7 +158,6 @@ async function register(req, res) {
         name: user.name,
         id: user.id,
         role: myRoles.roleName,
-        
       },
       process.env.JWT_SECRET_ACCESS_TOKEN,
       {
@@ -176,29 +215,41 @@ async function authme(req, res) {
         msg: "Email tidak ditemukan",
       });
     }
+
     const token = JWT.sign(
       {
         email: user.email,
         name: user.name,
         id: user.id,
-        role : user.role,
-        roleId : user.RoleId
-        
+        role: user.role,
+        roleId: user.RoleId,
+        StudentId: req.StudentId,
       },
       process.env.JWT_SECRET_ACCESS_TOKEN,
       {
         expiresIn: "7d",
       }
     );
+   if(req.role === 'wali'){
     return res.status(200).json({
       status: "Success",
       msg: "Berhasil Authme",
       user: user,
-      role : req.role,
+      role: req.role,
       token: token,
-
-
+      semesterAktif: req?.semesterAktif,
+      tahunAjaranAktif: req?.tahunAjaranAktif,
     });
+    
+   }
+   return res.status(200).json({
+    status: "Success",
+    msg: "Berhasil Authme",
+    user: user,
+    role: req.role,
+    token: token,
+    
+  });
   } catch (err) {
     console.log(err);
   }
