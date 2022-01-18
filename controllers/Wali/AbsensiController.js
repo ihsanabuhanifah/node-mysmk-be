@@ -50,7 +50,7 @@ async function list(req, res) {
 
   try {
     const absensi = await sequelize.query(
-      `SELECT a.id ,a.tanggal ,a.MapelId, e.namaGuru, b.namaSiswa , c.namaKelas , d.namaMapel , a.materi,
+      `SELECT a.id ,a.tanggal ,a.MapelId, e.namaGuru, a.pelajaranKe, b.namaSiswa , c.namaKelas , d.namaMapel , a.materi,
         a.statusKehadiran,a.keterangan, a.semester , a.tahunAjaran,a.createdAt,a.updatedAt FROM 
         AbsensiKelas AS a JOIN Students AS b ON (a.StudentId =b.id) 
         JOIN Kelas AS c ON (a.KelasId = c.id ) 
@@ -65,6 +65,7 @@ async function list(req, res) {
         ${statusKehadiran}
 
         ${limit}
+        ORDER BY a.tanggal desc , a.pelajaranKe asc
         ;`,
       {
         type: QueryTypes.SELECT,

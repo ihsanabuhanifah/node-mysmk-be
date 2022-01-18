@@ -5,16 +5,17 @@ require('dotenv').config()
 const sendEmail = async (email, subject, text) => {
     try {
       const transporter = nodemailer.createTransport({
-        host: "smtp.mailtrap.io",
-        port: 2525,
+        host: process.env.MAIL_HOST,
+        port: process.env.MAIL_PORT,
+        
         auth: {
-          user: "116b44e4fce785",
-          pass: "0a66404e26ca61"
+          user: process.env.MAIL_USERMAME,
+          pass: process.env.MAIL_PASSWORD
         }
       });
  
       await transporter.sendMail({
-        from: 'nor-reply@smkmadinatulquran.sch.id',
+        from: 'no-reply@smkmadinatulquran.sch.id',
         to: email,
         subject: subject,
         text: text,

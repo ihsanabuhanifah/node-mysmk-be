@@ -51,6 +51,9 @@ module.exports = {
           as: "MapelId",
         },
       },
+      pelajaranKe: {
+        type: Sequelize.INTEGER,
+      },
       materi: {
         type: Sequelize.STRING,
       },
