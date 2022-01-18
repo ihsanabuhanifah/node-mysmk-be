@@ -9,7 +9,7 @@ const { sequelize } = require("../models");
 const bcrypt = require("bcrypt");
 const JWT = require("jsonwebtoken");
 const { OAuth2Client } = require("google-auth-library");
-const { Op } = require("sequelize");
+const { Op, where } = require("sequelize");
 const { QueryTypes } = require("sequelize");
 generator = require("generate-password");
 const dotenv = require("dotenv");
@@ -94,16 +94,15 @@ async function login(req, res) {
       }
     );
 
-    if(loginAs === 8) {
+    if (loginAs === 8) {
       return res.status(200).json({
         status: "Success",
         msg: "Berhasil Login",
         user: user,
         role: roleName.roleName,
         token: token,
-        semesterAktif: KelasStudent[0]?.semester ,
+        semesterAktif: KelasStudent[0]?.semester,
         tahunAjaranAktif: KelasStudent[0]?.semester,
-
       });
     }
 
@@ -113,7 +112,6 @@ async function login(req, res) {
       user: user,
       role: roleName.roleName,
       token: token,
-     
     });
   } catch (err) {
     console.log(err);
@@ -230,26 +228,24 @@ async function authme(req, res) {
         expiresIn: "7d",
       }
     );
-   if(req.role === 'wali'){
+    if (req.role === "wali") {
+      return res.status(200).json({
+        status: "Success",
+        msg: "Berhasil Authme",
+        user: user,
+        role: req.role,
+        token: token,
+        semesterAktif: req?.semesterAktif,
+        tahunAjaranAktif: req?.tahunAjaranAktif,
+      });
+    }
     return res.status(200).json({
       status: "Success",
       msg: "Berhasil Authme",
       user: user,
       role: req.role,
       token: token,
-      semesterAktif: req?.semesterAktif,
-      tahunAjaranAktif: req?.tahunAjaranAktif,
     });
-    
-   }
-   return res.status(200).json({
-    status: "Success",
-    msg: "Berhasil Authme",
-    user: user,
-    role: req.role,
-    token: token,
-    
-  });
   } catch (err) {
     console.log(err);
   }
@@ -360,7 +356,46 @@ async function logout(req, res) {
     message: "Anda telah berhasil logout",
   });
 }
+async function resetPassword (req, res) {
+  try{
+    let {oldPassword, newPassword} = req.body
+    let email = req.email
+    const user = await userModel.findOne({
+      where: {
+        email: email,
+      },
+    });
+    const verify = bcrypt.compareSync(oldPassword, user.password);
+    if (!verify) {
+      return res.status(404).json({
+        status: "fail",
+        msg: "Masukan Password Lama ",
+      });
+    }
 
+    newPassword = await bcrypt.hashSync(newPassword, 10);
+    const update = await userModel.update({
+      password : newPassword
+    }, {
+      where : {
+        id : user.id
+      }
+    })
+
+    console.log(update)
+    return res.status(201).json({
+      status : "Success",
+      msg : "Password berhasil di perbaharui"
+    })
+
+  }catch (err){
+    console.log(err)
+    res.status(400).json({
+      status: "fail",
+      msg: "Terjadi Kesalahan",
+    });
+  }
+}
 module.exports = {
   login,
   logout,
@@ -368,4 +403,5 @@ module.exports = {
   authme,
   googleRegister,
   googleLogin,
+  resetPassword
 };

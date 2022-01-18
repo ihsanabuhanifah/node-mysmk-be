@@ -48,5 +48,6 @@ authRouter.get("/authme", jwtValidateMiddleware, authController.authme);
 authRouter.post('/google-register' , authController.googleRegister)
 authRouter.post('/google-login' , authController.googleLogin)
 authRouter.get('/logout' , authController.logout)
+authRouter.put("/password/update" ,jwtValidateMiddleware, authController.resetPassword)
 
 module.exports = authRouter;
