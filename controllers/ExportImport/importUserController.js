@@ -272,11 +272,11 @@ async function importWali(req, res) {
           if (userMail === null) {
             const student = await studentModel.findOne({
               where: {
-                nisn: user.nisn,
+                nisn: `${user.nisn}`,
               },
             });
 
-            console.log(student)
+          
             if (student !== null) {
               user.password = await bcrypt.hashSync(
                 user.password.toString(),
