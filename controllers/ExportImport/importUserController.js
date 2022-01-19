@@ -73,10 +73,10 @@ async function importGuru(req, res) {
             });
             user.UserId = userInTable.id;
             if (user.role === "guru") {
-              user.namaGuru = user.name
+              user.namaGuru = user.name;
               await teacherModel.create(user);
             }
-           
+
             if (userInTable !== null) {
               const userRoles = `${user.roles}`.split(".");
               await Promise.all(
@@ -180,7 +180,7 @@ async function importSiswa(req, res) {
               },
             });
             user.UserId = userInTable.id;
-            user.namaSiswa = user.name
+            user.namaSiswa = user.name;
 
             if (user.role === "siswa") {
               await studentModel.create(user);
@@ -270,39 +270,42 @@ async function importWali(req, res) {
           });
 
           if (userMail === null) {
-            user.password = await bcrypt.hashSync(user.password.toString(), 10);
-            await userModel.create(user);
-            const userInTable = await userModel.findOne({
-              where: {
-                email: user.email,
-              },
-            });
             const student = await studentModel.findOne({
               where: {
                 nisn: user.nisn,
               },
             });
-            user.namaWali = userInTable?.name
-            user.UserId = userInTable?.id;
-            user.StudentId = student?.id;
-          
-            
-            if (user.role === "wali") {
-              await parentModel.create(user);
-            }
-            if (userInTable !== null) {
-              const userRoles = `${user.roles}`.split(".");
-              await Promise.all(
-                userRoles.map(async (userRole) => {
-                  await userRoleModel.create({
-                    UserId: userInTable.id,
-                    RoleId: userRole,
-                  });
-                })
-              );
-            }
 
-            count += 1;
+            if (student !== null) {
+              user.password = await bcrypt.hashSync(
+                user.password.toString(),
+                10
+              );
+              await userModel.create(user);
+              const userInTable = await userModel.findOne({
+                where: {
+                  email: user.email,
+                },
+              });
+              user.namaWali = userInTable?.name;
+              user.UserId = userInTable?.id;
+              user.StudentId = student?.id;
+
+              await parentModel.create(user);
+
+              if (userInTable !== null) {
+                const userRoles = `${user.roles}`.split(".");
+                await Promise.all(
+                  userRoles.map(async (userRole) => {
+                    await userRoleModel.create({
+                      UserId: userInTable.id,
+                      RoleId: userRole,
+                    });
+                  })
+                );
+              }
+              count += 1;
+            }
           }
         })
       );
