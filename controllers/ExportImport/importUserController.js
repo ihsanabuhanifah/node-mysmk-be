@@ -276,6 +276,7 @@ async function importWali(req, res) {
               },
             });
 
+            console.log(student)
             if (student !== null) {
               user.password = await bcrypt.hashSync(
                 user.password.toString(),
