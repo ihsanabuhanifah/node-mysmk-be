@@ -46,7 +46,7 @@ async function login(req, res) {
 
     const checkRole = await userRoleModel.findOne({
       where: {
-        [Op.and]: [{ UserId: user.id }, { RoleId: loginAs }],
+        [Op.and]: [{ userId: user.id }, { roleId: loginAs }],
       },
     });
 
@@ -146,8 +146,8 @@ async function register(req, res) {
     });
 
     const userRole = await userRoleModel.create({
-      UserId: user.id,
-      RoleId: 1,
+      userId: user.id,
+      roleId: 1,
     });
 
     const myRoles = await RolesModel.findByPk(userRole.id);
@@ -419,7 +419,7 @@ async function forgotPassword(req, res) {
   }
   let token = crypto.randomBytes(32).toString("hex");
   const tokenSave = await TokenModel.create({
-    UserId: user.id,
+    userId: user.id,
     token: token,
   });
 
@@ -436,7 +436,7 @@ async function resetPasswordEmail(req, res) {
   let { newPassword } = req.body;
   const verify = await TokenModel.findOne({
     where: {
-      [Op.and]: [{ UserId: UserId }, { token: token }],
+      [Op.and]: [{ userId: UserId }, { token: token }],
     },
   });
 
@@ -461,7 +461,7 @@ async function resetPasswordEmail(req, res) {
 
   await TokenModel.destroy({
     where: {
-      UserId: UserId,
+      userId: UserId,
     },
   });
 
