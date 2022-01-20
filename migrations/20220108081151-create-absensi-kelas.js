@@ -11,7 +11,7 @@ module.exports = {
       tanggal: {
         type: Sequelize.DATE,
       },
-      TeacherId: {
+      teacherId: {
         type: Sequelize.INTEGER,
 
         onDelete: "CASCADE",
@@ -21,7 +21,7 @@ module.exports = {
           as: "teacherId",
         },
       },
-      StudentId: {
+      studentId: {
         type: Sequelize.INTEGER,
 
         onDelete: "CASCADE",
@@ -31,7 +31,7 @@ module.exports = {
           as: "studentId",
         },
       },
-      KelasId: {
+      kelasId: {
         type: Sequelize.INTEGER,
 
         onDelete: "CASCADE",
@@ -41,7 +41,7 @@ module.exports = {
           as: "kelasId",
         },
       },
-      MapelId: {
+      mapelId: {
         type: Sequelize.INTEGER,
 
         onDelete: "CASCADE",

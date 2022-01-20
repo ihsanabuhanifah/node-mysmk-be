@@ -8,7 +8,7 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER,
       },
-      KelasId: {
+      kelasId: {
         type: Sequelize.INTEGER,
 
         onDelete: "CASCADE",
@@ -18,7 +18,7 @@ module.exports = {
           as: "kelasId",
         },
       },
-      StudentId: {
+      studentId: {
         type: Sequelize.INTEGER,
 
         onDelete: "CASCADE",
