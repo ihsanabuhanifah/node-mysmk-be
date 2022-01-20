@@ -12,7 +12,7 @@ module.exports = {
         type : Sequelize.STRING,
         allowNull : false,
       },
-      UserId: {
+      userId: {
         type: Sequelize.INTEGER,
         onDelete: "CASCADE",
         references: {
@@ -21,7 +21,7 @@ module.exports = {
           as: "userId",
         },
       },
-      StudentId: {
+      studentId: {
         type: Sequelize.INTEGER,
         onDelete: "CASCADE",
         references: {
