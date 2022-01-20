@@ -1,7 +1,7 @@
 "use strict";
 const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
-  class AbsensiKelas extends Model {
+  class absensi_kelas extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -9,20 +9,20 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      AbsensiKelas.belongsTo(models.Kelas),
-        AbsensiKelas.belongsTo(models.Student);
-      AbsensiKelas.belongsTo(models.Mapel);
-      AbsensiKelas.belongsTo(models.Teacher);
+      absensi_kelas.belongsTo(models.kelas);
+      absensi_kelas.belongsTo(models.student);
+      absensi_kelas.belongsTo(models.mapel);
+      absensi_kelas.belongsTo(models.teacher);
     }
   }
-  AbsensiKelas.init(
+  absensi_kelas.init(
     {
       tanggal: DataTypes.DATEONLY,
-      TeacherId: DataTypes.INTEGER,
-      StudentId: DataTypes.INTEGER,
-      KelasId: DataTypes.INTEGER,
-      MapelId: DataTypes.INTEGER,
-      pelajaranKe : DataTypes.INTEGER,
+      teacherId: DataTypes.INTEGER,
+      studentId: DataTypes.INTEGER,
+      kelasId: DataTypes.INTEGER,
+      mapelId: DataTypes.INTEGER,
+      pelajaranKe: DataTypes.INTEGER,
       materi: DataTypes.STRING,
       statusKehadiran: DataTypes.INTEGER,
       keterangan: DataTypes.STRING,
@@ -31,8 +31,8 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      modelName: "AbsensiKelas",
+      modelName: "absensi_kelas",
     }
   );
-  return AbsensiKelas;
+  return absensi_kelas;
 };

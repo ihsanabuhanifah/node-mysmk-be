@@ -3,27 +3,23 @@ const {
   Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class mapel extends Model {
+  class token_reset_password extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      mapel.hasMany(
-        models.absensi_kelas,
-        { as: "absensi_kelas" },
-        { foreignKey: "mapelId" }
-      );
+      // define association here
+      token_reset_password.belongsTo(models.user);
     }
   };
-  mapel.init({
-    namaMapel: DataTypes.STRING,
-    kategori: DataTypes.STRING,
-    
+  token_reset_password.init({
+    userId: DataTypes.INTEGER,
+    token: DataTypes.STRING
   }, {
     sequelize,
-    modelName: 'mapel',
+    modelName: 'token_reset_password',
   });
-  return mapel;
+  return token_reset_password;
 };

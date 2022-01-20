@@ -1,7 +1,7 @@
 "use strict";
 const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
-  class User extends Model {
+  class user extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -9,44 +9,36 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      User.hasMany(
-        models.EmailVerified,
-        { as: "EmailVerified" },
-        { foreignKey: "UserId" }
-      );
-      User.hasMany(
-        models.LoginHistory,
-        { as: "loginHistory" },
-        { foreignKey: "UserId" }
-      );
-      User.hasMany(
-        models.UserRole,
+      
+      
+      user.hasMany(
+        models.user_role,
         { as: "userRole" },
-        { foreignKey: "UserId" }
+        { foreignKey: "userId" }
       );
-      User.hasMany(
-        models.tokenResetPassword,
+      user.hasMany(
+        models.token_reset_password,
         { as: "token" },
-        { foreignKey: "UserId" }
+        { foreignKey: "userId" }
       );
-      User.hasMany(
-        models.Student,
+      user.hasMany(
+        models.student,
         { as: "student" },
-        { foreignKey: "UserId" }
+        { foreignKey: "userId" }
       );
-      User.hasMany(
-        models.Parent,
+      user.hasMany(
+        models.parent,
         { as: "parent" },
-        { foreignKey: "UserId" }
+        { foreignKey: "userId" }
       );
-      User.hasMany(
-        models.Teacher,
+      user.hasMany(
+        models.teacher,
         { as: "teacher" },
-        { foreignKey: "UserId" }
+        { foreignKey: "userId" }
       );
     }
   }
-  User.init(
+  user.init(
     {
       name: DataTypes.STRING,
 
@@ -59,8 +51,8 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      modelName: "User",
+      modelName: "user",
     }
   );
-  return User;
+  return user;
 };

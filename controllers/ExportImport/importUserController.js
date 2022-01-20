@@ -1,12 +1,12 @@
-const roleModel = require("../../models").Role;
-const userModel = require("../../models").User;
-const taModel = require("../../models").Ta;
-const mapelModel = require("../../models").Mapel;
-const kelasModel = require("../../models").Kelas;
-const studentModel = require("../../models").Student;
-const teacherModel = require("../../models").Teacher;
-const parentModel = require("../../models").Parent;
-const userRoleModel = require("../../models").UserRole;
+const roleModel = require("../../models").role;
+const userModel = require("../../models").user;
+const taModel = require("../../models").ta;
+const mapelModel = require("../../models").mapel;
+const kelasModel = require("../../models").kelas;
+const studentModel = require("../../models").student;
+const teacherModel = require("../../models").teacher;
+const parentModel = require("../../models").parent;
+const userRoleModel = require("../../models").user_role;
 const fs = require("fs");
 const readXlsxFile = require("read-excel-file/node");
 const bcrypt = require("bcrypt");
@@ -276,7 +276,6 @@ async function importWali(req, res) {
               },
             });
 
-          
             if (student !== null) {
               user.password = await bcrypt.hashSync(
                 user.password.toString(),

@@ -3,7 +3,7 @@ const {
   Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class tokenResetPassword extends Model {
+  class login_history extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -11,15 +11,13 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      tokenResetPassword.belongsTo(models.User);
     }
   };
-  tokenResetPassword.init({
-    UserId: DataTypes.INTEGER,
-    token: DataTypes.STRING
+  login_history.init({
+    nama: DataTypes.STRING
   }, {
     sequelize,
-    modelName: 'tokenResetPassword',
+    modelName: 'login_history',
   });
-  return tokenResetPassword;
+  return login_history;
 };

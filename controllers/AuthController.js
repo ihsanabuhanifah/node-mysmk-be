@@ -65,7 +65,7 @@ async function login(req, res) {
         },
       });
     }
-    console.log("ee", parent);
+   
     if (parent !== undefined) {
       KelasStudent = await sequelize.query(
         `SELECT semester , tahunAjaran FROM KelasStudents 
@@ -75,7 +75,7 @@ async function login(req, res) {
         }
       );
     }
-    console.log(parent?.StudentId);
+    
 
     const token = JWT.sign(
       {

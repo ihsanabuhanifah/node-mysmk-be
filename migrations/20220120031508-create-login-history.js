@@ -1,23 +1,14 @@
 'use strict';
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('token_reset_passwords', {
+    await queryInterface.createTable('login_histories', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      UserId: {
-        type: Sequelize.INTEGER,
-        onDelete: "CASCADE",
-        references: {
-          model: "users",
-          key: "id",
-          as: "userId",
-        },
-      },
-      token: {
+      nama: {
         type: Sequelize.STRING
       },
       createdAt: {
@@ -31,6 +22,6 @@ module.exports = {
     });
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('token_reset_passwords');
+    await queryInterface.dropTable('login_histories');
   }
 };

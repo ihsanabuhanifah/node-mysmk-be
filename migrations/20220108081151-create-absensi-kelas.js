@@ -1,7 +1,7 @@
 "use strict";
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable("AbsensiKelas", {
+    await queryInterface.createTable("absensi_kelas", {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -16,9 +16,9 @@ module.exports = {
 
         onDelete: "CASCADE",
         references: {
-          model: "Teachers",
+          model: "teachers",
           key: "id",
-          as: "TeacherId",
+          as: "teacherId",
         },
       },
       StudentId: {
@@ -26,9 +26,9 @@ module.exports = {
 
         onDelete: "CASCADE",
         references: {
-          model: "Students",
+          model: "students",
           key: "id",
-          as: "StudentId",
+          as: "studentId",
         },
       },
       KelasId: {
@@ -36,9 +36,9 @@ module.exports = {
 
         onDelete: "CASCADE",
         references: {
-          model: "Kelas",
+          model: "kelas",
           key: "id",
-          as: "KelasId",
+          as: "kelasId",
         },
       },
       MapelId: {
@@ -46,9 +46,9 @@ module.exports = {
 
         onDelete: "CASCADE",
         references: {
-          model: "Mapels",
+          model: "mapels",
           key: "id",
-          as: "MapelId",
+          as: "mapelId",
         },
       },
       pelajaranKe: {
@@ -81,6 +81,6 @@ module.exports = {
     });
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable("AbsensiKelas");
+    await queryInterface.dropTable("absensi_kelas");
   },
 };
