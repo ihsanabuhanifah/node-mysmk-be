@@ -68,7 +68,7 @@ async function login(req, res) {
    console.log('parent' ,parent)
     if ( parent !== null && parent !== undefined) {
       KelasStudent = await sequelize.query(
-        `SELECT semester , tahunAjaran FROM kelas_students 
+        `SELECT "semester" , "tahunAjaran" FROM kelas_students 
         WHERE studentId = ${parent?.studentId}`,
         {
           type: QueryTypes.SELECT,
