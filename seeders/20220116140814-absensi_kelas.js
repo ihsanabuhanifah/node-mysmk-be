@@ -12,14 +12,14 @@ module.exports = {
      * }], {});
      */
     await queryInterface.bulkInsert(
-      "AbsensiKelas",
+      "absensi_kelas",
       [
         {
           tanggal: "2022-01-17",
-          TeacherId: 2,
-          StudentId: 1,
-          KelasId: 1,
-          MapelId: 9,
+          teacherId: 2,
+          studentId: 1,
+          kelasId: 1,
+          mapelId: 9,
           materi: "Perulangan",
           pelajaranKe: 1,
           statusKehadiran: 1,
@@ -31,10 +31,10 @@ module.exports = {
         },
         {
           tanggal: "2022-01-17",
-          TeacherId: 1,
-          StudentId: 1,
-          KelasId: 1,
-          MapelId: 1,
+          teacherId: 1,
+          studentId: 1,
+          kelasId: 1,
+          mapelId: 1,
           materi: "Perulangan",
           pelajaranKe: 2,
           statusKehadiran: 2,
@@ -46,10 +46,10 @@ module.exports = {
         },
         {
           tanggal: "2022-01-17",
-          TeacherId: 2,
-          StudentId: 1,
-          KelasId: 1,
-          MapelId: 9,
+          teacherId: 2,
+          studentId: 1,
+          kelasId: 1,
+          mapelId: 9,
           materi: "Perulangan",
           pelajaranKe: 3,
           statusKehadiran: 2,
@@ -61,10 +61,10 @@ module.exports = {
         },
         {
           tanggal: "2022-01-17",
-          TeacherId: 3,
-          StudentId: 1,
-          KelasId: 1,
-          MapelId: 9,
+          teacherId: 3,
+          studentId: 1,
+          kelasId: 1,
+          mapelId: 9,
           materi: "Perulangan",
           pelajaranKe: 4,
           statusKehadiran: 2,
@@ -76,10 +76,10 @@ module.exports = {
         },
         {
           tanggal: "2022-01-18",
-          TeacherId: 3,
-          StudentId: 2,
-          KelasId: 1,
-          MapelId: 9,
+          teacherId: 3,
+          studentId: 2,
+          kelasId: 1,
+          mapelId: 9,
           materi: "Perulangan",
           pelajaranKe: 1,
           statusKehadiran: 1,
@@ -91,10 +91,10 @@ module.exports = {
         },
         {
           tanggal: "2022-08-18",
-          TeacherId: 2,
-          StudentId: 1,
-          KelasId: 1,
-          MapelId: 9,
+          teacherId: 2,
+          studentId: 1,
+          kelasId: 1,
+          mapelId: 9,
           materi: "Perulangan",
           pelajaranKe: 2,
           statusKehadiran: 1,
@@ -106,10 +106,10 @@ module.exports = {
         },
         {
           tanggal: "2022-08-18",
-          TeacherId: 1,
-          StudentId: 1,
-          KelasId: 1,
-          MapelId: 9,
+          teacherId: 1,
+          studentId: 1,
+          kelasId: 1,
+          mapelId: 9,
           materi: "Perulangan",
           pelajaranKe: 3,
           statusKehadiran: 2,
@@ -121,10 +121,10 @@ module.exports = {
         },
         {
           tanggal: "2023-01-17",
-          TeacherId: 1,
-          StudentId: 1,
-          KelasId: 1,
-          MapelId: 9,
+          teacherId: 1,
+          studentId: 1,
+          kelasId: 1,
+          mapelId: 9,
           materi: "Perulangan",
           pelajaranKe: 1,
           statusKehadiran: 1,
@@ -147,6 +147,6 @@ module.exports = {
      * await queryInterface.bulkDelete('People', null, {});
      */
 
-    await queryInterface.bulkDelete("AbsensiKelas", null, {});
+    await queryInterface.bulkDelete("absensi_kelas", null, {});
   },
 };

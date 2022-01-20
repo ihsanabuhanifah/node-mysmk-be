@@ -71,7 +71,7 @@ async function importGuru(req, res) {
                 email: user.email,
               },
             });
-            user.UserId = userInTable.id;
+            user.userId = userInTable.id;
             if (user.role === "guru") {
               user.namaGuru = user.name;
               await teacherModel.create(user);
@@ -82,8 +82,8 @@ async function importGuru(req, res) {
               await Promise.all(
                 userRoles.map(async (userRole) => {
                   await userRoleModel.create({
-                    UserId: userInTable.id,
-                    RoleId: userRole,
+                    userId: userInTable.id,
+                    roleId: userRole,
                   });
                 })
               );
@@ -97,7 +97,7 @@ async function importGuru(req, res) {
       fs.unlinkSync(path);
       res.json({
         status: "Success",
-        msg: " import users berhasil",
+        msg: " import guru dan staf berhasil",
         successImport: count,
         failedImport: users.length - count,
       });
@@ -179,7 +179,7 @@ async function importSiswa(req, res) {
                 email: user.email,
               },
             });
-            user.UserId = userInTable.id;
+            user.userId = userInTable.id;
             user.namaSiswa = user.name;
 
             if (user.role === "siswa") {
@@ -190,8 +190,8 @@ async function importSiswa(req, res) {
               await Promise.all(
                 userRoles.map(async (userRole) => {
                   await userRoleModel.create({
-                    UserId: userInTable.id,
-                    RoleId: userRole,
+                    userId: userInTable.id,
+                    roleId: userRole,
                   });
                 })
               );
@@ -205,7 +205,7 @@ async function importSiswa(req, res) {
       fs.unlinkSync(path);
       res.json({
         status: "Success",
-        msg: " import users berhasil",
+        msg: " import santri berhasil",
         successImport: count,
         failedImport: users.length - count,
       });
@@ -288,8 +288,8 @@ async function importWali(req, res) {
                 },
               });
               user.namaWali = userInTable?.name;
-              user.UserId = userInTable?.id;
-              user.StudentId = student?.id;
+              user.userId = userInTable?.id;
+              user.studentId = student?.id;
 
               await parentModel.create(user);
 
@@ -298,8 +298,8 @@ async function importWali(req, res) {
                 await Promise.all(
                   userRoles.map(async (userRole) => {
                     await userRoleModel.create({
-                      UserId: userInTable.id,
-                      RoleId: userRole,
+                      userId: userInTable.id,
+                      roleId: userRole,
                     });
                   })
                 );
@@ -313,7 +313,7 @@ async function importWali(req, res) {
       fs.unlinkSync(path);
       res.json({
         status: "Success",
-        msg: " import users berhasil",
+        msg: " import wali santri berhasil",
         successImport: count,
         failedImport: users.length - count,
       });

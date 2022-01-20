@@ -1,8 +1,8 @@
-const roleModel = require("../../models").Role;
-const alquranModel = require("../../models").Alquran;
-const taModel = require("../../models").Ta;
-const mapelModel = require("../../models").Mapel;
-const kelasModel = require("../../models").Kelas;
+const roleModel = require("../../models").role;
+const alquranModel = require("../../models").alquran;
+const taModel = require("../../models").ta;
+const mapelModel = require("../../models").mapel;
+const kelasModel = require("../../models").kelas;
 const fs = require("fs");
 const readXlsxFile = require("read-excel-file/node");
 const bcrypt = require("bcrypt");
@@ -30,7 +30,7 @@ async function importRoles(req, res) {
 
       rows.forEach((row) => {
         const role = {
-          id: row[0],
+         
           roleName: row[1],
           remarks: row[2],
         };

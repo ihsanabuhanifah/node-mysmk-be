@@ -1,4 +1,4 @@
-const AbsensiKelasModel = require("../../models").AbsensiKelas;
+const AbsensiKelasModel = require("../../models").absensi_kelas;
 const { sequelize } = require("../../models");
 const { QueryTypes } = require("sequelize");
 const dotenv = require("dotenv");
@@ -33,7 +33,7 @@ async function list(req, res) {
     statusKehadiran = "";
   }
   if (namaMapel !== undefined) {
-    namaMapel = `AND a.MapelId = '${namaMapel}'`;
+    namaMapel = `AND a.mapelId = '${namaMapel}'`;
   } else {
     namaMapel = "";
   }
@@ -50,14 +50,14 @@ async function list(req, res) {
 
   try {
     const absensi = await sequelize.query(
-      `SELECT a.id ,a.tanggal ,a.MapelId, e.namaGuru, a.pelajaranKe, b.namaSiswa , c.namaKelas , d.namaMapel , a.materi,
+      `SELECT a.id ,a.tanggal ,a.mapelId, e.namaGuru, a.pelajaranKe, b.namaSiswa , c.namaKelas , d.namaMapel , a.materi,
         a.statusKehadiran,a.keterangan, a.semester , a.tahunAjaran,a.createdAt,a.updatedAt FROM 
-        AbsensiKelas AS a JOIN Students AS b ON (a.StudentId =b.id) 
-        JOIN Kelas AS c ON (a.KelasId = c.id ) 
+        absensi_kelas AS a JOIN students AS b ON (a.studentId =b.id) 
+        JOIN kelas AS c ON (a.kelasId = c.id ) 
        
-        JOIN Mapels AS d ON (a.MapelId = d.id) 
-        JOIN Teachers As e ON (a.TeacherId = e.id)
-        WHERE a.StudentId = ${req.StudentId}
+        JOIN mapels AS d ON (a.mapelId = d.id) 
+        JOIN teachers As e ON (a.teacherId = e.id)
+        WHERE a.studentId = ${req.StudentId}
         ${namaMapel}
        ${tahunAjaran}
        ${semester}

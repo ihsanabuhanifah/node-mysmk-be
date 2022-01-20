@@ -1,6 +1,6 @@
 const JWT = require("jsonwebtoken");
 const dotenv = require("dotenv").config()
-const UserModel = require("../models").User
+const UserModel = require("../models").user
 const jwtValidateMiddleware =  (req, res, next) => {
   const bearerHeader = req.headers["x-authorization"];
   if(!bearerHeader) return res.sendStatus(401)

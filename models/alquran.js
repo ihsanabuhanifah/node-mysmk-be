@@ -3,7 +3,7 @@ const {
   Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class Alquran extends Model {
+  class alquran extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -13,7 +13,7 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
     }
   };
-  Alquran.init({
+  alquran.init({
    
     namaSurat : DataTypes.STRING,
     namaSuratArabic : DataTypes.STRING,
@@ -21,7 +21,7 @@ module.exports = (sequelize, DataTypes) => {
 
   }, {
     sequelize,
-    modelName: 'Alquran',
+    modelName: 'alquran',
   });
-  return Alquran;
+  return alquran;
 };

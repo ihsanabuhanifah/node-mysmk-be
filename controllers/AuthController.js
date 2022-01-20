@@ -1,11 +1,11 @@
-const userModel = require("../models").User;
-const userRoleModel = require("../models").UserRole;
-const RolesModel = require("../models").Role;
-const KelasStudentModel = require("../models").KelasStudent;
-const ParentModel = require("../models").Parent;
-const EmailVerifiedModel = require("../models").EmailVerified;
-const TokenModel = require("../models").tokenResetPassword;
-const LoginHistory = require("../models").LoginHistory;
+const userModel = require("../models").user;
+const userRoleModel = require("../models").user_role;
+const RolesModel = require("../models").role;
+const KelasStudentModel = require("../models").kelas_student;
+const ParentModel = require("../models").parent;
+
+const TokenModel = require("../models").token_reset_password;
+
 const { sequelize } = require("../models");
 const bcrypt = require("bcrypt");
 const JWT = require("jsonwebtoken");
@@ -61,15 +61,15 @@ async function login(req, res) {
     if (loginAs === 8) {
       parent = await ParentModel.findOne({
         where: {
-          UserId: user.id,
+          userId: user.id,
         },
       });
     }
-   
-    if (parent !== undefined) {
+   console.log('parent' ,parent)
+    if ( parent !== null && parent !== undefined) {
       KelasStudent = await sequelize.query(
-        `SELECT semester , tahunAjaran FROM KelasStudents 
-        WHERE StudentId = ${parent?.StudentId}`,
+        `SELECT semester , tahunAjaran FROM kelas_students 
+        WHERE studentId = ${parent?.studentId}`,
         {
           type: QueryTypes.SELECT,
         }
@@ -84,11 +84,11 @@ async function login(req, res) {
         id: user.id,
         role: roleName.roleName,
         roleId: loginAs,
-        StudentId: parent?.StudentId,
+        StudentId: parent?.studentId,
         semesterAktif:
-          parent?.StudentId !== undefined ? KelasStudent[0]?.semester : "",
+          parent?.studentId !== undefined ? KelasStudent[0]?.semester : "",
         tahunAjaranAktif:
-          parent?.StudentId !== undefined ? KelasStudent[0]?.tahunAjaran : "",
+          parent?.studentId !== undefined ? KelasStudent[0]?.tahunAjaran : "",
       },
       process.env.JWT_SECRET_ACCESS_TOKEN,
       {

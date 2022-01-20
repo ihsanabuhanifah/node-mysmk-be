@@ -13,11 +13,11 @@ module.exports = {
      */
 
     await queryInterface.bulkInsert(
-      "KelasStudents",
+      "kelas_students",
       [
         {
-          KelasId: 1,
-          StudentId: 1,
+          kelasId: 1,
+          studentId: 1,
           semester: 1,
           tahunAjaran: "2021/2022",
           status : 1,
@@ -25,8 +25,8 @@ module.exports = {
           updatedAt: new Date(),
         },
         {
-          KelasId: 1,
-          StudentId: 2,
+          kelasId: 1,
+          studentId: 2,
           semester: 1,
           tahunAjaran: "2021/2022",
           status : 1,
@@ -45,7 +45,7 @@ module.exports = {
      * Example:
      * await queryInterface.bulkDelete('KelasStudents', null, {});
      */
-    await queryInterface.bulkDelete("KelasStudents", null, {});
+    await queryInterface.bulkDelete("Kelas_students", null, {});
   },
 };
 
