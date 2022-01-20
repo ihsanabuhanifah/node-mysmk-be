@@ -12,19 +12,19 @@ module.exports = (sequelize, DataTypes) => {
       kelas.hasMany(
         models.kelas_student,
         { as: "kelas_student" },
-        { foreignKey: "kelasId" }
+        { foreignKey: "kelas_id" }
       );
       kelas.hasMany(
         models.absensi_kelas,
         { as: "absensi_kelas" },
-        { foreignKey: "kelasId" }
+        { foreignKey: "kelas_id" }
       );
     }
   }
   kelas.init(
     {
-      namaKelas: DataTypes.STRING,
-      tahunAjaran: DataTypes.STRING,
+      nama_kelas: DataTypes.STRING,
+      tahun_ajaran: DataTypes.STRING,
     },
     {
       sequelize,

@@ -11,53 +11,53 @@ module.exports = {
       tanggal: {
         type: Sequelize.DATE,
       },
-      teacherId: {
+      teacher_id: {
         type: Sequelize.INTEGER,
 
         onDelete: "CASCADE",
         references: {
           model: "teachers",
           key: "id",
-          as: "teacherId",
+          as: "teacher_id",
         },
       },
-      studentId: {
+      student_id: {
         type: Sequelize.INTEGER,
 
         onDelete: "CASCADE",
         references: {
           model: "students",
           key: "id",
-          as: "studentId",
+          as: "student_id",
         },
       },
-      kelasId: {
+      kelas_id: {
         type: Sequelize.INTEGER,
 
         onDelete: "CASCADE",
         references: {
           model: "kelas",
           key: "id",
-          as: "kelasId",
+          as: "kelas_id",
         },
       },
-      mapelId: {
+      mapel_id: {
         type: Sequelize.INTEGER,
 
         onDelete: "CASCADE",
         references: {
           model: "mapels",
           key: "id",
-          as: "mapelId",
+          as: "mapel_id",
         },
       },
-      pelajaranKe: {
+      pelajaran_ke: {
         type: Sequelize.INTEGER,
       },
       materi: {
         type: Sequelize.STRING,
       },
-      statusKehadiran: {
+      status_kehadiran: {
         type: Sequelize.INTEGER,
       },
       keterangan: {
@@ -67,14 +67,14 @@ module.exports = {
       semester: {
         type: Sequelize.INTEGER,
       },
-      tahunAjaran: {
+      tahun_ajaran: {
         type: Sequelize.STRING,
       },
-      createdAt: {
+      created_at: {
         allowNull: false,
         type: Sequelize.DATE,
       },
-      updatedAt: {
+      updated_at: {
         allowNull: false,
         type: Sequelize.DATE,
       },

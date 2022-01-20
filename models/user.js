@@ -14,27 +14,27 @@ module.exports = (sequelize, DataTypes) => {
       user.hasMany(
         models.user_role,
         { as: "userRole" },
-        { foreignKey: "userId" }
+        { foreignKey: "user_id" }
       );
       user.hasMany(
         models.token_reset_password,
         { as: "token" },
-        { foreignKey: "userId" }
+        { foreignKey: "user_id" }
       );
       user.hasMany(
         models.student,
         { as: "student" },
-        { foreignKey: "userId" }
+        { foreignKey: "user_id" }
       );
       user.hasMany(
         models.parent,
         { as: "parent" },
-        { foreignKey: "userId" }
+        { foreignKey: "user_id" }
       );
       user.hasMany(
         models.teacher,
         { as: "teacher" },
-        { foreignKey: "userId" }
+        { foreignKey: "user_id" }
       );
     }
   }
@@ -46,7 +46,7 @@ module.exports = (sequelize, DataTypes) => {
       password: DataTypes.STRING,
       role: DataTypes.STRING,
       image: DataTypes.STRING,
-      emailVerified: DataTypes.BOOLEAN,
+      email_verified: DataTypes.BOOLEAN,
       status: DataTypes.STRING,
     },
     {

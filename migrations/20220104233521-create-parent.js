@@ -8,37 +8,37 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      namaWali :  {
+      nama_wali :  {
         type : Sequelize.STRING,
         allowNull : false,
       },
-      userId: {
+      user_id: {
         type: Sequelize.INTEGER,
         onDelete: "CASCADE",
         references: {
           model: "users",
           key: "id",
-          as: "userId",
+          as: "user_id",
         },
       },
-      studentId: {
+      student_id: {
         type: Sequelize.INTEGER,
         onDelete: "CASCADE",
         references: {
           model: "students",
           key: "id",
-          as: "studentId",
+          as: "student_id",
         },
       },
       hubungan :  {
         type : Sequelize.STRING,
         allowNull : false,
       },
-      createdAt: {
+      created_at: {
         allowNull: false,
         type: Sequelize.DATE
       },
-      updatedAt: {
+      updated_at: {
         allowNull: false,
         type: Sequelize.DATE
       }

@@ -14,10 +14,10 @@ module.exports = (sequelize, DataTypes) => {
   }
   kelas_student.init(
     {
-      kelasId: DataTypes.INTEGER,
-      studentId: DataTypes.INTEGER,
+      kelas_id: DataTypes.INTEGER,
+      student_id: DataTypes.INTEGER,
       semester: DataTypes.INTEGER,
-      tahunAjaran: DataTypes.STRING,
+      tahun_ajaran: DataTypes.STRING,
       status: DataTypes.INTEGER,
     },
     {

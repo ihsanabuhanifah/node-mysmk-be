@@ -46,7 +46,7 @@ async function login(req, res) {
 
     const checkRole = await userRoleModel.findOne({
       where: {
-        [Op.and]: [{ userId: user.id }, { roleId: loginAs }],
+        [Op.and]: [{ user_id: user.id }, { role_id: loginAs }],
       },
     });
 
@@ -61,15 +61,15 @@ async function login(req, res) {
     if (loginAs === 8) {
       parent = await ParentModel.findOne({
         where: {
-          userId: user.id,
+          user_id: user.id,
         },
       });
     }
    console.log('parent' ,parent)
     if ( parent !== null && parent !== undefined) {
       KelasStudent = await sequelize.query(
-        `SELECT "semester" , "tahunAjaran" FROM kelas_students 
-        WHERE studentId = ${parent?.studentId}`,
+        `SELECT semester , tahun_ajaran FROM kelas_students 
+        WHERE student_id = ${parent?.studentId}`,
         {
           type: QueryTypes.SELECT,
         }
@@ -82,13 +82,13 @@ async function login(req, res) {
         email: user.email,
         name: user.name,
         id: user.id,
-        role: roleName.roleName,
+        role: roleName.role_name,
         roleId: loginAs,
-        StudentId: parent?.studentId,
+        StudentId: parent?.student_id,
         semesterAktif:
-          parent?.studentId !== undefined ? KelasStudent[0]?.semester : "",
+          parent?.student_id !== undefined ? KelasStudent[0]?.semester : "",
         tahunAjaranAktif:
-          parent?.studentId !== undefined ? KelasStudent[0]?.tahunAjaran : "",
+          parent?.student_id !== undefined ? KelasStudent[0]?.tahun_ajaran : "",
       },
       process.env.JWT_SECRET_ACCESS_TOKEN,
       {
@@ -101,7 +101,7 @@ async function login(req, res) {
         status: "Success",
         msg: "Berhasil Login",
         user: user,
-        role: roleName.roleName,
+        role: roleName.role_name,
         token: token,
         semesterAktif: KelasStudent[0]?.semester,
         tahunAjaranAktif: KelasStudent[0]?.semester,
@@ -222,8 +222,8 @@ async function authme(req, res) {
         name: user.name,
         id: user.id,
         role: user.role,
-        roleId: user.RoleId,
-        StudentId: req.StudentId,
+        roleId: user.Role_id,
+        StudentId: req.Student_id,
       },
       process.env.JWT_SECRET_ACCESS_TOKEN,
       {

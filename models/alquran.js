@@ -15,9 +15,9 @@ module.exports = (sequelize, DataTypes) => {
   };
   alquran.init({
    
-    namaSurat : DataTypes.STRING,
-    namaSuratArabic : DataTypes.STRING,
-    jumlahAyat : DataTypes.INTEGER
+    nama_surat : DataTypes.STRING,
+    nama_surat_arabic : DataTypes.STRING,
+    jumlah_ayat : DataTypes.INTEGER
 
   }, {
     sequelize,

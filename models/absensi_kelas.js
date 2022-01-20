@@ -18,16 +18,16 @@ module.exports = (sequelize, DataTypes) => {
   absensi_kelas.init(
     {
       tanggal: DataTypes.DATEONLY,
-      teacherId: DataTypes.INTEGER,
-      studentId: DataTypes.INTEGER,
-      kelasId: DataTypes.INTEGER,
-      mapelId: DataTypes.INTEGER,
-      pelajaranKe: DataTypes.INTEGER,
+      teacher_id: DataTypes.INTEGER,
+      student_id: DataTypes.INTEGER,
+      kelas_id: DataTypes.INTEGER,
+      mapel_id: DataTypes.INTEGER,
+      pelajaran_ke: DataTypes.INTEGER,
       materi: DataTypes.STRING,
-      statusKehadiran: DataTypes.INTEGER,
+      status_kehadiran: DataTypes.INTEGER,
       keterangan: DataTypes.STRING,
       semester: DataTypes.INTEGER,
-      tahunAjaran: DataTypes.STRING,
+      tahun_ajaran: DataTypes.STRING,
     },
     {
       sequelize,

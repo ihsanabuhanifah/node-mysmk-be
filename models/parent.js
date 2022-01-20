@@ -14,9 +14,9 @@ module.exports = (sequelize, DataTypes) => {
   }
   parent.init(
     {
-      userId: DataTypes.INTEGER,
-      studentId: DataTypes.INTEGER,
-      namaWali: DataTypes.STRING,
+      user_id: DataTypes.INTEGER,
+      student_id: DataTypes.INTEGER,
+      nama_wali: DataTypes.STRING,
       hubungan: DataTypes.STRING,
     },
     {

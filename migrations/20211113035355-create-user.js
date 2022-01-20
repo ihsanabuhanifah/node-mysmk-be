@@ -18,7 +18,7 @@ module.exports = {
         type: Sequelize.STRING,
         unique: true,
       },
-      emailVerified: {
+      email_verified: {
         allowNull: false,
         type: Sequelize.BOOLEAN,
         defaultValue: false,
@@ -42,11 +42,11 @@ module.exports = {
         defaultValue: "inactive",
       },
 
-      createdAt: {
+      created_at: {
         allowNull: false,
         type: Sequelize.DATE,
       },
-      updatedAt: {
+      updated_at: {
         allowNull: false,
         type: Sequelize.DATE,
       },

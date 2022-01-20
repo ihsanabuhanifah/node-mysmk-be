@@ -13,12 +13,12 @@ module.exports = (sequelize, DataTypes) => {
       mapel.hasMany(
         models.absensi_kelas,
         { as: "absensi_kelas" },
-        { foreignKey: "mapelId" }
+        { foreignKey: "mapel_id" }
       );
     }
   };
   mapel.init({
-    namaMapel: DataTypes.STRING,
+    nama_mapel: DataTypes.STRING,
     kategori: DataTypes.STRING,
     
   }, {

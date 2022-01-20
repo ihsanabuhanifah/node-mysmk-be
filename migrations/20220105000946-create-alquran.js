@@ -8,20 +8,20 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      namaSurat: {
+      nama_surat: {
         type: Sequelize.STRING
       },
-      namaSuratArabic: {
+      nama_surat_arabic: {
         type: Sequelize.STRING
       },
-      jumlahAyat : {
+      jumlah_ayat : {
         type:Sequelize.INTEGER
       },
-      createdAt: {
+      created_at: {
         allowNull: false,
         type: Sequelize.DATE
       },
-      updatedAt: {
+      updated_at: {
         allowNull: false,
         type: Sequelize.DATE
       }

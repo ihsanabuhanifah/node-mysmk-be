@@ -12,13 +12,13 @@ module.exports = (sequelize, DataTypes) => {
       role.hasMany(
         models.user_role,
         { as: "user_role" },
-        { foreignKey: "roleId" }
+        { foreignKey: "role_id" }
       );
     }
   }
   role.init(
     {
-      roleName: DataTypes.STRING,
+      role_name: DataTypes.STRING,
       remarks: DataTypes.STRING,
     },
     {

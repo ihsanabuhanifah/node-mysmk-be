@@ -71,9 +71,9 @@ async function importGuru(req, res) {
                 email: user.email,
               },
             });
-            user.userId = userInTable.id;
+            user.user_id = userInTable.id;
             if (user.role === "guru") {
-              user.namaGuru = user.name;
+              user.nama_guru = user.name;
               await teacherModel.create(user);
             }
 
@@ -82,8 +82,8 @@ async function importGuru(req, res) {
               await Promise.all(
                 userRoles.map(async (userRole) => {
                   await userRoleModel.create({
-                    userId: userInTable.id,
-                    roleId: userRole,
+                    user_id: userInTable.id,
+                    role_id: userRole,
                   });
                 })
               );
@@ -142,15 +142,15 @@ async function importSiswa(req, res) {
           nis: row[7],
           nisn: row[8],
           nik: row[9],
-          tempatLahir: row[10],
-          tanggalLahir: row[11],
+          tempat_lahir: row[10],
+          tanggal_lahir: row[11],
           alamat: row[12],
-          sekolahAsal: row[13],
-          jenisKelamin: row[14],
-          anakKe: row[15],
-          tanggalDiterima: row[16],
+          sekolah_asal: row[13],
+          jenis_kelamin: row[14],
+          anak_ke: row[15],
+          tanggal_diterima: row[16],
           angkatan: row[17],
-          tahunAjaran: row[18],
+          tahun_ajaran: row[18],
         };
         const role = {
           name: row[1],
@@ -179,8 +179,8 @@ async function importSiswa(req, res) {
                 email: user.email,
               },
             });
-            user.userId = userInTable.id;
-            user.namaSiswa = user.name;
+            user.user_id = userInTable.id;
+            user.nama_siswa = user.name;
 
             if (user.role === "siswa") {
               await studentModel.create(user);
@@ -190,8 +190,8 @@ async function importSiswa(req, res) {
               await Promise.all(
                 userRoles.map(async (userRole) => {
                   await userRoleModel.create({
-                    userId: userInTable.id,
-                    roleId: userRole,
+                    user_id: userInTable.id,
+                    role_id: userRole,
                   });
                 })
               );
@@ -287,9 +287,9 @@ async function importWali(req, res) {
                   email: user.email,
                 },
               });
-              user.namaWali = userInTable?.name;
-              user.userId = userInTable?.id;
-              user.studentId = student?.id;
+              user.nama_wali = userInTable?.name;
+              user.user_id = userInTable?.id;
+              user.student_id = student?.id;
 
               await parentModel.create(user);
 
@@ -298,8 +298,8 @@ async function importWali(req, res) {
                 await Promise.all(
                   userRoles.map(async (userRole) => {
                     await userRoleModel.create({
-                      userId: userInTable.id,
-                      roleId: userRole,
+                      user_id: userInTable.id,
+                      role_id: userRole,
                     });
                   })
                 );

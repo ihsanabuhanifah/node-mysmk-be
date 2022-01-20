@@ -13,14 +13,14 @@ module.exports = (sequelize, DataTypes) => {
       teacher.hasMany(
         models.absensi_kelas,
         { as: "absensi_kelas" },
-        { foreignKey: "teacherId" }
+        { foreignKey: "teacher_id" }
       );
     }
   }
   teacher.init(
     {
-      userId: DataTypes.INTEGER,
-      namaGuru: DataTypes.STRING,
+      user_id: DataTypes.INTEGER,
+      nama_guru: DataTypes.STRING,
     },
     {
       sequelize,

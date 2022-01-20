@@ -30,8 +30,7 @@ async function importRoles(req, res) {
 
       rows.forEach((row) => {
         const role = {
-         
-          roleName: row[1],
+          role_name: row[1],
           remarks: row[2],
         };
         roles.push(role);
@@ -132,7 +131,7 @@ async function importMapel(req, res) {
 
       rows.forEach((row) => {
         const mapel = {
-          namaMapel: row[1],
+          nama_mapel: row[1],
           kategori: row[2],
         };
         mapels.push(mapel);
@@ -183,8 +182,8 @@ async function importKelas(req, res) {
       rows.forEach((row) => {
         const ta = {
           id: row[0],
-          namaKelas: row[1],
-          tahunAjaran: row[2],
+          nama_kelas: row[1],
+          tahun_ajaran: row[2],
         };
         tas.push(ta);
       });
@@ -234,9 +233,9 @@ async function importAlquran(req, res) {
 
       rows.forEach((row) => {
         const mapel = {
-          namaSurat: row[1],
-          namaSuratArabic: row[2],
-          jumlahAyat : row[3]
+          nama_surat: row[1],
+          nama_surat_arabic: row[2],
+          jumlah_ayat: row[3],
         };
         mapels.push(mapel);
       });
@@ -265,7 +264,7 @@ async function importAlquran(req, res) {
 }
 module.exports = {
   importRoles,
-importAlquran,
+  importAlquran,
   importTa,
   importMapel,
   importKelas,

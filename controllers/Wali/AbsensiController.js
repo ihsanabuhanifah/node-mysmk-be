@@ -17,7 +17,7 @@ async function list(req, res) {
   } = req.query;
 
   if (tahunAjaran !== undefined) {
-    tahunAjaran = `AND a.tahunAjaran = '${tahunAjaran}'`;
+    tahunAjaran = `AND a.tahun_ajaran = '${tahunAjaran}'`;
   } else {
     tahunAjaran = "";
   }
@@ -28,12 +28,12 @@ async function list(req, res) {
     semester = "";
   }
   if (statusKehadiran !== undefined) {
-    statusKehadiran = `AND a.statusKehadiran = '${statusKehadiran}'`;
+    statusKehadiran = `AND a.status_kehadiran = '${statusKehadiran}'`;
   } else {
     statusKehadiran = "";
   }
   if (namaMapel !== undefined) {
-    namaMapel = `AND a.mapelId = '${namaMapel}'`;
+    namaMapel = `AND a.mapel_id = '${namaMapel}'`;
   } else {
     namaMapel = "";
   }
@@ -50,14 +50,14 @@ async function list(req, res) {
 
   try {
     const absensi = await sequelize.query(
-      `SELECT a.id ,a.tanggal ,a.mapelId, e.namaGuru, a.pelajaranKe, b.namaSiswa , c.namaKelas , d.namaMapel , a.materi,
-        a.statusKehadiran,a.keterangan, a.semester , a.tahunAjaran,a.createdAt,a.updatedAt FROM 
-        absensi_kelas AS a JOIN students AS b ON (a.studentId =b.id) 
-        JOIN kelas AS c ON (a.kelasId = c.id ) 
+      `SELECT a.id ,a.tanggal ,a.mapel_id, e.nama_guru, a.pelajaran_ke, b.nama_siswa , c.nama_kelas , d.nama_mapel , a.materi,
+        a.status_kehadiran,a.keterangan, a.semester , a.tahun_ajaran,a.created_at,a.updated_at FROM 
+        absensi_kelas AS a JOIN students AS b ON (a.student_id =b.id) 
+        JOIN kelas AS c ON (a.kelas_id = c.id ) 
        
-        JOIN mapels AS d ON (a.mapelId = d.id) 
-        JOIN teachers As e ON (a.teacherId = e.id)
-        WHERE a.studentId = ${req.StudentId}
+        JOIN mapels AS d ON (a.mapel_id = d.id) 
+        JOIN teachers As e ON (a.teacher_id = e.id)
+        WHERE a.student_id = ${req.StudentId}
         ${namaMapel}
        ${tahunAjaran}
        ${semester}
@@ -65,7 +65,7 @@ async function list(req, res) {
         ${statusKehadiran}
 
         ${limit}
-        ORDER BY a.tanggal desc , a.pelajaranKe asc
+        ORDER BY a.tanggal desc , a.pelajaran_ke asc
         ;`,
       {
         type: QueryTypes.SELECT,

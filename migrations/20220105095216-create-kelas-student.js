@@ -8,40 +8,40 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER,
       },
-      kelasId: {
+      kelas_id: {
         type: Sequelize.INTEGER,
 
         onDelete: "CASCADE",
         references: {
           model: "kelas",
           key: "id",
-          as: "kelasId",
+          as: "kelas_id",
         },
       },
-      studentId: {
+      student_id: {
         type: Sequelize.INTEGER,
 
         onDelete: "CASCADE",
         references: {
           model: "students",
           key: "id",
-          as: "studentId",
+          as: "student_id",
         },
       },
       semester: {
         type: Sequelize.INTEGER,
       },
-      tahunAjaran: {
+      tahun_ajaran: {
         type: Sequelize.STRING,
       },
       status: {
         type: Sequelize.INTEGER,
       },
-      createdAt: {
+      created_at: {
         allowNull: false,
         type: Sequelize.DATE,
       },
-      updatedAt: {
+      updated_at: {
         allowNull: false,
         type: Sequelize.DATE,
       },

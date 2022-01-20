@@ -8,16 +8,16 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER,
       },
-      userId: {
+      user_id: {
         type: Sequelize.INTEGER,
         onDelete: "CASCADE",
         references: {
           model: "users",
           key: "id",
-          as: "userId",
+          as: "user_id",
         },
       },
-      namaSiswa: {
+      nama_siswa: {
         type: Sequelize.STRING,
         allowNull: false,
       },
@@ -30,40 +30,40 @@ module.exports = {
       nik: {
         type: Sequelize.STRING,
       },
-      tempatLahir: {
+      tempat_lahir: {
         type: Sequelize.STRING,
       },
-      tanggalLahir: {
+      tanggal_lahir: {
         type: Sequelize.DATE,
       },
 
       alamat: {
         type: Sequelize.STRING,
       },
-      sekolahAsal: {
+      sekolah_asal: {
         type: Sequelize.STRING,
       },
-      jenisKelamin: {
+      jenis_kelamin: {
         type: Sequelize.STRING,
       },
-      anakKe: {
+      anak_ke: {
         type: Sequelize.INTEGER,
       },
-      tanggalDiterima: {
+      tanggal_diterima: {
         type: Sequelize.DATE,
       },
       angkatan: {
         type: Sequelize.STRING,
       },
-      tahunAjaran: {
+      tahun_ajaran: {
         type: Sequelize.STRING,
       },
 
-      createdAt: {
+      created_at: {
         allowNull: false,
         type: Sequelize.DATE,
       },
-      updatedAt: {
+      updated_at: {
         allowNull: false,
         type: Sequelize.DATE,
       },

@@ -15,7 +15,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   };
   token_reset_password.init({
-    userId: DataTypes.INTEGER,
+    user_id: DataTypes.INTEGER,
     token: DataTypes.STRING
   }, {
     sequelize,

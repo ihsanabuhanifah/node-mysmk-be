@@ -8,29 +8,29 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER,
       },
-      userId: {
+      user_id: {
         type: Sequelize.INTEGER,
         onDelete: "CASCADE",
         references: {
           model: "users",
           key: "id",
-          as: "userId",
+          as: "user_ud",
         },
       },
-      roleId: {
+      role_id: {
         type: Sequelize.INTEGER,
         onDelete: "CASCADE",
         references: {
           model: "roles",
           key: "id",
-          as: "roleId",
+          as: "role_Id",
         },
       },
-      createdAt: {
+      created_at: {
         allowNull: false,
         type: Sequelize.DATE,
       },
-      updatedAt: {
+      updated_at: {
         allowNull: false,
         type: Sequelize.DATE,
       },
