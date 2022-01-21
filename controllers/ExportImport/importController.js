@@ -30,6 +30,7 @@ async function importRoles(req, res) {
 
       rows.forEach((row) => {
         const role = {
+          id: row[0],
           role_name: row[1],
           remarks: row[2],
         };

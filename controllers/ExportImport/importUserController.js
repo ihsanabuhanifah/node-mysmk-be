@@ -74,7 +74,10 @@ async function importGuru(req, res) {
             user.user_id = userInTable.id;
             if (user.role === "guru") {
               user.nama_guru = user.name;
-              await teacherModel.create(user);
+              await teacherModel.create({
+                user_id: userInTable.id,
+                nama_guru: user.name,
+              });
             }
 
             if (userInTable !== null) {
@@ -179,11 +182,25 @@ async function importSiswa(req, res) {
                 email: user.email,
               },
             });
-            user.user_id = userInTable.id;
-            user.nama_siswa = user.name;
+           
 
             if (user.role === "siswa") {
-              await studentModel.create(user);
+              await studentModel.create({
+                user_id : userInTable.id,
+                nama_siswa : user_name,
+                nis : user.nis,
+                nisn:user?.nisn,
+                tempat_lahir : user?.tempat_lahir,
+                tanggal_lahir: user?.tanggal_lahir,
+                alamat: user?.alamat,
+                sekolah_asal: user?.sekolah_asal,
+                jenis_kelamin: user?.jenis_kelamin,
+                anak_ke: user?.anak_ke,
+                tanggal_diterima: user?.tanggal_diterima,
+                angkatan: user?.angkatan,
+                tahun_ajaran: user?.tahun_ajaran,
+
+              });
             }
             if (userInTable !== null) {
               const userRoles = `${user.roles}`.split(".");
@@ -271,6 +288,7 @@ async function importWali(req, res) {
 
           if (userMail === null) {
             const student = await studentModel.findOne({
+              attributes: ["id"],
               where: {
                 nisn: `${user.nisn}`,
               },
@@ -287,11 +305,18 @@ async function importWali(req, res) {
                   email: user.email,
                 },
               });
+
+              console.log(userInTable);
               user.nama_wali = userInTable?.name;
               user.user_id = userInTable?.id;
               user.student_id = student?.id;
 
-              await parentModel.create(user);
+              await parentModel.create({
+                nama_wali: userInTable?.name,
+                user_id: userInTable?.id,
+                student_id: student?.id,
+                hubungan : user.hubungan,
+              });
 
               if (userInTable !== null) {
                 const userRoles = `${user.roles}`.split(".");

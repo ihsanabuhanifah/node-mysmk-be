@@ -45,6 +45,7 @@ async function login(req, res) {
     const roleName = await RolesModel.findByPk(loginAs);
 
     const checkRole = await userRoleModel.findOne({
+      attributes : ['id', 'role_id'],
       where: {
         [Op.and]: [{ user_id: user.id }, { role_id: loginAs }],
       },
@@ -53,13 +54,14 @@ async function login(req, res) {
     if (checkRole === null) {
       return res.status(422).json({
         status: "Fail",
-        msg: `Mohon Maaf anda tidak memiliki role sebagai ${roleName.roleName}  `,
+        msg: `Mohon Maaf anda tidak memiliki role sebagai ${roleName.role_name}  `,
       });
     }
     let parent;
     let KelasStudent;
     if (loginAs === 8) {
       parent = await ParentModel.findOne({
+        attributes : ['id', 'nama_wali' , 'user_id' , 'student_id' , 'hubungan'],
         where: {
           user_id: user.id,
         },
@@ -69,7 +71,7 @@ async function login(req, res) {
     if ( parent !== null && parent !== undefined) {
       KelasStudent = await sequelize.query(
         `SELECT semester , tahun_ajaran FROM kelas_students 
-        WHERE student_id = ${parent?.studentId}`,
+        WHERE student_id = ${parent?.student_id}`,
         {
           type: QueryTypes.SELECT,
         }

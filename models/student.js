@@ -12,17 +12,17 @@ module.exports = (sequelize, DataTypes) => {
         student.hasMany(
           models.parent,
           { as: "parent" },
-          { foreignKey: "studentId" }
+          { foreignKey: "student_id" }
         );
         student.hasMany(
           models.kelas_student,
           { as: "kelas_student" },
-          { foreignKey: "studentId" }
+          { foreignKey: "student_id" }
         );
         student.hasMany(
           models.absensi_kelas,
           { as: "absensi_kelas" },
-          { foreignKey: "studentId" }
+          { foreignKey: "student_id" }
         );
     }
     
