@@ -16,7 +16,7 @@ module.exports = {
       "kelas_students",
       [
         {
-          kelas_d: 1,
+          kelas_id: 1,
           student_id: 1,
           semester: 1,
           tahun_ajaran: "2021/2022",
@@ -25,8 +25,8 @@ module.exports = {
           updatedAt: new Date(),
         },
         {
-          kelasId: 1,
-          studentId: 2,
+          kelas_id: 1,
+          student_id: 2,
           semester: 1,
           tahun_ajaran: "2021/2022",
           status: 1,

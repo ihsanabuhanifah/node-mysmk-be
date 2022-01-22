@@ -187,7 +187,7 @@ async function importSiswa(req, res) {
             if (user.role === "siswa") {
               await studentModel.create({
                 user_id : userInTable.id,
-                nama_siswa : user_name,
+                nama_siswa : user.name,
                 nis : user.nis,
                 nisn:user?.nisn,
                 tempat_lahir : user?.tempat_lahir,
@@ -312,7 +312,7 @@ async function importWali(req, res) {
               user.student_id = student?.id;
 
               await parentModel.create({
-                nama_wali: userInTable?.name,
+                nama_wali: user.name,
                 user_id: userInTable?.id,
                 student_id: student?.id,
                 hubungan : user.hubungan,

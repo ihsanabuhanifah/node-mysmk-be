@@ -106,7 +106,7 @@ async function login(req, res) {
         role: roleName.role_name,
         token: token,
         semesterAktif: KelasStudent[0]?.semester,
-        tahunAjaranAktif: KelasStudent[0]?.semester,
+        tahunAjaranAktif: KelasStudent[0]?.tahun_ajaran,
       });
     }
 

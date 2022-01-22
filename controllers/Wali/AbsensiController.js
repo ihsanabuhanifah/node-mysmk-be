@@ -10,7 +10,8 @@ async function list(req, res) {
     tahunAjaran,
     semester,
     statusKehadiran,
-    tanggal,
+    dariTanggal,
+    sampaiTanggal,
     namaMapel,
     page,
     pageSize,
@@ -37,8 +38,8 @@ async function list(req, res) {
   } else {
     namaMapel = "";
   }
-  if (tanggal !== undefined) {
-    tanggal = `AND a.tanggal = '${tanggal}'`;
+  if (dariTanggal !== undefined && sampaiTanggal !== undefined)  {
+    tanggal = `AND a.tanggal BETWEEN  '${dariTanggal}' AND '${sampaiTanggal}' `;
   } else {
     tanggal = "";
   }
@@ -51,7 +52,7 @@ async function list(req, res) {
   try {
     const absensi = await sequelize.query(
       `SELECT a.id ,a.tanggal ,a.mapel_id, e.nama_guru, a.pelajaran_ke, b.nama_siswa , c.nama_kelas , d.nama_mapel , a.materi,
-        a.status_kehadiran,a.keterangan, a.semester , a.tahun_ajaran,a.created_at,a.updated_at FROM 
+        a.status_kehadiran,a.keterangan, a.semester , a.tahun_ajaran,a.createdAt,a.updatedAt FROM 
         absensi_kelas AS a JOIN students AS b ON (a.student_id =b.id) 
         JOIN kelas AS c ON (a.kelas_id = c.id ) 
        
