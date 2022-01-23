@@ -43,7 +43,7 @@ module.exports = {
       sampai_ayat: {
         type: Sequelize.STRING
       },
-      total_halaman: {
+      halaman_terakhir: {
         type: Sequelize.STRING
       },
       status_kehadiran: {
@@ -52,11 +52,11 @@ module.exports = {
       keterangan: {
         type: Sequelize.STRING
       },
-      createdAt: {
+      created_at: {
         allowNull: false,
         type: Sequelize.DATE
       },
-      updatedAt: {
+      updated_at: {
         allowNull: false,
         type: Sequelize.DATE
       }

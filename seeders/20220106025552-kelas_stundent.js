@@ -21,8 +21,8 @@ module.exports = {
           semester: 1,
           tahun_ajaran: "2021/2022",
           status: 1,
-          createdAt: new Date(),
-          updatedAt: new Date(),
+          created_at: new Date(),
+          updated_at: new Date(),
         },
         {
           kelas_id: 1,
@@ -30,8 +30,8 @@ module.exports = {
           semester: 1,
           tahun_ajaran: "2021/2022",
           status: 1,
-          createdAt: new Date(),
-          updatedAt: new Date(),
+          created_at: new Date(),
+          updated_at: new Date(),
         },
       ],
       {}
@@ -59,7 +59,7 @@ module.exports = {
 //       password: "`12345678",
 //       status: "active",
 //       createdAt: new Date(),
-//       updatedAt: new Date(),
+//       updated_at: new Date(),
 //     };
 
 //     data.push(newItem);

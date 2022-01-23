@@ -10,7 +10,7 @@ const config = require(__dirname + "/../config/config.js")[env];
 const db = {};
 
 let sequelize;
-
+console.log('config',config)
 if (config.use_env_variable) {
   sequelize = new Sequelize(process.env[config.use_env_variable], config);
 } else {
@@ -22,8 +22,16 @@ if (config.use_env_variable) {
   sequelize = new Sequelize(
     config.database,
     config.username,
-    config.password,
-    config
+    config.password, {
+      host: config.host,
+      port : config.port,
+      dialect : config.dialect,
+      define : {
+        underscored: true,
+        
+      }
+    }
+   
   );
 }
 

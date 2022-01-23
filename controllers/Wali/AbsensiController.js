@@ -1,4 +1,5 @@
 const AbsensiKelasModel = require("../../models").absensi_kelas;
+const AbsensiHalaqohModel = require("../../models").absensi_halaqoh;
 const { sequelize } = require("../../models");
 const { QueryTypes } = require("sequelize");
 const dotenv = require("dotenv");
@@ -52,7 +53,7 @@ async function list(req, res) {
   try {
     const absensi = await sequelize.query(
       `SELECT a.id ,a.tanggal ,a.mapel_id, e.nama_guru, a.pelajaran_ke, b.nama_siswa , c.nama_kelas , d.nama_mapel , a.materi,
-        a.status_kehadiran,a.keterangan, a.semester , a.tahun_ajaran,a.createdAt,a.updatedAt FROM 
+        a.status_kehadiran,a.keterangan, a.semester , a.tahun_ajaran,a.created_at,a.updated_at FROM 
         absensi_kelas AS a JOIN students AS b ON (a.student_id =b.id) 
         JOIN kelas AS c ON (a.kelas_id = c.id ) 
        
@@ -96,7 +97,13 @@ async function list(req, res) {
     });
   }
 }
-
-module.exports = { list };
+ async function listHalaqoh (req, res) {
+ 
+   const data  = await AbsensiHalaqohModel.findAll();
+   return res.json({
+     data: data
+   })
+ }
+module.exports = { list, listHalaqoh };
 
 

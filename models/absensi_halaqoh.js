@@ -23,7 +23,7 @@ module.exports = (sequelize, DataTypes) => {
     sampai_surat: DataTypes.STRING,
     dari_ayat: DataTypes.STRING,
     sampai_ayat: DataTypes.STRING,
-    total_halaman: DataTypes.STRING,
+    halaman_terakhir: DataTypes.STRING,
     status_kehadiran: DataTypes.INTEGER,
     keterangan: DataTypes.STRING
   }, {
