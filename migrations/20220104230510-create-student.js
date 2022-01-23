@@ -58,6 +58,14 @@ module.exports = {
       tahun_ajaran: {
         type: Sequelize.STRING,
       },
+      status: {
+        type: Sequelize.ENUM("active", "mutasi" , "alumni"),
+        defaultValue: "active",
+      },
+      keterangan: {
+        type: Sequelize.STRING,
+        defaultValue: "active",
+      },
 
       created_at: {
         allowNull: false,

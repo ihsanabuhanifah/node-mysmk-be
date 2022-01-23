@@ -1,12 +1,12 @@
-'use strict';
+"use strict";
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('teachers', {
+    await queryInterface.createTable("teachers", {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       user_id: {
         type: Sequelize.INTEGER,
@@ -17,21 +17,29 @@ module.exports = {
           as: "user_id",
         },
       },
-      nama_guru :  {
-        type : Sequelize.STRING,
-        allowNull : false,
+      nama_guru: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      status: {
+        type: Sequelize.ENUM("active", "nonactive"),
+        defaultValue: "active",
+      },
+      keterangan: {
+        type: Sequelize.STRING,
+        defaultValue: "active",
       },
       created_at: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       updated_at: {
         allowNull: false,
-        type: Sequelize.DATE
-      }
+        type: Sequelize.DATE,
+      },
     });
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('teachers');
-  }
+    await queryInterface.dropTable("teachers");
+  },
 };

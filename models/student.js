@@ -49,6 +49,8 @@ module.exports = (sequelize, DataTypes) => {
       tanggal_diterima: DataTypes.DATE,
       angkatan: DataTypes.STRING,
       tahun_ajaran: DataTypes.STRING,
+      status: DataTypes.ENUM('active' , 'mutasi' , 'alumni' ),
+      keterangan : DataTypes.STRING
     },
     {
       sequelize,

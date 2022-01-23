@@ -67,11 +67,11 @@ async function login(req, res) {
         },
       });
     }
-   console.log('parent' ,parent)
+  
     if ( parent !== null && parent !== undefined) {
       KelasStudent = await sequelize.query(
         `SELECT semester , tahun_ajaran FROM kelas_students 
-        WHERE student_id = ${parent?.student_id}`,
+        WHERE student_id = ${parent?.student_id} AND status = 1` ,
         {
           type: QueryTypes.SELECT,
         }

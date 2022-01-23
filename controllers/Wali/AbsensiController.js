@@ -3,8 +3,9 @@ const AbsensiHalaqohModel = require("../../models").absensi_halaqoh;
 const { sequelize } = require("../../models");
 const { QueryTypes } = require("sequelize");
 const dotenv = require("dotenv");
-const { paramsQueryAND } = require("../../utils/paramsQuery");
+
 dotenv.config();
+const {formatDate} = require("../../utils/format")
 
 async function list(req, res) {
   let {
@@ -107,6 +108,7 @@ async function listHalaqoh(req, res) {
     namaMapel,
     page,
     pageSize,
+    orderBy
   } = req.query;
 
   if (tahunAjaran !== undefined) {
@@ -142,25 +144,45 @@ async function listHalaqoh(req, res) {
   const absensi = await sequelize.query(
     `SELECT a.id , a.tanggal, b.nama_guru As nama_pengampu, c.nama_surat AS dari_surat,
      c.nama_surat_arabic AS dari_surat_arabic,a.dari_ayat, d.nama_surat AS sampai_surat, 
-     d.nama_surat_arabic AS sampai_surat_arabic, a.sampai_ayat,a.halaman_terakhir, a.status_kehadiran,
+     d.nama_surat_arabic AS sampai_surat_arabic, a.sampai_ayat,a.total_halaman, a.status_kehadiran,
      a.keterangan,a.semester, a.tahun_ajaran, a.created_at, a.updated_at  FROM absensi_halaqohs AS a 
-     LEFT JOIN teachers AS b ON (a.teacher_id = b.id) LEFT JOIN alqurans AS c ON (a.dari_surat = c.id) 
+     LEFT JOIN teachers AS b ON (a.teacher_id = b.id) 
+     LEFT JOIN alqurans AS c ON (a.dari_surat = c.id) 
      LEFT JOIN alqurans as d ON (a.sampai_surat = d.id) 
      WHERE a.student_id = ${req.StudentId}
      ${namaMapel}
      ${tahunAjaran}
      ${semester}
-      ${tanggal}
-      ${statusKehadiran}
-     ORDER BY a.tanggal desc 
+     ${tanggal}
+     ${statusKehadiran}
+     ORDER BY a.tanggal ${orderBy} 
       ;`,
     {
       type: QueryTypes.SELECT,
     }
   );
+
+  if (absensi.length === 0) {
+    return res.json({
+      status: "Fail",
+      msg: "Tidak ditemukan absensi halaqoh pada periode yang dipilih",
+    });
+  }
+  let hariPertama = absensi[absensi.length - 1]
+  let hariTerakhir = absensi[0] 
+
+  let periode = null
+  if(orderBy === 'desc'){
+    periode = `${formatDate(hariPertama?.tanggal)} - ${formatDate(hariTerakhir?.tanggal)}`
+  }else{
+    periode = `${formatDate(hariTerakhir?.tanggal)} - ${formatDate(hariPertama?.tanggal)}`
+  }
   return res.json({
     status: "Success",
     msg: "Data  Absensi Halaqoh ditemukan",
+   
+    periode : periode,
+    performa : `${((hariPertama?.halaman_terakhir - hariTerakhir?.halaman_terakhir) /5) *100} %`,
     page: page + 1,
     nextPage: page + 2,
     previousPage: page - 2,
@@ -214,18 +236,14 @@ async function resultHalaqoh(req, res) {
   }
   const absensi = await sequelize.query(
     `(SELECT a.id , a.tanggal, b.nama_surat AS dari_surat, b.nama_surat_arabic AS dari_surat_arabic,a.dari_ayat, 
-      c.nama_surat AS sampai_surat, c.nama_surat_arabic AS sampai_surat_arabic, a.sampai_ayat,a.halaman_terakhir,  a.created_at, a.updated_at  
+      c.nama_surat AS sampai_surat, c.nama_surat_arabic AS sampai_surat_arabic, a.sampai_ayat,a.total_halaman, a.juz_ke,  a.created_at, a.updated_at  
       FROM absensi_halaqohs AS a 
       LEFT JOIN alqurans as b ON (a.dari_surat = b.id) 
       LEFT JOIN alqurans AS c ON (a.sampai_surat = c.id)  
-      WHERE a.student_id =  ${req.StudentId} ORDER BY a.tanggal ASC LIMIT 1)  
-      UNION 
-      (SELECT  a.id , a.tanggal, b.nama_surat AS dari_surat, b.nama_surat_arabic AS dari_surat_arabic,a.dari_ayat,
-       c.nama_surat AS sampai_surat, c.nama_surat_arabic AS sampai_surat_arabic, a.sampai_ayat,a.halaman_terakhir,  a.created_at, a.updated_at  
-       FROM absensi_halaqohs AS a  
-       LEFT JOIN alqurans as b ON (a.dari_surat = b.id)
-       LEFT JOIN alqurans AS c ON (a.sampai_surat = c.id) 
-       WHERE a.student_id =  ${req.StudentId} ORDER BY a.tanggal DESC LIMIT 1)`,
+      WHERE a.student_id =  ${req.StudentId} 
+      GROUP BY a.total_halaman
+      ORDER BY a.tanggal DESC )  
+      `,
     {
       type: QueryTypes.SELECT,
     }
@@ -242,29 +260,16 @@ async function resultHalaqoh(req, res) {
       type: QueryTypes.SELECT,
     }
   );
-  let jumlahHalaman =
-    absensi[0]?.halaman_terakhir - absensi[1]?.halaman_terakhir;
-  let jumlahHari = jumlah.length;
+  
   return res.json({
     status: "Success",
-    msg: "Data  Absensi Halaqoh ditemukan",
+    msg: "Data Pencapaian Halaqoh Santri",
     
     data: {
       updateTanggal: absensi[1]?.created_at,
       
-      hafalanAwal: {
-        namaSurat: absensi[0]?.dari_surat,
-        suratSuratDalamArabic: absensi[0]?.dari_surat_arabic,
-        dariAyat: absensi[0]?.dari_ayat,
-      },
-      hafalanUpdate: {
-        namaSurat: absensi[1]?.dari_surat,
-        suratSuratDalamArabic: absensi[1]?.dari_surat_arabic,
-        sampaiAyat: absensi[1]?.sampai_ayat,
-      },
-    
-      jumlahHafalanDalamHalaman: `${jumlahHalaman} halaman`,
-      rataRataHalamanPerhari: `${jumlahHalaman / jumlahHari} halaman perhari`,
+      data : absensi
+     
     },
   });
 }

@@ -1,12 +1,12 @@
-'use strict';
+"use strict";
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('absensi_halaqohs', {
+    await queryInterface.createTable("absensi_halaqohs", {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       student_id: {
         type: Sequelize.INTEGER,
@@ -29,28 +29,37 @@ module.exports = {
         },
       },
       tanggal: {
-        type: Sequelize.DATEONLY
+        type: Sequelize.DATEONLY,
       },
       dari_surat: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       sampai_surat: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       dari_ayat: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       sampai_ayat: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
-      halaman_terakhir: {
-        type: Sequelize.INTEGER
+
+      total_halaman: {
+        type: Sequelize.DECIMAL(3,2),
+      },
+      
+      juz_ke: {
+        type: Sequelize.INTEGER,
+      },
+      ketuntasan_juz: {
+        type: Sequelize.INTEGER,
+        defaultValue : 0,
       },
       status_kehadiran: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       keterangan: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       semester: {
         type: Sequelize.INTEGER,
@@ -60,15 +69,15 @@ module.exports = {
       },
       created_at: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       updated_at: {
         allowNull: false,
-        type: Sequelize.DATE
-      }
+        type: Sequelize.DATE,
+      },
     });
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('absensi_halaqohs');
-  }
+    await queryInterface.dropTable("absensi_halaqohs");
+  },
 };
