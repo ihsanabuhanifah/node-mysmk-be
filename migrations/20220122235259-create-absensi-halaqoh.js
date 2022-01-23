@@ -32,10 +32,10 @@ module.exports = {
         type: Sequelize.DATEONLY
       },
       dari_surat: {
-        type: Sequelize.STRING
+        type: Sequelize.INTEGER
       },
       sampai_surat: {
-        type: Sequelize.STRING
+        type: Sequelize.INTEGER
       },
       dari_ayat: {
         type: Sequelize.INTEGER
