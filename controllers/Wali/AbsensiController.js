@@ -218,45 +218,54 @@ async function resultHalaqoh(req, res) {
       FROM absensi_halaqohs AS a 
       LEFT JOIN alqurans as b ON (a.dari_surat = b.id) 
       LEFT JOIN alqurans AS c ON (a.sampai_surat = c.id)  
-      WHERE a.student_id = ${req.StudentId} ORDER BY a.tanggal ASC LIMIT 1)  
+      WHERE a.student_id =  ${req.StudentId} ORDER BY a.tanggal ASC LIMIT 1)  
       UNION 
       (SELECT  a.id , a.tanggal, b.nama_surat AS dari_surat, b.nama_surat_arabic AS dari_surat_arabic,a.dari_ayat,
        c.nama_surat AS sampai_surat, c.nama_surat_arabic AS sampai_surat_arabic, a.sampai_ayat,a.halaman_terakhir,  a.created_at, a.updated_at  
        FROM absensi_halaqohs AS a  
        LEFT JOIN alqurans as b ON (a.dari_surat = b.id)
        LEFT JOIN alqurans AS c ON (a.sampai_surat = c.id) 
-       WHERE a.student_id = ${req.StudentId} ORDER BY a.tanggal DESC LIMIT 1)`,
+       WHERE a.student_id =  ${req.StudentId} ORDER BY a.tanggal DESC LIMIT 1)`,
     {
       type: QueryTypes.SELECT,
     }
   );
+  if (absensi.length === 0) {
+    return res.json({
+      status: "Fail",
+      msg: "Tidak ditemukan absensi pada siswa yang bersangkutan",
+    });
+  }
   const jumlah = await sequelize.query(
-    `(SELECT * FROM absensi_halaqohs AS a WHERE a.student_id = ${req.StudentId})`,
+    `(SELECT * FROM absensi_halaqohs AS a WHERE a.student_id =  ${req.StudentId})`,
     {
       type: QueryTypes.SELECT,
     }
   );
-  let jumlahHalaman = absensi[0].halaman_terakhir - absensi[1].halaman_terakhir
-  let jumlahHari = jumlah.length
+  let jumlahHalaman =
+    absensi[0]?.halaman_terakhir - absensi[1]?.halaman_terakhir;
+  let jumlahHari = jumlah.length;
   return res.json({
     status: "Success",
     msg: "Data  Absensi Halaqoh ditemukan",
-   
+    
     data: {
-      updateTanggal : absensi[1].created_at,
-      hafalanAwal : {
-        namaSurat : absensi[0].dari_surat,
-        suratSuratDalamArabic : absensi[0].dari_surat_arabic,
-        dariAyat : absensi[0].dari_ayat
+      updateTanggal: absensi[1]?.created_at,
+      
+      hafalanAwal: {
+        namaSurat: absensi[0]?.dari_surat,
+        suratSuratDalamArabic: absensi[0]?.dari_surat_arabic,
+        dariAyat: absensi[0]?.dari_ayat,
       },
-      hafalanUpdate : {
-        namaSurat : absensi[1].dari_surat,
-        suratSuratDalamArabic  : absensi[1].dari_surat_arabic,
-        sampaiAyat : absensi[1].sampai_ayat
+      hafalanUpdate: {
+        namaSurat: absensi[1]?.dari_surat,
+        suratSuratDalamArabic: absensi[1]?.dari_surat_arabic,
+        sampaiAyat: absensi[1]?.sampai_ayat,
       },
-      jumlahHafalanDalamHalaman : `${jumlahHalaman} halaman`,
-      rataRataHalamanPerhari : `${jumlahHalaman  / jumlahHari} halaman perhari`
+    
+      jumlahHafalanDalamHalaman: `${jumlahHalaman} halaman`,
+      rataRataHalamanPerhari: `${jumlahHalaman / jumlahHari} halaman perhari`,
     },
   });
 }
-module.exports = { list, listHalaqoh,resultHalaqoh };
+module.exports = { list, listHalaqoh, resultHalaqoh };
