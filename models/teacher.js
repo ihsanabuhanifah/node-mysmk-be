@@ -18,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
       teacher.hasMany(
         models.absensi_halaqoh,
         { as: "absensi_halaqoh" },
-        { foreignKey: "student_id" }
+        { foreignKey: "steacher_id" }
       );
     }
   }

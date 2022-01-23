@@ -38,19 +38,25 @@ module.exports = {
         type: Sequelize.STRING
       },
       dari_ayat: {
-        type: Sequelize.STRING
+        type: Sequelize.INTEGER
       },
       sampai_ayat: {
-        type: Sequelize.STRING
+        type: Sequelize.INTEGER
       },
       halaman_terakhir: {
-        type: Sequelize.STRING
+        type: Sequelize.INTEGER
       },
       status_kehadiran: {
         type: Sequelize.INTEGER
       },
       keterangan: {
         type: Sequelize.STRING
+      },
+      semester: {
+        type: Sequelize.INTEGER,
+      },
+      tahun_ajaran: {
+        type: Sequelize.STRING,
       },
       created_at: {
         allowNull: false,

@@ -21,11 +21,13 @@ module.exports = (sequelize, DataTypes) => {
     tanggal: DataTypes.DATEONLY,
     dari_surat: DataTypes.STRING,
     sampai_surat: DataTypes.STRING,
-    dari_ayat: DataTypes.STRING,
-    sampai_ayat: DataTypes.STRING,
-    halaman_terakhir: DataTypes.STRING,
+    dari_ayat: DataTypes.INTEGER,
+    sampai_ayat: DataTypes.INTEGER,
+    halaman_terakhir: DataTypes.INTEGER,
     status_kehadiran: DataTypes.INTEGER,
-    keterangan: DataTypes.STRING
+    keterangan: DataTypes.STRING,
+    semester:DataTypes.INTEGER,
+    tahun_ajaran:DataTypes.STRING,
   }, {
     sequelize,
     modelName: 'absensi_halaqoh',
