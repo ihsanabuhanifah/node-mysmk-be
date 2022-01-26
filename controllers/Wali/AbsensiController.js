@@ -169,7 +169,7 @@ async function listHalaqoh(req, res) {
 		f.nama_status_kehadiran AS status_kehadiran,
 		a.keterangan,
 		a.semester,
-		a.ta_id,
+		e.nama_tahun_ajaran AS tahun_ajaran,
 		a.created_at,
 		a.updated_at
 	FROM
