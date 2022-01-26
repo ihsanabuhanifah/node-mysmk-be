@@ -70,8 +70,12 @@ async function login(req, res) {
   
     if ( parent !== null && parent !== undefined) {
       KelasStudent = await sequelize.query(
-        `SELECT semester , tahun_ajaran FROM kelas_students 
-        WHERE student_id = ${parent?.student_id} AND status = 1` ,
+        `SELECT  
+            a.semester , 
+            b.nama_tahun_ajaran as ta_id  FROM kelas_students as a
+         LEFT JOIN ta AS b ON (a.ta_id = b.id)
+         WHERE 
+            student_id = ${parent?.student_id} AND status = 1` ,
         {
           type: QueryTypes.SELECT,
         }
@@ -90,7 +94,7 @@ async function login(req, res) {
         semesterAktif:
           parent?.student_id !== undefined ? KelasStudent[0]?.semester : "",
         tahunAjaranAktif:
-          parent?.student_id !== undefined ? KelasStudent[0]?.tahun_ajaran : "",
+          parent?.student_id !== undefined ? KelasStudent[0]?.ta_id : "",
       },
       process.env.JWT_SECRET_ACCESS_TOKEN,
       {
@@ -106,7 +110,7 @@ async function login(req, res) {
         role: roleName.role_name,
         token: token,
         semesterAktif: KelasStudent[0]?.semester,
-        tahunAjaranAktif: KelasStudent[0]?.tahun_ajaran,
+        tahunAjaranAktif: KelasStudent[0]?.ta_id,
       });
     }
 

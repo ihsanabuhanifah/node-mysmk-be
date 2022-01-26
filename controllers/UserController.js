@@ -1,5 +1,5 @@
-const userModel = require("../models").User;
-const userRoleModel = require("../models").UserRole;
+const userModel = require("../models").user;
+const userRoleModel = require("../models").user_role;
 const dotenv = require("dotenv");
 dotenv.config();
 const bcrypt = require("bcrypt");

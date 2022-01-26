@@ -20,7 +20,7 @@ async function list(req, res) {
   } = req.query;
 
   if (tahunAjaran !== undefined) {
-    tahunAjaran = `AND a.tahun_ajaran = '${tahunAjaran}'`;
+    tahunAjaran = `AND f.nama_tahun_ajaran = '${tahunAjaran}'`;
   } else {
     tahunAjaran = "";
   }
@@ -31,12 +31,12 @@ async function list(req, res) {
     semester = "";
   }
   if (statusKehadiran !== undefined) {
-    statusKehadiran = `AND a.status_kehadiran = '${statusKehadiran}'`;
+    statusKehadiran = `AND g.nama_status_kehadiran = '${statusKehadiran}'`;
   } else {
     statusKehadiran = "";
   }
   if (namaMapel !== undefined) {
-    namaMapel = `AND a.mapel_id = '${namaMapel}'`;
+    namaMapel = `AND d.nama_mapel = '${namaMapel}'`;
   } else {
     namaMapel = "";
   }
@@ -52,22 +52,35 @@ async function list(req, res) {
 
   try {
     const absensi = await sequelize.query(
-      `SELECT a.id ,a.tanggal ,a.mapel_id, e.nama_guru, a.pelajaran_ke, b.nama_siswa , c.nama_kelas , d.nama_mapel , a.materi,
-        a.status_kehadiran,a.keterangan, a.semester , a.tahun_ajaran,a.created_at,a.updated_at FROM 
-        absensi_kelas AS a JOIN students AS b ON (a.student_id =b.id) 
-        JOIN kelas AS c ON (a.kelas_id = c.id ) 
-       
-        JOIN mapels AS d ON (a.mapel_id = d.id) 
-        JOIN teachers As e ON (a.teacher_id = e.id)
-        WHERE a.student_id = ${req.StudentId}
-        ${namaMapel}
-       ${tahunAjaran}
-       ${semester}
-        ${tanggal}
-        ${statusKehadiran}
-
-        ${limit}
-        ORDER BY a.tanggal desc , a.pelajaran_ke asc
+    `SELECT
+      a.id,
+      a.tanggal,
+      a.mapel_id,
+      e.nama_guru,
+      a.pelajaran_ke,
+      b.nama_siswa,
+      c.nama_kelas,
+      d.nama_mapel,
+      a.materi,
+      g.nama_status_kehadiran AS status_kehadiran,
+      a.keterangan,
+      a.semester,
+      f.nama_tahun_ajaran AS tahun_ajaran,
+      a.created_at,
+      a.updated_at
+    FROM
+      absensi_kelas AS a
+    JOIN students AS b ON (a.student_id = b.id)
+    JOIN kelas AS c ON (a.kelas_id = c.id)
+    JOIN mapels AS d ON (a.mapel_id = d.id)
+    JOIN teachers AS e ON (a.teacher_id = e.id)
+    JOIN ta AS f ON (a.ta_id = f.id)
+    JOIN status_kehadirans AS g ON (a.status_kehadiran = g.id)
+    WHERE
+      a.student_id = ${req.StudentId} ${namaMapel} ${tahunAjaran} ${semester} ${tanggal} ${statusKehadiran} ${limit}
+    ORDER BY
+      a.tanggal DESC,
+      a.pelajaran_ke ASC
         ;`,
       {
         type: QueryTypes.SELECT,
@@ -112,7 +125,7 @@ async function listHalaqoh(req, res) {
   } = req.query;
 
   if (tahunAjaran !== undefined) {
-    tahunAjaran = `AND a.tahun_ajaran = '${tahunAjaran}'`;
+    tahunAjaran = `AND e.nama_tahun_ajaran = '${tahunAjaran}'`;
   } else {
     tahunAjaran = "";
   }
@@ -123,7 +136,7 @@ async function listHalaqoh(req, res) {
     semester = "";
   }
   if (statusKehadiran !== undefined) {
-    statusKehadiran = `AND a.status_kehadiran = '${statusKehadiran}'`;
+    statusKehadiran = `AND f.nama_status_kehadiran = '${statusKehadiran}'`;
   } else {
     statusKehadiran = "";
   }
@@ -142,20 +155,35 @@ async function listHalaqoh(req, res) {
     limit = `LIMIT ${page}, ${pageSize}`;
   }
   const absensi = await sequelize.query(
-    `SELECT a.id , a.tanggal, b.nama_guru As nama_pengampu, c.nama_surat AS dari_surat,
-     c.nama_surat_arabic AS dari_surat_arabic,a.dari_ayat, d.nama_surat AS sampai_surat, 
-     d.nama_surat_arabic AS sampai_surat_arabic, a.sampai_ayat,a.total_halaman, a.status_kehadiran,
-     a.keterangan,a.semester, a.tahun_ajaran, a.created_at, a.updated_at  FROM absensi_halaqohs AS a 
-     LEFT JOIN teachers AS b ON (a.teacher_id = b.id) 
-     LEFT JOIN alqurans AS c ON (a.dari_surat = c.id) 
-     LEFT JOIN alqurans as d ON (a.sampai_surat = d.id) 
-     WHERE a.student_id = ${req.StudentId}
-     ${namaMapel}
-     ${tahunAjaran}
-     ${semester}
-     ${tanggal}
-     ${statusKehadiran}
-     ORDER BY a.tanggal ${orderBy} 
+  `SELECT
+		a.id,
+		a.tanggal,
+		b.nama_guru AS nama_pengampu,
+		c.nama_surat AS dari_surat,
+		c.nama_surat_arabic AS dari_surat_arabic,
+		a.dari_ayat,
+		d.nama_surat AS sampai_surat,
+		d.nama_surat_arabic AS sampai_surat_arabic,
+		a.sampai_ayat,
+		a.total_halaman,
+		f.nama_status_kehadiran AS status_kehadiran,
+		a.keterangan,
+		a.semester,
+		a.ta_id,
+		a.created_at,
+		a.updated_at
+	FROM
+		absensi_halaqohs AS a
+	LEFT JOIN teachers AS b ON (a.teacher_id = b.id)
+	LEFT JOIN alqurans AS c ON (a.dari_surat = c.id)
+	LEFT JOIN alqurans AS d ON (a.sampai_surat = d.id)
+  LEFT JOIN ta AS e ON (a.ta_id = e.id) 
+  LEFT JOIN status_kehadirans AS f ON (a.status_kehadiran = f.id)
+  WHERE
+	  a.student_id = ${req.StudentId} ${namaMapel} ${tahunAjaran} ${semester} ${tanggal} ${statusKehadiran}
+  ORDER BY
+	  a.tanggal ${orderBy};
+
       ;`,
     {
       type: QueryTypes.SELECT,
@@ -235,14 +263,28 @@ async function resultHalaqoh(req, res) {
     limit = `LIMIT ${page}, ${pageSize}`;
   }
   const absensi = await sequelize.query(
-    `(SELECT a.id , a.tanggal, b.nama_surat AS dari_surat, b.nama_surat_arabic AS dari_surat_arabic,a.dari_ayat, 
-      c.nama_surat AS sampai_surat, c.nama_surat_arabic AS sampai_surat_arabic, a.sampai_ayat,a.total_halaman, a.juz_ke,  a.created_at, a.updated_at  
-      FROM absensi_halaqohs AS a 
-      LEFT JOIN alqurans as b ON (a.dari_surat = b.id) 
-      LEFT JOIN alqurans AS c ON (a.sampai_surat = c.id)  
-      WHERE a.student_id =  ${req.StudentId} 
-      GROUP BY a.total_halaman
-      ORDER BY a.tanggal DESC )  
+    `(SELECT
+      a.id,
+      a.tanggal,
+      b.nama_surat AS dari_surat,
+      b.nama_surat_arabic AS dari_surat_arabic,
+      a.dari_ayat,
+      c.nama_surat AS sampai_surat,
+      c.nama_surat_arabic AS sampai_surat_arabic,
+      a.sampai_ayat,
+      a.total_halaman,
+      a.juz_ke,
+      a.created_at,
+      a.updated_at
+    FROM
+      absensi_halaqohs AS a
+      LEFT JOIN alqurans AS b ON (a.dari_surat = b.id)
+      LEFT JOIN alqurans AS c ON (a.sampai_surat = c.id)
+    WHERE
+      a.student_id = ${req.StudentId}
+   
+    ORDER BY
+      a.tanggal DESC )  
       `,
     {
       type: QueryTypes.SELECT,

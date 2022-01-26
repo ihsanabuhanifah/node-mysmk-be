@@ -27,7 +27,7 @@ module.exports = {
       },
       keterangan: {
         type: Sequelize.STRING,
-        defaultValue: "active",
+        
       },
       created_at: {
         allowNull: false,

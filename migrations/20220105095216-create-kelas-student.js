@@ -31,8 +31,10 @@ module.exports = {
       semester: {
         type: Sequelize.INTEGER,
       },
-      tahun_ajaran: {
-        type: Sequelize.STRING,
+      ta_id: {
+        type: Sequelize.INTEGER,
+        
+
       },
       status: {
         type: Sequelize.INTEGER,

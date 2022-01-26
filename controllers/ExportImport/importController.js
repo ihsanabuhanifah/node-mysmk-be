@@ -83,7 +83,7 @@ async function importTa(req, res) {
       rows.forEach((row) => {
         const ta = {
           id: row[0],
-          name: row[1],
+          nama_tahun_ajaran: row[1],
         };
         tas.push(ta);
       });
