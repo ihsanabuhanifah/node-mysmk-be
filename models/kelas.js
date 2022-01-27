@@ -19,6 +19,11 @@ module.exports = (sequelize, DataTypes) => {
         { as: "absensi_kelas" },
         { foreignKey: "kelas_id" }
       );
+      kelas.hasMany(
+        models.agenda_kelas,
+        { as: "agenda_kelas" },
+        { foreignKey: "kelas_id" }
+      );
     }
   }
   kelas.init(

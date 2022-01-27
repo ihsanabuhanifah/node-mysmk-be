@@ -15,7 +15,13 @@ module.exports = (sequelize, DataTypes) => {
         { as: "absensi_kelas" },
         { foreignKey: "mapel_id" }
       );
+      mapel.hasMany(
+        models.agenda_kelas,
+        { as: "agenda_kelas" },
+        { foreignKey: "kelas_id" }
+      );
     }
+    
   };
   mapel.init({
     nama_mapel: DataTypes.STRING,

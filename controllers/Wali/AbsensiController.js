@@ -57,17 +57,17 @@ async function list(req, res) {
         `SELECT
         a.id,
         a.tanggal,
-        a.mapel_id,
         e.nama_guru,
-        a.pelajaran_ke,
+        h.materi,
         b.nama_siswa,
         c.nama_kelas,
         d.nama_mapel,
-        a.materi,
+      h.jam_ke,
         g.nama_status_kehadiran AS status_kehadiran,
         a.keterangan,
         a.semester,
         f.nama_tahun_ajaran AS tahun_ajaran,
+       
         a.created_at,
         a.updated_at
       FROM
@@ -78,11 +78,12 @@ async function list(req, res) {
       JOIN teachers AS e ON (a.teacher_id = e.id)
       JOIN ta AS f ON (a.ta_id = f.id)
       JOIN status_kehadirans AS g ON (a.status_kehadiran = g.id)
+      JOIN agenda_kelas AS h ON (a.tanggal = h.tanggal AND a.teacher_id = h.teacher_id AND a.mapel_id = h.mapel_id AND a.kelas_id = h.kelas_id  )
       WHERE
         a.student_id = ${req.StudentId} ${namaMapel} ${tahunAjaran} ${semester} ${tanggal} ${statusKehadiran} 
       ORDER BY
-        a.tanggal ${orderBy},
-        a.pelajaran_ke ASC
+        a.tanggal ${orderBy} , h.jam_ke asc
+       
   
       ${limit}
           ;`,

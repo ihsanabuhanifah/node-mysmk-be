@@ -20,6 +20,11 @@ module.exports = (sequelize, DataTypes) => {
         { as: "absensi_halaqoh" },
         { foreignKey: "steacher_id" }
       );
+      teacher.hasMany(
+        models.agenda_kelas,
+        { as: "agenda_kelas" },
+        { foreignKey: "kelas_id" }
+      );
     }
   }
   teacher.init(

@@ -1,4 +1,5 @@
 const express = require("express");
+const waliAccessMiddleware = require("../../middleware/waliAccessMiddleware")
 
 const wali = express.Router();
 const {
@@ -7,6 +8,7 @@ const {
   resultHalaqoh
 } = require("../../controllers/Wali/AbsensiController");
 const { profile, create } = require("../../controllers/Wali/ProfileController");
+wali.use(waliAccessMiddleware)
 wali.get("/absensi/kelas/list", list);
 wali.get("/absensi/halaqoh/list", listHalaqoh);
 wali.get("/halaqoh/result", resultHalaqoh);
