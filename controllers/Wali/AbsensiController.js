@@ -57,7 +57,9 @@ async function list(req, res) {
       }
      
     }
-
+    if(orderBy === undefined) {
+      orderBy = 'desc'
+    }
     try {
       const absensi = await sequelize.query(
         `SELECT
@@ -188,6 +190,10 @@ async function listHalaqoh(req, res) {
         limit = `LIMIT ${pageSize} OFFSET ${page}`;
       }
     }
+
+    if(orderBy === undefined) {
+      orderBy = 'desc'
+    }
     const absensi = await sequelize.query(
       `SELECT
       a.id,
@@ -307,6 +313,7 @@ async function resultHalaqoh(req, res) {
   if (page !== undefined && pageSize !== undefined) {
     limit = `LIMIT ${page}, ${pageSize}`;
   }
+  
   const absensi = await sequelize.query(
     `(SELECT
       a.id,
