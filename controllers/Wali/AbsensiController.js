@@ -52,7 +52,8 @@ async function list(req, res) {
       if(process.env.DB_DIALECT === 'mysql') {
         limit = `LIMIT ${page}, ${pageSize}`;
       }else {
-        limit = `LIMIT ${page} OFFSET ${pageSize}`;
+        limit = `LIMIT ${pageSize} OFFSET ${page}`;
+      
       }
      
     }
@@ -184,7 +185,7 @@ async function listHalaqoh(req, res) {
       if(process.env.DB_DIALECT === 'mysql') {
         limit = `LIMIT ${page}, ${pageSize}`;
       }else {
-        limit = `LIMIT ${page} OFFSET ${pageSize}`;
+        limit = `LIMIT ${pageSize} OFFSET ${page}`;
       }
     }
     const absensi = await sequelize.query(
