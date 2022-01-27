@@ -3,7 +3,7 @@ const userRoleModel = require("../models").user_role;
 const RolesModel = require("../models").role;
 const KelasStudentModel = require("../models").kelas_student;
 const ParentModel = require("../models").parent;
-
+const TeacherModel = require("../models").teacher;
 const TokenModel = require("../models").token_reset_password;
 
 const { sequelize } = require("../models");
@@ -45,7 +45,7 @@ async function login(req, res) {
     const roleName = await RolesModel.findByPk(loginAs);
 
     const checkRole = await userRoleModel.findOne({
-      attributes : ['id', 'role_id'],
+      attributes: ["id", "role_id"],
       where: {
         [Op.and]: [{ user_id: user.id }, { role_id: loginAs }],
       },
@@ -59,29 +59,38 @@ async function login(req, res) {
     }
     let parent;
     let KelasStudent;
+    let guru;
     if (loginAs === 8) {
       parent = await ParentModel.findOne({
-        attributes : ['id', 'nama_wali' , 'user_id' , 'student_id' , 'hubungan'],
+        attributes: ["id", "nama_wali", "user_id", "student_id", "hubungan"],
+        where: {
+          user_id: user.id,
+        },
+      });
+    } else if (loginAs === 9) {
+      console.log("ok");
+    } else {
+      guru = await TeacherModel.findOne({
+        attributes: ["id"],
         where: {
           user_id: user.id,
         },
       });
     }
-  
-    if ( parent !== null && parent !== undefined) {
+
+    if (parent !== null && parent !== undefined) {
       KelasStudent = await sequelize.query(
         `SELECT  
             a.semester , 
             b.nama_tahun_ajaran as ta_id  FROM kelas_students as a
          LEFT JOIN ta AS b ON (a.ta_id = b.id)
          WHERE 
-            student_id = ${parent?.student_id} AND status = 1` ,
+            student_id = ${parent?.student_id} AND status = 1`,
         {
           type: QueryTypes.SELECT,
         }
       );
     }
-    
 
     const token = JWT.sign(
       {
@@ -91,6 +100,7 @@ async function login(req, res) {
         role: roleName.role_name,
         roleId: loginAs,
         StudentId: parent?.student_id,
+        teacher_id: guru?.id,
         semesterAktif:
           parent?.student_id !== undefined ? KelasStudent[0]?.semester : "",
         tahunAjaranAktif:
@@ -118,7 +128,7 @@ async function login(req, res) {
       status: "Success",
       msg: "Berhasil Login",
       user: user,
-      role: roleName.roleName,
+      role: roleName.role_name,
       token: token,
     });
   } catch (err) {
@@ -205,8 +215,6 @@ async function register(req, res) {
 }
 
 async function authme(req, res) {
-  let name = req.name;
-  let id = req.id;
   let email = req.email;
 
   try {
@@ -229,7 +237,10 @@ async function authme(req, res) {
         id: user.id,
         role: user.role,
         roleId: user.Role_id,
-        StudentId: req.Student_id,
+        StudentId: req?.Student_id,
+        teacher_id: req?.teacher_id,
+        semesterAktif: req?.semesterAktif,
+        rahunAjaranAktif: req?.tahunAjaranAktif,
       },
       process.env.JWT_SECRET_ACCESS_TOKEN,
       {
@@ -471,13 +482,11 @@ async function resetPasswordEmail(req, res) {
     },
   });
 
-  
   return res.status(201).json({
     status: "Success",
     msg: "Password berhasil di perbaharui",
   });
 
- 
   return res.json({
     status: verify,
   });

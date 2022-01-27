@@ -6,22 +6,24 @@ const logRouter = require("./logRouters");
 const identitasRouter = require("./indentitasRouter");
 const rolesRouter = require("./rolesRouter");
 const importRouter = require("./importRouter");
-const waliRouter = require("./Wali")
-const daftarRouter = require("./Daftar")
+const guruRouter = require("./Guru");
+const waliRouter = require("./Wali");
+const daftarRouter = require("./Daftar");
 router.get("/", (req, res) => {
   res.send("Backend MySMK");
 });
 const jwtValidateMiddleware = require("../middleware/jwtValidateMiddleware");
-const paginationMiddleware = require("../middleware/paginationMiddleware")
+const paginationMiddleware = require("../middleware/paginationMiddleware");
 
 router.use(authRouter);
 router.use(importRouter);
 router.use(jwtValidateMiddleware);
-router.use(paginationMiddleware)
+router.use(paginationMiddleware);
 router.use("/users", userRouter);
 router.use("/info", logRouter);
 router.use("/identitas", identitasRouter);
 router.use("/admin/roles", rolesRouter);
-router.use("/wali" , waliRouter),
-router.use("/list" ,daftarRouter),
-module.exports = router;
+router.use("/wali", waliRouter),
+  router.use("/list", daftarRouter),
+  router.use("/guru", guruRouter),
+  (module.exports = router);

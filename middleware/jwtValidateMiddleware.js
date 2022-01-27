@@ -22,13 +22,15 @@ const jwtValidateMiddleware =  (req, res, next) => {
       req.roleId = decoded.roleId
       req.StudentId = decoded?.StudentId
       req.semesterAktif = decoded?.semesterAktif,
-      req.tahunAjaranAktif = decoded?.tahunAjaranAktif
+      req.tahunAjaranAktif = decoded?.tahunAjaranAktif,
+      req.teacher_id = decoded?.teacher_id
       const user = await UserModel.findByPk(decoded.id)
      if (user === null) return res.status(404).json({
        status : "Fail",
        message : "User tidak ditemukan"
      })
 
+     
       next();
     }
   });
