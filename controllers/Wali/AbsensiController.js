@@ -18,6 +18,7 @@ async function list(req, res) {
       namaMapel,
       page,
       pageSize,
+      orderBy
     } = req.query;
 
     if (tahunAjaran !== undefined) {
@@ -80,7 +81,7 @@ async function list(req, res) {
       WHERE
         a.student_id = ${req.StudentId} ${namaMapel} ${tahunAjaran} ${semester} ${tanggal} ${statusKehadiran} 
       ORDER BY
-        a.tanggal DESC,
+        a.tanggal ${orderBy},
         a.pelajaran_ke ASC
   
       ${limit}
@@ -96,9 +97,22 @@ async function list(req, res) {
           msg: "Tidak ditemukan absensi halaqoh pada periode yang dipilih",
         });
       }
+
+      let hariPertama = absensi[absensi.length - 1];
+      let hariTerakhir = absensi[0];
+      if (orderBy === "desc") {
+        periode = `${formatDate(hariPertama?.tanggal)} - ${formatDate(
+          hariTerakhir?.tanggal
+        )}`;
+      } else {
+        periode = `${formatDate(hariTerakhir?.tanggal)} - ${formatDate(
+          hariPertama?.tanggal
+        )}`;
+      }
       return res.json({
         status: "Success",
         msg: "Data  Absensi Kelas ditemukan",
+        periode :periode,
         page: page + 1,
         nextPage: page + 2,
         previousPage: page + 1 - 1,
