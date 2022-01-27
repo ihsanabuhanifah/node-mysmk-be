@@ -1,10 +1,9 @@
-function paramsQueryAND(params, name, string = true){
-    if(params !== undefined){
-        const value = string ? `${params}` : params
-       return  `AND a.${name} = ` +  value
-    }else {
-        name = ""
-    }
+function paramsQueryAND(params, column, string = true) {
+  if (params === undefined) {
+    let parameter = string ? `${params}` : parmas;
+    return (Object.keys({ params })[0] = `AND ${column} = ${parameter}`);
+  } else {
+    return (Object.keys({ params })[0] = "");
+  }
 }
-
-module.exports = {paramsQueryAND}
+module.exports = {paramsQueryAND};

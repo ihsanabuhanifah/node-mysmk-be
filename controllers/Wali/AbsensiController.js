@@ -6,7 +6,7 @@ const dotenv = require("dotenv");
 
 dotenv.config();
 const { formatDate } = require("../../utils/format");
-
+const {paramsQueryAND} = require("../../utils/paramsQuery")
 async function list(req, res) {
   try {
     let {
