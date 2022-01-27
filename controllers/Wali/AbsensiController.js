@@ -49,7 +49,12 @@ async function list(req, res) {
     }
     let limit = "";
     if (page !== undefined && pageSize !== undefined) {
-      limit = `LIMIT ${page}, ${pageSize}`;
+      if(process.env.DB_DIALECT === 'mysql') {
+        limit = `LIMIT ${page}, ${pageSize}`;
+      }else {
+        limit = `LIMIT ${page} OFFSET ${pageSize}`;
+      }
+     
     }
 
     try {
@@ -176,7 +181,11 @@ async function listHalaqoh(req, res) {
     }
     let limit = "";
     if (page !== undefined && pageSize !== undefined) {
-      limit = `LIMIT ${page}, ${pageSize}`;
+      if(process.env.DB_DIALECT === 'mysql') {
+        limit = `LIMIT ${page}, ${pageSize}`;
+      }else {
+        limit = `LIMIT ${page} OFFSET ${pageSize}`;
+      }
     }
     const absensi = await sequelize.query(
       `SELECT
