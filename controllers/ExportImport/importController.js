@@ -3,9 +3,10 @@ const alquranModel = require("../../models").alquran;
 const taModel = require("../../models").ta;
 const mapelModel = require("../../models").mapel;
 const kelasModel = require("../../models").kelas;
+const daftarPelanggaranModel = require("../../models").daftar_pelanggaran
 const fs = require("fs");
 const readXlsxFile = require("read-excel-file/node");
-const bcrypt = require("bcrypt");
+
 const dotenv = require("dotenv");
 dotenv.config();
 async function importRoles(req, res) {
