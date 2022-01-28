@@ -6,7 +6,7 @@ const dotenv = require("dotenv");
 
 dotenv.config();
 const { formatDate } = require("../../utils/format");
-const {paramsQueryAND} = require("../../utils/paramsQuery")
+const { paramsQueryAND } = require("../../utils/paramsQuery");
 async function list(req, res) {
   try {
     let {
@@ -18,7 +18,7 @@ async function list(req, res) {
       namaMapel,
       page,
       pageSize,
-      orderBy
+      orderBy,
     } = req.query;
 
     if (tahunAjaran !== undefined) {
@@ -49,16 +49,14 @@ async function list(req, res) {
     }
     let limit = "";
     if (page !== undefined && pageSize !== undefined) {
-      if(process.env.DB_DIALECT === 'mysql') {
+      if (process.env.DB_DIALECT === "mysql") {
         limit = `LIMIT ${page}, ${pageSize}`;
-      }else {
+      } else {
         limit = `LIMIT ${pageSize} OFFSET ${page}`;
-      
       }
-     
     }
-    if(orderBy === undefined) {
-      orderBy = 'desc'
+    if (orderBy === undefined) {
+      orderBy = "desc";
     }
     try {
       const absensi = await sequelize.query(
@@ -121,7 +119,7 @@ async function list(req, res) {
       return res.json({
         status: "Success",
         msg: "Data  Absensi Kelas ditemukan",
-        periode :periode,
+        periode: periode,
         page: page + 1,
         nextPage: page + 2,
         previousPage: page + 1 - 1,
@@ -135,6 +133,75 @@ async function list(req, res) {
         msg: "Terjadi Kesalahan",
       });
     }
+  } catch (err) {
+    return res.status(403).json({
+      status: "Fail",
+      msg: "Terjadi Kesalahan",
+    });
+  }
+}
+
+async function rekapAbsensiKehadiran(req, res) {
+  let { tahunAjaran, semester,mapel } = req.query;
+  if (tahunAjaran !== undefined) {
+    tahunAjaran = `AND b.nama_tahun_ajaran = '${tahunAjaran}'`;
+  } else {
+    tahunAjaran = "";
+  }
+  // paramsQueryAND(tahunAjaran, 'tahunAjaran')
+  if (semester !== undefined) {
+    semester = `AND a.semester = '${semester}'`;
+  } else {
+    semester = "";
+  }
+  if (mapel !== undefined) {
+    mapel = `AND c.nama_mapel = '${mapel}'`;
+  } else {
+    mapel = "";
+  }
+  try {
+    const absensi = await sequelize.query(
+      `SELECT
+      COUNT(status_kehadiran) AS jumlah_absensi,
+      COUNT( IF(status_kehadiran = 1, student_id, NULL)) AS hadir,
+      COUNT( IF(status_kehadiran = 2, student_id , NULL)) AS sakit,
+      COUNT( IF(status_kehadiran = 3, student_id , NULL)) AS izin,
+      COUNT( IF(status_kehadiran = 4, student_id , NULL)) AS dispensasi,
+      COUNT( IF(status_kehadiran = 5, student_id , NULL)) AS 'tanpa keterangan'
+      
+    FROM
+      absensi_kelas AS a
+      LEFT JOIN ta AS b ON (a.ta_id = b.id)
+      LEFT JOIN mapels as c ON (a.mapel_id = c.id)
+    
+    WHERE
+      a.student_id = ${req.StudentId} ${semester} ${tahunAjaran} ${mapel}
+      `,
+      {
+        type: QueryTypes.SELECT,
+      }
+    );
+
+    absensi[0].persentase_kehadiran =
+      Math.round((absensi[0].hadir / absensi[0].jumlah_absensi) * 100) + "%";
+    absensi[0].persentase_sakit =
+      Math.round((absensi[0].sakit / absensi[0].jumlah_absensi) * 100) + "%";
+    absensi[0].persentase_izin =
+      Math.round((absensi[0].izin / absensi[0].jumlah_absensi) * 100) + "%";
+    absensi[0].persentase_dispensasi =
+      Math.round((absensi[0].dispensasi / absensi[0].jumlah_absensi) * 100) +
+      "%";
+    absensi[0].persentase_tanpa_keterangan =
+      Math.round(
+        (absensi[0]["tanpa keterangan"] / absensi[0].jumlah_absensi) * 100
+      ) + "%";
+    return res.json({
+      status: "Success",
+      mapel : req.query.mapel,
+      semester: req.query.semester,
+      tahunAjaran: req.query.tahunAjaran,
+      data: absensi,
+    });
   } catch (err) {
     return res.status(403).json({
       status: "Fail",
@@ -184,15 +251,15 @@ async function listHalaqoh(req, res) {
     }
     let limit = "";
     if (page !== undefined && pageSize !== undefined) {
-      if(process.env.DB_DIALECT === 'mysql') {
+      if (process.env.DB_DIALECT === "mysql") {
         limit = `LIMIT ${page}, ${pageSize}`;
-      }else {
+      } else {
         limit = `LIMIT ${pageSize} OFFSET ${page}`;
       }
     }
 
-    if(orderBy === undefined) {
-      orderBy = 'desc'
+    if (orderBy === undefined) {
+      orderBy = "desc";
     }
     const absensi = await sequelize.query(
       `SELECT
@@ -313,7 +380,7 @@ async function resultHalaqoh(req, res) {
   if (page !== undefined && pageSize !== undefined) {
     limit = `LIMIT ${page}, ${pageSize}`;
   }
-  
+
   const absensi = await sequelize.query(
     `(SELECT
       a.id,
@@ -366,4 +433,4 @@ async function resultHalaqoh(req, res) {
     },
   });
 }
-module.exports = { list, listHalaqoh, resultHalaqoh };
+module.exports = { list, listHalaqoh, resultHalaqoh, rekapAbsensiKehadiran };

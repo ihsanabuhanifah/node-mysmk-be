@@ -5,7 +5,8 @@ const wali = express.Router();
 const {
   list,
   listHalaqoh,
-  resultHalaqoh
+  resultHalaqoh,
+  rekapAbsensiKehadiran
 } = require("../../controllers/Wali/AbsensiController");
 const { profile, create } = require("../../controllers/Wali/ProfileController");
 wali.use(waliAccessMiddleware)
@@ -14,5 +15,6 @@ wali.get("/absensi/halaqoh/list", listHalaqoh);
 wali.get("/halaqoh/result", resultHalaqoh);
 wali.post("/tambah", create);
 wali.get("/profile", profile);
+wali.get("/rekap/absensi-kelas", rekapAbsensiKehadiran)
 
 module.exports = wali;
