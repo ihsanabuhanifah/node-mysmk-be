@@ -162,12 +162,12 @@ async function rekapAbsensiKehadiran(req, res) {
   try {
     const absensi = await sequelize.query(
       `SELECT
-      COUNT(status_kehadiran) AS jumlah_absensi,
-      COUNT( IF(status_kehadiran = 1, student_id, NULL)) AS hadir,
-      COUNT( IF(status_kehadiran = 2, student_id , NULL)) AS sakit,
-      COUNT( IF(status_kehadiran = 3, student_id , NULL)) AS izin,
-      COUNT( IF(status_kehadiran = 4, student_id , NULL)) AS dispensasi,
-      COUNT( IF(status_kehadiran = 5, student_id , NULL)) AS 'tanpa keterangan'
+      COUNT(a.status_kehadiran) AS jumlah_absensi,
+      COUNT( IF(a.status_kehadiran = 1, a.student_id, NULL)) AS hadir,
+      COUNT( IF(a.status_kehadiran = 2, a.student_id , NULL)) AS sakit,
+      COUNT( IF(a.status_kehadiran = 3, a.student_id , NULL)) AS izin,
+      COUNT( IF(a.status_kehadiran = 4, a.student_id , NULL)) AS dispensasi,
+      COUNT( IF(a.status_kehadiran = 5, a.student_id , NULL)) AS 'tanpa keterangan'
       
     FROM
       absensi_kelas AS a
