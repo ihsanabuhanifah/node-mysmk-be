@@ -24,11 +24,11 @@ module.exports = {
     port : process.env.DB_PORT,
     dialect: process.env.DB_DIALECT,
     // use_env_variable: process.env.DATABASE_URL
-    dialectOptions: {
-      ssl: {
-        require: true,
-        rejectUnauthorized: false,
-      },
-    },
+    // dialectOptions: {
+    //   ssl: {
+    //     require: true,
+    //     rejectUnauthorized: false,
+    //   },
+    // },
   },
 };
