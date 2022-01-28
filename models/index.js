@@ -23,7 +23,7 @@ if (config.use_env_variable) {
     host: config.host,
     port: config.port,
     dialect: config.dialect,
-    dialectOptions: config.dialectOptions,
+    dialectOptions: config?.dialectOptions,
     define: {
       underscored: true,
     },
