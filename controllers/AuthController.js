@@ -427,7 +427,9 @@ async function forgotPassword(req, res) {
     },
   });
 
-  console.log(user);
+  
+
+
   if (!user) {
     return res.status(404).json({
       status: "fail",
@@ -435,13 +437,14 @@ async function forgotPassword(req, res) {
     });
   }
   let token = crypto.randomBytes(32).toString("hex");
-  const tokenSave = await TokenModel.create({
-    userId: user.id,
-    token: token,
-  });
+  
 
   const link = `${process.env.BASE_URL}/resetPassword/${user.id}/${token}`;
   await sendEmail(user.email, "Password Reset", link);
+  await TokenModel.create({
+    userId: user.id,
+    token: token,
+  });
   return res.json({
     status: "Success",
     msg: "Silahkan Periksa Email Masuk",

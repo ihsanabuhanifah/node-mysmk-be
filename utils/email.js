@@ -7,20 +7,30 @@ const sendEmail = async (email, subject, text) => {
       const transporter = nodemailer.createTransport({
         host: process.env.MAIL_HOST,
         port: process.env.MAIL_PORT,
-        
+        secure : true,
         auth: {
-          user: process.env.MAIL_USERMAME,
+          user: process.env.MAIL_USERNAME,
           pass: process.env.MAIL_PASSWORD
         }
       });
+      transporter.verify(function (error, success) {
+        if (error) {
+          console.log(error);
+        } else {
+          console.log("Server is ready to take our messages");
+        }
+      });
+     
  
-      await transporter.sendMail({
+      const kirim = await transporter.sendMail({
         from: 'no-reply@smkmadinatulquran.sch.id',
         to: email,
         subject: subject,
         text: text,
       });
-      return "email sent sucessfully"
+
+      console.log('ee', kirim)
+      
     } catch (error) {
      
      
