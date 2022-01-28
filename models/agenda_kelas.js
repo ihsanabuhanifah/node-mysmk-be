@@ -23,7 +23,10 @@ module.exports = (sequelize, DataTypes) => {
     teacher_id: DataTypes.INTEGER,
     jam_ke: DataTypes.INTEGER,
     materi: DataTypes.STRING,
-    keterangan:DataTypes.STRING,
+    semester: DataTypes.INTEGER,
+      ta_id: DataTypes.INTEGER,
+
+   
   }, {
     sequelize,
     modelName: 'agenda_kelas',

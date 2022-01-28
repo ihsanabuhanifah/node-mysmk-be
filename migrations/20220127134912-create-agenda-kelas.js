@@ -47,9 +47,7 @@ module.exports = {
       materi: {
         type: Sequelize.STRING
       },
-      keterangan: {
-        type: Sequelize.STRING
-      },
+      
       semester: {
         type: Sequelize.INTEGER,
       },
