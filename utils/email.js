@@ -35,7 +35,7 @@ const sendEmail = async (email, subject, text) => {
      
      
       console.log(error);
-      return "email not sent"
+      return "email tidak terkirim"
     }
   };
   
