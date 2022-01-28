@@ -203,6 +203,7 @@ async function rekapAbsensiKehadiran(req, res) {
       data: absensi,
     });
   } catch (err) {
+  console.log(err)
     return res.status(403).json({
       status: "Fail",
       msg: "Terjadi Kesalahan",
