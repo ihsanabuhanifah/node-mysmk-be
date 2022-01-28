@@ -142,7 +142,7 @@ async function list(req, res) {
 }
 
 async function rekapAbsensiKehadiran(req, res) {
-  let { tahunAjaran, semester,mapel } = req.query;
+  let { tahunAjaran, semester, mapel } = req.query;
   if (tahunAjaran !== undefined) {
     tahunAjaran = `AND b.nama_tahun_ajaran = '${tahunAjaran}'`;
   } else {
@@ -167,7 +167,7 @@ async function rekapAbsensiKehadiran(req, res) {
       COUNT( IF(a.status_kehadiran = 2, a.student_id , NULL)) AS sakit,
       COUNT( IF(a.status_kehadiran = 3, a.student_id , NULL)) AS izin,
       COUNT( IF(a.status_kehadiran = 4, a.student_id , NULL)) AS dispensasi,
-      COUNT( IF(a.status_kehadiran = 5, a.student_id , NULL)) AS 'tanpa keterangan'
+      COUNT( IF(a.status_kehadiran = 5, a.student_id , NULL)) AS tanpa_keterangan
       
     FROM
       absensi_kelas AS a
@@ -193,17 +193,17 @@ async function rekapAbsensiKehadiran(req, res) {
       "%";
     absensi[0].persentase_tanpa_keterangan =
       Math.round(
-        (absensi[0]["tanpa keterangan"] / absensi[0].jumlah_absensi) * 100
+        (absensi[0].tanpa_keterangan / absensi[0].jumlah_absensi) * 100
       ) + "%";
     return res.json({
       status: "Success",
-      mapel : req.query.mapel,
+      mapel: req.query.mapel,
       semester: req.query.semester,
       tahunAjaran: req.query.tahunAjaran,
       data: absensi,
     });
   } catch (err) {
-  console.log(err)
+    console.log(err);
     return res.status(403).json({
       status: "Fail",
       msg: "Terjadi Kesalahan",
