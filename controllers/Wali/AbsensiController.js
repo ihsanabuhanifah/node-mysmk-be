@@ -183,11 +183,11 @@ async function rekapAbsensiKehadiran(req, res) {
     );
 
     absensi[0].persentase_kehadiran =
-      Math.round((absensi[0].hadir / absensi[0].jumlah_absensi) * 100) + "%";
+      Math.round((absensi[0].hadir / absensi[0].jumlah_absensi) * 100) + " %";
     absensi[0].persentase_sakit =
-      Math.round((absensi[0].sakit / absensi[0].jumlah_absensi) * 100) + "%";
+      Math.round((absensi[0].sakit / absensi[0].jumlah_absensi) * 100) + " %";
     absensi[0].persentase_izin =
-      Math.round((absensi[0].izin / absensi[0].jumlah_absensi) * 100) + "%";
+      Math.round((absensi[0].izin / absensi[0].jumlah_absensi) * 100) + " %";
     absensi[0].persentase_dispensasi =
       Math.round((absensi[0].dispensasi / absensi[0].jumlah_absensi) * 100) +
       "%";
