@@ -9,10 +9,30 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      absensi_kelas.belongsTo(models.kelas);
-      absensi_kelas.belongsTo(models.student);
-      absensi_kelas.belongsTo(models.mapel);
-      absensi_kelas.belongsTo(models.teacher);
+      absensi_kelas.belongsTo(models.kelas, {
+        as: "kelas",
+        foreignKey: "kelas_id",
+      });
+      absensi_kelas.belongsTo(models.student, {
+        as: "siswa",
+        foreignKey: "student_id",
+      });
+      absensi_kelas.belongsTo(models.mapel, {
+        as: "mapel",
+        foreignKey: "mapel_id",
+      });
+      absensi_kelas.belongsTo(models.teacher, {
+        as: "teacher",
+        foreignKey: "teacher_id",
+      });
+      absensi_kelas.belongsTo(models.status_kehadiran, {
+        as: "kehadiran",
+        foreignKey: "status_kehadiran",
+      });
+      absensi_kelas.belongsTo(models.ta, {
+        as: "tahun_ajaran",
+        foreignKey: "ta_id",
+      });
     }
   }
   absensi_kelas.init(

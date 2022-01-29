@@ -9,33 +9,15 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      
-      
-      user.hasMany(
-        models.user_role,
-        { as: "userRole" },
-        { foreignKey: "user_id" }
-      );
-      user.hasMany(
-        models.token_reset_password,
-        { as: "token" },
-        { foreignKey: "user_id" }
-      );
-      user.hasMany(
-        models.student,
-        { as: "student" },
-        { foreignKey: "user_id" }
-      );
-      user.hasMany(
-        models.parent,
-        { as: "parent" },
-        { foreignKey: "user_id" }
-      );
-      user.hasMany(
-        models.teacher,
-        { as: "teacher" },
-        { foreignKey: "user_id" }
-      );
+
+      user.hasMany(models.user_role, { as: "userRole", foreignKey: "user_id" });
+      user.hasMany(models.token_reset_password, {
+        as: "token",
+        foreignKey: "user_id",
+      });
+      user.hasMany(models.student, { as: "student", foreignKey: "user_id" });
+      user.hasMany(models.parent, { as: "parent", foreignKey: "user_id" });
+      user.hasMany(models.teacher, { as: "teacher", foreignKey: "user_id" });
     }
   }
   user.init(

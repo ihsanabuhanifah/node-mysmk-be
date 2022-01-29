@@ -23,7 +23,7 @@ module.exports = {
           mapel_id: 2,
           jam_ke: 1,
           materi: "aaa",
-          keterangan: "",
+         
           semester: 1,
           ta_id: 8,
           created_at: new Date(),
@@ -37,7 +37,7 @@ module.exports = {
           mapel_id: 2,
           jam_ke: 2,
           materi: "bbbb",
-          keterangan: "",
+         
           semester: 1,
           ta_id: 8,
           created_at: new Date(),
@@ -51,7 +51,7 @@ module.exports = {
           mapel_id: 1,
           jam_ke: 3,
           materi: "cccc",
-          keterangan: "",
+         
           semester: 1,
           ta_id: 8,
           created_at: new Date(),
@@ -65,7 +65,7 @@ module.exports = {
           mapel_id: 1,
           jam_ke: 4,
           materi: "ddd",
-          keterangan: "",
+         
           semester: 1,
           ta_id: 8,
           created_at: new Date(),
@@ -79,7 +79,7 @@ module.exports = {
           mapel_id: 1,
           jam_ke: 5,
           materi: "eeeeeee",
-          keterangan: "",
+         
           semester: 1,
           ta_id: 8,
           created_at: new Date(),
@@ -93,7 +93,7 @@ module.exports = {
           mapel_id: 1,
           jam_ke: 6,
           materi: "fffff",
-          keterangan: "",
+         
           semester: 1,
           ta_id: 8,
           created_at: new Date(),
@@ -107,7 +107,7 @@ module.exports = {
           mapel_id: 1,
           jam_ke: 7,
           materi: "gggg",
-          keterangan: "",
+         
           semester: 1,
           ta_id: 8,
           created_at: new Date(),
@@ -121,7 +121,7 @@ module.exports = {
           mapel_id: 1,
           jam_ke: 1,
           materi: "aaaaa",
-          keterangan: "",
+         
           semester: 1,
           ta_id: 8,
           created_at: new Date(),
@@ -135,7 +135,7 @@ module.exports = {
           mapel_id: 1,
           jam_ke: 2,
           materi: "bbbbb",
-          keterangan: "",
+         
           semester: 1,
           ta_id: 8,
           created_at: new Date(),
@@ -149,7 +149,7 @@ module.exports = {
           mapel_id: 1,
           jam_ke: 3,
           materi: "eeeeee",
-          keterangan: "",
+         
           semester: 1,
           ta_id: 8,
           created_at: new Date(),
@@ -163,7 +163,7 @@ module.exports = {
           mapel_id: 3,
           jam_ke: 4,
           materi: "ddd",
-          keterangan: "",
+         
           semester: 1,
           ta_id: 8,
           created_at: new Date(),
@@ -177,7 +177,7 @@ module.exports = {
           mapel_id: 3,
           jam_ke: 5,
           materi: "eeeee",
-          keterangan: "",
+         
           semester: 1,
           ta_id: 8,
           created_at: new Date(),
@@ -191,7 +191,7 @@ module.exports = {
           mapel_id: 3,
           jam_ke: 6,
           materi: "ffff",
-          keterangan: "",
+         
           semester: 1,
           ta_id: 8,
           created_at: new Date(),
@@ -205,7 +205,7 @@ module.exports = {
           mapel_id: 3,
           jam_ke: 7,
           materi: "ggg",
-          keterangan: "",
+         
           semester: 1,
           ta_id: 8,
           created_at: new Date(),

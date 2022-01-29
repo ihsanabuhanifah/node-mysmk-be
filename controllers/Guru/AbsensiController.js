@@ -1,5 +1,6 @@
 const AbsensiKelasModel = require("../../models").absensi_kelas;
 const AgendaKelasModel = require("../../models").agenda_kelas;
+const models = require("../../models");
 const { Op } = require("sequelize");
 
 async function create(req, res) {
@@ -66,6 +67,46 @@ async function create(req, res) {
   }
 }
 
-async function index(req, res) {}
+async function index(req, res) {
+  let { kelas_id, student_id, mapel_id } = req.query;
+  try {
+    const data = await AbsensiKelasModel.findAll({
+      attributes: ["id",  "created_at", "updated_at"],
+      include: [
+        {
+          model: models.kelas,
+          require: true,
+          as: "kelas",
+          attributes: ["id", "nama_kelas"],
+          where: kelas_id !== undefined ? { id: kelas_id } : {},
+        },
+        {
+          model: models.student,
+          require: true,
+          as: "siswa",
+          attributes: ["id", "nama_siswa"],
+          where: student_id !== undefined ? { id: student_id } : {},
+        },
+        {
+          model: models.mapel,
+          require: true,
+          as: "mapel",
+          attributes: ["id", "nama_mapel"],
+          where:  mapel_id !== undefined ? { id:  mapel_id } : {},
+        },
+      ],
+      
+    });
+    return res.json({
+      data: data,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(403).json({
+      status: "Fail",
+      msg: "Terjadi Kesalahan",
+    });
+  }
+}
 
 module.exports = { create, index };

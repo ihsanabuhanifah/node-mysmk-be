@@ -10,29 +10,26 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       teacher.belongsTo(models.user);
-      teacher.hasMany(
-        models.absensi_kelas,
-        { as: "absensi_kelas" },
-        { foreignKey: "teacher_id" }
-      );
-      teacher.hasMany(
-        models.absensi_halaqoh,
-        { as: "absensi_halaqoh" },
-        { foreignKey: "steacher_id" }
-      );
-      teacher.hasMany(
-        models.agenda_kelas,
-        { as: "agenda_kelas" },
-        { foreignKey: "kelas_id" }
-      );
+      teacher.hasMany(models.absensi_kelas, {
+        as: "absensi_kelas",
+        foreignKey: "teacher_id",
+      });
+      teacher.hasMany(models.absensi_halaqoh, {
+        as: "absensi_halaqoh",
+        foreignKey: "steacher_id",
+      });
+      teacher.hasMany(models.agenda_kelas, {
+        as: "agenda_kelas",
+        foreignKey: "kelas_id",
+      });
     }
   }
   teacher.init(
     {
       user_id: DataTypes.INTEGER,
       nama_guru: DataTypes.STRING,
-      status: DataTypes.ENUM('active' , 'nonactive'),
-      keterangan : DataTypes.STRING
+      status: DataTypes.ENUM("active", "nonactive"),
+      keterangan: DataTypes.STRING,
     },
     {
       sequelize,

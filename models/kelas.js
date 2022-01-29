@@ -9,21 +9,18 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      kelas.hasMany(
-        models.kelas_student,
-        { as: "kelas_student" },
-        { foreignKey: "kelas_id" }
-      );
-      kelas.hasMany(
-        models.absensi_kelas,
-        { as: "absensi_kelas" },
-        { foreignKey: "kelas_id" }
-      );
-      kelas.hasMany(
-        models.agenda_kelas,
-        { as: "agenda_kelas" },
-        { foreignKey: "kelas_id" }
-      );
+      kelas.hasMany(models.kelas_student, {
+        as: "kelas_student",
+        foreignKey: "kelas_id",
+      });
+      kelas.hasMany(models.absensi_kelas, {
+        as: "absensi_kelas",
+        foreignKey: "kelas_id",
+      });
+      kelas.hasMany(models.agenda_kelas, {
+        as: "agenda_kelas",
+        foreignKey: "kelas_id",
+      });
     }
   }
   kelas.init(

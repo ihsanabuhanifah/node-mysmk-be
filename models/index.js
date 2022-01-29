@@ -22,6 +22,7 @@ if (config.use_env_variable) {
     dialectOptions: config?.dialectOptions,
     define: {
       underscored: true,
+      
     },
   });
 } else {

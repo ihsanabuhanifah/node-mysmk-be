@@ -9,29 +9,23 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       student.belongsTo(models.user),
-        student.hasMany(
-          models.parent,
-          { as: "parent" },
-          { foreignKey: "student_id" }
-        );
-        student.hasMany(
-          models.kelas_student,
-          { as: "kelas_student" },
-          { foreignKey: "student_id" }
-        );
-        student.hasMany(
-          models.absensi_kelas,
-          { as: "absensi_kelas" },
-          { foreignKey: "student_id" }
-        );
-        student.hasMany(
-          models.absensi_halaqoh,
-          { as: "absensi_halaqoh" },
-          { foreignKey: "student_id" }
-        );
-        
+        student.hasMany(models.parent, {
+          as: "parent",
+          foreignKey: "student_id",
+        });
+      student.hasMany(models.kelas_student, {
+        as: "kelas_student",
+        foreignKey: "student_id",
+      });
+      student.hasMany(models.absensi_kelas, {
+        as: "absensi_kelas",
+        foreignKey: "student_id",
+      });
+      student.hasMany(models.absensi_halaqoh, {
+        as: "absensi_halaqoh",
+        foreignKey: "student_id",
+      });
     }
-    
   }
   student.init(
     {
@@ -49,8 +43,8 @@ module.exports = (sequelize, DataTypes) => {
       tanggal_diterima: DataTypes.DATE,
       angkatan: DataTypes.STRING,
       tahun_ajaran: DataTypes.STRING,
-      status: DataTypes.ENUM('active' , 'mutasi' , 'alumni' ),
-      keterangan : DataTypes.STRING
+      status: DataTypes.ENUM("active", "mutasi", "alumni"),
+      keterangan: DataTypes.STRING,
     },
     {
       sequelize,

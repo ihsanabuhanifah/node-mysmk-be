@@ -51,19 +51,33 @@ module.exports = {
           as: "mapel_id",
         },
       },
-     
+
       status_kehadiran: {
         type: Sequelize.INTEGER,
+
+        onDelete: "CASCADE",
+        references: {
+          model: "status_kehadirans",
+          key: "id",
+          as: "status_kehadiran",
+        },
       },
       keterangan: {
         type: Sequelize.STRING,
       },
-      
+
       semester: {
         type: Sequelize.INTEGER,
       },
       ta_id: {
         type: Sequelize.INTEGER,
+
+        onDelete: "CASCADE",
+        references: {
+          model: "ta",
+          key: "id",
+          as: "ta_id",
+        },
       },
       created_at: {
         allowNull: false,
