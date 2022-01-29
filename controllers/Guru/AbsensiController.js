@@ -68,10 +68,18 @@ async function create(req, res) {
 }
 
 async function index(req, res) {
-  let { kelas_id, student_id, mapel_id } = req.query;
+  let {
+    kelas_id,
+    student_id,
+    mapel_id,
+    tahun_ajaran,
+    status_kehadiran,
+    semester,
+  } = req.query;
   try {
     const data = await AbsensiKelasModel.findAll({
-      attributes: ["id",  "created_at", "updated_at"],
+      attributes: ["id", "semester",  "created_at"],
+      where: semester !== undefined ? { id: semester } : {},
       include: [
         {
           model: models.kelas,
@@ -92,10 +100,29 @@ async function index(req, res) {
           require: true,
           as: "mapel",
           attributes: ["id", "nama_mapel"],
-          where:  mapel_id !== undefined ? { id:  mapel_id } : {},
+          where: mapel_id !== undefined ? { id: mapel_id } : {},
+        },
+        {
+          model: models.ta,
+          require: true,
+          as: "tahun_ajaran",
+          attributes: ["id", "nama_tahun_ajaran"],
+          where:
+            tahun_ajaran !== undefined
+              ? { nama_tahun_ajaran: tahun_ajaran }
+              : {},
+        },
+        {
+          model: models.status_kehadiran,
+          require: true,
+          as: "kehadiran",
+          attributes: ["id", "nama_status_kehadiran"],
+          where:
+            status_kehadiran !== undefined
+              ? {  nama_status_kehadiran :status_kehadiran }
+              : {},
         },
       ],
-      
     });
     return res.json({
       data: data,
