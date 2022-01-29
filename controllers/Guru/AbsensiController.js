@@ -2,7 +2,8 @@ const AbsensiKelasModel = require("../../models").absensi_kelas;
 const AgendaKelasModel = require("../../models").agenda_kelas;
 const models = require("../../models");
 const { Op } = require("sequelize");
-
+const {check} = require("../../utils/paramsQuery")
+ 
 async function create(req, res) {
   try {
     let {
@@ -75,11 +76,23 @@ async function index(req, res) {
     tahun_ajaran,
     status_kehadiran,
     semester,
+    dariTanggal,
+    sampaiTanggal,
+    page,
+    pageSize
   } = req.query;
   try {
     const data = await AbsensiKelasModel.findAll({
-      attributes: ["id", "semester",  "created_at"],
-      where: semester !== undefined ? { id: semester } : {},
+      attributes: ["id", "semester", "tanggal", "keterangan"],
+      where: {
+        ...(semester !== undefined && { semester: semester }),
+        ...(dariTanggal !== undefined && {
+          tanggal: { [Op.between]: [dariTanggal, sampaiTanggal] },
+        }),
+      },
+      order : [['tanggal' , 'desc']],
+      limit : pageSize,
+      offset : page,
       include: [
         {
           model: models.kelas,
@@ -119,7 +132,7 @@ async function index(req, res) {
           attributes: ["id", "nama_status_kehadiran"],
           where:
             status_kehadiran !== undefined
-              ? {  nama_status_kehadiran :status_kehadiran }
+              ? { nama_status_kehadiran: status_kehadiran }
               : {},
         },
       ],
