@@ -5,21 +5,26 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 require("dotenv").config();
 const port = process.env.PORT || 8000;
-const key = process.env.KEY;
-const morgan = require("morgan");
+
 const { sequelize } = require("./models");
+const cron = require('node-cron');
+const { schedule } = require("./controllers/Admin/jadwalController");
 
-
+// const rule = new schedule2.RecurrenceRule();
+// rule.minute = 1;
+// console.log(rule.minute);
+const job = cron.schedule("*/2 * * * *", schedule);
 app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
-app.use(morgan(":user-agent"));
+
 app.use(router);
-console.log(key);
+
+job.start()
 app.listen(port, async () => {
   try {
     await sequelize.authenticate();
-    console.log("Connection has been established successfully.");
+    console.log(`Connection has been established successfully ${port}`);
   } catch (error) {
     console.error("Unable to connect to the database:", error);
   }

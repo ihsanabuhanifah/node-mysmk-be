@@ -16,11 +16,15 @@ module.exports = (sequelize, DataTypes) => {
       });
       teacher.hasMany(models.absensi_halaqoh, {
         as: "absensi_halaqoh",
-        foreignKey: "steacher_id",
+        foreignKey: "teacher_id",
       });
       teacher.hasMany(models.agenda_kelas, {
         as: "agenda_kelas",
-        foreignKey: "kelas_id",
+        foreignKey: "teacher_id",
+      });
+      teacher.hasMany(models.jadwal, {
+        as: "jadwal",
+        foreignKey: "teacher_id",
       });
     }
   }

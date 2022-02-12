@@ -9,6 +9,7 @@ const importRouter = require("./importRouter");
 const guruRouter = require("./Guru");
 const waliRouter = require("./Wali");
 const daftarRouter = require("./Daftar");
+const adminRouter = require("./Admin");
 router.get("/", (req, res) => {
   res.send("Backend MySMK");
 });
@@ -26,4 +27,5 @@ router.use("/admin/roles", rolesRouter);
 router.use("/wali", waliRouter),
   router.use("/list", daftarRouter),
   router.use("/guru", guruRouter),
+  router.use("/admin", adminRouter),
   (module.exports = router);

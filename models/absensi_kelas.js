@@ -46,6 +46,7 @@ module.exports = (sequelize, DataTypes) => {
       keterangan: DataTypes.STRING,
       semester: DataTypes.INTEGER,
       ta_id: DataTypes.INTEGER,
+      status_absensi : DataTypes.TINYINT,
     },
     {
       sequelize,

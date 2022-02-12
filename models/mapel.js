@@ -14,7 +14,11 @@ module.exports = (sequelize, DataTypes) => {
       });
       mapel.hasMany(models.agenda_kelas, {
         as: "agenda_kelas",
-        foreignKey: "kelas_id",
+        foreignKey: "mapel_id",
+      });
+      mapel.hasMany(models.mapel, {
+        as: "mapel",
+        foreignKey: "mapel_id",
       });
     }
   }

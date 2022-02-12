@@ -1,39 +1,18 @@
-"use strict";
+'use strict';
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable("absensi_kelas", {
+    await queryInterface.createTable('jadwals', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER,
+        type: Sequelize.INTEGER
       },
-      tanggal: {
-        type: Sequelize.DATE,
-      },
-      teacher_id: {
-        type: Sequelize.INTEGER,
-
-        onDelete: "CASCADE",
-        references: {
-          model: "teachers",
-          key: "id",
-          as: "teacher_id",
-        },
-      },
-      student_id: {
-        type: Sequelize.INTEGER,
-
-        onDelete: "CASCADE",
-        references: {
-          model: "students",
-          key: "id",
-          as: "student_id",
-        },
+      hari: {
+        type: Sequelize.STRING
       },
       kelas_id: {
         type: Sequelize.INTEGER,
-
         onDelete: "CASCADE",
         references: {
           model: "kelas",
@@ -41,9 +20,17 @@ module.exports = {
           as: "kelas_id",
         },
       },
+      teacher_id: {
+        type: Sequelize.INTEGER,
+        onDelete: "CASCADE",
+        references: {
+          model: "teachers",
+          key: "id",
+          as: "teacher_id",
+        },
+      },
       mapel_id: {
         type: Sequelize.INTEGER,
-
         onDelete: "CASCADE",
         references: {
           model: "mapels",
@@ -51,27 +38,14 @@ module.exports = {
           as: "mapel_id",
         },
       },
-
-      status_kehadiran: {
-        type: Sequelize.INTEGER,
-
-        onDelete: "CASCADE",
-        references: {
-          model: "status_kehadirans",
-          key: "id",
-          as: "status_kehadiran",
-        },
+      jam_ke: {
+        type: Sequelize.INTEGER
       },
-      keterangan: {
-        type: Sequelize.STRING,
-      },
-
       semester: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.INTEGER
       },
       ta_id: {
         type: Sequelize.INTEGER,
-
         onDelete: "CASCADE",
         references: {
           model: "ta",
@@ -79,20 +53,23 @@ module.exports = {
           as: "ta_id",
         },
       },
-      status_absensi: {
-        type: Sequelize.TINYINT,
+      student : {
+        type : Sequelize.STRING
+      },
+      status: {
+        type: Sequelize.TINYINT
       },
       created_at: {
         allowNull: false,
-        type: Sequelize.DATE,
+        type: Sequelize.DATE
       },
       updated_at: {
         allowNull: false,
-        type: Sequelize.DATE,
-      },
+        type: Sequelize.DATE
+      }
     });
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable("absensi_kelas");
-  },
+    await queryInterface.dropTable('jadwals');
+  }
 };
