@@ -1,74 +1,10 @@
-const AbsensiKelasModel = require("../../models").absensi_kelas;
-const AgendaKelasModel = require("../../models").agenda_kelas;
+const HalaqohModel = require("../../models").absensi_halaqoh;
+
 const models = require("../../models");
 const { Op } = require("sequelize");
 const { check } = require("../../utils/paramsQuery");
 
-async function createAbsensi(req, res) {
-  try {
-    let {
-      tanggal,
-      semester,
-      ta_id,
-      kelas_id,
-      mapel_id,
-      absensi_kehadiran,
-      agenda_kelas,
-    } = req.body;
-
-    const cek = await AbsensiKelasModel.findAll({
-      attributes: ["id"],
-      where: {
-        [Op.and]: [
-          { tanggal: tanggal },
-          { kelas_id: kelas_id },
-          { teacher_id: req.teacher_id },
-          { mapel_id: mapel_id },
-        ],
-      },
-    });
-
-    if (cek.length !== 0) {
-      return res.status(403).json({
-        status: "Fail",
-        msg: "Anda sudah mengabsen kelas ini",
-      });
-    }
-
-    await absensi_kehadiran.map((data) => {
-      (data.teacher_id = req.teacher_id),
-        (data.tanggal = tanggal),
-        (data.semester = semester),
-        (data.ta_id = ta_id),
-        (data.kelas_id = kelas_id),
-        (data.mapel_id = mapel_id);
-    });
-    await agenda_kelas.map((data) => {
-      (data.teacher_id = req.teacher_id),
-        (data.tanggal = tanggal),
-        (data.semester = semester),
-        (data.ta_id = ta_id),
-        (data.kelas_id = kelas_id),
-        (data.mapel_id = mapel_id);
-    });
-
-    await AbsensiKelasModel.bulkCreate(absensi_kehadiran);
-    await AgendaKelasModel.bulkCreate(agenda_kelas);
-
-    return res.status(201).json({
-      status: "Success",
-      msg: "Absensi Berhasil di Simpan",
-    });
-  } catch (err) {
-    console.log(err);
-    return res.status(403).json({
-      status: "Fail",
-      msg: "Terjadi Kesalahan",
-    });
-  }
-}
-
-async function listAbsensi(req, res) {
+async function listHalaqoh(req, res) {
   let {
     kelas_id,
     student_id,
@@ -82,7 +18,6 @@ async function listAbsensi(req, res) {
     pageSize,
   } = req.query;
   try {
-
     const agenda = await AgendaKelasModel.findAll({
       // attributes: ["id","jam_ke" , "materi" , 'tanggal' , 'semester' , 'ta_id'],
       where: {
@@ -91,7 +26,7 @@ async function listAbsensi(req, res) {
           tanggal: { [Op.between]: [dariTanggal, sampaiTanggal] },
         }),
       },
-    })
+    });
     const absensi = await AbsensiKelasModel.findAll({
       attributes: ["id", "semester", "tanggal", "keterangan"],
       where: {
@@ -149,10 +84,10 @@ async function listAbsensi(req, res) {
     });
 
     return res.json({
-      status : 'Success',
-      msg : 'Absensi ditemukan',
+      status: "Success",
+      msg: "Absensi ditemukan",
       absensi,
-      agenda 
+      agenda,
     });
   } catch (err) {
     console.log(err);
@@ -163,7 +98,8 @@ async function listAbsensi(req, res) {
   }
 }
 
-async function updateAbsensi(req, res) {
+async function updateHalaqoh(req, res) {
+    return res.send('ok')
   try {
     let {
       // tanggal,
@@ -177,7 +113,7 @@ async function updateAbsensi(req, res) {
 
     await Promise.all(
       absensi_kehadiran.map(async (data) => {
-        data.status_absensi = 1
+        data.status_absensi = 1;
         await AbsensiKelasModel.update(data, {
           where: {
             id: data.id,
@@ -207,4 +143,4 @@ async function updateAbsensi(req, res) {
     });
   }
 }
-module.exports = { createAbsensi, listAbsensi, updateAbsensi };
+module.exports = {  listHalaqoh, updateHalaqoh };
