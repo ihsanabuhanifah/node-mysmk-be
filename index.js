@@ -7,20 +7,20 @@ require("dotenv").config();
 const port = process.env.PORT || 8000;
 
 const { sequelize } = require("./models");
-const cron = require('node-cron');
+const cron = require("node-cron");
 const { schedule } = require("./controllers/Admin/jadwalController");
 
 // const rule = new schedule2.RecurrenceRule();
 // rule.minute = 1;
 // console.log(rule.minute);
-const job = cron.schedule("*/2 * * * *", schedule);
+const job = cron.schedule("0 5 * * *", schedule);
 app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
 
 app.use(router);
 
-job.start()
+job.start();
 app.listen(port, async () => {
   try {
     await sequelize.authenticate();

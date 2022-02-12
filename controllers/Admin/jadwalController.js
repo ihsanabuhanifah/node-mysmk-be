@@ -78,9 +78,7 @@ async function schedule(req, res) {
     );
 
     console.log("ini return");
-    return res.json({
-      jadwal: "ok",
-    });
+   
   } catch (err) {
     console.log(err);
     return res.json({
