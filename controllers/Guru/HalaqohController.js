@@ -2,7 +2,6 @@ const HalaqohModel = require("../../models").absensi_halaqoh;
 
 const models = require("../../models");
 const { Op } = require("sequelize");
-const { check } = require("../../utils/paramsQuery");
 
 async function listHalaqoh(req, res) {
   let {
@@ -99,31 +98,28 @@ async function listHalaqoh(req, res) {
 }
 
 async function updateHalaqoh(req, res) {
-    return res.send('ok')
   try {
-    let {
-      // tanggal,
-      // semester,
-      // ta_id,
-      // kelas_id,
-      // mapel_id,
-      absensi_kehadiran,
-      agenda_kelas,
-    } = req.body;
+    let { tanggal, halaqoh_id, waktu, absensi_kehadiran } = req.body;
 
     await Promise.all(
       absensi_kehadiran.map(async (data) => {
-        data.status_absensi = 1;
-        await AbsensiKelasModel.update(data, {
-          where: {
-            id: data.id,
-          },
-        });
-      })
-    );
-    await Promise.all(
-      agenda_kelas.map(async (data) => {
-        await AgendaKelasModel.update(data, {
+        let payload = {
+          student_id: data.student_id,
+          halaqoh_id: halaqoh_id,
+          tanggal: tanggal,
+          dari_surat: data.dari_surat,
+          sampai_surat: data.sampai_surat,
+          dari_ayat: data.dari_ayat,
+          sampai_ayat: data.sampai_ayat,
+          total_halaman: data.total_halaman,
+          juz_ke: data.juz_ke,
+          ketuntasan_juz: data.ketuntasan_juz,
+          status_kehadiran: data.status_kehadiran,
+          keterangan: data.keterangan,
+          kegiatan: data.kegiatan,
+          waktu: data.waktu,
+        };
+        await HalaqohModel.update(payload, {
           where: {
             id: data.id,
           },
@@ -131,9 +127,9 @@ async function updateHalaqoh(req, res) {
       })
     );
 
-    return res.status(201).json({
+    return res.status(200).json({
       status: "Success",
-      msg: "Absensi Berhasil di Simpan",
+      msg: "Absensi Halaqoh Berhasil di Simpan",
     });
   } catch (err) {
     console.log(err);
@@ -143,4 +139,4 @@ async function updateHalaqoh(req, res) {
     });
   }
 }
-module.exports = {  listHalaqoh, updateHalaqoh };
+module.exports = { listHalaqoh, updateHalaqoh };

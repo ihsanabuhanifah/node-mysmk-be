@@ -82,7 +82,6 @@ async function listAbsensi(req, res) {
     pageSize,
   } = req.query;
   try {
-
     const agenda = await AgendaKelasModel.findAll({
       // attributes: ["id","jam_ke" , "materi" , 'tanggal' , 'semester' , 'ta_id'],
       where: {
@@ -91,7 +90,7 @@ async function listAbsensi(req, res) {
           tanggal: { [Op.between]: [dariTanggal, sampaiTanggal] },
         }),
       },
-    })
+    });
     const absensi = await AbsensiKelasModel.findAll({
       attributes: ["id", "semester", "tanggal", "keterangan"],
       where: {
@@ -149,10 +148,10 @@ async function listAbsensi(req, res) {
     });
 
     return res.json({
-      status : 'Success',
-      msg : 'Absensi ditemukan',
+      status: "Success",
+      msg: "Absensi ditemukan",
       absensi,
-      agenda 
+      agenda,
     });
   } catch (err) {
     console.log(err);
@@ -177,7 +176,7 @@ async function updateAbsensi(req, res) {
 
     await Promise.all(
       absensi_kehadiran.map(async (data) => {
-        data.status_absensi = 1
+        data.status_absensi = 1;
         await AbsensiKelasModel.update(data, {
           where: {
             id: data.id,
@@ -195,9 +194,9 @@ async function updateAbsensi(req, res) {
       })
     );
 
-    return res.status(201).json({
+    return res.status(200).json({
       status: "Success",
-      msg: "Absensi Berhasil di Simpan",
+      msg: "Absensi Kelas Berhasil di Simpan",
     });
   } catch (err) {
     console.log(err);
