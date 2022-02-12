@@ -1,7 +1,5 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
+"use strict";
+const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class ta extends Model {
     /**
@@ -28,12 +26,15 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "ta_id",
       });
     }
-  };
-  ta.init({
-    nama_tahun_ajaran: DataTypes.STRING
-  }, {
-    sequelize,
-    modelName: 'ta',
-  });
+  }
+  ta.init(
+    {
+      nama_tahun_ajaran: DataTypes.STRING,
+    },
+    {
+      sequelize,
+      modelName: "ta",
+    }
+  );
   return ta;
 };

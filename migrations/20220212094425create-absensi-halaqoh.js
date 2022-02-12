@@ -61,6 +61,9 @@ module.exports = {
       keterangan: {
         type: Sequelize.STRING,
       },
+      kegiatan : {
+        type : Sequelize.INTEGER,
+      },
       
       waktu : {
         type : Sequelize.STRING,

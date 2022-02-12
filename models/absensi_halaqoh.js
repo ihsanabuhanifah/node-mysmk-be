@@ -27,6 +27,7 @@ module.exports = (sequelize, DataTypes) => {
       ketuntasan_juz: DataTypes.INTEGER,
       status_kehadiran: DataTypes.INTEGER,
       keterangan: DataTypes.STRING,
+      kegiatan: DataTypes.INTEGER,
       
       waktu : DataTypes.STRING,
     },

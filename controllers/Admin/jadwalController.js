@@ -4,6 +4,8 @@ const AbsensiModel = require("../../models").absensi_kelas;
 const AgendaKelasModel = require("../../models").agenda_kelas;
 const HalaqohModel = require("../../models").halaqoh;
 const HalaqohStudentModel = require("../../models").halaqoh_student;
+const AbsensiHalaqohModel = require("../../models").absensi_halaqoh;
+const models = require("../../models");
 const dotenv = require("dotenv");
 dotenv.config();
 const { formatHari } = require("../../utils/format");
@@ -77,7 +79,7 @@ async function schedule(req, res) {
     );
   } catch (err) {
     console.log(err);
-    return res.json({
+    return res.status(403).json({
       status: "fail",
       msg: "Ada Kesalahan",
     });
@@ -85,18 +87,44 @@ async function schedule(req, res) {
 }
 
 async function scheduleHalaqoh(req, res) {
- 
   try {
     // let hari =   dayjs(timeStamps).format("dddd")
 
     const date = new Date();
     const hari = await formatHari(date);
-    const halaqoh = await HalaqohStudentModel.findAll({
-        
-    })
+    const halaqoh = await HalaqohModel.findAll({
+      include: [
+        {
+          model: models.halaqoh_student,
+          require: true,
+          as: "halaqoh_student",
+          attributes: ["id", "student_id"],
+        },
+      ],
+    });
+
+    await Promise.all(
+      halaqoh.map(async (value) => {
+        await Promise.all(
+          value.halaqoh_student.map(async(data) => {
+            const payload = {
+              student_id: data.student_id,
+              halaqoh_id: value.id,
+              tanggal: date,
+            };
+
+            await AbsensiHalaqohModel.create(payload);
+          })
+        );
+      })
+    );
+
+    return res.json({
+      msg : 'Success',
+    });
   } catch (err) {
     console.log(err);
-    return res.json({
+    return res.status(403).json({
       status: "fail",
       msg: "Ada Kesalahan",
     });
