@@ -51,7 +51,7 @@ async function schedule(req, res) {
 
         await AgendaKelasModel.create(payload)
 
-        console.log("sebelum perualgnan", index);
+       
 
         data.student = siswa;
       })
@@ -69,7 +69,8 @@ async function schedule(req, res) {
               student_id: data.student_id,
               semester: value.semester,
               ta_id: value.ta_id,
-              status_absensi : 0
+              status_absensi : 0,
+              status_kehadiran : 6
             };
             await AbsensiModel.create(payload);
           })
@@ -77,7 +78,7 @@ async function schedule(req, res) {
       })
     );
 
-    console.log("ini return");
+    
    
   } catch (err) {
     console.log(err);

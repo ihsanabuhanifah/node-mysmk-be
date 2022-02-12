@@ -11,9 +11,18 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      agenda_kelas.belongsTo(models.kelas);
-      agenda_kelas.belongsTo(models.mapel);
-      agenda_kelas.belongsTo(models.teacher);
+      agenda_kelas.belongsTo(models.kelas, {
+        as: "kelas",
+        foreignKey: "kelas_id",
+      });
+      agenda_kelas.belongsTo(models.mapel, {
+        as: "mapels",
+        foreignKey: "mapel_id",
+      });
+      agenda_kelas.belongsTo(models.teacher, {
+        as: "teacher",
+        foreignKey: "teacher_id",
+      });
     }
   };
   agenda_kelas.init({
