@@ -13,7 +13,7 @@ const { schedule } = require("./controllers/Admin/jadwalController");
 // const rule = new schedule2.RecurrenceRule();
 // rule.minute = 1;
 // console.log(rule.minute);
-const job = cron.schedule("0 5 * * *", schedule);
+const job = cron.schedule("0 4 * * *", schedule);
 app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
