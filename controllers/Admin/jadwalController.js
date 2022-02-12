@@ -2,12 +2,14 @@ const JadwalModel = require("../../models").jadwal;
 const KelasModel = require("../../models").kelas_student;
 const AbsensiModel = require("../../models").absensi_kelas;
 const AgendaKelasModel = require("../../models").agenda_kelas;
+const HalaqohModel = require("../../models").halaqoh;
+const HalaqohStudentModel = require("../../models").halaqoh_student;
 const dotenv = require("dotenv");
 dotenv.config();
 const { formatHari } = require("../../utils/format");
 
 async function schedule(req, res) {
-    console.log('jalan')
+  console.log("jalan");
   try {
     // let hari =   dayjs(timeStamps).format("dddd")
 
@@ -37,21 +39,17 @@ async function schedule(req, res) {
         });
 
         const payload = {
-            tanggal: date,
-            mapel_id: data.mapel_id,
-            kelas_id: data.kelas_id,
-            teacher_id: data.teacher_id,
-           jam_ke : data.jam_ke,
-           
-          
-            semester: data.semester,
-            ta_id: data.ta_id,
-           
-          };
+          tanggal: date,
+          mapel_id: data.mapel_id,
+          kelas_id: data.kelas_id,
+          teacher_id: data.teacher_id,
+          jam_ke: data.jam_ke,
 
-        await AgendaKelasModel.create(payload)
+          semester: data.semester,
+          ta_id: data.ta_id,
+        };
 
-       
+        await AgendaKelasModel.create(payload);
 
         data.student = siswa;
       })
@@ -69,17 +67,14 @@ async function schedule(req, res) {
               student_id: data.student_id,
               semester: value.semester,
               ta_id: value.ta_id,
-              status_absensi : 0,
-              status_kehadiran : 6
+              status_absensi: 0,
+              status_kehadiran: 6,
             };
             await AbsensiModel.create(payload);
           })
         );
       })
     );
-
-    
-   
   } catch (err) {
     console.log(err);
     return res.json({
@@ -89,4 +84,23 @@ async function schedule(req, res) {
   }
 }
 
-module.exports = { schedule };
+async function scheduleHalaqoh(req, res) {
+ 
+  try {
+    // let hari =   dayjs(timeStamps).format("dddd")
+
+    const date = new Date();
+    const hari = await formatHari(date);
+    const halaqoh = await HalaqohStudentModel.findAll({
+        
+    })
+  } catch (err) {
+    console.log(err);
+    return res.json({
+      status: "fail",
+      msg: "Ada Kesalahan",
+    });
+  }
+}
+
+module.exports = { schedule, scheduleHalaqoh };

@@ -23,6 +23,10 @@ module.exports = (sequelize, DataTypes) => {
         as: "teacher",
         foreignKey: "teacher_id",
       });
+      agenda_kelas.belongsTo(models.ta, {
+        as: "ta",
+        foreignKey: "ta_id",
+      });
     }
   };
   agenda_kelas.init({

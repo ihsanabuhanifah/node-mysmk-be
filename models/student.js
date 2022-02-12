@@ -25,6 +25,10 @@ module.exports = (sequelize, DataTypes) => {
         as: "absensi_halaqoh",
         foreignKey: "student_id",
       });
+      student.belongsTo(models.halaqoh, {
+        as: "halaqoh",
+        foreignKey: "halaqoh_id",
+      });
     }
   }
   student.init(

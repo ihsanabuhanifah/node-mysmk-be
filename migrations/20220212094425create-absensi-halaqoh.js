@@ -18,7 +18,7 @@ module.exports = {
           as: "student_id",
         },
       },
-      teacher_id: {
+      halaqoh_id: {
         type: Sequelize.INTEGER,
 
         onDelete: "CASCADE",
@@ -45,7 +45,7 @@ module.exports = {
       },
 
       total_halaman: {
-        type: Sequelize.DECIMAL(3,2),
+        type: Sequelize.DECIMAL(3,1),
       },
       
       juz_ke: {
@@ -61,11 +61,9 @@ module.exports = {
       keterangan: {
         type: Sequelize.STRING,
       },
-      semester: {
-        type: Sequelize.INTEGER,
-      },
-      ta_id: {
-        type: Sequelize.INTEGER,
+      
+      waktu : {
+        type : Sequelize.STRING,
       },
       created_at: {
         allowNull: false,

@@ -177,6 +177,7 @@ async function update(req, res) {
 
     await Promise.all(
       absensi_kehadiran.map(async (data) => {
+        data.status_absensi = 1
         await AbsensiKelasModel.update(data, {
           where: {
             id: data.id,

@@ -16,7 +16,7 @@ module.exports = (sequelize, DataTypes) => {
   absensi_halaqoh.init(
     {
       student_id: DataTypes.INTEGER,
-      teacher_id: DataTypes.INTEGER,
+      halaqoh_id: DataTypes.INTEGER,
       tanggal: DataTypes.DATEONLY,
       dari_surat: DataTypes.INTEGER,
       sampai_surat: DataTypes.INTEGER,
@@ -27,8 +27,8 @@ module.exports = (sequelize, DataTypes) => {
       ketuntasan_juz: DataTypes.INTEGER,
       status_kehadiran: DataTypes.INTEGER,
       keterangan: DataTypes.STRING,
-      semester: DataTypes.INTEGER,
-      ta_id: DataTypes.INTEGER,
+      
+      waktu : DataTypes.STRING,
     },
     {
       sequelize,
