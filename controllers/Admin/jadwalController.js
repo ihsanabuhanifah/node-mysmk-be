@@ -10,6 +10,7 @@ const dotenv = require("dotenv");
 dotenv.config();
 const { formatHari } = require("../../utils/format");
 
+
 async function scheduleKelas(req, res) {
   console.log("jalan");
   try {
@@ -17,6 +18,7 @@ async function scheduleKelas(req, res) {
 
     const date = new Date();
     const hari = await formatHari(date);
+    date.setDate(date.getDate() + 1);
     const jadwal = await JadwalModel.findAll({
       where: {
         hari: hari,
@@ -90,14 +92,19 @@ async function scheduleHalaqoh(req, res) {
   try {
     const date = new Date();
     const hari = await formatHari(date);
+    date.setDate(date.getDate() + 1);
 
-    // if(hari === 'sabtu') return res.json({
-    //     msg : 'hari ini libur'
-    // })
+   
 
-    // if(hari === 'minggu') return res.json({
-    //     msg : 'hari ini libur'
-    // })
+    if (hari === "sabtu")
+      return res.json({
+        msg: "hari ini libur",
+      });
+
+    if (hari === "minggu")
+      return res.json({
+        msg: "hari ini libur",
+      });
     const halaqoh = await HalaqohModel.findAll({
       include: [
         {
@@ -117,7 +124,7 @@ async function scheduleHalaqoh(req, res) {
               student_id: data.student_id,
               halaqoh_id: value.id,
               tanggal: date,
-              status_kehadiran : 6
+              status_kehadiran: 6,
             };
 
             await AbsensiHalaqohModel.create(payload);
