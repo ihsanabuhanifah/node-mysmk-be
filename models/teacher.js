@@ -27,11 +27,11 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "teacher_id",
       });
       teacher.hasMany(models.pelanggaran_siswa, {
-        as: "pelanggaran_siswa",
+        as: "pelaporan",
         foreignKey: "pelapor",
       });
       teacher.hasMany(models.pelanggaran_siswa, {
-        as: "pelanggaran_siswa",
+        as: "penindakan",
         foreignKey: "penindak",
       });
     }

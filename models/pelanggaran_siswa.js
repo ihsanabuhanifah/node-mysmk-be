@@ -20,11 +20,11 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "student_id",
       });
       pelanggaran_siswa.belongsTo(models.teacher, {
-        as: "pelapor",
+        as: "pelaporan",
         foreignKey: "pelapor",
       });
       pelanggaran_siswa.belongsTo(models.teacher, {
-        as: "penindak",
+        as: "penindakan",
         foreignKey: "penindak",
       });
 
