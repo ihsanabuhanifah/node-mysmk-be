@@ -11,14 +11,14 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      pelanggaran.belongsTo(models.tipe_pelanggaran, {
-        as: "tipe",
-        foreignKey: "tipe_id",
-      });
-      pelanggaran.belongsTo(models.kategori_pelanggaran, {
-        as: "kategori",
-        foreignKey: "kate_id",
-      });
+      // pelanggaran.belongsTo(models.tipe_pelanggaran, {
+      //   as: "tipe",
+      //   foreignKey: "tipe_id",
+      // });
+      // pelanggaran.belongsTo(models.kategori_pelanggaran, {
+      //   as: "kategori",
+      //   foreignKey: "kate_id",
+      // });
       pelanggaran.hasMany(models.pelanggaran_siswa, {
         as: "pelanggaran_siswa",
         foreignKey: "pelanggaran_id",
@@ -26,9 +26,9 @@ module.exports = (sequelize, DataTypes) => {
     }
   };
   pelanggaran.init({
-    nama: DataTypes.STRING,
-    tipe_id: DataTypes.INTEGER,
-    kategori_id: DataTypes.INTEGER,
+    nama_pelanggaran: DataTypes.STRING,
+    tipe: DataTypes.STRING,
+    kategori: DataTypes.STRING,
     point: DataTypes.INTEGER,
     hukuman: DataTypes.STRING
   }, {

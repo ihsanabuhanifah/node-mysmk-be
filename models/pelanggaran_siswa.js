@@ -11,6 +11,23 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      pelanggaran_siswa.belongsTo(models.ta, {
+        as: "tahun_ajaran",
+        foreignKey: "ta_id",
+      });
+      pelanggaran_siswa.belongsTo(models.student, {
+        as: "siswa",
+        foreignKey: "student_id",
+      });
+      pelanggaran_siswa.belongsTo(models.teacher, {
+        as: "pelapor",
+        foreignKey: "pelapor",
+      });
+      pelanggaran_siswa.belongsTo(models.teacher, {
+        as: "penindak",
+        foreignKey: "penindak",
+      });
+
     }
   };
   pelanggaran_siswa.init({
@@ -20,7 +37,10 @@ module.exports = (sequelize, DataTypes) => {
     pelanggaran_id: DataTypes.INTEGER,
     status: DataTypes.INTEGER,
     tindakan: DataTypes.STRING,
-    penindak: DataTypes.INTEGER
+    penindak: DataTypes.INTEGER,
+    semester: DataTypes.INTEGER,
+    ta_id: DataTypes.INTEGER
+
   }, {
     sequelize,
     modelName: 'pelanggaran_siswa',

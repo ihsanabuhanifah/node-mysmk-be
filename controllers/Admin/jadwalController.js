@@ -92,7 +92,7 @@ async function scheduleHalaqoh(req, res) {
   try {
     const date = new Date();
     const hari = await formatHari(date);
-    date.setDate(date.getDate() + 1);
+   
 
    
 
@@ -105,6 +105,7 @@ async function scheduleHalaqoh(req, res) {
       return res.json({
         msg: "hari ini libur",
       });
+      date.setDate(date.getDate() + 1);
     const halaqoh = await HalaqohModel.findAll({
       include: [
         {

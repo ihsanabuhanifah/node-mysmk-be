@@ -11,10 +11,10 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      kategori_pelanggaran.hasMany(models.pelanggaran, {
-        as: "pelanggaran",
-        foreignKey: "kategori_id",
-      });
+      // kategori_pelanggaran.hasMany(models.pelanggaran, {
+      //   as: "pelanggaran",
+      //   foreignKey: "kategori_id",
+      // });
     }
   };
   kategori_pelanggaran.init({
