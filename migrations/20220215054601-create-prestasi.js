@@ -25,11 +25,17 @@ module.exports = {
       kategori: {
         type: Sequelize.STRING
       },
-      createdAt: {
+      semester: {
+        type: Sequelize.INTEGER
+      },
+      ta_id: {
+        type: Sequelize.INTEGER
+      },
+      created_at: {
         allowNull: false,
         type: Sequelize.DATE
       },
-      updatedAt: {
+      updated_at: {
         allowNull: false,
         type: Sequelize.DATE
       }

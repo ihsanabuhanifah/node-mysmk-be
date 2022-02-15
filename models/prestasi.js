@@ -15,13 +15,19 @@ module.exports = (sequelize, DataTypes) => {
         as: "siswa",
         foreignKey: "student_id",
       });
+      prestasi.belongsTo(models.ta, {
+        as: "tahun_ajaran",
+        foreignKey: "ta_id",
+      });
     }
   };
   prestasi.init({
     tanggal: DataTypes.DATE,
     student_id: DataTypes.INTEGER,
     prestasi: DataTypes.STRING,
-    kategori: DataTypes.STRING
+    kategori: DataTypes.STRING,
+    semester : DataTypes.INTEGER,
+    ta_id : DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'prestasi',
