@@ -5,11 +5,12 @@ const AgendaKelasModel = require("../../models").agenda_kelas;
 const HalaqohModel = require("../../models").halaqoh;
 const HalaqohStudentModel = require("../../models").halaqoh_student;
 const AbsensiHalaqohModel = require("../../models").absensi_halaqoh;
+const ScheduleMonitorModel = require("../../models").scheduleMonitor;
 const models = require("../../models");
 const dotenv = require("dotenv");
 dotenv.config();
 const { formatHari } = require("../../utils/format");
-
+const dayjs = require("dayjs");
 
 async function scheduleKelas(req, res) {
   console.log("jalan");
@@ -79,6 +80,15 @@ async function scheduleKelas(req, res) {
         );
       })
     );
+
+    let laporan = {
+      tanggal: date,
+      keterangan: `Absensi kelas tanggal ${dayjs(date).format(
+        "DD-MM-YY"
+      )} berhasil dibuat`,
+      kegiatan : 'KBM'
+    };
+    await ScheduleMonitorModel.create(laporan);
   } catch (err) {
     console.log(err);
     return res.status(403).json({
@@ -92,9 +102,6 @@ async function scheduleHalaqoh(req, res) {
   try {
     const date = new Date();
     const hari = await formatHari(date);
-   
-
-   
 
     if (hari === "sabtu")
       return res.json({
@@ -105,7 +112,7 @@ async function scheduleHalaqoh(req, res) {
       return res.json({
         msg: "hari ini libur",
       });
-      date.setDate(date.getDate() + 1);
+    date.setDate(date.getDate() + 1);
     const halaqoh = await HalaqohModel.findAll({
       include: [
         {
@@ -134,9 +141,17 @@ async function scheduleHalaqoh(req, res) {
       })
     );
 
-    return res.json({
-      msg: "Success",
-    });
+    let laporan = {
+      tanggal: date,
+      keterangan: `Absensi Halaqoh tanggal ${dayjs(date).format(
+        "DD-MM-YY"
+      )} berhasil dibuat`,
+      kegiatan : 'Halaqoh'
+    };
+    await ScheduleMonitorModel.create(laporan);
+    // return res.json({
+    //   msg: "Success",
+    // });
   } catch (err) {
     console.log(err);
     return res.status(403).json({
