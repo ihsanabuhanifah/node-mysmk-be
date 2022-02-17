@@ -97,10 +97,10 @@ async function scheduleKelas(req, res) {
     });
   } catch (err) {
     console.log(err);
-    return res.status(403).json({
-      status: "fail",
-      msg: "Ada Kesalahan",
-    });
+    // return res.status(403).json({
+    //   status: "fail",
+    //   msg: "Ada Kesalahan",
+    // });
   }
 }
 
@@ -160,9 +160,9 @@ async function scheduleHalaqoh(req, res) {
     };
     await ScheduleMonitorModel.create(laporan);
     
-    return res.json({
-      msg: "Success",
-    });
+    // return res.json({
+    //   msg: "Success",
+    // });
   } catch (err) {
     console.log(err);
     return res.status(403).json({
