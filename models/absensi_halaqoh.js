@@ -17,7 +17,6 @@ module.exports = (sequelize, DataTypes) => {
         as: "halaqoh",
         foreignKey: "halaqoh_id",
       });
-     
     }
   }
   absensi_halaqoh.init(
@@ -35,8 +34,8 @@ module.exports = (sequelize, DataTypes) => {
       status_kehadiran: DataTypes.INTEGER,
       keterangan: DataTypes.STRING,
       kegiatan: DataTypes.INTEGER,
-      
-      waktu : DataTypes.STRING,
+
+      waktu: DataTypes.STRING,
     },
     {
       sequelize,

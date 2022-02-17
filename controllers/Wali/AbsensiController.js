@@ -60,7 +60,7 @@ async function list(req, res) {
     }
     try {
       const absensi = await sequelize.query(
-        `SELECT
+        `SELECT DISTINCT
         a.id,
         a.tanggal,
         e.nama_guru,
@@ -78,13 +78,13 @@ async function list(req, res) {
         a.updated_at
       FROM
         absensi_kelas AS a
-      JOIN students AS b ON (a.student_id = b.id)
-      JOIN kelas AS c ON (a.kelas_id = c.id)
-      JOIN mapels AS d ON (a.mapel_id = d.id)
-      JOIN teachers AS e ON (a.teacher_id = e.id)
-      JOIN ta AS f ON (a.ta_id = f.id)
-      JOIN status_kehadirans AS g ON (a.status_kehadiran = g.id)
-      JOIN agenda_kelas AS h ON (a.tanggal = h.tanggal AND a.teacher_id = h.teacher_id AND a.mapel_id = h.mapel_id AND a.kelas_id = h.kelas_id  )
+      LEFT JOIN students AS b ON (a.student_id = b.id)
+      LEFT JOIN kelas AS c ON (a.kelas_id = c.id)
+      LEFT JOIN mapels AS d ON (a.mapel_id = d.id)
+      LEFT JOIN teachers AS e ON (a.teacher_id = e.id)
+      LEFT JOIN ta AS f ON (a.ta_id = f.id)
+      LEFT JOIN status_kehadirans AS g ON (a.status_kehadiran = g.id)
+      LEFT JOIN agenda_kelas AS h ON (a.tanggal = h.tanggal AND a.teacher_id = h.teacher_id AND a.mapel_id = h.mapel_id AND a.kelas_id = h.kelas_id  )
       WHERE
         a.student_id = ${req.StudentId} ${namaMapel} ${tahunAjaran} ${semester} ${tanggal} ${statusKehadiran} 
       ORDER BY
