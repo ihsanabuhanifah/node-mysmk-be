@@ -5,7 +5,10 @@ const AgendaKelasModel = require("../../models").agenda_kelas;
 const HalaqohModel = require("../../models").halaqoh;
 const HalaqohStudentModel = require("../../models").halaqoh_student;
 const AbsensiHalaqohModel = require("../../models").absensi_halaqoh;
-const ScheduleMonitorModel = require("../../models").scheduleMonitor;
+const ScheduleMonitorModel = require("../../models").schedule_monitor;
+
+
+
 const models = require("../../models");
 const dotenv = require("dotenv");
 dotenv.config();
@@ -86,9 +89,12 @@ async function scheduleKelas(req, res) {
       keterangan: `Absensi kelas tanggal ${dayjs(date).format(
         "DD-MM-YY"
       )} berhasil dibuat`,
-      kegiatan : 'KBM'
+      kegiatan: "KBM",
     };
     await ScheduleMonitorModel.create(laporan);
+    return res.json({
+      msg: "Success",
+    });
   } catch (err) {
     console.log(err);
     return res.status(403).json({
@@ -146,12 +152,13 @@ async function scheduleHalaqoh(req, res) {
       keterangan: `Absensi Halaqoh tanggal ${dayjs(date).format(
         "DD-MM-YY"
       )} berhasil dibuat`,
-      kegiatan : 'Halaqoh'
+      kegiatan: "Halaqoh",
     };
     await ScheduleMonitorModel.create(laporan);
-    // return res.json({
-    //   msg: "Success",
-    // });
+    
+    return res.json({
+      msg: "Success",
+    });
   } catch (err) {
     console.log(err);
     return res.status(403).json({

@@ -1,7 +1,7 @@
 'use strict';
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('scheduleMonitors', {
+    await queryInterface.createTable('schedule_monitors', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -14,8 +14,8 @@ module.exports = {
       keterangan: {
         type: Sequelize.STRING
       },
-      kegiatan : {
-        type :Sequelize.STRING
+      kegiatan: {
+        type: Sequelize.STRING
       },
       created_at: {
         allowNull: false,
@@ -28,6 +28,6 @@ module.exports = {
     });
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('scheduleMonitors');
+    await queryInterface.dropTable('schedule_monitors');
   }
 };
