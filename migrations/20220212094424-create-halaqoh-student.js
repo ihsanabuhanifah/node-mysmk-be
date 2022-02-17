@@ -9,10 +9,24 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       halaqoh_id: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
+       
+        onDelete: "CASCADE",
+        references: {
+          model: "halaqohs",
+          key: "id",
+          as: "halaqoh_id",
+        },
       },
       student_id: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
+        onDelete: "CASCADE",
+        references: {
+          model: "students",
+          key: "id",
+          as: "students_id",
+        },
+        
       },
       created_at: {
         allowNull: false,

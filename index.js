@@ -21,7 +21,7 @@ const date = new Date();
 
 console.log(dayjs(date).format("hh:mm:ss"));
 const job = cron.schedule("5 4 * * *", scheduleKelas);
-const halaqoh = cron.schedule("10 4 * * *", scheduleHalaqoh);
+const halaqoh = cron.schedule("35 4 * * *", scheduleHalaqoh);
 app.use(cors());
 app.use(express.json());
 app.use(cookieParser());

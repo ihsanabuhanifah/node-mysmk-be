@@ -120,6 +120,7 @@ async function scheduleHalaqoh(req, res) {
       });
     date.setDate(date.getDate() + 1);
     const halaqoh = await HalaqohModel.findAll({
+      attributes : ['id'],
       include: [
         {
           model: models.halaqoh_student,
@@ -129,6 +130,9 @@ async function scheduleHalaqoh(req, res) {
         },
       ],
     });
+
+
+   
 
     await Promise.all(
       halaqoh.map(async (value) => {
@@ -164,6 +168,7 @@ async function scheduleHalaqoh(req, res) {
     return res.status(403).json({
       status: "fail",
       msg: "Ada Kesalahan",
+      data : err
     });
   }
 }
