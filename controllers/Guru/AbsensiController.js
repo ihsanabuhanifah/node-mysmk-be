@@ -1,9 +1,60 @@
 const AbsensiKelasModel = require("../../models").absensi_kelas;
 const AgendaKelasModel = require("../../models").agenda_kelas;
+const JadwalModel = require("../../models").jadwal;
 const models = require("../../models");
 const { Op } = require("sequelize");
 const { check } = require("../../utils/paramsQuery");
 
+async function listJadwal(req, res) {
+  try {
+    const { hari } = req.query;
+    const jadwal = await JadwalModel.findAndCountAll({
+      attributes: ["id", "hari", "jam_ke", "semester"],
+      include: [
+        {
+          model: models.kelas,
+          require: true,
+          as: "kelas",
+          attributes: ["id", "nama_kelas"],
+        },
+        {
+          model: models.teacher,
+          require: true,
+          as: "teacher",
+          attributes: ["id", "nama_guru"],
+        },
+        {
+          model: models.mapel,
+          require: true,
+          as: "mapel",
+          attributes: ["id", "nama_mapel"],
+        },
+        {
+          model: models.ta,
+          require: true,
+          as: "tahun_ajaran",
+          attributes: ["id", "nama_tahun_ajaran"],
+        },
+      ],
+      where: {
+        teacher_id: req.teacher_id,
+        status: 1,
+        ...(hari !== undefined && { hari: hari }),
+      },
+    });
+    return res.json({
+      status: "Success",
+      msg: "Jadwal ditemukan",
+      data: jadwal,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(403).json({
+      status: "Fail",
+      msg: "Terjadi Kesalahan",
+    });
+  }
+}
 async function createAbsensi(req, res) {
   try {
     let {
@@ -80,6 +131,7 @@ async function listAbsensi(req, res) {
     sampaiTanggal,
     page,
     pageSize,
+    
   } = req.query;
   try {
     const agenda = await AgendaKelasModel.findAll({
@@ -88,6 +140,7 @@ async function listAbsensi(req, res) {
         ...(semester !== undefined && { semester: semester }),
         ...(dariTanggal !== undefined && {
           tanggal: { [Op.between]: [dariTanggal, sampaiTanggal] },
+          teacher_id : req.teacher_id
         }),
       },
     });
@@ -206,4 +259,4 @@ async function updateAbsensi(req, res) {
     });
   }
 }
-module.exports = { createAbsensi, listAbsensi, updateAbsensi };
+module.exports = { createAbsensi, listAbsensi, updateAbsensi, listJadwal };
