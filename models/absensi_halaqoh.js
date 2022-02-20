@@ -10,12 +10,20 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       absensi_halaqoh.belongsTo(models.student, {
-        as: "student",
-        foreignKey: "students_id",
+        as: "siswa",
+        foreignKey: "student_id",
       });
       absensi_halaqoh.belongsTo(models.halaqoh, {
         as: "halaqoh",
         foreignKey: "halaqoh_id",
+      });
+      absensi_halaqoh.belongsTo(models.alquran, {
+        as: "surat_awal",
+        foreignKey: "dari_surat",
+      });
+      absensi_halaqoh.belongsTo(models.alquran, {
+        as: "surat_akhir",
+        foreignKey: "sampai_surat",
       });
     }
   }
@@ -33,8 +41,7 @@ module.exports = (sequelize, DataTypes) => {
       ketuntasan_juz: DataTypes.INTEGER,
       status_kehadiran: DataTypes.INTEGER,
       keterangan: DataTypes.STRING,
-      kegiatan: DataTypes.INTEGER,
-
+      status_absensi: DataTypes.TINYINT,
       waktu: DataTypes.STRING,
     },
     {

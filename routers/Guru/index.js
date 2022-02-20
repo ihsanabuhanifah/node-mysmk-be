@@ -13,6 +13,6 @@ guru.get("/absensi/notifikasi", notifikasiAbsensi)
 
 guru.get("/jadwal/list", listJadwal)
 //halaqoh
-guru.put("/halaqoh/list", listHalaqoh)
+guru.get("/halaqoh/list", listHalaqoh)
 guru.put("/halaqoh/update", updateHalaqoh)
 module.exports = guru;

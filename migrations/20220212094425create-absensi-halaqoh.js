@@ -61,7 +61,7 @@ module.exports = {
       keterangan: {
         type: Sequelize.STRING,
       },
-      kegiatan : {
+      status_absensi : {
         type : Sequelize.INTEGER,
       },
       

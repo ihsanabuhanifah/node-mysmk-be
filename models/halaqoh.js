@@ -20,7 +20,7 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "teacher_id",
       });
       halaqoh.belongsTo(models.ta, {
-        as: "ta",
+        as: "tahun_ajaran",
         foreignKey: "ta_id",
       });
     }

@@ -14,9 +14,6 @@ const {
   scheduleHalaqoh,
 } = require("./controllers/Admin/jadwalController");
 
-// const rule = new schedule2.RecurrenceRule();
-// rule.minute = 1;
-// console.log(rule.minute);
 const date = new Date();
 
 console.log(dayjs(date).format("hh:mm:ss"));

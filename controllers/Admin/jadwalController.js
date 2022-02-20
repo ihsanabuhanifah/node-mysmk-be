@@ -7,8 +7,6 @@ const HalaqohStudentModel = require("../../models").halaqoh_student;
 const AbsensiHalaqohModel = require("../../models").absensi_halaqoh;
 const ScheduleMonitorModel = require("../../models").schedule_monitor;
 
-
-
 const models = require("../../models");
 const dotenv = require("dotenv");
 dotenv.config();
@@ -109,18 +107,18 @@ async function scheduleHalaqoh(req, res) {
     const date = new Date();
     const hari = await formatHari(date);
 
-    if (hari === "sabtu")
-      return res.json({
-        msg: "hari ini libur",
-      });
+    // if (hari === "sabtu")
+    //   return res.json({
+    //     msg: "hari ini libur",
+    //   });
 
-    if (hari === "minggu")
-      return res.json({
-        msg: "hari ini libur",
-      });
+    // if (hari === "minggu")
+    //   return res.json({
+    //     msg: "hari ini libur",
+    //   });
     date.setDate(date.getDate() + 1);
     const halaqoh = await HalaqohModel.findAll({
-      attributes : ['id'],
+      attributes: ["id"],
       include: [
         {
           model: models.halaqoh_student,
@@ -131,9 +129,6 @@ async function scheduleHalaqoh(req, res) {
       ],
     });
 
-
-   
-
     await Promise.all(
       halaqoh.map(async (value) => {
         await Promise.all(
@@ -143,6 +138,8 @@ async function scheduleHalaqoh(req, res) {
               halaqoh_id: value.id,
               tanggal: date,
               status_kehadiran: 6,
+              status_absensi: 0,
+              waktu : 'pagi'
             };
 
             await AbsensiHalaqohModel.create(payload);
@@ -159,16 +156,16 @@ async function scheduleHalaqoh(req, res) {
       kegiatan: "Halaqoh",
     };
     await ScheduleMonitorModel.create(laporan);
-    
-    // return res.json({
-    //   msg: "Success",
-    // });
+
+    return res.json({
+      msg: "Success",
+    });
   } catch (err) {
     console.log(err);
     return res.status(403).json({
       status: "fail",
       msg: "Ada Kesalahan",
-      data : err
+      data: err,
     });
   }
 }

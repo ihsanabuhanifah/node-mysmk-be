@@ -3,9 +3,43 @@ const KelasModel = require("../../models").kelas;
 const KelasSiswaModel = require("../../models").kelas_student;
 const TahunAjaranModel = require("../../models").ta;
 const GuruModel = require("../../models").teacher;
-const RoleModel = require("../../models").role
+const RoleModel = require("../../models").role;
+const AlquranModel = require("../../models").alquran;
 const { sequelize } = require("../../models");
 const { QueryTypes } = require("sequelize");
+const { Op } = require("sequelize");
+
+const listAlquran = async (req, res) => {
+  try {
+    const { page, pageSize, keyword } = req.query;
+    const mapel = await AlquranModel.findAll({
+      attributes: ["id", "nama_surat"],
+      limit: pageSize,
+      offset: page,
+      where: {
+        ...(keyword !== undefined && {
+          nama_surat: {
+            [Op.like]: `%${keyword}%`,
+          },
+        }),
+      },
+      order: [["id", "desc"]],
+    });
+
+    return res.json({
+      status: "Success",
+      totalMapel: mapel.length,
+
+      data: mapel,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(403).json({
+      status: "fail",
+      msg: "Terjadi Kesalahan",
+    });
+  }
+};
 const listMapel = async (req, res) => {
   try {
     const mapel = await MapelModel.findAll({
@@ -26,10 +60,9 @@ const listMapel = async (req, res) => {
   }
 };
 const listGuru = async (req, res) => {
-  
   try {
     const guru = await GuruModel.findAll({
-      attributes : ['id' , 'nama_guru']
+      attributes: ["id", "nama_guru"],
     });
 
     return res.json({
@@ -126,7 +159,7 @@ const listTahunAjaran = async (req, res) => {
 const listRole = async (req, res) => {
   try {
     const role = await RoleModel.findAll({
-      attributes : ["id" , 'role_name' , 'remarks']
+      attributes: ["id", "role_name", "remarks"],
     });
 
     return res.json({
@@ -148,5 +181,6 @@ module.exports = {
   listKelasSiswa,
   listTahunAjaran,
   listGuru,
-  listRole
+  listRole,
+  listAlquran,
 };

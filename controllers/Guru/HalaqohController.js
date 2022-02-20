@@ -17,33 +17,48 @@ async function listHalaqoh(req, res) {
     pageSize,
   } = req.query;
   try {
-    const agenda = await AgendaKelasModel.findAll({
-      // attributes: ["id","jam_ke" , "materi" , 'tanggal' , 'semester' , 'ta_id'],
+    const halaqoh = await HalaqohModel.findAndCountAll({
+      attributes: [
+        "id",
+        "tanggal",
+       
+        "dari_ayat",
+      
+        "sampai_ayat",
+        "total_halaman",
+        "juz_ke",
+        "ketuntasan_juz",
+        "status_kehadiran",
+        "keterangan",
+        "status_absensi",
+        "waktu",
+      ],
       where: {
         ...(semester !== undefined && { semester: semester }),
         ...(dariTanggal !== undefined && {
           tanggal: { [Op.between]: [dariTanggal, sampaiTanggal] },
         }),
       },
-    });
-    const absensi = await AbsensiKelasModel.findAll({
-      attributes: ["id", "semester", "tanggal", "keterangan"],
-      where: {
-        ...(semester !== undefined && { semester: semester }),
-        ...(dariTanggal !== undefined && {
-          tanggal: { [Op.between]: [dariTanggal, sampaiTanggal] },
-        }),
-      },
-      order: [["tanggal", "desc"]],
-      limit: pageSize,
-      offset: page,
+
       include: [
+
         {
-          model: models.kelas,
+          model: models.halaqoh,
           require: true,
-          as: "kelas",
-          attributes: ["id", "nama_kelas"],
-          where: kelas_id !== undefined ? { id: kelas_id } : {},
+          as: "halaqoh",
+          attributes: ["id", "nama_kelompok", "semester"],
+          where: {
+            teacher_id: req.teacher_id,
+          },
+          include: [
+            {
+              model: models.ta,
+              require: true,
+              as: "tahun_ajaran",
+              attributes: ["id", "nama_tahun_ajaran"],
+            },
+          ],
+          // where: kelas_id !== undefined ? { id: kelas_id } : {},
         },
         {
           model: models.student,
@@ -53,40 +68,30 @@ async function listHalaqoh(req, res) {
           where: student_id !== undefined ? { id: student_id } : {},
         },
         {
-          model: models.mapel,
+          model: models.alquran,
           require: true,
-          as: "mapel",
-          attributes: ["id", "nama_mapel"],
-          where: mapel_id !== undefined ? { id: mapel_id } : {},
+          as: "surat_awal",
+          attributes: ["id", "nama_surat"],
+          
         },
         {
-          model: models.ta,
+          model: models.alquran,
           require: true,
-          as: "tahun_ajaran",
-          attributes: ["id", "nama_tahun_ajaran"],
-          where:
-            tahun_ajaran !== undefined
-              ? { nama_tahun_ajaran: tahun_ajaran }
-              : {},
-        },
-        {
-          model: models.status_kehadiran,
-          require: true,
-          as: "kehadiran",
-          attributes: ["id", "nama_status_kehadiran"],
-          where:
-            status_kehadiran !== undefined
-              ? { nama_status_kehadiran: status_kehadiran }
-              : {},
+          as: "surat_akhir",
+          attributes: ["id", "nama_surat"],
+          
         },
       ],
+
+      order: [["tanggal", "desc"]],
+      limit: pageSize,
+      offset: page,
     });
 
     return res.json({
       status: "Success",
       msg: "Absensi ditemukan",
-      absensi,
-      agenda,
+      halaqoh,
     });
   } catch (err) {
     console.log(err);
