@@ -6,7 +6,7 @@ const dotenv = require("dotenv");
 
 dotenv.config();
 const { formatDate } = require("../../utils/format");
-const { paramsQueryAND } = require("../../utils/paramsQuery");
+
 async function list(req, res) {
   try {
     let {
@@ -60,7 +60,7 @@ async function list(req, res) {
     }
     try {
       const absensi = await sequelize.query(
-        `SELECT
+        `SELECT DISTINCT
         a.id,
         a.tanggal,
         e.nama_guru,
@@ -78,13 +78,13 @@ async function list(req, res) {
         a.updated_at
       FROM
         absensi_kelas AS a
-      JOIN students AS b ON (a.student_id = b.id)
-      JOIN kelas AS c ON (a.kelas_id = c.id)
-      JOIN mapels AS d ON (a.mapel_id = d.id)
-      JOIN teachers AS e ON (a.teacher_id = e.id)
-      JOIN ta AS f ON (a.ta_id = f.id)
-      JOIN status_kehadirans AS g ON (a.status_kehadiran = g.id)
-      JOIN agenda_kelas AS h ON (a.tanggal = h.tanggal AND a.teacher_id = h.teacher_id AND a.mapel_id = h.mapel_id AND a.kelas_id = h.kelas_id  )
+      LEFT JOIN students AS b ON (a.student_id = b.id)
+      LEFT JOIN kelas AS c ON (a.kelas_id = c.id)
+      LEFT JOIN mapels AS d ON (a.mapel_id = d.id)
+      LEFT JOIN teachers AS e ON (a.teacher_id = e.id)
+      LEFT JOIN ta AS f ON (a.ta_id = f.id)
+      LEFT JOIN status_kehadirans AS g ON (a.status_kehadiran = g.id)
+      LEFT JOIN agenda_kelas AS h ON (a.tanggal = h.tanggal AND a.teacher_id = h.teacher_id AND a.mapel_id = h.mapel_id AND a.kelas_id = h.kelas_id  )
       WHERE
         a.student_id = ${req.StudentId} ${namaMapel} ${tahunAjaran} ${semester} ${tanggal} ${statusKehadiran} 
       ORDER BY
@@ -218,20 +218,20 @@ async function listHalaqoh(req, res) {
       statusKehadiran,
       dariTanggal,
       sampaiTanggal,
-      namaMapel,
+
       page,
       pageSize,
       orderBy,
     } = req.query;
 
     if (tahunAjaran !== undefined) {
-      tahunAjaran = `AND e.nama_tahun_ajaran = '${tahunAjaran}'`;
+      tahunAjaran = `AND h.nama_tahun_ajaran = '${tahunAjaran}'`;
     } else {
       tahunAjaran = "";
     }
-    // paramsQueryAND(tahunAjaran, 'tahunAjaran')
+
     if (semester !== undefined) {
-      semester = `AND a.semester = '${semester}'`;
+      semester = `AND b.semester = '${semester}'`;
     } else {
       semester = "";
     }
@@ -240,11 +240,7 @@ async function listHalaqoh(req, res) {
     } else {
       statusKehadiran = "";
     }
-    if (namaMapel !== undefined) {
-      namaMapel = `AND a.mapel_id = '${namaMapel}'`;
-    } else {
-      namaMapel = "";
-    }
+
     if (dariTanggal !== undefined && sampaiTanggal !== undefined) {
       tanggal = `AND a.tanggal BETWEEN  '${dariTanggal}' AND '${sampaiTanggal}' `;
     } else {
@@ -266,7 +262,8 @@ async function listHalaqoh(req, res) {
       `SELECT
       a.id,
       a.tanggal,
-      b.nama_guru AS nama_pengampu,
+      b.nama_kelompok,
+      g.nama_guru,
       c.nama_surat AS dari_surat,
       c.nama_surat_arabic AS dari_surat_arabic,
       a.dari_ayat,
@@ -275,20 +272,21 @@ async function listHalaqoh(req, res) {
       a.sampai_ayat,
       a.total_halaman,
       f.nama_status_kehadiran AS status_kehadiran,
+      b. semester AS semester  ,
+      h. nama_tahun_ajaran AS tahun_ajaran,
       a.keterangan,
-      a.semester,
-      e.nama_tahun_ajaran AS tahun_ajaran,
       a.created_at,
       a.updated_at
-    FROM
-      absensi_halaqohs AS a
-    LEFT JOIN teachers AS b ON (a.teacher_id = b.id)
+    FROM absensi_halaqohs AS a
+    LEFT JOIN halaqohs AS b ON (a.halaqoh_id = b.id)
     LEFT JOIN alqurans AS c ON (a.dari_surat = c.id)
     LEFT JOIN alqurans AS d ON (a.sampai_surat = d.id)
-    LEFT JOIN ta AS e ON (a.ta_id = e.id) 
+  
     LEFT JOIN status_kehadirans AS f ON (a.status_kehadiran = f.id)
+    LEFT JOIN teachers AS g ON (b.teacher_id = g.id)
+    LEFT JOIN ta AS h ON (b.ta_id = h.id)
     WHERE
-      a.student_id = ${req.StudentId} ${namaMapel} ${tahunAjaran} ${semester} ${tanggal} ${statusKehadiran}
+      a.student_id = ${req.StudentId}  ${semester} ${tahunAjaran}  ${tanggal} ${statusKehadiran}
     ORDER BY
       a.tanggal ${orderBy}
     ${limit}
