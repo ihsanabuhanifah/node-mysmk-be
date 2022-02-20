@@ -1,10 +1,61 @@
 const AbsensiKelasModel = require("../../models").absensi_kelas;
 const AgendaKelasModel = require("../../models").agenda_kelas;
+const JadwalModel = require("../../models").jadwal;
 const models = require("../../models");
 const { Op } = require("sequelize");
 const { check } = require("../../utils/paramsQuery");
 
-async function create(req, res) {
+async function listJadwal(req, res) {
+  try {
+    const { hari } = req.query;
+    const jadwal = await JadwalModel.findAndCountAll({
+      attributes: ["id", "hari", "jam_ke", "semester"],
+      include: [
+        {
+          model: models.kelas,
+          require: true,
+          as: "kelas",
+          attributes: ["id", "nama_kelas"],
+        },
+        {
+          model: models.teacher,
+          require: true,
+          as: "teacher",
+          attributes: ["id", "nama_guru"],
+        },
+        {
+          model: models.mapel,
+          require: true,
+          as: "mapel",
+          attributes: ["id", "nama_mapel"],
+        },
+        {
+          model: models.ta,
+          require: true,
+          as: "tahun_ajaran",
+          attributes: ["id", "nama_tahun_ajaran"],
+        },
+      ],
+      where: {
+        teacher_id: req.teacher_id,
+        status: 1,
+        ...(hari !== undefined && { hari: hari }),
+      },
+    });
+    return res.json({
+      status: "Success",
+      msg: "Jadwal ditemukan",
+      data: jadwal,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(403).json({
+      status: "Fail",
+      msg: "Terjadi Kesalahan",
+    });
+  }
+}
+async function createAbsensi(req, res) {
   try {
     let {
       tanggal,
@@ -68,7 +119,7 @@ async function create(req, res) {
   }
 }
 
-async function index(req, res) {
+async function listAbsensi(req, res) {
   let {
     kelas_id,
     student_id,
@@ -82,16 +133,22 @@ async function index(req, res) {
     pageSize,
   } = req.query;
   try {
-
     const agenda = await AgendaKelasModel.findAll({
       // attributes: ["id","jam_ke" , "materi" , 'tanggal' , 'semester' , 'ta_id'],
       where: {
         ...(semester !== undefined && { semester: semester }),
         ...(dariTanggal !== undefined && {
           tanggal: { [Op.between]: [dariTanggal, sampaiTanggal] },
+          ...(mapel_id !== undefined && {
+            mapel_id: mapel_id,
+          }),
+          ...(kelas_id !== undefined && {
+            kelas_id: kelas_id,
+          }),
+          teacher_id: req.teacher_id,
         }),
       },
-    })
+    });
     const absensi = await AbsensiKelasModel.findAll({
       attributes: ["id", "semester", "tanggal", "keterangan"],
       where: {
@@ -99,6 +156,7 @@ async function index(req, res) {
         ...(dariTanggal !== undefined && {
           tanggal: { [Op.between]: [dariTanggal, sampaiTanggal] },
         }),
+        teacher_id: req.teacher_id,
       },
       order: [["tanggal", "desc"]],
       limit: pageSize,
@@ -149,10 +207,10 @@ async function index(req, res) {
     });
 
     return res.json({
-      status : 'Success',
-      msg : 'Absensi ditemukan',
+      status: "Success",
+      msg: "Absensi ditemukan",
       absensi,
-      agenda 
+      agenda,
     });
   } catch (err) {
     console.log(err);
@@ -163,7 +221,7 @@ async function index(req, res) {
   }
 }
 
-async function update(req, res) {
+async function updateAbsensi(req, res) {
   try {
     let {
       // tanggal,
@@ -177,7 +235,7 @@ async function update(req, res) {
 
     await Promise.all(
       absensi_kehadiran.map(async (data) => {
-        data.status_absensi = 1
+        data.status_absensi = 1;
         await AbsensiKelasModel.update(data, {
           where: {
             id: data.id,
@@ -195,9 +253,9 @@ async function update(req, res) {
       })
     );
 
-    return res.status(201).json({
+    return res.status(200).json({
       status: "Success",
-      msg: "Absensi Berhasil di Simpan",
+      msg: "Absensi Kelas Berhasil di Simpan",
     });
   } catch (err) {
     console.log(err);
@@ -207,4 +265,50 @@ async function update(req, res) {
     });
   }
 }
-module.exports = { create, index, update };
+
+const notifikasiAbsensi = async (req, res) => {
+  try {
+    const notifikasi = await AbsensiKelasModel.findAll({
+      attributes: ["id", "tanggal"],
+      where: {
+        teacher_id: req.teacher_id,
+        status_absensi: 0,
+      },
+      include: [
+        {
+          model: models.kelas,
+          require: true,
+          as: "kelas",
+          attributes: ["id", "nama_kelas"],
+        },
+        {
+          model: models.mapel,
+          require: true,
+          as: "mapel",
+          attributes: ["id", "nama_mapel"],
+        },
+      ],
+      order: [["tanggal", "desc"]],
+      group: "tanggal",
+    });
+
+    return res.json({
+      status: "Success",
+      msg: "notifikasi absensi",
+      data: notifikasi,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(403).json({
+      status: "Fail",
+      msg: "Terjadi Kesalahan",
+    });
+  }
+};
+module.exports = {
+  createAbsensi,
+  listAbsensi,
+  updateAbsensi,
+  listJadwal,
+  notifikasiAbsensi,
+};

@@ -36,7 +36,7 @@ async function login(req, res) {
     }
     const verify = bcrypt.compareSync(password, user.password);
     if (!verify) {
-      return res.status(404).json({
+      return res.status(422).json({
         status: "fail",
         msg: "Email dan Pasword tidak sama",
       });

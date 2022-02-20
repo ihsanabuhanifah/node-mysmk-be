@@ -4,17 +4,25 @@ const AbsensiModel = require("../../models").absensi_kelas;
 const AgendaKelasModel = require("../../models").agenda_kelas;
 const HalaqohModel = require("../../models").halaqoh;
 const HalaqohStudentModel = require("../../models").halaqoh_student;
+const AbsensiHalaqohModel = require("../../models").absensi_halaqoh;
+const ScheduleMonitorModel = require("../../models").schedule_monitor;
+
+
+
+const models = require("../../models");
 const dotenv = require("dotenv");
 dotenv.config();
 const { formatHari } = require("../../utils/format");
+const dayjs = require("dayjs");
 
-async function schedule(req, res) {
+async function scheduleKelas(req, res) {
   console.log("jalan");
   try {
     // let hari =   dayjs(timeStamps).format("dddd")
 
     const date = new Date();
     const hari = await formatHari(date);
+    date.setDate(date.getDate() + 1);
     const jadwal = await JadwalModel.findAll({
       where: {
         hari: hari,
@@ -75,32 +83,94 @@ async function schedule(req, res) {
         );
       })
     );
+
+    let laporan = {
+      tanggal: date,
+      keterangan: `Absensi kelas tanggal ${dayjs(date).format(
+        "DD-MM-YY"
+      )} berhasil dibuat`,
+      kegiatan: "KBM",
+    };
+    await ScheduleMonitorModel.create(laporan);
+    return res.json({
+      msg: "Success",
+    });
   } catch (err) {
     console.log(err);
-    return res.json({
-      status: "fail",
-      msg: "Ada Kesalahan",
-    });
+    // return res.status(403).json({
+    //   status: "fail",
+    //   msg: "Ada Kesalahan",
+    // });
   }
 }
 
 async function scheduleHalaqoh(req, res) {
- 
   try {
-    // let hari =   dayjs(timeStamps).format("dddd")
-
     const date = new Date();
     const hari = await formatHari(date);
-    const halaqoh = await HalaqohStudentModel.findAll({
-        
-    })
+
+    if (hari === "sabtu")
+      return res.json({
+        msg: "hari ini libur",
+      });
+
+    if (hari === "minggu")
+      return res.json({
+        msg: "hari ini libur",
+      });
+    date.setDate(date.getDate() + 1);
+    const halaqoh = await HalaqohModel.findAll({
+      attributes : ['id'],
+      include: [
+        {
+          model: models.halaqoh_student,
+          require: true,
+          as: "halaqoh_student",
+          attributes: ["id", "student_id"],
+        },
+      ],
+    });
+
+
+   
+
+    await Promise.all(
+      halaqoh.map(async (value) => {
+        await Promise.all(
+          value.halaqoh_student.map(async (data) => {
+            const payload = {
+              student_id: data.student_id,
+              halaqoh_id: value.id,
+              tanggal: date,
+              status_kehadiran: 6,
+            };
+
+            await AbsensiHalaqohModel.create(payload);
+          })
+        );
+      })
+    );
+
+    let laporan = {
+      tanggal: date,
+      keterangan: `Absensi Halaqoh tanggal ${dayjs(date).format(
+        "DD-MM-YY"
+      )} berhasil dibuat`,
+      kegiatan: "Halaqoh",
+    };
+    await ScheduleMonitorModel.create(laporan);
+    
+    // return res.json({
+    //   msg: "Success",
+    // });
   } catch (err) {
     console.log(err);
-    return res.json({
+    return res.status(403).json({
       status: "fail",
       msg: "Ada Kesalahan",
+      data : err
     });
   }
 }
 
-module.exports = { schedule, scheduleHalaqoh };
+module.exports = { scheduleKelas, scheduleHalaqoh };

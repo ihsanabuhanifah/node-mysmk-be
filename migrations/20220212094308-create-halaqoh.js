@@ -32,14 +32,14 @@ module.exports = {
           as: "ta_id",
         },
       },
-      status : {
-        type : Sequelize.INTEGER
+      status: {
+        type: Sequelize.INTEGER,
       },
-      createdAt: {
+      created_at: {
         allowNull: false,
         type: Sequelize.DATE,
       },
-      updatedAt: {
+      updated_at: {
         allowNull: false,
         type: Sequelize.DATE,
       },

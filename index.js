@@ -5,15 +5,23 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 require("dotenv").config();
 const port = process.env.PORT || 8000;
+const dayjs = require("dayjs");
 
 const { sequelize } = require("./models");
 const cron = require("node-cron");
-const { schedule } = require("./controllers/Admin/jadwalController");
+const {
+  scheduleKelas,
+  scheduleHalaqoh,
+} = require("./controllers/Admin/jadwalController");
 
 // const rule = new schedule2.RecurrenceRule();
 // rule.minute = 1;
 // console.log(rule.minute);
-const job = cron.schedule("0 18 * * *", schedule);
+const date = new Date();
+
+console.log(dayjs(date).format("hh:mm:ss"));
+const job = cron.schedule("5 18 * * *", scheduleKelas);
+const halaqoh = cron.schedule("20 18 * * *", scheduleHalaqoh);
 app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
@@ -21,6 +29,7 @@ app.use(cookieParser());
 app.use(router);
 
 job.start();
+halaqoh.start();
 app.listen(port, async () => {
   try {
     await sequelize.authenticate();
