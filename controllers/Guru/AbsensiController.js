@@ -139,6 +139,12 @@ async function listAbsensi(req, res) {
         ...(semester !== undefined && { semester: semester }),
         ...(dariTanggal !== undefined && {
           tanggal: { [Op.between]: [dariTanggal, sampaiTanggal] },
+          ...(mapel_id !== undefined && {
+            mapel_id: mapel_id,
+          }),
+          ...(kelas_id !== undefined && {
+            kelas_id: kelas_id,
+          }),
           teacher_id: req.teacher_id,
         }),
       },
@@ -150,6 +156,7 @@ async function listAbsensi(req, res) {
         ...(dariTanggal !== undefined && {
           tanggal: { [Op.between]: [dariTanggal, sampaiTanggal] },
         }),
+        teacher_id: req.teacher_id,
       },
       order: [["tanggal", "desc"]],
       limit: pageSize,
@@ -262,7 +269,7 @@ async function updateAbsensi(req, res) {
 const notifikasiAbsensi = async (req, res) => {
   try {
     const notifikasi = await AbsensiKelasModel.findAll({
-      attributes : ['id' , 'tanggal'],
+      attributes: ["id", "tanggal"],
       where: {
         teacher_id: req.teacher_id,
         status_absensi: 0,
