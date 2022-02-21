@@ -45,15 +45,15 @@ module.exports = {
       },
 
       total_halaman: {
-        type: Sequelize.DECIMAL(3,1),
+        type: Sequelize.DECIMAL(3, 1),
       },
-      
+
       juz_ke: {
         type: Sequelize.INTEGER,
       },
       ketuntasan_juz: {
         type: Sequelize.INTEGER,
-        defaultValue : 0,
+        defaultValue: 0,
       },
       status_kehadiran: {
         type: Sequelize.INTEGER,
@@ -61,12 +61,12 @@ module.exports = {
       keterangan: {
         type: Sequelize.STRING,
       },
-      status_absensi : {
-        type : Sequelize.INTEGER,
+      status_absensi: {
+        type: Sequelize.INTEGER,
       },
-      
-      waktu : {
-        type : Sequelize.STRING,
+
+      waktu: {
+        type: Sequelize.STRING,
       },
       created_at: {
         allowNull: false,

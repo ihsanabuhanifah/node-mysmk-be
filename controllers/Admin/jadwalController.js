@@ -20,7 +20,7 @@ async function scheduleKelas(req, res) {
 
     const date = new Date();
     const hari = await formatHari(date);
-    date.setDate(date.getDate() + 1);
+    // date.setDate(date.getDate() + 1);
     const jadwal = await JadwalModel.findAll({
       where: {
         hari: hari,
@@ -139,7 +139,7 @@ async function scheduleHalaqoh(req, res) {
               tanggal: date,
               status_kehadiran: 6,
               status_absensi: 0,
-              waktu : 'pagi'
+              waktu: "pagi",
             };
 
             await AbsensiHalaqohModel.create(payload);

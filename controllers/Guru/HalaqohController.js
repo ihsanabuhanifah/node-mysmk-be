@@ -21,9 +21,9 @@ async function listHalaqoh(req, res) {
       attributes: [
         "id",
         "tanggal",
-       
+
         "dari_ayat",
-      
+
         "sampai_ayat",
         "total_halaman",
         "juz_ke",
@@ -41,7 +41,6 @@ async function listHalaqoh(req, res) {
       },
 
       include: [
-
         {
           model: models.halaqoh,
           require: true,
@@ -72,14 +71,12 @@ async function listHalaqoh(req, res) {
           require: true,
           as: "surat_awal",
           attributes: ["id", "nama_surat"],
-          
         },
         {
           model: models.alquran,
           require: true,
           as: "surat_akhir",
           attributes: ["id", "nama_surat"],
-          
         },
       ],
 
@@ -144,4 +141,49 @@ async function updateHalaqoh(req, res) {
     });
   }
 }
-module.exports = { listHalaqoh, updateHalaqoh };
+
+const notifikasiHalaqoh = async (req, res) => {
+  try {
+    const notifikasi = await HalaqohModel.findAll({
+      attributes: ["id", "tanggal"],
+      where: {
+        status_absensi: 0,
+      },
+      include: [
+        {
+          model: models.halaqoh,
+          require: true,
+          as: "halaqoh",
+          attributes: ["id", "nama_kelompok", "semester" , "teacher_id"],
+          where: {
+            teacher_id: req.teacher_id,
+          },
+          include: [
+            {
+              model: models.ta,
+              require: true,
+              as: "tahun_ajaran",
+              attributes: ["id", "nama_tahun_ajaran"],
+            },
+          ],
+          // where: kelas_id !== undefined ? { id: kelas_id } : {},
+        },
+      ],
+      order: [["tanggal", "desc"]],
+      group: "tanggal",
+    });
+
+    return res.json({
+      status: "Success",
+      msg: "notifikasi absensi",
+      data: notifikasi,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(403).json({
+      status: "Fail",
+      msg: "Terjadi Kesalahan",
+    });
+  }
+};
+module.exports = { listHalaqoh, updateHalaqoh, notifikasiHalaqoh };

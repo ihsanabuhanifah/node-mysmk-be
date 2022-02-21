@@ -2,7 +2,7 @@ const express = require("express");
 const guruAccessMiddleware = require("../../middleware/guruAccessMiddleware")
 const guru = express.Router();
 const {createAbsensi, listAbsensi, updateAbsensi, listJadwal, notifikasiAbsensi} = require("../../controllers/Guru/AbsensiController")
-const {listHalaqoh, updateHalaqoh} = require("../../controllers/Guru/HalaqohController")
+const {listHalaqoh, updateHalaqoh, notifikasiHalaqoh} = require("../../controllers/Guru/HalaqohController")
 
 //absensi
 guru.use(guruAccessMiddleware)
@@ -15,4 +15,5 @@ guru.get("/jadwal/list", listJadwal)
 //halaqoh
 guru.get("/halaqoh/list", listHalaqoh)
 guru.put("/halaqoh/update", updateHalaqoh)
+guru.get("/halaqoh/notifikasi" , notifikasiHalaqoh)
 module.exports = guru;
