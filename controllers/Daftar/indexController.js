@@ -5,6 +5,7 @@ const TahunAjaranModel = require("../../models").ta;
 const GuruModel = require("../../models").teacher;
 const RoleModel = require("../../models").role;
 const AlquranModel = require("../../models").alquran;
+const PelanggaranModel = require("../../models").pelanggaran;
 const { sequelize } = require("../../models");
 const { QueryTypes } = require("sequelize");
 const { Op } = require("sequelize");
@@ -175,6 +176,46 @@ const listRole = async (req, res) => {
     });
   }
 };
+const listPelanggaran = async (req, res) => {
+  try {
+    const { keyword } = req.query;
+    const pelajaran = await PelanggaranModel.findAll({
+      attributes: ["id", "nama_pelanggaran", "tipe", "kategori", "point"],
+      where: {
+        ...(keyword !== undefined && {
+          [Op.or]: [
+            {
+              nama_pelanggaran: {
+                [Op.like]: `%${keyword}%`,
+              },
+            },
+            {
+              tipe: {
+                [Op.like]: `%${keyword}%`,
+              },
+            },
+            {
+              kategori: {
+                [Op.like]: `%${keyword}%`,
+              },
+            },
+          ],
+        }),
+      },
+      // order : [["nama_pelanggaran" , "asc"]]
+    });
+    return res.json({
+      status: "Success",
+      data: pelajaran,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(403).json({
+      status: "fail",
+      msg: "Terjadi Kesalahan",
+    });
+  }
+};
 module.exports = {
   listMapel,
   listKelas,
@@ -183,4 +224,5 @@ module.exports = {
   listGuru,
   listRole,
   listAlquran,
+  listPelanggaran,
 };

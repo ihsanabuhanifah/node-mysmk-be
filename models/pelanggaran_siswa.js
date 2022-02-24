@@ -27,6 +27,10 @@ module.exports = (sequelize, DataTypes) => {
         as: "penindakan",
         foreignKey: "penindak",
       });
+      pelanggaran_siswa.belongsTo(models.pelanggaran, {
+        as: "pelanggaran",
+        foreignKey: "pelanggaran_id",
+      });
 
     }
   };
