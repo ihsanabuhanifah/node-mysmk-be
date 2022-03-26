@@ -15,7 +15,7 @@ const { QueryTypes } = require("sequelize");
 generator = require("generate-password");
 const dotenv = require("dotenv");
 dotenv.config();
-const sendEmail = require("../utils/email");
+const sendEmail = require("../mail");
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const crypto = require("crypto");
 
@@ -427,9 +427,6 @@ async function forgotPassword(req, res) {
     },
   });
 
-  
-
-
   if (!user) {
     return res.status(404).json({
       status: "fail",
@@ -437,10 +434,27 @@ async function forgotPassword(req, res) {
     });
   }
   let token = crypto.randomBytes(32).toString("hex");
-  
 
   const link = `${process.env.BASE_URL}/resetPassword/${user.id}/${token}`;
-  await sendEmail(user.email, "Password Reset", link);
+
+  const context = {
+    link: link,
+  };
+  const mail = await sendEmail(
+    user.email,
+    "Password Reset",
+    "lupa_password",
+    context
+  );
+
+  
+
+  if (mail === "error") {
+    return res.status(422).json({
+      status: "Fail",
+      msg: "Email tidak terkirim ",
+    });
+  }
   await TokenModel.create({
     userId: user.id,
     token: token,

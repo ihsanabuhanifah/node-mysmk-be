@@ -61,12 +61,12 @@ const listPelanggaran = async (req, res) => {
   }
 };
 const detailPelanggaran = async (req, res) => {
-  let {id} = req.params
+  let { id } = req.params;
   try {
-    const pelanggaran = await PelanggaranSiswaModel.findAndCountAll({
+    const pelanggaran = await PelanggaranSiswaModel.findOne({
       attributes: ["id", "tanggal", "status", "tindakan", "semester"],
-      where : {
-        id : id
+      where: {
+        id: id,
       },
       include: [
         {
@@ -74,28 +74,24 @@ const detailPelanggaran = async (req, res) => {
           require: true,
           as: "siswa",
           attributes: ["id", "nama_siswa"],
-
         },
         {
           model: TeacherModel,
           require: true,
           as: "pelaporan",
           attributes: ["id", "nama_guru"],
-        
         },
         {
           model: TeacherModel,
           require: true,
           as: "penindakan",
           attributes: ["id", "nama_guru"],
-        
         },
         {
           model: PelanggaranModel,
           require: true,
           as: "pelanggaran",
           attributes: ["id", "nama_pelanggaran", "tipe", "kategori"],
-        
         },
         {
           model: TaModel,
@@ -157,7 +153,35 @@ const createPelanggaran = async (req, res) => {
   });
 };
 const updatePelanggaran = async (req, res) => {
-  res.send("update");
+  try {
+    const {payload} = req.body;
+
+    const update = await PelanggaranSiswaModel.update(payload, {
+      where: {
+        id: payload.id
+      },
+    });
+
+    if(update[0] === 0){
+      return res.json({
+        status : "Fail",
+        msg : "id pelanggaran tidak ditemukan"
+      })
+    }
+    return res.json({
+      status: "Success",
+      msg: "Data berhasil diperharui",
+   
+     
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(403).json({
+      status: "Fail",
+      msg: "Terjadi Kesalahan",
+      error: err,
+    });
+  }
 };
 
 module.exports = {

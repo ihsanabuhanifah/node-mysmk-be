@@ -38,6 +38,6 @@ guru.get("/halaqoh/notifikasi", notifikasiHalaqoh);
 guru.get("/pelanggaran/list", listPelanggaran);
 guru.get("/pelanggaran/detail/:id", detailPelanggaran);
 guru.post("/pelanggaran/create", createPelanggaran);
-guru.put("/pelanggaran/update/:id", updatePelanggaran);
+guru.put("/pelanggaran/update", updatePelanggaran);
 guru.delete("/pelanggaran/delete", deletePelanggaran);
 module.exports = guru;
