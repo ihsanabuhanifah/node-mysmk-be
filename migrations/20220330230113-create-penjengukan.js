@@ -38,6 +38,16 @@ module.exports = {
       status_approval: {
         type: Sequelize.ENUM('menunggu', 'disetujui', 'ditolak')
       },
+      approval_by: {
+        type: Sequelize.INTEGER,
+       
+        onDelete: "RESTRICT",
+        references: {
+          model: "teachers",
+          key: "id",
+          as: "approval_by",
+        },
+      },
       alasan_ditolak: {
         type: Sequelize.STRING
       },

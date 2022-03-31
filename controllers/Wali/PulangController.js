@@ -35,6 +35,12 @@ async function listIzinPulang(req, res) {
           as: "siswa",
           attributes: ["id", "nama_siswa"],
         },
+        {
+            model: models.teacher,
+            require: true,
+            as: "pulang_approv_by",
+            attributes: ["id", "nama_guru"],
+          },
       ],
       order: [["id", "desc"]],
     });
@@ -73,6 +79,12 @@ async function detailIzinPulang(req, res) {
           as: "siswa",
           attributes: ["id", "nama_siswa"],
         },
+        {
+            model: models.teacher,
+            require: true,
+            as: "pulang_approv_by",
+            attributes: ["id", "nama_guru"],
+          },
       ],
     });
     if (!detail) {

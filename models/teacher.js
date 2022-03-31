@@ -34,6 +34,14 @@ module.exports = (sequelize, DataTypes) => {
         as: "penindakan",
         foreignKey: "penindak",
       });
+      teacher.hasMany(models.izin_pulang, {
+        as: "pulang_approv_by",
+        foreignKey: "approval_by",
+      });
+      teacher.hasMany(models.penjengukan, {
+        as: "kunjungan_approv_by",
+        foreignKey: "approval_by",
+      });
     }
   }
   teacher.init(

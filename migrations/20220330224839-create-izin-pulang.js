@@ -43,9 +43,21 @@ module.exports = {
         type: Sequelize.ENUM("menunggu", "disetujui", "ditolak"),
         allowNull: false,
       },
+      approval_by: {
+        type: Sequelize.INTEGER,
+      
+        onDelete: "RESTRICT",
+        references: {
+          model: "teachers",
+          key: "id",
+          as: "approval_by",
+        },
+      },
+      
       alasan_ditolak : {
         type:Sequelize.STRING,
       },
+      
       tanggal_kembali: {
         type: Sequelize.DATE,
       },

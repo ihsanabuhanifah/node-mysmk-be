@@ -35,6 +35,12 @@ async function listIzin(req, res) {
           as: "siswa",
           attributes: ["id", "nama_siswa"],
         },
+        {
+            model: models.teacher,
+            require: true,
+            as: "kunjungan_approv_by",
+            attributes: ["id", "nama_guru"],
+          },
       ],
       order: [["id", "desc"]],
     });
@@ -72,6 +78,12 @@ async function detailIzin(req, res) {
           require: true,
           as: "siswa",
           attributes: ["id", "nama_siswa"],
+        },
+        {
+          model: models.teacher,
+          require: true,
+          as: "kunjungan_approv_by",
+          attributes: ["id", "nama_guru"],
         },
       ],
     });
@@ -115,7 +127,6 @@ async function updateIzin(req, res) {
       return res.status(422).json({
         status: "Fail",
         msg: "Tidak dapat merubah , Perizinan sudah di proses",
-       
       });
     }
 
