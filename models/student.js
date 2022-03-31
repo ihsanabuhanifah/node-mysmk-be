@@ -1,5 +1,7 @@
 "use strict";
 const { Model } = require("sequelize");
+const izin_pulang = require("./izin_pulang");
+const penjengukan = require("./penjengukan");
 module.exports = (sequelize, DataTypes) => {
   class student extends Model {
     /**
@@ -35,6 +37,14 @@ module.exports = (sequelize, DataTypes) => {
       });
       student.hasMany(models.prestasi, {
         as: "prestasi",
+        foreignKey: "student_id",
+      });
+      student.hasMany(models.izin_pulang, {
+        as: "izin_pulang",
+        foreignKey: "student_id",
+      });
+      student.hasMany(models.penjengukan, {
+        as: "penjengukan",
         foreignKey: "student_id",
       });
     }

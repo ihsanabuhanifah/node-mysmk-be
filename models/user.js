@@ -18,6 +18,8 @@ module.exports = (sequelize, DataTypes) => {
       user.hasMany(models.student, { as: "student", foreignKey: "user_id" });
       user.hasMany(models.parent, { as: "parent", foreignKey: "user_id" });
       user.hasMany(models.teacher, { as: "teacher", foreignKey: "user_id" });
+      user.hasMany(models.izin_pulang, { as: "izin_pulang", foreignKey: "user_id" });
+      user.hasMany(models.penjengukan, { as: "penjengukan", foreignKey: "user_id" });
     }
   }
   user.init(
