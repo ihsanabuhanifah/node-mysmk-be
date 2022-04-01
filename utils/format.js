@@ -91,4 +91,13 @@ function formatDate(timeStamps) {
   ).format("YYYY")} `;
 }
 
-module.exports = { formatDate, formatHari };
+function checkQuery(value) {
+  if (value === undefined) return false;
+
+  if (value === "") return false;
+
+  if (value === null) return false;
+  return true;
+}
+
+module.exports = { formatDate, formatHari, checkQuery };

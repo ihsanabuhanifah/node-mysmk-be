@@ -22,7 +22,6 @@ async function listIzinPulang(req, res) {
 
   try {
     const list = await IzinModel.findAll({
-       
       where: {
         user_id: req.id,
       },
@@ -36,11 +35,11 @@ async function listIzinPulang(req, res) {
           attributes: ["id", "nama_siswa"],
         },
         {
-            model: models.teacher,
-            require: true,
-            as: "pulang_approv_by",
-            attributes: ["id", "nama_guru"],
-          },
+          model: models.teacher,
+          require: true,
+          as: "pulang_approv_by",
+          attributes: ["id", "nama_guru"],
+        },
       ],
       order: [["id", "desc"]],
     });
@@ -80,11 +79,11 @@ async function detailIzinPulang(req, res) {
           attributes: ["id", "nama_siswa"],
         },
         {
-            model: models.teacher,
-            require: true,
-            as: "pulang_approv_by",
-            attributes: ["id", "nama_guru"],
-          },
+          model: models.teacher,
+          require: true,
+          as: "pulang_approv_by",
+          attributes: ["id", "nama_guru"],
+        },
       ],
     });
     if (!detail) {
@@ -151,9 +150,43 @@ async function updateIzinPulang(req, res) {
   }
 }
 
+async function terakhirIzinPulang(req, res) {
+  const { page, pageSize } = req.query;
+
+  try {
+    const list = await IzinModel.findAll({
+      where: {
+        user_id: req.id,
+      },
+      limit: 1,
+      offset: 1,
+
+      order: [["id", "desc"]],
+    });
+
+    if (list.length === 0) {
+      return res.json({
+        status: "Success",
+        msg: "Belum pernah membuat perizinan",
+        data: list,
+      });
+    }
+
+    return res.json({
+      status: "Success",
+      msg: "Berhasil mengambil data",
+      data: list,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(403).send("Ada Kesalahan");
+  }
+}
+
 module.exports = {
   buatIzinPulang,
   listIzinPulang,
   detailIzinPulang,
   updateIzinPulang,
+  terakhirIzinPulang
 };

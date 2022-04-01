@@ -1,5 +1,6 @@
 const express = require("express");
 const guruAccessMiddleware = require("../../middleware/guruAccessMiddleware");
+
 const guru = express.Router();
 const {
   createAbsensi,
@@ -20,6 +21,11 @@ const {
   createPelanggaran,
   updatePelanggaran,
 } = require("../../controllers/Guru/PelanggaranController");
+
+//kunjungan
+const {listKunjungan, responseKunjungan} = require("../../controllers/Guru/KunjunganControler")
+//pulang 
+const {listPulang, responsePulang} = require("../../controllers/Guru/PulangController")
 //absensi
 guru.use(guruAccessMiddleware);
 guru.post("/absensi/simpan", createAbsensi);
@@ -40,4 +46,16 @@ guru.get("/pelanggaran/detail/:id", detailPelanggaran);
 guru.post("/pelanggaran/create", createPelanggaran);
 guru.put("/pelanggaran/update", updatePelanggaran);
 guru.delete("/pelanggaran/delete", deletePelanggaran);
+
+
+//kunjungan
+
+guru.get("/kunjungan/list" , listKunjungan )
+guru.put("/kunjungan/response/:id" , responseKunjungan )
+
+
+//pulang
+
+guru.get("/pulang/list" , listPulang )
+guru.put("/pulang/response/:id" , responsePulang )
 module.exports = guru;
