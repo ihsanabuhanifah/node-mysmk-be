@@ -7,7 +7,7 @@ async function listPulang(req, res) {
   const { page, pageSize, nama_siswa, status_approval, keyword } = req.query;
 
   try {
-    const list = await IzinModel.findAll({
+    const list = await IzinModel.findAndCountAll({
       ...(pageSize !== undefined && { limit: pageSize }),
       ...(page !== undefined && { offset: page }),
       where: {
@@ -33,6 +33,12 @@ async function listPulang(req, res) {
           as: "pulang_approv_by",
           attributes: ["id", "nama_guru"],
         },
+        {
+          model: models.teacher,
+          require: true,
+          as: "laporan_oleh",
+          attributes: ["id", "nama_guru"],
+        },
       ],
       order: [["id", "desc"]],
     });
@@ -48,7 +54,10 @@ async function listPulang(req, res) {
     return res.json({
       status: "Success",
       msg: "Berhasil mengambil semua perizinan",
+      page : req.page,
+      pageSize : pageSize,
       data: list,
+      
     });
   } catch (err) {
     console.log(err);
@@ -70,7 +79,7 @@ async function responsePulang(req, res) {
             {
               status_approval: data.status_approval,
               alasan_ditolak: data.alasan_ditolak,
-              approval_by : req.teacher_id
+              approval_by: req.teacher_id,
             },
             {
               where: {
@@ -97,4 +106,50 @@ async function responsePulang(req, res) {
   }
 }
 
-module.exports = { listPulang, responsePulang };
+async function laporanPulang(req, res) {
+
+  
+  try {
+    const { payload } = req.body;
+
+    let berhasil = 0;
+    let gagal = 0;
+
+    await Promise.all(
+      payload.map(async (data) => {
+        try {
+          await IzinModel.update(
+            {
+              tanggal_kembali: data.tanggal_kembali,
+              jam_kembali_ke_sekolah: data.jam_kembali_ke_sekolah,
+              status_kepulangan: data.status_kepulangan,
+              jumlah_hari_terlambat: data.jumlah_hari_terlambat,
+              denda: data.denda,
+              dilaporkan_oleh : req.teacher_id,
+            },
+            {
+              where: {
+                id: data.id,
+              },
+            }
+          );
+          berhasil = berhasil + 1;
+        } catch {
+          gagal = gagal + 1;
+        }
+      })
+    );
+
+    return res.json({
+      status: "Success",
+      berhasil,
+      gagal,
+      msg: `${berhasil} data diperharui dan ${gagal} gagal`,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(403).send("Ada Kesalahan");
+  }
+}
+
+module.exports = { listPulang, responsePulang, laporanPulang };

@@ -1,16 +1,17 @@
 const KunjunganModel = require("../../models").penjengukan;
 const { Op } = require("sequelize");
 const models = require("../../models");
+const { checkQuery } = require("../../utils/format");
 
 async function listKunjungan(req, res) {
   const { page, pageSize, nama_siswa, status_approval } = req.query;
 
   try {
-    const list = await KunjunganModel.findAll({
+    const list = await KunjunganModel.findAndCountAll({
       ...(pageSize !== undefined && { limit: pageSize }),
       ...(page !== undefined && { offset: page }),
       where: {
-        status_approval: status_approval,
+        ...(checkQuery(status_approval) && { status_approval }),
       },
       include: [
         {
@@ -19,7 +20,11 @@ async function listKunjungan(req, res) {
           as: "siswa",
           attributes: ["id", "nama_siswa"],
           where: {
-            ...(nama_siswa !== undefined && { nama_siswa: nama_siswa }),
+            ...(checkQuery(nama_siswa) && {
+              nama_siswa: {
+                [Op.substring]: nama_siswa,
+              },
+            }),
           },
         },
         {
@@ -43,6 +48,8 @@ async function listKunjungan(req, res) {
     return res.json({
       status: "Success",
       msg: "Berhasil mengambil semua perizinan",
+      page: req.page,
+      pageSize: pageSize,
       data: list,
     });
   } catch (err) {
@@ -53,42 +60,41 @@ async function listKunjungan(req, res) {
 
 async function responseKunjungan(req, res) {
   try {
-    const { id } = req.params;
-    const { status_approval, alasan_ditolak } = req.body;
+    const { payload } = req.body;
 
-    const Kunjugan = await KunjunganModel.findOne({
-      where: {
-        id: id,
-      },
-    });
+    let berhasil = 0;
+    let gagal = 0;
 
-    if (!Kunjugan) {
-      return res.json({
-        status: "Success",
-        msg: "Kunjungan tidak ditemukan",
-      });
-    }
-
-    await KunjunganModel.update(
-      {
-        status_approval,
-        alasan_ditolak,
-        approval_by: req.teacher_id,
-      },
-      {
-        where: {
-            id
+    await Promise.all(
+      payload.map(async (data) => {
+        try {
+          await KunjunganModel.update(
+            {
+              status_approval: data.status_approval,
+              alasan_ditolak: data.alasan_ditolak,
+              approval_by: req.teacher_id,
+            },
+            {
+              where: {
+                id: data.id,
+              },
+            }
+          );
+          berhasil = berhasil + 1;
+        } catch {
+          gagal = gagal + 1;
         }
-      }
+      })
     );
 
     return res.json({
       status: "Success",
-      msg: "Update Berhasil",
-      
+      berhasil,
+      gagal,
+      msg: `${berhasil} data diperharui dan ${gagal} gagal`,
     });
   } catch (err) {
-      console.log(err)
+    console.log(err);
     return res.status(403).send("Ada Kesalahan");
   }
 }

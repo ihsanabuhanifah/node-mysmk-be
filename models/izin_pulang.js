@@ -21,6 +21,10 @@ module.exports = (sequelize, DataTypes) => {
         as: "pulang_approv_by",
         foreignKey: "approval_by",
       });
+      izin_pulang.belongsTo(models.teacher, {
+        as: "laporan_oleh",
+        foreignKey: "dilaporkan_oleh",
+      });
     }
   }
   izin_pulang.init(
@@ -32,6 +36,7 @@ module.exports = (sequelize, DataTypes) => {
       kepentingan: DataTypes.STRING,
       status_approval: DataTypes.ENUM("menunggu", "disetujui", "ditolak"),
       approval_by: DataTypes.INTEGER,
+      dilaporkan_oleh : DataTypes.INTEGER,
       alasan_ditolak: DataTypes.STRING,
       tanggal_kembali: DataTypes.DATE,
       jam_kembali_ke_sekolah: DataTypes.TIME,

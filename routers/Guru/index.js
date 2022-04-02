@@ -25,7 +25,7 @@ const {
 //kunjungan
 const {listKunjungan, responseKunjungan} = require("../../controllers/Guru/KunjunganControler")
 //pulang 
-const {listPulang, responsePulang} = require("../../controllers/Guru/PulangController")
+const {listPulang, responsePulang, laporanPulang} = require("../../controllers/Guru/PulangController")
 //absensi
 guru.use(guruAccessMiddleware);
 guru.post("/absensi/simpan", createAbsensi);
@@ -58,4 +58,5 @@ guru.put("/kunjungan/response" , responseKunjungan )
 
 guru.get("/pulang/list" , listPulang )
 guru.put("/pulang/response" , responsePulang )
+guru.put('/pulang/laporan', laporanPulang)
 module.exports = guru;

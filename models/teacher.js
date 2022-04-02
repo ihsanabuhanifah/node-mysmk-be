@@ -38,6 +38,10 @@ module.exports = (sequelize, DataTypes) => {
         as: "pulang_approv_by",
         foreignKey: "approval_by",
       });
+      teacher.hasMany(models.izin_pulang, {
+        as: "laporan_oleh",
+        foreignKey: "dilaporkan_oleh",
+      });
       teacher.hasMany(models.penjengukan, {
         as: "kunjungan_approv_by",
         foreignKey: "approval_by",

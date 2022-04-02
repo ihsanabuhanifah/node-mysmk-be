@@ -53,6 +53,16 @@ module.exports = {
           as: "approval_by",
         },
       },
+      dilaporkan_oleh: {
+        type: Sequelize.INTEGER,
+      
+        onDelete: "RESTRICT",
+        references: {
+          model: "teachers",
+          key: "id",
+          as: "dilaporkan_oleh",
+        },
+      },
       
       alasan_ditolak : {
         type:Sequelize.STRING,
