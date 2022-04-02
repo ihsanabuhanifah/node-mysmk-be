@@ -58,38 +58,37 @@ async function listPulang(req, res) {
 
 async function responsePulang(req, res) {
   try {
-    const { id } = req.params;
-    const { status_approval, alasan_ditolak } = req.body;
+    const { payload } = req.body;
 
-    const Kunjugan = await IzinModel.findOne({
-      where: {
-        id: id,
-      },
-    });
+    let berhasil = 0;
+    let gagal = 0;
 
-    if (!Kunjugan) {
-      return res.json({
-        status: "Success",
-        msg: "Kunjungan tidak ditemukan",
-      });
-    }
-
-    await IzinModel.update(
-      {
-        status_approval,
-        alasan_ditolak,
-        approval_by: req.teacher_id,
-      },
-      {
-        where: {
-          id,
-        },
-      }
+    await Promise.all(
+      payload.map(async (data) => {
+        try {
+          await IzinModel.update(
+            {
+              status_approval: data.status_approval,
+              alasan_ditolak: data.alasan_ditolak,
+            },
+            {
+              where: {
+                id: data.id,
+              },
+            }
+          );
+          berhasil = berhasil + 1;
+        } catch {
+          gagal = gagal + 1;
+        }
+      })
     );
 
     return res.json({
       status: "Success",
-      msg: "Update Berhasil",
+      berhasil,
+      gagal,
+      msg: `${berhasil} data diperharui dan ${gagal} gagal`,
     });
   } catch (err) {
     console.log(err);

@@ -51,11 +51,11 @@ guru.delete("/pelanggaran/delete", deletePelanggaran);
 //kunjungan
 
 guru.get("/kunjungan/list" , listKunjungan )
-guru.put("/kunjungan/response/:id" , responseKunjungan )
+guru.put("/kunjungan/response" , responseKunjungan )
 
 
 //pulang
 
 guru.get("/pulang/list" , listPulang )
-guru.put("/pulang/response/:id" , responsePulang )
+guru.put("/pulang/response" , responsePulang )
 module.exports = guru;
