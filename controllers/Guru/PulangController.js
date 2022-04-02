@@ -70,6 +70,7 @@ async function responsePulang(req, res) {
             {
               status_approval: data.status_approval,
               alasan_ditolak: data.alasan_ditolak,
+              approval_by : req.teacher_id
             },
             {
               where: {
