@@ -5,40 +5,46 @@ const TeacherModel = require("../../models").teacher;
 const TaModel = require("../../models").ta;
 const models = require("../../models");
 const { Op } = require("sequelize");
+const { checkQuery } = require("../../utils/format");
 
 const listPelanggaran = async (req, res) => {
-  let { namaSiswa, pelapor, penindak } = req.query;
+  let { nama_siswa, pelapor, penindak, page, pageSize } = req.query;
   try {
     const pelanggaran = await PelanggaranSiswaModel.findAndCountAll({
       attributes: ["id", "tanggal", "status", "tindakan", "semester"],
+      ...(pageSize !== undefined && { limit: pageSize }),
+      ...(page !== undefined && { offset: page }),
       include: [
         {
           model: StudentModel,
           require: true,
           as: "siswa",
           attributes: ["id", "nama_siswa"],
-          where: namaSiswa !== undefined ? { nama_siswa: namaSiswa } : {},
+          where: {
+            ...(checkQuery(nama_siswa) && {
+              nama_siswa: {
+                [Op.substring]: nama_siswa,
+              },
+            }),
+          },
         },
         {
           model: TeacherModel,
           require: true,
           as: "pelaporan",
           attributes: ["id", "nama_guru"],
-          where: pelapor !== undefined ? { nama_guru: pelapor } : {},
         },
         {
           model: TeacherModel,
           require: true,
           as: "penindakan",
           attributes: ["id", "nama_guru"],
-          where: penindak !== undefined ? { nama_guru: penindak } : {},
         },
         {
           model: PelanggaranModel,
           require: true,
           as: "pelanggaran",
           attributes: ["id", "nama_pelanggaran", "tipe", "kategori"],
-          where: penindak !== undefined ? { nama_guru: penindak } : {},
         },
         {
           model: TaModel,
@@ -50,6 +56,8 @@ const listPelanggaran = async (req, res) => {
     });
     return res.json({
       status: "Success",
+      page: req.page,
+      pageSize: pageSize,
       data: pelanggaran,
     });
   } catch (err) {
@@ -145,34 +153,67 @@ const deletePelanggaran = async (req, res) => {
 };
 
 const createPelanggaran = async (req, res) => {
-  const { payload } = req.body;
-  await PelanggaranSiswaModel.bulkCreate(payload);
-  return res.status(201).json({
-    status: "Success",
-    msg: "Daftar Pelanggaran Siswa berhasil ditambahkan",
-  });
+  try {
+    const { payload } = req.body;
+    console.log(payload);
+    let berhasil = 0;
+    let gagal = 0;
+
+    await Promise.all(
+      payload.map(async (data) => {
+        try {
+          const create = await PelanggaranSiswaModel.create({
+            tanggal: data.tanggal,
+            pelanggaran_id: data.pelanggaran_id,
+            student_id: data.student_id,
+            semester: data.semester,
+            ta_id: data?.ta_id,
+            pelapor: req.teacher_id,
+          });
+          if (create) {
+            berhasil = berhasil + 1;
+          } else {
+            gagal = gagal + 1;
+          }
+        } catch {
+          gagal = gagal + 1;
+        }
+      })
+    );
+
+    return res.json({
+      status: "Success",
+      berhasil,
+      gagal,
+      msg: `${berhasil} data ditambahkan dan ${gagal} gagal`,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(403).json({
+      status: "Fail",
+      msg: "Terjadi Kesalahan",
+    });
+  }
 };
 const updatePelanggaran = async (req, res) => {
   try {
-    const {payload} = req.body;
+    const { payload } = req.body;
 
     const update = await PelanggaranSiswaModel.update(payload, {
       where: {
-        id: payload.id
+        id: payload.id,
       },
     });
 
-    if(update[0] === 0){
+    if (update[0] === 0) {
       return res.json({
-        status : "Fail",
-        msg : "id pelanggaran tidak ditemukan"
-      })
+        status: "Fail",
+        msg: "id pelanggaran tidak ditemukan",
+      });
     }
     return res.json({
       status: "Success",
       msg: "Data berhasil diperharui",
-   
-     
     });
   } catch (err) {
     console.log(err);
