@@ -45,7 +45,7 @@ guru.get("/pelanggaran/list", listPelanggaran);
 guru.get("/pelanggaran/detail/:id", detailPelanggaran);
 guru.post("/pelanggaran/create", createPelanggaran);
 guru.put("/pelanggaran/update", updatePelanggaran);
-guru.delete("/pelanggaran/delete", deletePelanggaran);
+guru.post("/pelanggaran/delete", deletePelanggaran);
 
 
 //kunjungan

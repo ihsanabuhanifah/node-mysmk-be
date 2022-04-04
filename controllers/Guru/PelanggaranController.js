@@ -44,7 +44,7 @@ const listPelanggaran = async (req, res) => {
           model: PelanggaranModel,
           require: true,
           as: "pelanggaran",
-          attributes: ["id", "nama_pelanggaran", "tipe", "kategori"],
+          attributes: ["id", "nama_pelanggaran", "tipe", "kategori", "point"],
         },
         {
           model: TaModel,
@@ -53,6 +53,7 @@ const listPelanggaran = async (req, res) => {
           attributes: ["id", "nama_tahun_ajaran"],
         },
       ],
+      order: [["id", "desc"]],
     });
     return res.json({
       status: "Success",
@@ -125,6 +126,8 @@ const detailPelanggaran = async (req, res) => {
 const deletePelanggaran = async (req, res) => {
   try {
     const { payload } = req.body;
+
+    console.log("pau;ad", req.body);
     let count = 0;
     await Promise.all(
       payload.map(async (data) => {
@@ -155,7 +158,7 @@ const deletePelanggaran = async (req, res) => {
 const createPelanggaran = async (req, res) => {
   try {
     const { payload } = req.body;
-    console.log(payload);
+
     let berhasil = 0;
     let gagal = 0;
 
@@ -198,6 +201,7 @@ const createPelanggaran = async (req, res) => {
 const updatePelanggaran = async (req, res) => {
   try {
     const { payload } = req.body;
+    payload.penindak = req.teacher_id;
 
     const update = await PelanggaranSiswaModel.update(payload, {
       where: {
