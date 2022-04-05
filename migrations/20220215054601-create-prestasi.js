@@ -22,6 +22,14 @@ module.exports = {
       prestasi: {
         type: Sequelize.STRING
       },
+      teacher_id: {
+        type: Sequelize.INTEGER,
+        references: {
+          model: "teachers",
+          key: "id",
+          as: "teacher_id",
+        },
+      },
       kategori: {
         type: Sequelize.STRING
       },
@@ -30,6 +38,9 @@ module.exports = {
       },
       ta_id: {
         type: Sequelize.INTEGER
+      },
+      file_url: {
+        type: Sequelize.STRING
       },
       created_at: {
         allowNull: false,

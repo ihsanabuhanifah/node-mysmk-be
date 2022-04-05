@@ -26,6 +26,7 @@ const {
 const {listKunjungan, responseKunjungan} = require("../../controllers/Guru/KunjunganControler")
 //pulang 
 const {listPulang, responsePulang, laporanPulang} = require("../../controllers/Guru/PulangController")
+const {listPrestasi, createPrestasi, updatePrestasi} = require('../../controllers/Guru/PrestasiControler')
 //absensi
 guru.use(guruAccessMiddleware);
 guru.post("/absensi/simpan", createAbsensi);
@@ -47,6 +48,10 @@ guru.post("/pelanggaran/create", createPelanggaran);
 guru.put("/pelanggaran/update", updatePelanggaran);
 guru.post("/pelanggaran/delete", deletePelanggaran);
 
+//prestasi
+guru.get('/prestasi/list', listPrestasi)
+guru.post('/prestasi/create', createPrestasi)
+guru.put('/prestasi/update', updatePrestasi)
 
 //kunjungan
 

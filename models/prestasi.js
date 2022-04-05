@@ -1,7 +1,5 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
+"use strict";
+const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class prestasi extends Model {
     /**
@@ -19,18 +17,27 @@ module.exports = (sequelize, DataTypes) => {
         as: "tahun_ajaran",
         foreignKey: "ta_id",
       });
+      prestasi.belongsTo(models.teacher, {
+        as: "guru",
+        foreignKey: "teacher_id",
+      });
     }
-  };
-  prestasi.init({
-    tanggal: DataTypes.DATE,
-    student_id: DataTypes.INTEGER,
-    prestasi: DataTypes.STRING,
-    kategori: DataTypes.STRING,
-    semester : DataTypes.INTEGER,
-    ta_id : DataTypes.INTEGER
-  }, {
-    sequelize,
-    modelName: 'prestasi',
-  });
+  }
+  prestasi.init(
+    {
+      tanggal: DataTypes.DATE,
+      student_id: DataTypes.INTEGER,
+      teacher_id: DataTypes.INTEGER,
+      prestasi: DataTypes.STRING,
+      kategori: DataTypes.STRING,
+      semester: DataTypes.INTEGER,
+      ta_id: DataTypes.INTEGER,
+      file_url: DataTypes.STRING,
+    },
+    {
+      sequelize,
+      modelName: "prestasi",
+    }
+  );
   return prestasi;
 };
