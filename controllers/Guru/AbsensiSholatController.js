@@ -1,15 +1,16 @@
 const PrestasiModel = require("../../models").prestasi;
 const StudentModel = require("../../models").student;
 const TeacherModel = require("../../models").teacher;
+const AbsensiSholatModel = require("../../models").absensi_sholat;
 const TaModel = require("../../models").ta;
 const models = require("../../models");
 const { Op } = require("sequelize");
 const { checkQuery } = require("../../utils/format");
 
-const listPrestasi = async (req, res) => {
-  let { nama_siswa, pelapor, penindak, page, pageSize } = req.query;
+const listAbsensiSholat = async (req, res) => {
+  let { nama_siswa,page, pageSize } = req.query;
   try {
-    const pelanggaran = await PrestasiModel.findAndCountAll({
+    const pelanggaran = await AbsensiSholatModel.findAndCountAll({
       //   attributes: ["id", "tanggal", "status", "tindakan", "semester"],
       ...(pageSize !== undefined && { limit: pageSize }),
       ...(page !== undefined && { offset: page }),
@@ -34,12 +35,12 @@ const listPrestasi = async (req, res) => {
           attributes: ["id", "nama_guru"],
         },
 
-        {
-          model: TaModel,
-          require: true,
-          as: "tahun_ajaran",
-          attributes: ["id", "nama_tahun_ajaran"],
-        },
+        // {
+        //   model: TaModel,
+        //   require: true,
+        //   as: "tahun_ajaran",
+        //   attributes: ["id", "nama_tahun_ajaran"],
+        // },
       ],
       order: [["id", "desc"]],
     });
@@ -61,7 +62,7 @@ const detailPrestasi = async (req, res) => {
   return res.send("ok");
 };
 
-const deletePrestasi = async (req, res) => {
+const deleteAbsensiSholat = async (req, res) => {
     try {
         const { payload } = req.body;
     
@@ -69,7 +70,7 @@ const deletePrestasi = async (req, res) => {
         let count = 0;
         await Promise.all(
           payload.map(async (data) => {
-            const hapus = await PrestasiModel.destroy({
+            const hapus = await AbsensiSholatModel.destroy({
               where: {
                 id: data,
               },
@@ -93,7 +94,7 @@ const deletePrestasi = async (req, res) => {
       }
 };
 
-const createPrestasi = async (req, res) => {
+const createAbsensiSholat = async (req, res) => {
   try {
     const { payload } = req.body;
 
@@ -103,14 +104,14 @@ const createPrestasi = async (req, res) => {
     await Promise.all(
       payload.map(async (data) => {
         try {
-          const create = await PrestasiModel.create({
-            tanggal: data.tanggal,
-            teacher_id: req.teacher_id,
-            prestasi: data.prestasi,
-            kategori: data.kategori,
+          const create = await AbsensiSholatModel.create({
             student_id: data.student_id,
-            semester: data.semester,
-            ta_id: data?.ta_id,
+            tanggal: data.tanggal,
+            waktu : data.waktu,
+            alasan:data.alasan,
+            keterangan : data.keterangan,
+            created_by: req.teacher_id,
+           
           });
           if (create) {
             berhasil = berhasil + 1;
@@ -137,14 +138,14 @@ const createPrestasi = async (req, res) => {
     });
   }
 };
-const updatePrestasi = async (req, res) => {
+const updateAbensiSholat = async (req, res) => {
   try {
     const { payload } = req.body;
 
-    const data = await PrestasiModel.findOne({
+    const data = await AbsensiSholatModel.findOne({
       where: {
         id: payload.id,
-        teacher_id: req.teacher_id,
+        
       },
     });
 
@@ -152,12 +153,13 @@ const updatePrestasi = async (req, res) => {
       return res.status(422).json({
         status: "Fail",
         msg: "Anda tidak meiliki Akses untuk merubah data ini",
+       
       });
     }
-    await PrestasiModel.update(payload, {
+    await AbsensiSholatModel.update(payload, {
       where: {
         id: payload.id,
-        teacher_id: payload.teacher_id,
+       
       },
     });
 
@@ -175,4 +177,4 @@ const updatePrestasi = async (req, res) => {
   }
 };
 
-module.exports = { listPrestasi, createPrestasi, updatePrestasi };
+module.exports = { createAbsensiSholat, listAbsensiSholat, updateAbensiSholat, deleteAbsensiSholat };
