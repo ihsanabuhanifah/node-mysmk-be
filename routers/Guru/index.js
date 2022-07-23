@@ -23,14 +23,42 @@ const {
 } = require("../../controllers/Guru/PelanggaranController");
 
 //kunjungan
-const {listKunjungan, responseKunjungan} = require("../../controllers/Guru/KunjunganControler")
-//pulang 
-const {listPulang, responsePulang, laporanPulang} = require("../../controllers/Guru/PulangController")
-const {listPrestasi, createPrestasi, updatePrestasi} = require('../../controllers/Guru/PrestasiControler')
+const {
+  listKunjungan,
+  responseKunjungan,
+} = require("../../controllers/Guru/KunjunganControler");
+//pulang
+const {
+  listPulang,
+  responsePulang,
+  laporanPulang,
+} = require("../../controllers/Guru/PulangController");
+const {
+  listPrestasi,
+  createPrestasi,
+  updatePrestasi,
+} = require("../../controllers/Guru/PrestasiControler");
 
-const {createAbsensiSholat, listAbsensiSholat, updateAbensiSholat, deleteAbsensiSholat} = require("../../controllers/Guru/AbsensiSholatController")
+const {
+  createAbsensiSholat,
+  listAbsensiSholat,
+  updateAbensiSholat,
+  deleteAbsensiSholat,
+} = require("../../controllers/Guru/AbsensiSholatController");
 //absensi
+
+//jadwal
+
+const {
+  scheduleKelasManual,
+  scheduleHalaqohManual,
+  scheduleCek,
+} = require("../../controllers/Admin/jadwalController");
+
 guru.use(guruAccessMiddleware);
+guru.get("/absensi/manual", scheduleKelasManual);
+guru.get("/halaqoh/manual", scheduleHalaqohManual);
+guru.get("/monitor", scheduleCek);
 guru.post("/absensi/simpan", createAbsensi);
 guru.put("/absensi/update", updateAbsensi);
 guru.get("/absensi/list", listAbsensi);
@@ -51,27 +79,25 @@ guru.put("/pelanggaran/update", updatePelanggaran);
 guru.post("/pelanggaran/delete", deletePelanggaran);
 
 //prestasi
-guru.get('/prestasi/list', listPrestasi)
-guru.post('/prestasi/create', createPrestasi)
-guru.put('/prestasi/update', updatePrestasi)
+guru.get("/prestasi/list", listPrestasi);
+guru.post("/prestasi/create", createPrestasi);
+guru.put("/prestasi/update", updatePrestasi);
 
 //kunjungan
 
-guru.get("/kunjungan/list" , listKunjungan )
-guru.put("/kunjungan/response" , responseKunjungan )
-
+guru.get("/kunjungan/list", listKunjungan);
+guru.put("/kunjungan/response", responseKunjungan);
 
 //pulang
 
-guru.get("/pulang/list" , listPulang )
-guru.put("/pulang/response" , responsePulang )
-guru.put('/pulang/laporan', laporanPulang)
-
+guru.get("/pulang/list", listPulang);
+guru.put("/pulang/response", responsePulang);
+guru.put("/pulang/laporan", laporanPulang);
 
 //absensi sholat
 
-guru.post('/absensi-sholat/create', createAbsensiSholat)
-guru.get('/absensi-sholat/list', listAbsensiSholat)
-guru.put('/absensi-sholat/update', updateAbensiSholat)
-guru.post('/absensi-sholat/delete', deleteAbsensiSholat)
+guru.post("/absensi-sholat/create", createAbsensiSholat);
+guru.get("/absensi-sholat/list", listAbsensiSholat);
+guru.put("/absensi-sholat/update", updateAbensiSholat);
+guru.post("/absensi-sholat/delete", deleteAbsensiSholat);
 module.exports = guru;

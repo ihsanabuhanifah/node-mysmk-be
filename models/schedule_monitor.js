@@ -14,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   };
   schedule_monitor.init({
-    tanggal: DataTypes.DATE,
+    tanggal: DataTypes.DATEONLY,
     keterangan: DataTypes.STRING,
     kegiatan: DataTypes.STRING
   }, {
