@@ -40,7 +40,7 @@ async function importGuru(req, res) {
           name: row[1],
           email: row[2],
           password: row[3],
-          status: "active",
+          status: row[4],
           roles: row[5],
           role: row[6],
         };
@@ -50,10 +50,14 @@ async function importGuru(req, res) {
           roles: row[5],
           role: row[6],
         };
+        
         users.push(user);
         roles.push(role);
       });
 
+      console.log(users)
+      console.log(roles)
+     
       let count = 0;
       await Promise.all(
         users.map(async (user) => {
@@ -107,8 +111,9 @@ async function importGuru(req, res) {
     });
   } catch (error) {
     console.log(error);
-    res.status(500).json({
+    res.status(422).json({
       msg: "error",
+      error : error
     });
   }
 }
@@ -139,7 +144,7 @@ async function importSiswa(req, res) {
           name: row[1],
           email: row[2],
           password: row[3],
-          status: "active",
+          status: row[4],
           roles: row[5],
           role: row[6],
           nis: row[7],
@@ -164,6 +169,9 @@ async function importSiswa(req, res) {
         users.push(user);
         roles.push(role);
       });
+
+
+      console.log('siswa', users)
 
       let count = 0;
       await Promise.all(

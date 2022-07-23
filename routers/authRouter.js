@@ -15,7 +15,7 @@ authRouter.post(
 authRouter.post(
   "/register",
   registerValidation,
-  validationMiddleware,
+
   authController.register
 );
 

@@ -41,6 +41,9 @@ module.exports = {
       jam_ke: {
         type: Sequelize.INTEGER
       },
+      jumlah_jam: {
+        type: Sequelize.INTEGER
+      },
       semester: {
         type: Sequelize.INTEGER
       },

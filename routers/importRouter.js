@@ -6,12 +6,14 @@ const {
   importTa,
   importKelas,
   importMapel,
-  importAlquran
+  importAlquran,
+  importJadwal,
+  importRombel
 } = require("../controllers/ExportImport/importController");
 const {
   importGuru,
   importSiswa,
-  importWali
+  importWali,
 } = require("../controllers/ExportImport/importUserController");
 importRouter.post("/import/roles", upload.single("file"), importRoles);
 importRouter.post("/import/guru", upload.single("file"), importGuru);
@@ -21,4 +23,6 @@ importRouter.post("/import/ta", upload.single("file"), importTa);
 importRouter.post("/import/mapel", upload.single("file"), importMapel);
 importRouter.post("/import/kelas", upload.single("file"), importKelas);
 importRouter.post("/import/alquran", upload.single("file"), importAlquran);
+importRouter.post("/import/jadwal", upload.single("file"), importJadwal);
+importRouter.post("/import/rombel", upload.single("file"), importRombel);
 module.exports = importRouter;

@@ -151,6 +151,8 @@ async function register(req, res) {
     });
   }
   payload.password = await bcrypt.hashSync(req.body.password, 10);
+
+  console.log(payload)
   try {
     await userModel.create(payload);
 

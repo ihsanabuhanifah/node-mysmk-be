@@ -3,7 +3,9 @@ const alquranModel = require("../../models").alquran;
 const taModel = require("../../models").ta;
 const mapelModel = require("../../models").mapel;
 const kelasModel = require("../../models").kelas;
-const daftarPelanggaranModel = require("../../models").daftar_pelanggaran
+const JadwalModel = require("../../models").jadwal;
+const daftarPelanggaranModel = require("../../models").daftar_pelanggaran;
+const RombelModel = require("../../models").kelas_student;
 const fs = require("fs");
 const readXlsxFile = require("read-excel-file/node");
 
@@ -121,6 +123,8 @@ async function importMapel(req, res) {
 
     let password = process.env.IMPORT_PASSWORD;
 
+    console.log("msuk sini");
+
     if (password !== req.body.password) {
       return res.status(400).json({
         msg: "Password Import Salah",
@@ -141,6 +145,7 @@ async function importMapel(req, res) {
 
       fs.unlinkSync(path);
 
+      console.log("maoel", mapels);
       await Promise.all(
         mapels.map(async (mapel) => {
           if (mapel.id !== null) {
@@ -264,10 +269,125 @@ async function importAlquran(req, res) {
     });
   }
 }
+
+async function importJadwal(req, res) {
+  try {
+    if (req.file == undefined) {
+      return res.status(400).json({
+        msg: "Upload File Excel",
+      });
+    }
+
+    let password = process.env.IMPORT_PASSWORD;
+
+    if (password !== req.body.password) {
+      return res.status(400).json({
+        msg: "Password Import Salah",
+      });
+    }
+    let path = "public/data/uploads/" + req.file.filename;
+    readXlsxFile(path).then(async (rows) => {
+      rows.shift();
+      let jadwals = [];
+
+      rows.forEach((row) => {
+        const jadwal = {
+          hari: row[1],
+          kelas_id: row[2],
+          teacher_id: row[3],
+          mapel_id: row[4],
+          jam_ke: row[5],
+          semester: row[6],
+          ta_id: row[7],
+          status: row[8],
+          jumlah_jam: row[9],
+        };
+        jadwals.push(jadwal);
+      });
+
+      console.log(jadwals);
+      fs.unlinkSync(path);
+
+      await Promise.all(
+        jadwals.map(async (jadwal) => {
+          if (jadwal.id !== null) {
+            await JadwalModel.create(jadwal);
+          }
+        })
+      );
+      res.json({
+        status: "Success",
+        msg: "Jadwal Berhasil dibuat",
+      });
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(400).json({
+      status: "Fail",
+      msg: "Terjadi Kesalahan",
+    });
+  }
+}
+async function importRombel(req, res) {
+  try {
+    if (req.file == undefined) {
+      return res.status(400).json({
+        msg: "Upload File Excel",
+      });
+    }
+
+    let password = process.env.IMPORT_PASSWORD;
+
+    if (password !== req.body.password) {
+      return res.status(400).json({
+        msg: "Password Import Salah",
+      });
+    }
+    let path = "public/data/uploads/" + req.file.filename;
+    readXlsxFile(path).then(async (rows) => {
+      rows.shift();
+      let rombels = [];
+
+      rows.forEach((row) => {
+        const rombel = {
+          kelas_id: row[1],
+          student_id: row[2],
+          semester: row[3],
+          ta_id: row[4],
+          status: row[5],
+        };
+        rombels.push(rombel);
+      });
+
+      console.log(rombels);
+      fs.unlinkSync(path);
+
+      await Promise.all(
+        rombels.map(async (rombel) => {
+          if (rombel.id !== null) {
+            await RombelModel.create(rombel);
+          }
+        })
+      );
+      res.json({
+        status: "Success",
+        msg: "Rombel Berhasil dibuat",
+      });
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(400).json({
+      status: "Fail",
+      msg: "Terjadi Kesalahan",
+    });
+  }
+}
 module.exports = {
   importRoles,
   importAlquran,
   importTa,
   importMapel,
   importKelas,
+  importJadwal,
+  importRombel
 };
