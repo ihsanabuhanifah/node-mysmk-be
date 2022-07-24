@@ -7,7 +7,7 @@ require("dotenv").config();
 const port = process.env.PORT || 8000;
 const dayjs = require("dayjs");
 var moment = require("moment-timezone");
-moment().tz("Asia/Jakarta").format();
+let date = moment().tz("Asia/Jakarta").format("hh:mm:ss");
 
 const { sequelize } = require("./models");
 const cron = require("node-cron");
@@ -16,9 +16,9 @@ const {
   scheduleHalaqoh,
 } = require("./controllers/Admin/jadwalController");
 
-const date = new Date();
 
-console.log(dayjs(date).format("hh:mm:ss"));
+
+console.log(date);
 const job = cron.schedule("5 18 * * *", scheduleKelas);
 const halaqoh = cron.schedule("20 18 * * *", scheduleHalaqoh);
 app.use(cors());
