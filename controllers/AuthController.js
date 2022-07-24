@@ -437,7 +437,7 @@ async function forgotPassword(req, res) {
   }
   let token = crypto.randomBytes(32).toString("hex");
 
-  const link = `${process.env.BASE_URL}/resetPassword/${user.id}/${token}`;
+  const link = `${process.env.BASE_URL}/reset-password/${user.id}/${token}`;
 
   const context = {
     link: link,
@@ -477,9 +477,9 @@ async function resetPasswordEmail(req, res) {
   });
 
   if (verify === null) {
-    return res.json({
+    return res.status(422).json({
       status: "fail",
-      msg: "Token tidak Valid",
+      msg: "Token Sudah Expired",
     });
   }
 

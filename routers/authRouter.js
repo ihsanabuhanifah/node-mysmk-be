@@ -30,7 +30,7 @@ authRouter.put(
 );
 authRouter.post("/forgotPassword", authController.forgotPassword);
 authRouter.post(
-  "/resetPassword/:UserId/:token",
+  "/reset-password/:UserId/:token",
   authController.resetPasswordEmail
 );
 
