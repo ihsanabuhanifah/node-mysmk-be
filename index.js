@@ -6,6 +6,8 @@ const cookieParser = require("cookie-parser");
 require("dotenv").config();
 const port = process.env.PORT || 8000;
 const dayjs = require("dayjs");
+var moment = require("moment-timezone");
+moment().tz("Asia/Jakarta").format();
 
 const { sequelize } = require("./models");
 const cron = require("node-cron");

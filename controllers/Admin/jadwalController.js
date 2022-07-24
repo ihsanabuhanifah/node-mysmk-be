@@ -214,6 +214,7 @@ async function scheduleKelasManual(req, res) {
     if (cek) {
       return res.json({
         msg: "Absensi hari ini sudah dbuat",
+        jam_sekrang : dayjs(date).format("hh:mm:ss")
       });
     }
     const hari = await formatHari(date);
@@ -228,6 +229,7 @@ async function scheduleKelasManual(req, res) {
     if (jadwal.length === 0) {
       return res.json({
         msg: "Tidak ada Jadwal",
+        jam_sekrang : dayjs(date).format("hh:mm:ss")
       });
     }
 
@@ -291,6 +293,7 @@ async function scheduleKelasManual(req, res) {
     await ScheduleMonitorModel.create(laporan);
     return res.json({
       msg: "Success",
+      jam_sekrang : dayjs(date).format("hh:mm:ss")
     });
   } catch (err) {
     console.log(err);
