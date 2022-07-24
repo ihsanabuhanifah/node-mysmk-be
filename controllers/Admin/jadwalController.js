@@ -319,15 +319,15 @@ async function scheduleHalaqohManual(req, res) {
     }
     const hari = await formatHari(date);
 
-    // if (hari === "sabtu")
-    //   return res.json({
-    //     msg: "hari ini libur",
-    //   });
+    if (hari === "sabtu")
+      return res.json({
+        msg: "hari ini libur",
+      });
 
-    // if (hari === "minggu")
-    //   return res.json({
-    //     msg: "hari ini libur",
-    //   });
+    if (hari === "minggu")
+      return res.json({
+        msg: "hari ini libur",
+      });
  
     const halaqoh = await HalaqohModel.findAll({
       attributes: ["id"],
