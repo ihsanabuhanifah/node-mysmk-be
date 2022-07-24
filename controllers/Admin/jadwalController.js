@@ -200,7 +200,6 @@ async function scheduleHalaqoh(req, res) {
 //manual
 
 async function scheduleKelasManual(req, res) {
-  console.log("jalan");
   try {
     // let hari =   dayjs(timeStamps).format("dddd")
 
@@ -241,23 +240,25 @@ async function scheduleKelasManual(req, res) {
             status: 1,
           },
         });
+        for (let i = 0; i < data?.jumlah_jam; i++) {
+          const payload = {
+            tanggal: date,
+            mapel_id: data.mapel_id,
+            kelas_id: data.kelas_id,
+            teacher_id: data.teacher_id,
+            jam_ke: data.jam_ke,
 
-        const payload = {
-          tanggal: date,
-          mapel_id: data.mapel_id,
-          kelas_id: data.kelas_id,
-          teacher_id: data.teacher_id,
-          jam_ke: data.jam_ke,
+            semester: data.semester,
+            ta_id: data.ta_id,
+          };
 
-          semester: data.semester,
-          ta_id: data.ta_id,
-        };
-
-        await AgendaKelasModel.create(payload);
+          await AgendaKelasModel.create(payload);
+        }
 
         data.student = siswa;
       })
     );
+
     await Promise.all(
       jadwal.map(async (value, index) => {
         await Promise.all(
@@ -293,9 +294,10 @@ async function scheduleKelasManual(req, res) {
     });
   } catch (err) {
     console.log(err);
-    return res.status(403).json({
+    return res.status(422).json({
       status: "fail",
       msg: "Ada Kesalahan",
+      err,
     });
   }
 }
@@ -312,7 +314,7 @@ async function scheduleHalaqohManual(req, res) {
 
     if (cek) {
       return res.json({
-        msg: "Absensi hari ini sudah dbuat",
+        msg: "Absensi Halaqoh hari ini sudah dbuat",
       });
     }
     const hari = await formatHari(date);
@@ -326,7 +328,7 @@ async function scheduleHalaqohManual(req, res) {
     //   return res.json({
     //     msg: "hari ini libur",
     //   });
-    // date.setDate(date.getDate() + 1);
+ 
     const halaqoh = await HalaqohModel.findAll({
       attributes: ["id"],
       include: [
@@ -338,7 +340,9 @@ async function scheduleHalaqohManual(req, res) {
         },
       ],
     });
-
+    // return res.json({
+    //   halaqoh
+    // })
     await Promise.all(
       halaqoh.map(async (value) => {
         await Promise.all(
@@ -351,6 +355,8 @@ async function scheduleHalaqohManual(req, res) {
               status_absensi: 0,
               waktu: "pagi",
             };
+
+          
 
             await AbsensiHalaqohModel.create(payload);
           })
@@ -372,7 +378,7 @@ async function scheduleHalaqohManual(req, res) {
     });
   } catch (err) {
     console.log(err);
-    return res.status(403).json({
+    return res.status(422).json({
       status: "fail",
       msg: "Ada Kesalahan",
       data: err,

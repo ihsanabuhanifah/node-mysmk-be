@@ -25,6 +25,10 @@ module.exports = (sequelize, DataTypes) => {
         as: "surat_akhir",
         foreignKey: "sampai_surat",
       });
+      absensi_halaqoh.belongsTo(models.status_kehadiran, {
+        as: "kehadiran",
+        foreignKey: "status_kehadiran",
+      });
     }
   }
   absensi_halaqoh.init(

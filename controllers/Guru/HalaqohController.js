@@ -60,6 +60,16 @@ async function listHalaqoh(req, res) {
           // where: kelas_id !== undefined ? { id: kelas_id } : {},
         },
         {
+          model: models.status_kehadiran,
+          require: true,
+          as: "kehadiran",
+          attributes: ["id", "nama_status_kehadiran"],
+          where:
+            status_kehadiran !== undefined
+              ? { nama_status_kehadiran: status_kehadiran }
+              : {},
+        },
+        {
           model: models.student,
           require: true,
           as: "siswa",
@@ -154,7 +164,7 @@ const notifikasiHalaqoh = async (req, res) => {
           model: models.halaqoh,
           require: true,
           as: "halaqoh",
-          attributes: ["id", "nama_kelompok", "semester" , "teacher_id"],
+          attributes: ["id", "nama_kelompok", "semester", "teacher_id"],
           where: {
             teacher_id: req.teacher_id,
           },
