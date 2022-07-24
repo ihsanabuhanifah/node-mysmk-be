@@ -9,13 +9,14 @@ const importRouter = require("./importRouter");
 const guruRouter = require("./Guru");
 const waliRouter = require("./Wali");
 const daftarRouter = require("./Daftar");
-const dayjs = require("dayjs");
+const { formatHari } = require("../utils/format");
 let moment = require("moment-timezone");
 let date = moment().tz("Asia/Jakarta").format("hh:mm:ss");
+let hari = formatHari(moment().tz("Asia/Jakarta").format());
 
 const adminRouter = require("./Admin");
 router.get("/", (req, res) => {
-  res.send(`Backend MySMK di akses ${date}`);
+  res.send(`Backend MySMK di akses ${hari} jam ${date} `);
 });
 const jwtValidateMiddleware = require("../middleware/jwtValidateMiddleware");
 const paginationMiddleware = require("../middleware/paginationMiddleware");

@@ -2,25 +2,25 @@ const dayjs = require("dayjs");
 function formatHari(timeStamps) {
   let hari = dayjs(timeStamps).format("dddd");
 
-  if (hari === "Monday") return (hari = "senin");
+  if (hari === "Monday") return (hari = "Senin");
 
   if (hari === "Tuesday") {
-    return (hari = "selasa");
+    return (hari = "Selasa");
   }
   if (hari === "Wednesday") {
-    return (hari = "rabu");
+    return (hari = "Rabu");
   }
   if (hari === "Thursday") {
-    return (hari = "kamis");
+    return (hari = "Kamis");
   }
   if (hari === "Friday") {
-    return (hari = "jumat");
+    return (hari = "Jumat");
   }
   if (hari === "Saturday") {
-    return (hari = "sabtu");
+    return (hari = "Sabtu");
   }
   if (hari === "Sunday") {
-    return (hari = "minggu");
+    return (hari = "Minggu");
   }
 }
 function formatDate(timeStamps) {

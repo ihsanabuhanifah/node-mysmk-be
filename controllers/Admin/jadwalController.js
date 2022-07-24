@@ -213,6 +213,10 @@ async function scheduleKelasManual(req, res) {
     }
     const hari = await formatHari(moment().tz("Asia/Jakarta").format());
 
+    return res.json({
+      hari
+    })
+
     const jadwal = await JadwalModel.findAll({
       where: {
         hari: hari,
