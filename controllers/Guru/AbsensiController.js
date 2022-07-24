@@ -305,10 +305,56 @@ const notifikasiAbsensi = async (req, res) => {
     });
   }
 };
+const guruBelumAbsen = async (req, res) => {
+  try {
+    const notifikasi = await AbsensiKelasModel.findAll({
+      attributes: ["id", "tanggal"],
+      where: {
+       
+        status_absensi: 0,
+      },
+      include: [
+        {
+          model: models.teacher,
+          require: true,
+          as: "teacher",
+          attributes: ["id", "nama_guru"],
+        },
+        {
+          model: models.kelas,
+          require: true,
+          as: "kelas",
+          attributes: ["id", "nama_kelas"],
+        },
+        {
+          model: models.mapel,
+          require: true,
+          as: "mapel",
+          attributes: ["id", "nama_mapel"],
+        },
+      ],
+      order: [["tanggal", "desc"]],
+      group: "tanggal",
+    });
+
+    return res.json({
+      status: "Success",
+      msg: "notifikasi absensi",
+      data: notifikasi,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(403).json({
+      status: "Fail",
+      msg: "Terjadi Kesalahan",
+    });
+  }
+};
 module.exports = {
   createAbsensi,
   listAbsensi,
   updateAbsensi,
   listJadwal,
   notifikasiAbsensi,
+  guruBelumAbsen
 };

@@ -8,11 +8,13 @@ const {
   updateAbsensi,
   listJadwal,
   notifikasiAbsensi,
+  guruBelumAbsen
 } = require("../../controllers/Guru/AbsensiController");
 const {
   listHalaqoh,
   updateHalaqoh,
   notifikasiHalaqoh,
+  
 } = require("../../controllers/Guru/HalaqohController");
 const {
   listPelanggaran,
@@ -63,6 +65,7 @@ guru.post("/absensi/simpan", createAbsensi);
 guru.put("/absensi/update", updateAbsensi);
 guru.get("/absensi/list", listAbsensi);
 guru.get("/absensi/notifikasi", notifikasiAbsensi);
+guru.get("/absensi/guru-belum-absen", guruBelumAbsen);
 
 guru.get("/jadwal/list", listJadwal);
 //halaqoh

@@ -59,7 +59,7 @@ async function scheduleKelas(req, res) {
         });
 
         const payload = {
-          tanggal: date,
+          tanggal: moment().tz("Asia/Jakarta").format("YYYY-MM-DD"),
           mapel_id: data.mapel_id,
           kelas_id: data.kelas_id,
           teacher_id: data.teacher_id,
@@ -79,7 +79,7 @@ async function scheduleKelas(req, res) {
         await Promise.all(
           value.student.map(async (data) => {
             const payload = {
-              tanggal: date,
+              tanggal: moment().tz("Asia/Jakarta").format("YYYY-MM-DD"),
               hari: value.hari,
               kelas_id: value.kelas_id,
               teacher_id: value.teacher_id,
@@ -97,7 +97,7 @@ async function scheduleKelas(req, res) {
     );
 
     let laporan = {
-      tanggal: date,
+      tanggal: moment().tz("Asia/Jakarta").format("YYYY-MM-DD"),
       keterangan: `Absensi kelas tanggal ${dayjs(date).format(
         "DD-MM-YY"
       )} berhasil dibuat`,
@@ -161,7 +161,7 @@ async function scheduleHalaqoh(req, res) {
             const payload = {
               student_id: data.student_id,
               halaqoh_id: value.id,
-              tanggal: date,
+              tanggal: moment().tz("Asia/Jakarta").format("YYYY-MM-DD"),
               status_kehadiran: 6,
               status_absensi: 0,
               waktu: "pagi",
@@ -174,7 +174,7 @@ async function scheduleHalaqoh(req, res) {
     );
 
     let laporan = {
-      tanggal: date,
+      tanggal: moment().tz("Asia/Jakarta").format("YYYY-MM-DD"),
       keterangan: `Absensi Halaqoh tanggal ${dayjs(date).format(
         "DD-MM-YY"
       )} berhasil dibuat`,
@@ -199,7 +199,6 @@ async function scheduleHalaqoh(req, res) {
 
 async function scheduleKelasManual(req, res) {
   try {
-   
     const cek = await ScheduleMonitorModel.findOne({
       where: {
         tanggal: dayjs(date).format("YYYY-MM-DD"),
@@ -210,12 +209,10 @@ async function scheduleKelasManual(req, res) {
     if (cek) {
       return res.json({
         msg: "Absensi hari ini sudah dbuat",
-      
       });
     }
     const hari = await formatHari(moment().tz("Asia/Jakarta").format());
 
-    
     const jadwal = await JadwalModel.findAll({
       where: {
         hari: hari,
@@ -226,7 +223,6 @@ async function scheduleKelasManual(req, res) {
     if (jadwal.length === 0) {
       return res.json({
         msg: "Tidak ada Jadwal",
-      
       });
     }
 
@@ -241,7 +237,7 @@ async function scheduleKelasManual(req, res) {
         });
         for (let i = 0; i < data?.jumlah_jam; i++) {
           const payload = {
-            tanggal: date,
+            tanggal: moment().tz("Asia/Jakarta").format("YYYY-MM-DD"),
             mapel_id: data.mapel_id,
             kelas_id: data.kelas_id,
             teacher_id: data.teacher_id,
@@ -263,7 +259,7 @@ async function scheduleKelasManual(req, res) {
         await Promise.all(
           value.student.map(async (data) => {
             const payload = {
-              tanggal: date,
+              tanggal: moment().tz("Asia/Jakarta").format("YYYY-MM-DD"),
               hari: value.hari,
               kelas_id: value.kelas_id,
               teacher_id: value.teacher_id,
@@ -281,7 +277,7 @@ async function scheduleKelasManual(req, res) {
     );
 
     let laporan = {
-      tanggal: date,
+      tanggal: moment().tz("Asia/Jakarta").format("YYYY-MM-DD"),
       keterangan: `Absensi kelas tanggal ${dayjs(date).format(
         "DD-MM-YY"
       )} berhasil dibuat`,
@@ -290,7 +286,6 @@ async function scheduleKelasManual(req, res) {
     await ScheduleMonitorModel.create(laporan);
     return res.json({
       msg: "Success",
-    
     });
   } catch (err) {
     console.log(err);
@@ -349,7 +344,7 @@ async function scheduleHalaqohManual(req, res) {
             const payload = {
               student_id: data.student_id,
               halaqoh_id: value.id,
-              tanggal: date,
+              tanggal: moment().tz("Asia/Jakarta").format("YYYY-MM-DD"),
               status_kehadiran: 6,
               status_absensi: 0,
               waktu: "pagi",
@@ -362,7 +357,7 @@ async function scheduleHalaqohManual(req, res) {
     );
 
     let laporan = {
-      tanggal: date,
+      tanggal: moment().tz("Asia/Jakarta").format("YYYY-MM-DD"),
       keterangan: `Absensi Halaqoh tanggal ${dayjs(date).format(
         "DD-MM-YY"
       )} berhasil dibuat`,
