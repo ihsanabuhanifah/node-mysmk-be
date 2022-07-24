@@ -240,6 +240,7 @@ async function importAlquran(req, res) {
 
       rows.forEach((row) => {
         const mapel = {
+          id: row[0],
           nama_surat: row[1],
           nama_surat_arabic: row[2],
           jumlah_ayat: row[3],
