@@ -269,7 +269,7 @@ async function updateAbsensi(req, res) {
 const notifikasiAbsensi = async (req, res) => {
   try {
     const notifikasi = await AbsensiKelasModel.findAll({
-      attributes: ["id", "tanggal"],
+      attributes: ["id", "tanggal", "kelas_id"],
       where: {
         teacher_id: req.teacher_id,
         status_absensi: 0,
@@ -289,7 +289,7 @@ const notifikasiAbsensi = async (req, res) => {
         },
       ],
       order: [["tanggal", "desc"]],
-      group: "tanggal",
+      group: "kelas_id",
     });
 
     return res.json({
@@ -333,7 +333,6 @@ const guruBelumAbsen = async (req, res) => {
         },
       ],
       order: [["tanggal", "desc"]],
-     
     });
 
     return res.json({
