@@ -159,8 +159,8 @@ async function listAbsensi(req, res) {
         teacher_id: req.teacher_id,
       },
       order: [["tanggal", "desc"]],
-      limit: pageSize,
-      offset: page,
+      // limit: pageSize,
+      // offset: page,
       include: [
         {
           model: models.kelas,
