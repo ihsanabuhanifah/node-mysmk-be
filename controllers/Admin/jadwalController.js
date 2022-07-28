@@ -15,6 +15,7 @@ const dayjs = require("dayjs");
 const { func } = require("joi");
 let moment = require("moment-timezone");
 let date = moment().tz("Asia/Jakarta").format("hh:mm:ss");
+let hari = formatHari(moment().tz("Asia/Jakarta").format('YYYY-MM-DD'));
 
 async function scheduleKelas(req, res) {
   console.log("jalan");
@@ -34,7 +35,7 @@ async function scheduleKelas(req, res) {
         msg: "Absensi hari ini sudah dbuat",
       });
     }
-    const hari = await formatHari(moment().tz("Asia/Jakarta").format());
+    
 
     const jadwal = await JadwalModel.findAll({
       where: {
@@ -119,7 +120,7 @@ async function scheduleKelas(req, res) {
 
 async function scheduleHalaqoh(req, res) {
   try {
-    const hari = await formatHari(moment().tz("Asia/Jakarta").format());
+    
 
     if (hari === "sabtu")
       return res.json({
@@ -213,7 +214,7 @@ async function scheduleKelasManual(req, res) {
         msg: "Absensi hari ini sudah dbuat",
       });
     }
-    const hari = await formatHari(moment().tz("Asia/Jakarta").format());
+    
 
    
 
@@ -315,7 +316,7 @@ async function scheduleHalaqohManual(req, res) {
         msg: "Absensi Halaqoh hari ini sudah dbuat",
       });
     }
-    const hari = await formatHari(moment().tz("Asia/Jakarta").format());
+    
 
     if (hari === "sabtu")
       return res.json({
