@@ -9,7 +9,7 @@ async function listJadwal(req, res) {
   try {
     const { hari } = req.query;
     const jadwal = await JadwalModel.findAndCountAll({
-      attributes: ["id", "hari", "jam_ke", "semester"],
+      attributes: ["id", "hari", "jam_ke", "jumlah_jam", "semester"],
       include: [
         {
           model: models.kelas,
@@ -332,6 +332,7 @@ const guruBelumAbsen = async (req, res) => {
           attributes: ["id", "nama_mapel"],
         },
       ],
+      group: ["tanggal", "kelas_id", "teacher_id" , "mapel_id" ],
       order: [["tanggal", "desc"]],
     });
 

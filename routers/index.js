@@ -10,9 +10,10 @@ const guruRouter = require("./Guru");
 const waliRouter = require("./Wali");
 const daftarRouter = require("./Daftar");
 const { formatHari } = require("../utils/format");
+const dayjs = require('dayjs')
 let moment = require("moment-timezone");
 let date = moment().tz("Asia/Jakarta").format("hh:mm:ss");
-let hari = formatHari(moment().tz("Asia/Jakarta").format());
+let hari = formatHari(moment().tz("Asia/Jakarta").format('YYYY-MM-DD'));
 
 const adminRouter = require("./Admin");
 router.get("/", (req, res) => {
