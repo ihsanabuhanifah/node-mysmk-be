@@ -289,7 +289,7 @@ const notifikasiAbsensi = async (req, res) => {
         },
       ],
       order: [["tanggal", "desc"]],
-      group: "kelas_id",
+      group: ["tanggal", "kelas_id"],
     });
 
     return res.json({
@@ -332,7 +332,7 @@ const guruBelumAbsen = async (req, res) => {
           attributes: ["id", "nama_mapel"],
         },
       ],
-      group: ["tanggal", "kelas_id", "teacher_id" , "mapel_id" ],
+      group: ["tanggal", "kelas_id", "teacher_id", "mapel_id"],
       order: [["tanggal", "desc"]],
     });
 
