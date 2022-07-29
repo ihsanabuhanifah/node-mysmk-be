@@ -268,9 +268,7 @@ async function scheduleKelasManual(req, res) {
 
     let laporan = {
       tanggal: tanggal,
-      keterangan: `Absensi kelas tanggal ${moment()
-        .tz("Asia/Jakarta")
-        .format("YYYY-MM-DD")} berhasil dibuat`,
+      keterangan: `Absensi kelas tanggal ${tanggal} berhasil dibuat`,
       kegiatan: "KBM",
     };
     await ScheduleMonitorModel.create(laporan);
@@ -323,6 +321,12 @@ async function scheduleHalaqohManual(req, res) {
         },
       ],
     });
+
+    if(halaqoh.length === 0) {
+      return res.json({
+        msg: "Kelompok Halaqoh belum dibuat"
+      })
+    }
     // return res.json({
     //   halaqoh
     // })
@@ -347,9 +351,7 @@ async function scheduleHalaqohManual(req, res) {
 
     let laporan = {
       tanggal: tanggal,
-      keterangan: `Absensi Halaqoh tanggal ${moment()
-        .tz("Asia/Jakarta")
-        .format("YYYY-MM-DD")} berhasil dibuat`,
+      keterangan: `Absensi Halaqoh tanggal ${tanggal} berhasil dibuat`,
       kegiatan: "Halaqoh",
     };
     await ScheduleMonitorModel.create(laporan);
