@@ -6,6 +6,8 @@ const HalaqohModel = require("../../models").halaqoh;
 const HalaqohStudentModel = require("../../models").halaqoh_student;
 const AbsensiHalaqohModel = require("../../models").absensi_halaqoh;
 const ScheduleMonitorModel = require("../../models").schedule_monitor;
+const LaporanGuruPiketModel = require("../../models").laporan_guru_piket;
+const GuruPiketModel = require("../../models").guru_piket;
 
 const models = require("../../models");
 const dotenv = require("dotenv");
@@ -209,6 +211,29 @@ async function scheduleKelasManual(req, res) {
         status: 1,
       },
     });
+    const jadwalGuruPiket = await GuruPiketModel.findAll({
+      where: {
+        hari: hari,
+        status: 1,
+      },
+    });
+
+    if (jadwalGuruPiket.length !== 0) {
+      await Promise.all(
+        jadwalGuruPiket.map(async (data) => {
+          const payload = {
+            teacher_id: data?.teacher_id,
+            tanggal: tanggal,
+            laporan: null,
+            diperiksa_oleh: null,
+            status: 0,
+            ta_id: data?.ta_id,
+          };
+
+          await LaporanGuruPiketModel.create(payload);
+        })
+      );
+    }
 
     if (jadwal.length === 0) {
       return res.json({
@@ -272,6 +297,12 @@ async function scheduleKelasManual(req, res) {
       kegiatan: "KBM",
     };
     await ScheduleMonitorModel.create(laporan);
+    let laporanGuruPiket = {
+      tanggal: tanggal,
+      keterangan: `Absensi Guru Piket tanggal ${tanggal} berhasil dibuat`,
+      kegiatan: "Guru",
+    };
+    await ScheduleMonitorModel.create(laporanGuruPiket);
     return res.json({
       msg: "Success",
     });
@@ -322,10 +353,10 @@ async function scheduleHalaqohManual(req, res) {
       ],
     });
 
-    if(halaqoh.length === 0) {
+    if (halaqoh.length === 0) {
       return res.json({
-        msg: "Kelompok Halaqoh belum dibuat"
-      })
+        msg: "Kelompok Halaqoh belum dibuat",
+      });
     }
     // return res.json({
     //   halaqoh

@@ -33,6 +33,14 @@ module.exports = (sequelize, DataTypes) => {
         as: "prestasi",
         foreignKey: "ta_id",
       });
+      ta.hasMany(models.guru_piket, {
+        as: "guru_piket",
+        foreignKey: "ta_id",
+      });
+      ta.hasMany(models.laporan_guru_piket, {
+        as: "laporan_guru_piket",
+        foreignKey: "ta_id",
+      });
     }
   }
   ta.init(

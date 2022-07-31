@@ -47,6 +47,8 @@ const {
   updateAbensiSholat,
   deleteAbsensiSholat,
 } = require("../../controllers/Guru/AbsensiSholatController");
+
+const {listPiketHariIni, listGuruPiketBelumLaporan, simpanLaporanGuruPiket, getDetailLaporanGuruPiket}= require("../../controllers/Guru/LaporanController");
 //absensi
 
 //jadwal
@@ -56,6 +58,7 @@ const {
   scheduleHalaqohManual,
   scheduleCek,
 } = require("../../controllers/Admin/jadwalController");
+
 
 guru.use(guruAccessMiddleware);
 guru.get("/absensi/manual", scheduleKelasManual);
@@ -103,4 +106,12 @@ guru.post("/absensi-sholat/create", createAbsensiSholat);
 guru.get("/absensi-sholat/list", listAbsensiSholat);
 guru.put("/absensi-sholat/update", updateAbensiSholat);
 guru.post("/absensi-sholat/delete", deleteAbsensiSholat);
+
+
+//laporan
+
+guru.get("/laporan/guru-piket/list", listPiketHariIni);
+guru.get("/laporan/guru-piket-belum-laporan/list", listGuruPiketBelumLaporan);
+guru.put("/laporan/guru-piket/simpan", simpanLaporanGuruPiket);
+guru.get("/laporan/guru-piket/:id/:tanggal", getDetailLaporanGuruPiket)
 module.exports = guru;

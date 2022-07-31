@@ -1,6 +1,7 @@
 const AbsensiKelasModel = require("../../models").absensi_kelas;
 const AgendaKelasModel = require("../../models").agenda_kelas;
 const JadwalModel = require("../../models").jadwal;
+const LaporanGuruPiket = require("../../models").laporan_guru_piket;
 const models = require("../../models");
 const { Op } = require("sequelize");
 const { check } = require("../../utils/paramsQuery");
@@ -158,7 +159,10 @@ async function listAbsensi(req, res) {
         }),
         teacher_id: req.teacher_id,
       },
-      order: [["tanggal", "desc"]],
+      order: [
+        ["tanggal", "desc"],
+        [{ model: models.student, as: "siswa" }, "nama_siswa", "asc"],
+      ],
       // limit: pageSize,
       // offset: page,
       include: [
@@ -252,6 +256,8 @@ async function updateAbsensi(req, res) {
         });
       })
     );
+
+    
 
     return res.status(200).json({
       status: "Success",
