@@ -218,6 +218,19 @@ async function scheduleKelasManual(req, res) {
       },
     });
 
+    let laporan = {
+      tanggal: tanggal,
+      keterangan: `Absensi kelas tanggal ${tanggal} berhasil dibuat`,
+      kegiatan: "KBM",
+    };
+    await ScheduleMonitorModel.create(laporan);
+    let laporanGuruPiket = {
+      tanggal: tanggal,
+      keterangan: `Absensi Guru Piket tanggal ${tanggal} berhasil dibuat`,
+      kegiatan: "Guru",
+    };
+    await ScheduleMonitorModel.create(laporanGuruPiket);
+
     if (jadwalGuruPiket.length !== 0) {
       await Promise.all(
         jadwalGuruPiket.map(async (data) => {
@@ -291,18 +304,6 @@ async function scheduleKelasManual(req, res) {
       })
     );
 
-    let laporan = {
-      tanggal: tanggal,
-      keterangan: `Absensi kelas tanggal ${tanggal} berhasil dibuat`,
-      kegiatan: "KBM",
-    };
-    await ScheduleMonitorModel.create(laporan);
-    let laporanGuruPiket = {
-      tanggal: tanggal,
-      keterangan: `Absensi Guru Piket tanggal ${tanggal} berhasil dibuat`,
-      kegiatan: "Guru",
-    };
-    await ScheduleMonitorModel.create(laporanGuruPiket);
     return res.json({
       msg: "Success",
     });
