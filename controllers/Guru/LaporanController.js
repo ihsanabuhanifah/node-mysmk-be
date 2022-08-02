@@ -73,7 +73,7 @@ const listGuruPiketBelumLaporan = async (req, res) => {
 
     return res.json({
       status: "Success",
-      msg: "list guru piket belum buat laporan",
+      msg: "list guru laporan",
       data: notifikasi,
     });
   } catch (err) {
@@ -94,7 +94,7 @@ const getDetailLaporanGuruPiket = async (req, res) => {
         tanggal: tanggal,
       },
     });
-    laporan.laporan = JSON.parse(laporan.laporan);
+    laporan.laporan = JSON.parse(laporan?.laporan);
     return res.json({
       status: "Success",
       msg: "Laporan ditemukan",
@@ -147,9 +147,45 @@ const simpanLaporanGuruPiket = async (req, res) => {
     });
   }
 };
+
+const notifikasiPiket = async (req, res) => {
+  try {
+    const notifikasi = await LaporanGuruPiketModel.findAll({
+      // attributes: ["id", "tanggal", "kelas_id"],
+      where: {
+        // teacher_id: req.teacher_id,
+        status: 0,
+      },
+      include: [
+        
+        {
+          model: models.ta,
+          require: true,
+          as: "tahun_ajaran",
+          attributes: ["id", "nama_tahun_ajaran"],
+        },
+      ],
+      order: [["tanggal", "desc"]],
+      // group: ["tanggal", "kelas_id"],
+    });
+
+    return res.json({
+      status: "Success",
+      msg: "notifikasi Guru Piket",
+      data: notifikasi,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(403).json({
+      status: "Fail",
+      msg: "Terjadi Kesalahan",
+    });
+  }
+};
 module.exports = {
   listPiketHariIni,
   listGuruPiketBelumLaporan,
   simpanLaporanGuruPiket,
   getDetailLaporanGuruPiket,
+  notifikasiPiket
 };
