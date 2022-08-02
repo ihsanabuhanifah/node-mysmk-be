@@ -153,7 +153,7 @@ const notifikasiPiket = async (req, res) => {
     const notifikasi = await LaporanGuruPiketModel.findAll({
       // attributes: ["id", "tanggal", "kelas_id"],
       where: {
-        // teacher_id: req.teacher_id,
+        teacher_id: req.teacher_id,
         status: 0,
       },
       include: [
@@ -171,7 +171,7 @@ const notifikasiPiket = async (req, res) => {
 
     return res.json({
       status: "Success",
-      msg: "notifikasi Guru Piket",
+      msg: "notifikasi Guru",
       data: notifikasi,
     });
   } catch (err) {
