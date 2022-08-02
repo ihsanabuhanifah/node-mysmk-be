@@ -28,7 +28,7 @@ authRouter.put(
   jwtValidateMiddleware,
   authController.resetPassword
 );
-authRouter.post("/forgotPassword", authController.forgotPassword);
+authRouter.post("/forgot-password", authController.forgotPassword);
 authRouter.post(
   "/reset-password/:UserId/:token",
   authController.resetPasswordEmail

@@ -5,7 +5,7 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 require("dotenv").config();
 const port = process.env.PORT || 8000;
-const dayjs = require("dayjs");
+cors
 var moment = require("moment-timezone");
 let date = moment().tz("Asia/Jakarta").format("hh:mm:ss");
 
