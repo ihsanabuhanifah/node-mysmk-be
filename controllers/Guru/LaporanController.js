@@ -91,9 +91,11 @@ const getDetailLaporanGuruPiket = async (req, res) => {
     const laporan = await LaporanGuruPiketModel.findOne({
       where: {
         id: id,
-        tanggal: tanggal,
+        // tanggal: tanggal,
       },
     });
+
+  
     laporan.laporan = JSON.parse(laporan?.laporan);
     return res.json({
       status: "Success",
