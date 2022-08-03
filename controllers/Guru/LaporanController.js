@@ -95,6 +95,10 @@ const getDetailLaporanGuruPiket = async (req, res) => {
       },
     });
 
+
+    // return res.json({
+    //   laporan
+    // })
   
     laporan.laporan = JSON.parse(laporan?.laporan);
     return res.json({
