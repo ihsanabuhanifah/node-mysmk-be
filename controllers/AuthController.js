@@ -232,6 +232,8 @@ async function authme(req, res) {
       });
     }
 
+   
+
     const token = JWT.sign(
       {
         email: user.email,
@@ -249,10 +251,12 @@ async function authme(req, res) {
         expiresIn: "7d",
       }
     );
-    if (req.role === "wali") {
+
+   
+    if (req.role === "Wali Siswa" || req.role === 'Wali Santri') {
       return res.status(200).json({
         status: "Success",
-        msg: "Berhasil Authme",
+        msg: "Berhasil Wali Santri Authme",
         user: user,
         role: req.role,
         token: token,
