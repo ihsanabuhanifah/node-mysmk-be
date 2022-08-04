@@ -253,7 +253,7 @@ async function authme(req, res) {
     );
 
    
-    if (req.role === "Wali Siswa" || req.role === 'Wali Santri') {
+    if (req.role === "Wali Siswa") {
       return res.status(200).json({
         status: "Success",
         msg: "Berhasil Wali Santri Authme",
