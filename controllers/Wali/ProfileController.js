@@ -15,20 +15,20 @@ const profile = async (req, res) => {
           include: [
             {
               model: models.kelas_student,
-              require : true,
-              as : "kelas_student",
-              attributes : ["id", "kelas_id",],
-              include : [
+              require: true,
+              as: "kelas_student",
+              attributes: ["id", "kelas_id"],
+              include: [
                 {
-                    model: models.kelas,
-                    require: true,
-                    as: "kelas",
-                    attributes : ['id', 'nama_kelas'],
-                }
+                  model: models.kelas,
+                  require: true,
+                  as: "kelas",
+                  attributes: ["id", "nama_kelas"],
+                },
               ],
-              where : {
-                status : 1
-              }
+              where: {
+                status: 1,
+              },
             },
           ],
         },

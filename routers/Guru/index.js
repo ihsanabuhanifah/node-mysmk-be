@@ -2,6 +2,8 @@ const express = require("express");
 const guruAccessMiddleware = require("../../middleware/guruAccessMiddleware");
 
 const guru = express.Router();
+
+const {getRole} = require("../../controllers/Admin/RolesController");
 const {
   createAbsensi,
   listAbsensi,
@@ -65,6 +67,11 @@ const {
 } = require("../../controllers/Admin/jadwalController");
 
 guru.use(guruAccessMiddleware);
+
+//role
+
+guru.get("/get-role-guru", getRole);
+//jadwal
 guru.get("/absensi/manual", scheduleKelasManual);
 guru.get("/halaqoh/manual", scheduleHalaqohManual);
 guru.get("/monitor", scheduleCek);
