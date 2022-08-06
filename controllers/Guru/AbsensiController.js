@@ -6,6 +6,7 @@ const models = require("../../models");
 const { Op } = require("sequelize");
 const { check } = require("../../utils/paramsQuery");
 const { checkQuery } = require("../../utils/format");
+const excel = require("exceljs");
 
 async function listJadwal(req, res) {
   try {
@@ -375,11 +376,12 @@ async function rekapAbsensi(req, res) {
       attributes: ["id", "semester", "tanggal", "keterangan"],
 
       where: {
-        ...(semester !== undefined && { semester: semester }),
-        ...(dariTanggal !== undefined && {
+        ...(checkQuery(semester) && {
+          semester: semester,
+        }),
+        ...(checkQuery(dariTanggal) && {
           tanggal: { [Op.between]: [dariTanggal, sampaiTanggal] },
         }),
-        ...(semester !== undefined && { teacher_id: teacher_id }),
       },
       order: [
         ["tanggal", "desc"],
@@ -461,7 +463,7 @@ async function rekapAbsensi(req, res) {
           attributes: ["id", "nama_status_kehadiran"],
           where: {
             ...(checkQuery(status_kehadiran) && {
-             id: {
+              id: {
                 [Op.substring]: status_kehadiran,
               },
             }),
@@ -486,6 +488,172 @@ async function rekapAbsensi(req, res) {
   }
 }
 
+async function downloadExcelrekapAbsensi(req, res) {
+  let {
+    nama_kelas,
+    nama_siswa,
+    nama_mapel,
+    nama_guru,
+    teacher_id,
+    tahun_ajaran,
+    status_kehadiran,
+    semester,
+    dariTanggal,
+    sampaiTanggal,
+    page,
+    pageSize,
+  } = req.query;
+  try {
+    const absensi = await AbsensiKelasModel.findAll({
+      attributes: ["id", "semester", "tanggal", "keterangan"],
+
+      where: {
+        ...(checkQuery(semester) && {
+          semester: semester,
+        }),
+        ...(checkQuery(dariTanggal) && {
+          tanggal: { [Op.between]: [dariTanggal, sampaiTanggal] },
+        }),
+      },
+      order: [
+        ["tanggal", "desc"],
+        [{ model: models.student, as: "siswa" }, "nama_siswa", "asc"],
+      ],
+      limit: pageSize,
+      offset: page,
+      include: [
+        {
+          model: models.kelas,
+          require: true,
+          as: "kelas",
+          attributes: ["id", "nama_kelas"],
+          where: {
+            ...(checkQuery(nama_kelas) && {
+              nama_kelas: {
+                [Op.substring]: nama_kelas,
+              },
+            }),
+          },
+        },
+        {
+          model: models.student,
+          require: true,
+          as: "siswa",
+          attributes: ["id", "nama_siswa"],
+          where: {
+            ...(checkQuery(nama_siswa) && {
+              nama_siswa: {
+                [Op.substring]: nama_siswa,
+              },
+            }),
+          },
+        },
+        {
+          model: models.teacher,
+          require: true,
+          as: "teacher",
+          attributes: ["id", "nama_guru"],
+          where: {
+            ...(checkQuery(nama_guru) && {
+              nama_guru: {
+                [Op.substring]: nama_guru,
+              },
+            }),
+          },
+        },
+        {
+          model: models.mapel,
+          require: true,
+          as: "mapel",
+          attributes: ["id", "nama_mapel"],
+          where: {
+            ...(checkQuery(nama_mapel) && {
+              nama_mapel: {
+                [Op.substring]: nama_mapel,
+              },
+            }),
+          },
+        },
+        {
+          model: models.ta,
+          require: true,
+          as: "tahun_ajaran",
+          attributes: ["id", "nama_tahun_ajaran"],
+
+          where: {
+            ...(checkQuery(tahun_ajaran) && {
+              nama_tahun_ajaran: {
+                [Op.substring]: tahun_ajaran,
+              },
+            }),
+          },
+        },
+        {
+          model: models.status_kehadiran,
+          require: true,
+          as: "kehadiran",
+          attributes: ["id", "nama_status_kehadiran"],
+          where: {
+            ...(checkQuery(status_kehadiran) && {
+              id: {
+                [Op.substring]: status_kehadiran,
+              },
+            }),
+          },
+        },
+      ],
+    });
+
+   
+
+    let workbook = new excel.Workbook();
+    let worksheet = workbook.addWorksheet("Rekap Absensi");
+    worksheet.columns = [
+      { header: "No.", key: "no", width: 10 },
+      { header: "Tanggal", key: "tanggal", width: 20 },
+      { header: "Nama Siswa", key: "nSiswa", width: 20 },
+      { header: "Kelas", key: "nKelas", width: 10 },
+      { header: "Mata Pelajaran", key: "nMapel", width: 20 },
+      { header: "Nama Guru", key: "nGuru", width: 20 },
+
+      { header: "Status Kehadiran", key: "kehadiran", width: 20 },
+      { header: "Keterangan", key: "keterangan", width: 20 },
+      { header: "Semester", key: "semester", width: 20 },
+      { header: "Tahun Pelajaran", key: "ta", width: 20 },
+    ];
+
+    absensi.forEach((item, index) => {
+      worksheet.addRow({
+        no: index + 1,
+        tanggal: item.tanggal,
+        nSiswa: item.siswa.nama_siswa,
+        nKelas: item.kelas.nama_kelas,
+        nMapel: item.mapel.nama_mapel,
+        nGuru: item.teacher.nama_guru,
+        kehadiran: item.kehadiran.nama_status_kehadiran,
+        keterangan: item.keterangan,
+        semester: item.semester,
+        ta: item.tahun_ajaran.nama_tahun_ajaran,
+      });
+    });
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+
+    return workbook.xlsx.write(res).then(function () {
+      res.status(200).end();
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(403).json({
+      status: "Fail",
+      msg: "Terjadi Kesalahan",
+      err,
+    });
+  }
+}
+
 module.exports = {
   createAbsensi,
   listAbsensi,
@@ -494,4 +662,5 @@ module.exports = {
   notifikasiAbsensi,
   guruBelumAbsen,
   rekapAbsensi,
+  downloadExcelrekapAbsensi,
 };

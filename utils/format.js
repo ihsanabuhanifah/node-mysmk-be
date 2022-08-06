@@ -92,10 +92,12 @@ function formatDate(timeStamps) {
 }
 
 function checkQuery(value) {
+
+ 
   if (value === undefined) return false;
 
   if (value === "") return false;
-
+  console.log('mauk aini', value);
   if (value === null) return false;
   return true;
 }
