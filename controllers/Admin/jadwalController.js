@@ -16,11 +16,7 @@ dotenv.config();
 const { hari, tanggal } = require("../../utils/tanggal");
 
 async function scheduleKelas(req, res) {
-  console.log("jalan");
-
   try {
-    // let hari =   dayjs(timeStamps).format("dddd")
-
     const cek = await ScheduleMonitorModel.findOne({
       where: {
         tanggal: tanggal,
@@ -40,6 +36,42 @@ async function scheduleKelas(req, res) {
         status: 1,
       },
     });
+    const jadwalGuruPiket = await GuruPiketModel.findAll({
+      where: {
+        hari: hari,
+        status: 1,
+      },
+    });
+
+    let laporan = {
+      tanggal: tanggal,
+      keterangan: `Absensi kelas tanggal ${tanggal} berhasil dibuat`,
+      kegiatan: "KBM",
+    };
+    await ScheduleMonitorModel.create(laporan);
+    let laporanGuruPiket = {
+      tanggal: tanggal,
+      keterangan: `Absensi Guru Piket tanggal ${tanggal} berhasil dibuat`,
+      kegiatan: "Guru",
+    };
+    await ScheduleMonitorModel.create(laporanGuruPiket);
+
+    if (jadwalGuruPiket.length !== 0) {
+      await Promise.all(
+        jadwalGuruPiket.map(async (data) => {
+          const payload = {
+            teacher_id: data?.teacher_id,
+            tanggal: tanggal,
+            laporan: null,
+            diperiksa_oleh: null,
+            status: 0,
+            ta_id: data?.ta_id,
+          };
+
+          await LaporanGuruPiketModel.create(payload);
+        })
+      );
+    }
 
     if (jadwal.length === 0) {
       return res.json({
@@ -56,23 +88,25 @@ async function scheduleKelas(req, res) {
             status: 1,
           },
         });
+        for (let i = 0; i < data?.jumlah_jam; i++) {
+          const payload = {
+            tanggal: tanggal,
+            mapel_id: data.mapel_id,
+            kelas_id: data.kelas_id,
+            teacher_id: data.teacher_id,
+            jam_ke: data.jam_ke + i,
 
-        const payload = {
-          tanggal: tanggal,
-          mapel_id: data.mapel_id,
-          kelas_id: data.kelas_id,
-          teacher_id: data.teacher_id,
-          jam_ke: data.jam_ke,
+            semester: data.semester,
+            ta_id: data.ta_id,
+          };
 
-          semester: data.semester,
-          ta_id: data.ta_id,
-        };
-
-        await AgendaKelasModel.create(payload);
+          await AgendaKelasModel.create(payload);
+        }
 
         data.student = siswa;
       })
     );
+
     await Promise.all(
       jadwal.map(async (value, index) => {
         await Promise.all(
@@ -95,21 +129,10 @@ async function scheduleKelas(req, res) {
       })
     );
 
-    let laporan = {
-      tanggal: tanggal,
-      keterangan: `Absensi kelas tanggal ${tanggal} berhasil dibuat`,
-      kegiatan: "KBM",
-    };
-    await ScheduleMonitorModel.create(laporan);
-    return res.json({
-      msg: "Success",
-    });
+   
   } catch (err) {
     console.log(err);
-    // return res.status(403).json({
-    //   status: "fail",
-    //   msg: "Ada Kesalahan",
-    // });
+   
   }
 }
 
@@ -269,7 +292,7 @@ async function scheduleKelasManual(req, res) {
             mapel_id: data.mapel_id,
             kelas_id: data.kelas_id,
             teacher_id: data.teacher_id,
-            jam_ke: data.jam_ke,
+            jam_ke: data.jam_ke + i,
 
             semester: data.semester,
             ta_id: data.ta_id,

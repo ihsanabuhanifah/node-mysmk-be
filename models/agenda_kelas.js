@@ -16,7 +16,7 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "kelas_id",
       });
       agenda_kelas.belongsTo(models.mapel, {
-        as: "mapels",
+        as: "mapel",
         foreignKey: "mapel_id",
       });
       agenda_kelas.belongsTo(models.teacher, {
@@ -24,7 +24,7 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "teacher_id",
       });
       agenda_kelas.belongsTo(models.ta, {
-        as: "ta",
+        as: "tahun_ajaran",
         foreignKey: "ta_id",
       });
     }

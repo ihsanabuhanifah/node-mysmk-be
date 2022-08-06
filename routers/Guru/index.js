@@ -12,7 +12,8 @@ const {
   notifikasiAbsensi,
   guruBelumAbsen,
   rekapAbsensi,
-  downloadExcelrekapAbsensi
+  downloadExcelrekapAbsensi,
+  rekapAgenda
 } = require("../../controllers/Guru/AbsensiController");
 const {
   listHalaqoh,
@@ -84,6 +85,7 @@ guru.get("/absensi/notifikasi", notifikasiAbsensi);
 guru.get("/absensi/guru-belum-absen", guruBelumAbsen);
 guru.get("/absensi/rekap", rekapAbsensi);
 guru.get("/absensi/rekap/download", downloadExcelrekapAbsensi);
+guru.get("/agenda/rekap", rekapAgenda);
 
 guru.get("/jadwal/list", listJadwal);
 //halaqoh

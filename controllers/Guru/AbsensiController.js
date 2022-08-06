@@ -604,8 +604,6 @@ async function downloadExcelrekapAbsensi(req, res) {
       ],
     });
 
-   
-
     let workbook = new excel.Workbook();
     let worksheet = workbook.addWorksheet("Rekap Absensi");
     worksheet.columns = [
@@ -654,6 +652,114 @@ async function downloadExcelrekapAbsensi(req, res) {
   }
 }
 
+async function rekapAgenda(req, res) {
+  let {
+    nama_kelas,
+
+    nama_mapel,
+    nama_guru,
+
+    tahun_ajaran,
+
+    semester,
+    dariTanggal,
+    sampaiTanggal,
+    page,
+    pageSize,
+  } = req.query;
+  try {
+    const absensi = await AgendaKelasModel.findAndCountAll({
+      attributes: ["id", "materi", "jam_ke", "semester", "tanggal"],
+
+      where: {
+        ...(checkQuery(semester) && {
+          semester: semester,
+        }),
+        ...(checkQuery(dariTanggal) && {
+          tanggal: { [Op.between]: [dariTanggal, sampaiTanggal] },
+        }),
+      },
+      order: [
+        ["id", "desc"],
+       
+      ],
+      limit: pageSize,
+      offset: page,
+      include: [
+        {
+          model: models.kelas,
+          require: true,
+          as: "kelas",
+          attributes: ["id", "nama_kelas"],
+          where: {
+            ...(checkQuery(nama_kelas) && {
+              nama_kelas: {
+                [Op.substring]: nama_kelas,
+              },
+            }),
+          },
+        },
+       
+        {
+          model: models.teacher,
+          require: true,
+          as: "teacher",
+          attributes: ["id", "nama_guru"],
+          where: {
+            ...(checkQuery(nama_guru) && {
+              nama_guru: {
+                [Op.substring]: nama_guru,
+              },
+            }),
+          },
+        },
+        {
+          model: models.mapel,
+          require: true,
+          as: "mapel",
+          attributes: ["id", "nama_mapel"],
+          where: {
+            ...(checkQuery(nama_mapel) && {
+              nama_mapel: {
+                [Op.substring]: nama_mapel,
+              },
+            }),
+          },
+        },
+        {
+          model: models.ta,
+          require: true,
+          as: "tahun_ajaran",
+          attributes: ["id", "nama_tahun_ajaran"],
+
+          where: {
+            ...(checkQuery(tahun_ajaran) && {
+              nama_tahun_ajaran: {
+                [Op.substring]: tahun_ajaran,
+              },
+            }),
+          },
+        },
+       
+      ],
+    });
+
+    return res.json({
+      status: "Success",
+      msg: "Agenda Kelas ditemukan",
+      page: req.page,
+      pageSize: pageSize,
+      absensi,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(403).json({
+      status: "Fail",
+      msg: "Terjadi Kesalahan",
+    });
+  }
+}
+
 module.exports = {
   createAbsensi,
   listAbsensi,
@@ -663,4 +769,5 @@ module.exports = {
   guruBelumAbsen,
   rekapAbsensi,
   downloadExcelrekapAbsensi,
+  rekapAgenda
 };
