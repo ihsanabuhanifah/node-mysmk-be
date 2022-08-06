@@ -5,6 +5,7 @@ const LaporanGuruPiket = require("../../models").laporan_guru_piket;
 const models = require("../../models");
 const { Op } = require("sequelize");
 const { check } = require("../../utils/paramsQuery");
+const { checkQuery } = require("../../utils/format");
 
 async function listJadwal(req, res) {
   try {
@@ -257,8 +258,6 @@ async function updateAbsensi(req, res) {
       })
     );
 
-    
-
     return res.status(200).json({
       status: "Success",
       msg: "Absensi Kelas Berhasil di Simpan",
@@ -355,6 +354,138 @@ const guruBelumAbsen = async (req, res) => {
     });
   }
 };
+
+async function rekapAbsensi(req, res) {
+  let {
+    nama_kelas,
+    nama_siswa,
+    nama_mapel,
+    nama_guru,
+    teacher_id,
+    tahun_ajaran,
+    status_kehadiran,
+    semester,
+    dariTanggal,
+    sampaiTanggal,
+    page,
+    pageSize,
+  } = req.query;
+  try {
+    const absensi = await AbsensiKelasModel.findAndCountAll({
+      attributes: ["id", "semester", "tanggal", "keterangan"],
+
+      where: {
+        ...(semester !== undefined && { semester: semester }),
+        ...(dariTanggal !== undefined && {
+          tanggal: { [Op.between]: [dariTanggal, sampaiTanggal] },
+        }),
+        ...(semester !== undefined && { teacher_id: teacher_id }),
+      },
+      order: [
+        ["tanggal", "desc"],
+        [{ model: models.student, as: "siswa" }, "nama_siswa", "asc"],
+      ],
+      limit: pageSize,
+      offset: page,
+      include: [
+        {
+          model: models.kelas,
+          require: true,
+          as: "kelas",
+          attributes: ["id", "nama_kelas"],
+          where: {
+            ...(checkQuery(nama_kelas) && {
+              nama_kelas: {
+                [Op.substring]: nama_kelas,
+              },
+            }),
+          },
+        },
+        {
+          model: models.student,
+          require: true,
+          as: "siswa",
+          attributes: ["id", "nama_siswa"],
+          where: {
+            ...(checkQuery(nama_siswa) && {
+              nama_siswa: {
+                [Op.substring]: nama_siswa,
+              },
+            }),
+          },
+        },
+        {
+          model: models.teacher,
+          require: true,
+          as: "teacher",
+          attributes: ["id", "nama_guru"],
+          where: {
+            ...(checkQuery(nama_guru) && {
+              nama_guru: {
+                [Op.substring]: nama_guru,
+              },
+            }),
+          },
+        },
+        {
+          model: models.mapel,
+          require: true,
+          as: "mapel",
+          attributes: ["id", "nama_mapel"],
+          where: {
+            ...(checkQuery(nama_mapel) && {
+              nama_mapel: {
+                [Op.substring]: nama_mapel,
+              },
+            }),
+          },
+        },
+        {
+          model: models.ta,
+          require: true,
+          as: "tahun_ajaran",
+          attributes: ["id", "nama_tahun_ajaran"],
+
+          where: {
+            ...(checkQuery(tahun_ajaran) && {
+              nama_tahun_ajaran: {
+                [Op.substring]: tahun_ajaran,
+              },
+            }),
+          },
+        },
+        {
+          model: models.status_kehadiran,
+          require: true,
+          as: "kehadiran",
+          attributes: ["id", "nama_status_kehadiran"],
+          where: {
+            ...(checkQuery(status_kehadiran) && {
+             id: {
+                [Op.substring]: status_kehadiran,
+              },
+            }),
+          },
+        },
+      ],
+    });
+
+    return res.json({
+      status: "Success",
+      msg: "Absensi ditemukan",
+      page: req.page,
+      pageSize: pageSize,
+      absensi,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(403).json({
+      status: "Fail",
+      msg: "Terjadi Kesalahan",
+    });
+  }
+}
+
 module.exports = {
   createAbsensi,
   listAbsensi,
@@ -362,4 +493,5 @@ module.exports = {
   listJadwal,
   notifikasiAbsensi,
   guruBelumAbsen,
+  rekapAbsensi,
 };
