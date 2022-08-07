@@ -16,7 +16,12 @@ module.exports = (sequelize, DataTypes) => {
         as: "siswa",
         foreignKey: "student_id",
       });
+      kelas_student.belongsTo(models.ta, {
+        as: "tahun_ajaran",
+        foreignKey: "ta_id",
+      });
     }
+    
   }
   kelas_student.init(
     {

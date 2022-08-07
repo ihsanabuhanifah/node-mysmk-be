@@ -36,6 +36,12 @@ async function scheduleKelas(req, res) {
         status: 1,
       },
     });
+    if (jadwal.length === 0) {
+      return res.json({
+        msg: "Tidak ada Jadwal",
+      });
+    }
+
     const jadwalGuruPiket = await GuruPiketModel.findAll({
       where: {
         hari: hari,
@@ -73,12 +79,7 @@ async function scheduleKelas(req, res) {
       );
     }
 
-    if (jadwal.length === 0) {
-      return res.json({
-        msg: "Tidak ada Jadwal",
-      });
-    }
-
+   
     await Promise.all(
       jadwal.map(async (data, index) => {
         const siswa = await KelasModel.findAll({
@@ -234,6 +235,11 @@ async function scheduleKelasManual(req, res) {
         status: 1,
       },
     });
+    if (jadwal.length === 0) {
+      return res.json({
+        msg: "Tidak ada Jadwal",
+      });
+    }
     const jadwalGuruPiket = await GuruPiketModel.findAll({
       where: {
         hari: hari,
@@ -271,11 +277,7 @@ async function scheduleKelasManual(req, res) {
       );
     }
 
-    if (jadwal.length === 0) {
-      return res.json({
-        msg: "Tidak ada Jadwal",
-      });
-    }
+   
 
     await Promise.all(
       jadwal.map(async (data, index) => {

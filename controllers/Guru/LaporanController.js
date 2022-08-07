@@ -1,8 +1,7 @@
 const GuruPiketModel = require("../../models").guru_piket;
 const LaporanGuruPiketModel = require("../../models").laporan_guru_piket;
 const models = require("../../models");
-const { Op } = require("sequelize");
-const { check } = require("../../utils/paramsQuery");
+
 
 async function listPiketHariIni(req, res) {
   try {
@@ -46,12 +45,12 @@ async function listPiketHariIni(req, res) {
 const listGuruPiketBelumLaporan = async (req, res) => {
   try {
     let { status, page, pageSize } = req.query;
+
     
-    const notifikasi = await LaporanGuruPiketModel.findAll({
-      attributes: ["id", "tanggal", "teacher_id", "ta_id", "laporan", "status"],
-      where: {
-        status: status,
-      },
+    
+    const notifikasi = await LaporanGuruPiketModel.findAndCountAll({
+      attributes: ["id", "tanggal", "laporan", "status"],
+     
       include: [
         {
           model: models.teacher,
@@ -67,8 +66,13 @@ const listGuruPiketBelumLaporan = async (req, res) => {
           attributes: ["id", "nama_tahun_ajaran"],
         },
       ],
+      where: {
+        status: status,
+      },
       group: ["tanggal", "teacher_id"],
       order: [["tanggal", "desc"]],
+      limit: pageSize,
+      offset: page,
     });
 
     return res.json({

@@ -362,7 +362,7 @@ async function rekapAbsensi(req, res) {
     nama_siswa,
     nama_mapel,
     nama_guru,
-    teacher_id,
+    
     tahun_ajaran,
     status_kehadiran,
     semester,

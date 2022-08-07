@@ -69,6 +69,8 @@ const {
   scheduleCek,
 } = require("../../controllers/Admin/jadwalController");
 
+const {listSiswa} = require("../../controllers/Guru/SiswaController");
+ 
 guru.use(guruAccessMiddleware);
 
 //role
@@ -131,4 +133,9 @@ guru.get("/laporan/guru-piket-belum-laporan/list", listGuruPiketBelumLaporan);
 guru.put("/laporan/guru-piket/simpan", simpanLaporanGuruPiket);
 guru.get("/laporan/guru-piket/:id/:tanggal", getDetailLaporanGuruPiket);
 guru.get("/laporan/guru-piket/notifikasi", notifikasiPiket);
+
+
+//siswa
+
+guru.get("/siswa/list", listSiswa);
 module.exports = guru;
