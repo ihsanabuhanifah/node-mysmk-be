@@ -79,7 +79,6 @@ async function scheduleKelas(req, res) {
       );
     }
 
-   
     await Promise.all(
       jadwal.map(async (data, index) => {
         const siswa = await KelasModel.findAll({
@@ -129,11 +128,8 @@ async function scheduleKelas(req, res) {
         );
       })
     );
-
-   
   } catch (err) {
     console.log(err);
-   
   }
 }
 
@@ -161,6 +157,13 @@ async function scheduleHalaqoh(req, res) {
         msg: "Absensi hari ini sudah dbuat",
       });
     }
+
+    let laporan = {
+      tanggal: tanggal,
+      keterangan: `Absensi Halaqoh tanggal ${tanggal} berhasil dibuat`,
+      kegiatan: "Halaqoh",
+    };
+    await ScheduleMonitorModel.create(laporan);
     const halaqoh = await HalaqohModel.findAll({
       attributes: ["id"],
       include: [
@@ -191,13 +194,24 @@ async function scheduleHalaqoh(req, res) {
         );
       })
     );
+    await Promise.all(
+      halaqoh.map(async (value) => {
+        await Promise.all(
+          value.halaqoh_student.map(async (data) => {
+            const payload = {
+              student_id: data.student_id,
+              halaqoh_id: value.id,
+              tanggal: tanggal,
+              status_kehadiran: 6,
+              status_absensi: 0,
+              waktu: "malam",
+            };
 
-    let laporan = {
-      tanggal: tanggal,
-      keterangan: `Absensi Halaqoh tanggal ${tanggal} berhasil dibuat`,
-      kegiatan: "Halaqoh",
-    };
-    await ScheduleMonitorModel.create(laporan);
+            await AbsensiHalaqohModel.create(payload);
+          })
+        );
+      })
+    );
 
     return res.json({
       msg: "Success",
@@ -277,8 +291,6 @@ async function scheduleKelasManual(req, res) {
       );
     }
 
-   
-
     await Promise.all(
       jadwal.map(async (data, index) => {
         const siswa = await KelasModel.findAll({
@@ -357,15 +369,15 @@ async function scheduleHalaqohManual(req, res) {
       });
     }
 
-    if (hari === "sabtu")
-      return res.json({
-        msg: "hari ini libur",
-      });
+    // if (hari === "sabtu")
+    //   return res.json({
+    //     msg: "hari ini libur",
+    //   });
 
-    if (hari === "minggu")
-      return res.json({
-        msg: "hari ini libur",
-      });
+    // if (hari === "minggu")
+    //   return res.json({
+    //     msg: "hari ini libur",
+    //   });
 
     const halaqoh = await HalaqohModel.findAll({
       attributes: ["id"],
@@ -384,9 +396,12 @@ async function scheduleHalaqohManual(req, res) {
         msg: "Kelompok Halaqoh belum dibuat",
       });
     }
-    // return res.json({
-    //   halaqoh
-    // })
+    let laporan = {
+      tanggal: tanggal,
+      keterangan: `Absensi Halaqoh tanggal ${tanggal} berhasil dibuat`,
+      kegiatan: "Halaqoh",
+    };
+    await ScheduleMonitorModel.create(laporan);
     await Promise.all(
       halaqoh.map(async (value) => {
         await Promise.all(
@@ -405,13 +420,24 @@ async function scheduleHalaqohManual(req, res) {
         );
       })
     );
+    await Promise.all(
+      halaqoh.map(async (value) => {
+        await Promise.all(
+          value.halaqoh_student.map(async (data) => {
+            const payload = {
+              student_id: data.student_id,
+              halaqoh_id: value.id,
+              tanggal: tanggal,
+              status_kehadiran: 6,
+              status_absensi: 0,
+              waktu: "malam",
+            };
 
-    let laporan = {
-      tanggal: tanggal,
-      keterangan: `Absensi Halaqoh tanggal ${tanggal} berhasil dibuat`,
-      kegiatan: "Halaqoh",
-    };
-    await ScheduleMonitorModel.create(laporan);
+            await AbsensiHalaqohModel.create(payload);
+          })
+        );
+      })
+    );
 
     return res.json({
       msg: "Success",

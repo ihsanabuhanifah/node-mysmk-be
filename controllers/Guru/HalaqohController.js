@@ -14,6 +14,7 @@ async function listHalaqoh(req, res) {
     dariTanggal,
     sampaiTanggal,
     page,
+    waktu,
     pageSize,
   } = req.query;
   try {
@@ -21,9 +22,10 @@ async function listHalaqoh(req, res) {
       attributes: [
         "id",
         "tanggal",
+        "dari_surat",
 
         "dari_ayat",
-
+        "sampai_surat",
         "sampai_ayat",
         "total_halaman",
         "juz_ke",
@@ -38,6 +40,7 @@ async function listHalaqoh(req, res) {
         ...(dariTanggal !== undefined && {
           tanggal: { [Op.between]: [dariTanggal, sampaiTanggal] },
         }),
+        waktu: waktu,
       },
 
       include: [
@@ -76,21 +79,25 @@ async function listHalaqoh(req, res) {
           attributes: ["id", "nama_siswa"],
           where: student_id !== undefined ? { id: student_id } : {},
         },
-        {
-          model: models.alquran,
-          require: true,
-          as: "surat_awal",
-          attributes: ["id", "nama_surat"],
-        },
-        {
-          model: models.alquran,
-          require: true,
-          as: "surat_akhir",
-          attributes: ["id", "nama_surat"],
-        },
+        // {
+        //   model: models.alquran,
+        //   require: true,
+        //   as: "surat_awal",
+        //   attributes: ["id", "nama_surat"],
+        // },
+        // {
+        //   model: models.alquran,
+        //   require: true,
+        //   as: "surat_akhir",
+        //   attributes: ["id", "nama_surat"],
+        // },
       ],
 
-      order: [["tanggal", "desc"]],
+      order: [
+        ["tanggal", "desc"],
+        [{ model: models.student, as: "siswa" }, "nama_siswa", "asc"],
+      ],
+
       limit: pageSize,
       offset: page,
     });
