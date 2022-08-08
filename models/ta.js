@@ -41,6 +41,10 @@ module.exports = (sequelize, DataTypes) => {
         as: "laporan_guru_piket",
         foreignKey: "ta_id",
       });
+      ta.hasMany(models.pengampu_halaqoh, {
+        as: "pengampu_halaqoh",
+        foreignKey: "ta_id",
+      });
     }
   }
   ta.init(

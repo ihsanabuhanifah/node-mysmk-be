@@ -1,5 +1,6 @@
 const HalaqohModel = require("../../models").absensi_halaqoh;
-
+const PengampuModel = require("../../models").pengampu_halaqoh;
+const { checkQuery } = require("../../utils/format");
 const models = require("../../models");
 const { Op } = require("sequelize");
 
@@ -203,4 +204,41 @@ const notifikasiHalaqoh = async (req, res) => {
     });
   }
 };
-module.exports = { listHalaqoh, updateHalaqoh, notifikasiHalaqoh };
+
+async function listPengampuHalaqoh(req, res) {
+  try {
+    let {
+      status_kehadiran,
+
+      dariTanggal,
+      sampaiTanggal,
+      page,
+      pageSize,
+    } = req.query;
+
+    const pengampu = await PengampuModel.findAndCountAll({
+      where: {
+        ...(checkQuery(dariTanggal) && {
+          tanggal: { [Op.between]: [dariTanggal, sampaiTanggal] },
+        }),
+      },
+    });
+
+    return res.json({
+      status: "Success",
+      msg: "Jadwal ditemukan",
+      data: pengampu,
+    });
+  } catch (err) {
+    return res.status(403).json({
+      status: "Fail",
+      msg: "Terjadi Kesalahan",
+    });
+  }
+}
+module.exports = {
+  listHalaqoh,
+  updateHalaqoh,
+  notifikasiHalaqoh,
+  listPengampuHalaqoh,
+};

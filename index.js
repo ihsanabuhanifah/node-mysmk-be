@@ -19,8 +19,8 @@ const {
 
 
 console.log(date);
-const job = cron.schedule("5 18 * * *", scheduleKelas);
-const halaqoh = cron.schedule("20 18 * * *", scheduleHalaqoh);
+const job = cron.schedule("01 00 * * *", scheduleKelas);
+const halaqoh = cron.schedule("02 00 * * *", scheduleHalaqoh);
 app.use(cors());
 app.use(express.json());
 app.use(cookieParser());

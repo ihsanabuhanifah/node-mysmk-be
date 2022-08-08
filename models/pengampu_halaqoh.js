@@ -1,7 +1,8 @@
 "use strict";
 const { Model } = require("sequelize");
+
 module.exports = (sequelize, DataTypes) => {
-  class halaqoh extends Model {
+  class pengampu_halaqoh extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -10,36 +11,38 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
 
-      halaqoh.hasMany(models.halaqoh_student, {
-        as: "halaqoh_student",
+      pengampu_halaqoh.belongsTo(models.halaqoh, {
+        as: "halaqoh",
         foreignKey: "halaqoh_id",
       });
-      halaqoh.belongsTo(models.teacher, {
+      pengampu_halaqoh.belongsTo(models.teacher, {
         as: "teacher",
         foreignKey: "teacher_id",
       });
-      halaqoh.belongsTo(models.ta, {
+      pengampu_halaqoh.belongsTo(models.ta, {
         as: "tahun_ajaran",
         foreignKey: "ta_id",
       });
-      // halaqoh.hasMany(models.pengampu_halaqoh, {
-      //   as: "pengampu_halaqoh",
-      //   foreignKey: "halaqoh_id",
-      // });
+      pengampu_halaqoh.belongsTo(models.teacher, {
+        as: "diabsen",
+        foreignKey: "absen_by",
+      });
     }
   }
-  halaqoh.init(
+  pengampu_halaqoh.init(
     {
-      nama_kelompok: DataTypes.STRING,
+      halaqoh_id: DataTypes.INTEGER,
+      tanggal: DataTypes.DATEONLY,
       teacher_id: DataTypes.INTEGER,
+      status_kehadiran: DataTypes.INTEGER,
       status: DataTypes.INTEGER,
-      semester: DataTypes.INTEGER,
-      ta_id: DataTypes.INTEGER,
+      ta_id:DataTypes.INTEGER,
+      absen_by: DataTypes.INTEGER,
     },
     {
       sequelize,
-      modelName: "halaqoh",
+      modelName: "pengampu_halaqoh",
     }
   );
-  return halaqoh;
+  return pengampu_halaqoh;
 };

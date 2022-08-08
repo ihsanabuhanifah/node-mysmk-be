@@ -362,7 +362,7 @@ async function rekapAbsensi(req, res) {
     nama_siswa,
     nama_mapel,
     nama_guru,
-    
+
     tahun_ajaran,
     status_kehadiran,
     semester,
@@ -679,10 +679,7 @@ async function rekapAgenda(req, res) {
           tanggal: { [Op.between]: [dariTanggal, sampaiTanggal] },
         }),
       },
-      order: [
-        ["id", "desc"],
-       
-      ],
+      order: [["id", "desc"]],
       limit: pageSize,
       offset: page,
       include: [
@@ -699,7 +696,7 @@ async function rekapAgenda(req, res) {
             }),
           },
         },
-       
+
         {
           model: models.teacher,
           require: true,
@@ -740,7 +737,6 @@ async function rekapAgenda(req, res) {
             }),
           },
         },
-       
       ],
     });
 
@@ -769,5 +765,5 @@ module.exports = {
   guruBelumAbsen,
   rekapAbsensi,
   downloadExcelrekapAbsensi,
-  rekapAgenda
+  rekapAgenda,
 };
