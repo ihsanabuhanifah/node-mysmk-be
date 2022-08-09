@@ -27,6 +27,10 @@ module.exports = (sequelize, DataTypes) => {
         as: "diabsen",
         foreignKey: "absen_by",
       });
+      pengampu_halaqoh.belongsTo(models.status_kehadiran, {
+        as: "kehadiran",
+        foreignKey: "status_kehadiran",
+      });
     }
   }
   pengampu_halaqoh.init(

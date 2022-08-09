@@ -221,7 +221,36 @@ async function listPengampuHalaqoh(req, res) {
         ...(checkQuery(dariTanggal) && {
           tanggal: { [Op.between]: [dariTanggal, sampaiTanggal] },
         }),
+        
       },
+      limit: pageSize,
+      offset: page,
+      include: [
+        {
+          model: models.teacher,
+          require: true,
+          as: "teacher",
+          attributes: ["id", "nama_guru"],
+        },
+        {
+          model: models.status_kehadiran,
+          require: true,
+          as: "kehadiran",
+          attributes: ["id", "nama_status_kehadiran"],
+        },
+        {
+          model: models.teacher,
+          require: true,
+          as: "diabsen",
+          attributes: ["id", "nama_guru"],
+        },
+        {
+          model: models.ta,
+          require: true,
+          as: "tahun_ajaran",
+          attributes: ["id", "nama_tahun_ajaran"],
+        },
+      ],
     });
 
     return res.json({
