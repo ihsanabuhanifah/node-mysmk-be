@@ -247,7 +247,8 @@ async function listPengampuHalaqoh(req, res) {
   try {
     let {
       status_kehadiran,
-
+      nama_guru,
+      tahun_ajaran,
       dariTanggal,
       sampaiTanggal,
       page,
@@ -272,24 +273,46 @@ async function listPengampuHalaqoh(req, res) {
           require: true,
           as: "teacher",
           attributes: ["id", "nama_guru"],
+          where: {
+            ...(checkQuery(nama_guru) && {
+              nama_guru: {
+                [Op.substring]: nama_guru,
+              },
+            }),
+          },
         },
         {
           model: models.status_kehadiran,
           require: true,
           as: "kehadiran",
           attributes: ["id", "nama_status_kehadiran"],
+          where: {
+            ...(checkQuery(status_kehadiran) && {
+              id: {
+                [Op.substring]: status_kehadiran,
+              },
+            }),
+          },
         },
         {
           model: models.teacher,
           require: true,
           as: "diabsen",
           attributes: ["id", "nama_guru"],
+         
         },
         {
           model: models.ta,
           require: true,
           as: "tahun_ajaran",
           attributes: ["id", "nama_tahun_ajaran"],
+          where: {
+            ...(checkQuery(tahun_ajaran) && {
+              nama_tahun_ajaran: {
+                [Op.substring]: tahun_ajaran,
+              },
+            }),
+          },
         },
       ],
     });
@@ -300,6 +323,7 @@ async function listPengampuHalaqoh(req, res) {
       data: pengampu,
     });
   } catch (err) {
+    console.log(err);
     return res.status(403).json({
       status: "Fail",
       msg: "Terjadi Kesalahan",

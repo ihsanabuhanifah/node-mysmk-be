@@ -2,7 +2,6 @@ const GuruPiketModel = require("../../models").guru_piket;
 const LaporanGuruPiketModel = require("../../models").laporan_guru_piket;
 const models = require("../../models");
 
-
 async function listPiketHariIni(req, res) {
   try {
     const { hari } = req.query;
@@ -46,11 +45,9 @@ const listGuruPiketBelumLaporan = async (req, res) => {
   try {
     let { status, page, pageSize } = req.query;
 
-    
-    
     const notifikasi = await LaporanGuruPiketModel.findAndCountAll({
       attributes: ["id", "tanggal", "laporan", "status"],
-     
+
       include: [
         {
           model: models.teacher,
@@ -99,12 +96,22 @@ const getDetailLaporanGuruPiket = async (req, res) => {
       },
     });
 
+    if(laporan === null){
+      return res.json({
+        status: "Success",
+        msg: "Laporan tidak ditemukan",
+       
+      });
+    }
 
     // return res.json({
     //   laporan
     // })
-  
-    laporan.laporan = JSON.parse(laporan?.laporan);
+
+    if (laporan.laporan !== null) {
+      laporan.laporan = JSON.parse(laporan?.laporan);
+    }
+
     return res.json({
       status: "Success",
       msg: "Laporan ditemukan",
@@ -167,7 +174,6 @@ const notifikasiPiket = async (req, res) => {
         status: 0,
       },
       include: [
-        
         {
           model: models.ta,
           require: true,
@@ -197,5 +203,5 @@ module.exports = {
   listGuruPiketBelumLaporan,
   simpanLaporanGuruPiket,
   getDetailLaporanGuruPiket,
-  notifikasiPiket
+  notifikasiPiket,
 };
