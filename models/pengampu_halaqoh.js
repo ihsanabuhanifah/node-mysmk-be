@@ -41,6 +41,8 @@ module.exports = (sequelize, DataTypes) => {
       status_kehadiran: DataTypes.INTEGER,
       status: DataTypes.INTEGER,
       ta_id:DataTypes.INTEGER,
+      keterangan: DataTypes.STRING,
+      waktu: DataTypes.STRING,
       absen_by: DataTypes.INTEGER,
     },
     {

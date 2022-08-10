@@ -37,11 +37,15 @@ async function listHalaqoh(req, res) {
         "waktu",
       ],
       where: {
-        ...(semester !== undefined && { semester: semester }),
-        ...(dariTanggal !== undefined && {
+        ...(checkQuery(semester) && {
+          semester: semester,
+        }),
+        ...(checkQuery(dariTanggal) && {
           tanggal: { [Op.between]: [dariTanggal, sampaiTanggal] },
         }),
-        waktu: waktu,
+        ...(checkQuery(waktu) && {
+          waktu: waktu,
+        }),
       },
 
       include: [
@@ -205,6 +209,40 @@ const notifikasiHalaqoh = async (req, res) => {
   }
 };
 
+async function updatePengampuHalaqoh(req, res) {
+  let payload = req.body;
+
+  console.log(payload);
+  try {
+    await Promise.all(
+      payload.map(async (data) => {
+        let values = {
+          status_kehadiran: data?.status_kehadiran,
+          absen_by: req.teacher_id,
+          status: 1,
+          keterangan: data?.keterangan,
+        };
+        await PengampuModel.update(values, {
+          where: {
+            id: data.id,
+          },
+        });
+      })
+    );
+
+    return res.json({
+      status: "Success",
+      msg: "Absensi Berhasil",
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(403).json({
+      status: "Fail",
+      msg: "Terjadi Kesalahan",
+    });
+  }
+}
+
 async function listPengampuHalaqoh(req, res) {
   try {
     let {
@@ -214,6 +252,7 @@ async function listPengampuHalaqoh(req, res) {
       sampaiTanggal,
       page,
       pageSize,
+      waktu,
     } = req.query;
 
     const pengampu = await PengampuModel.findAndCountAll({
@@ -221,7 +260,9 @@ async function listPengampuHalaqoh(req, res) {
         ...(checkQuery(dariTanggal) && {
           tanggal: { [Op.between]: [dariTanggal, sampaiTanggal] },
         }),
-        
+        ...(checkQuery(waktu) && {
+          waktu: waktu,
+        }),
       },
       limit: pageSize,
       offset: page,
@@ -270,4 +311,5 @@ module.exports = {
   updateHalaqoh,
   notifikasiHalaqoh,
   listPengampuHalaqoh,
+  updatePengampuHalaqoh,
 };

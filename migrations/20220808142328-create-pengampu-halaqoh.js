@@ -44,6 +44,12 @@ module.exports = {
       status: {
         type: Sequelize.INTEGER,
       },
+      keterangan: {
+        type: Sequelize.STRING,
+      },
+      waktu: {
+        type: Sequelize.STRING,
+      },
       absen_by: {
         type: Sequelize.INTEGER,
         onDelete: "RESTRICT",

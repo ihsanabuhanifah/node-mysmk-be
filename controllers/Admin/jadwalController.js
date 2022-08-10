@@ -328,6 +328,22 @@ async function scheduleHalaqohManual(req, res) {
           status: 0,
           tanggal: tanggal,
           ta_id: value?.ta_id,
+          waktu: "pagi",
+        };
+
+        await PengampuModel.create(paylaod);
+      })
+    );
+    await Promise.all(
+      pengampu.map(async (value) => {
+        const paylaod = {
+          halaqoh_id: value?.id,
+          teacher_id: value?.teacher_id,
+          status_kehadiran: 6,
+          status: 0,
+          tanggal: tanggal,
+          ta_id: value?.ta_id,
+          waktu: "malam",
         };
 
         await PengampuModel.create(paylaod);
@@ -476,6 +492,22 @@ async function scheduleHalaqoh(req, res) {
           status: 0,
           tanggal: tanggal,
           ta_id: value?.ta_id,
+          waktu: "pagi",
+        };
+
+        await PengampuModel.create(paylaod);
+      })
+    );
+    await Promise.all(
+      pengampu.map(async (value) => {
+        const paylaod = {
+          halaqoh_id: value?.id,
+          teacher_id: value?.teacher_id,
+          status_kehadiran: 6,
+          status: 0,
+          tanggal: tanggal,
+          ta_id: value?.ta_id,
+          waktu: "malam",
         };
 
         await PengampuModel.create(paylaod);
@@ -524,6 +556,33 @@ async function scheduleHalaqoh(req, res) {
   } catch (err) {
     console.log(err);
     return res.status(422).json({
+      status: "fail",
+      msg: "Ada Kesalahan",
+      data: err,
+    });
+  }
+}
+
+async function scheduleCek(req, res) {
+  try {
+    const cek = await ScheduleMonitorModel.findOne({
+      where: {
+        tanggal: tanggal,
+      },
+    });
+
+    if (cek) {
+      return res.json({
+        result: true,
+      });
+    }
+    return res.json({
+      result: false,
+      date: tanggal,
+      cek,
+    });
+  } catch (err) {
+    return res.status(403).json({
       status: "fail",
       msg: "Ada Kesalahan",
       data: err,
