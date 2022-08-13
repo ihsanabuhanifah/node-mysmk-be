@@ -37,19 +37,16 @@ async function saveToken(req, res) {
       notif = JSON.parse(getNotif.notif);
     }
 
-   
     let payload = {};
     if (notif.length === 0) {
       payload = {
         notif: JSON.stringify([token]),
       };
-    }
-    if (notif.length === 1) {
+    } else if (notif.length === 1) {
       payload = {
         notif: JSON.stringify([...notif, token]),
       };
-    }
-    if (notif.length === 2) {
+    } else if (notif.length === 2) {
       payload = {
         notif: JSON.stringify([notif[1], token]),
       };
