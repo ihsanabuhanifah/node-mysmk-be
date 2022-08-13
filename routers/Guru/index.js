@@ -3,7 +3,10 @@ const guruAccessMiddleware = require("../../middleware/guruAccessMiddleware");
 
 const guru = express.Router();
 
-const {getRole} = require("../../controllers/Admin/RolesController");
+const {
+  getRole,
+  saveToken,
+} = require("../../controllers/Admin/RolesController");
 const {
   createAbsensi,
   listAbsensi,
@@ -13,14 +16,14 @@ const {
   guruBelumAbsen,
   rekapAbsensi,
   downloadExcelrekapAbsensi,
-  rekapAgenda
+  rekapAgenda,
 } = require("../../controllers/Guru/AbsensiController");
 const {
   listHalaqoh,
   updateHalaqoh,
   notifikasiHalaqoh,
   listPengampuHalaqoh,
-  updatePengampuHalaqoh
+  updatePengampuHalaqoh,
 } = require("../../controllers/Guru/HalaqohController");
 const {
   listPelanggaran,
@@ -59,7 +62,7 @@ const {
   listGuruPiketBelumLaporan,
   simpanLaporanGuruPiket,
   getDetailLaporanGuruPiket,
-  notifikasiPiket
+  notifikasiPiket,
 } = require("../../controllers/Guru/LaporanController");
 //absensi
 
@@ -71,13 +74,14 @@ const {
   scheduleCek,
 } = require("../../controllers/Admin/jadwalController");
 
-const {listSiswa} = require("../../controllers/Guru/SiswaController");
- 
+const { listSiswa } = require("../../controllers/Guru/SiswaController");
+
 guru.use(guruAccessMiddleware);
 
 //role
 
 guru.get("/get-role-guru", getRole);
+guru.put("/token/save", saveToken);
 //jadwal
 guru.get("/absensi/manual", scheduleKelasManual);
 guru.get("/halaqoh/manual", scheduleHalaqohManual);
@@ -137,7 +141,6 @@ guru.get("/laporan/guru-piket-belum-laporan/list", listGuruPiketBelumLaporan);
 guru.put("/laporan/guru-piket/simpan", simpanLaporanGuruPiket);
 guru.get("/laporan/guru-piket/:id/:tanggal", getDetailLaporanGuruPiket);
 guru.get("/laporan/guru-piket/notifikasi", notifikasiPiket);
-
 
 //siswa
 
