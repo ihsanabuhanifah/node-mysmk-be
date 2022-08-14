@@ -9,6 +9,8 @@ const ScheduleMonitorModel = require("../../models").schedule_monitor;
 const LaporanGuruPiketModel = require("../../models").laporan_guru_piket;
 const GuruPiketModel = require("../../models").guru_piket;
 const PengampuModel = require("../../models").pengampu_halaqoh;
+const { sendNotificationToClient } = require("../../firebase/notify");
+const {fcm} = require('../../firebase/firebaseInit');
 
 const models = require("../../models");
 const dotenv = require("dotenv");
@@ -138,12 +140,35 @@ async function scheduleKelas(req, res) {
 
 async function scheduleKelasManual(req, res) {
   try {
+    // const notificationData = {
+    //   title: "New message",
+    //   body: "ihsan",
+    // };
+
+    
+
+    // const tokens = [
+    //   "fKpWn59kC-q8oVVxdR6u8w:APA91bEI4Brt0-akWKwiHJD06sUQv508ga_-AJneaTxjq0lCOSFqVNoIaT6IBwdiWd1rpaM07RD83mE6B1vLDJNWJjmZRPzCDGLgZdppco8W14hAp6yE4X2h0M8oA1qbkLcPb4XhTSpi", "fQ2drkZlkyQxncsUOA0T48:APA91bG5xFanU_uVarDO_jt7QrKT9uQDVHwWp3EMt71MwCDJUSoQVLC-SjiXsZPbJGZu6XLkJne5MU9n5ZyDLS0Tqw_DI3gCkUD1b9dFiRGMCAhkQxeDYmhX0dyFbRsxmFQTYsrO2fh7"
+    // ];
+    try {
+      const success = await sendNotificationToClient(tokens, notificationData);
+      console.log('berhasil')
+      return res.json({
+        msg: "Absensi hari ini sudah dbuat",
+        success
+      });
+    } catch (errs) {
+      console.log('err')
+      console.log(errs);
+    }
     const cek = await ScheduleMonitorModel.findOne({
       where: {
         tanggal: tanggal,
         kegiatan: "KBM",
       },
     });
+
+   
 
     if (cek) {
       return res.json({

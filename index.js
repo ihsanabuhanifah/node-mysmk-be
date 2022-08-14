@@ -11,6 +11,7 @@ let date = moment().tz("Asia/Jakarta").format("hh:mm:ss");
 
 const { sequelize } = require("./models");
 const cron = require("node-cron");
+const {messaging} = require("./firebase/firebaseInit");
 const {
   scheduleKelas,
   scheduleHalaqoh,
@@ -19,6 +20,7 @@ const {
 
 
 console.log(date);
+console.log(messaging)
 const job = cron.schedule("01 00 * * *", scheduleKelas);
 const halaqoh = cron.schedule("02 00 * * *", scheduleHalaqoh);
 app.use(cors());

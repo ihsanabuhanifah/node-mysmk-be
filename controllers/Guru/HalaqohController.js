@@ -4,6 +4,66 @@ const { checkQuery } = require("../../utils/format");
 const models = require("../../models");
 const { Op } = require("sequelize");
 
+async function belumAbsensitHalaqoh(req, res) {
+  let {
+   
+    page,
+    waktu,
+    pageSize,
+  } = req.query;
+  try {
+    const halaqoh = await HalaqohModel.findAll({
+      attributes: ["id", "tanggal", "waktu"],
+      where: {
+        status_absensi: 0,
+      },
+
+      include: [
+        {
+          model: models.halaqoh,
+          require: true,
+          as: "halaqoh",
+          attributes: ["id", "nama_kelompok", "semester"],
+
+          include: [
+            {
+              model: models.ta,
+              require: true,
+              as: "tahun_ajaran",
+              attributes: ["id", "nama_tahun_ajaran"],
+            },
+            {
+              model: models.teacher,
+              require: true,
+              as: "teacher",
+              attributes: ["id", "nama_guru"],
+            },
+          ],
+          // where: kelas_id !== undefined ? { id: kelas_id } : {},
+        },
+      ],
+
+      order: [["tanggal", "desc"]],
+      group: ["waktu", "tanggal", "halaqoh_id"],
+
+      limit: pageSize,
+      offset: page,
+    });
+
+    return res.json({
+      status: "Success",
+      msg: "Absensi ditemukan",
+      halaqoh,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(403).json({
+      status: "Fail",
+      msg: "Terjadi Kesalahan",
+    });
+  }
+}
+
 async function listHalaqoh(req, res) {
   let {
     kelas_id,
@@ -35,6 +95,7 @@ async function listHalaqoh(req, res) {
         "keterangan",
         "status_absensi",
         "waktu",
+        "tipe",
       ],
       where: {
         ...(checkQuery(semester) && {
@@ -142,6 +203,8 @@ async function updateHalaqoh(req, res) {
           keterangan: data.keterangan,
           kegiatan: data.kegiatan,
           waktu: data.waktu,
+          tipe: data.tipe,
+          status_absensi: 1,
         };
         await HalaqohModel.update(payload, {
           where: {
@@ -167,7 +230,7 @@ async function updateHalaqoh(req, res) {
 const notifikasiHalaqoh = async (req, res) => {
   try {
     const notifikasi = await HalaqohModel.findAll({
-      attributes: ["id", "tanggal"],
+      attributes: ["id", "tanggal", "waktu"],
       where: {
         status_absensi: 0,
       },
@@ -192,7 +255,7 @@ const notifikasiHalaqoh = async (req, res) => {
         },
       ],
       order: [["tanggal", "desc"]],
-      group: "tanggal",
+      group: ["waktu", "tanggal"],
     });
 
     return res.json({
@@ -227,6 +290,19 @@ async function updatePengampuHalaqoh(req, res) {
             id: data.id,
           },
         });
+
+        if (data?.status_kehadiran !== 1) {
+          let payload = {
+            status_absensi: 1,
+            status_kehadiran: 8,
+          };
+          await HalaqohModel.update(payload, {
+            where: {
+              halaqoh_id: data.halaqoh_id,
+              tanggal: data.tanggal,
+            },
+          });
+        }
       })
     );
 
@@ -299,7 +375,6 @@ async function listPengampuHalaqoh(req, res) {
           require: true,
           as: "diabsen",
           attributes: ["id", "nama_guru"],
-         
         },
         {
           model: models.ta,
@@ -336,4 +411,5 @@ module.exports = {
   notifikasiHalaqoh,
   listPengampuHalaqoh,
   updatePengampuHalaqoh,
+  belumAbsensitHalaqoh
 };

@@ -24,6 +24,7 @@ const {
   notifikasiHalaqoh,
   listPengampuHalaqoh,
   updatePengampuHalaqoh,
+  belumAbsensitHalaqoh,
 } = require("../../controllers/Guru/HalaqohController");
 const {
   listPelanggaran,
@@ -102,6 +103,7 @@ guru.put("/halaqoh/update", updateHalaqoh);
 guru.get("/halaqoh/notifikasi", notifikasiHalaqoh);
 guru.get("/halaqoh/pengampu/list", listPengampuHalaqoh);
 guru.put("/halaqoh/pengampu/update", updatePengampuHalaqoh);
+guru.get("/halaqoh/belum-absensi", belumAbsensitHalaqoh);
 
 //pelanggaran
 

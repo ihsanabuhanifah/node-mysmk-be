@@ -47,6 +47,7 @@ module.exports = (sequelize, DataTypes) => {
       keterangan: DataTypes.STRING,
       status_absensi: DataTypes.TINYINT,
       waktu: DataTypes.STRING,
+      tipe: DataTypes.STRING,
     },
     {
       sequelize,

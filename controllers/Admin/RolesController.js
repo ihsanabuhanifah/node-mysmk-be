@@ -62,9 +62,7 @@ async function saveToken(req, res) {
       status: "ok",
     });
 
-    return res.json({
-      notif: getNotif,
-    });
+  
   } catch (err) {
     console.log(err);
     res.status(403).json({
