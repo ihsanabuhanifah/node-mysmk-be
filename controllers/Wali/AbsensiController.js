@@ -271,6 +271,7 @@ async function listHalaqoh(req, res) {
       d.nama_surat_arabic AS sampai_surat_arabic,
       a.sampai_ayat,
       a.total_halaman,
+      a.tipe,
       f.nama_status_kehadiran AS status_kehadiran,
       b. semester AS semester  ,
       h. nama_tahun_ajaran AS tahun_ajaran,
