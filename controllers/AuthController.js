@@ -241,10 +241,10 @@ async function authme(req, res) {
         id: user.id,
         role: user.role,
         roleId: user.Role_id,
-        StudentId: req?.Student_id,
+        StudentId: req?.StudentId,
         teacher_id: req?.teacher_id,
         semesterAktif: req?.semesterAktif,
-        rahunAjaranAktif: req?.tahunAjaranAktif,
+        tahunAjaranAktif: req?.tahunAjaranAktif,
       },
       process.env.JWT_SECRET_ACCESS_TOKEN,
       {
