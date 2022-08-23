@@ -390,6 +390,7 @@ async function listPengampuHalaqoh(req, res) {
           },
         },
       ],
+      order: [["tanggal", "desc"]],
     });
 
     return res.json({
