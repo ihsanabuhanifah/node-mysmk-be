@@ -17,6 +17,8 @@ const {
   rekapAbsensi,
   downloadExcelrekapAbsensi,
   rekapAgenda,
+  listJadwalAll,
+  createJadwal
 } = require("../../controllers/Guru/AbsensiController");
 const {
   listHalaqoh,
@@ -25,6 +27,7 @@ const {
   listPengampuHalaqoh,
   updatePengampuHalaqoh,
   belumAbsensitHalaqoh,
+  RekapHalaqoh
 } = require("../../controllers/Guru/HalaqohController");
 const {
   listPelanggaran,
@@ -97,6 +100,8 @@ guru.get("/absensi/rekap/download", downloadExcelrekapAbsensi);
 guru.get("/agenda/rekap", rekapAgenda);
 
 guru.get("/jadwal/list", listJadwal);
+guru.get("/jadwal/list-all", listJadwalAll);
+guru.post("/jadwal/create", createJadwal);
 //halaqoh
 guru.get("/halaqoh/list", listHalaqoh);
 guru.put("/halaqoh/update", updateHalaqoh);
@@ -104,7 +109,7 @@ guru.get("/halaqoh/notifikasi", notifikasiHalaqoh);
 guru.get("/halaqoh/pengampu/list", listPengampuHalaqoh);
 guru.put("/halaqoh/pengampu/update", updatePengampuHalaqoh);
 guru.get("/halaqoh/belum-absensi", belumAbsensitHalaqoh);
-
+guru.get("/halaqoh/absensi/rekap", RekapHalaqoh);
 //pelanggaran
 
 guru.get("/pelanggaran/list", listPelanggaran);

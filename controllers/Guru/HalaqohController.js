@@ -5,12 +5,7 @@ const models = require("../../models");
 const { Op } = require("sequelize");
 
 async function belumAbsensitHalaqoh(req, res) {
-  let {
-   
-    page,
-    waktu,
-    pageSize,
-  } = req.query;
+  let { page, waktu, pageSize } = req.query;
   try {
     const halaqoh = await HalaqohModel.findAll({
       attributes: ["id", "tanggal", "waktu"],
@@ -406,11 +401,147 @@ async function listPengampuHalaqoh(req, res) {
     });
   }
 }
+
+async function RekapHalaqoh(req, res) {
+  let {
+    nama_siswa,
+
+    nama_guru,
+
+    tahun_ajaran,
+    status_kehadiran,
+    semester,
+    dariTanggal,
+    sampaiTanggal,
+    page,
+    pageSize,
+  } = req.query;
+  try {
+    const absensi = await HalaqohModel.findAndCountAll({
+      attributes: [
+        "id",
+        "tanggal",
+        "keterangan",
+        "dari_surat",
+        "sampai_surat",
+        "total_halaman",
+      ],
+
+      where: {
+        ...(checkQuery(semester) && {
+          semester: semester,
+        }),
+        ...(checkQuery(dariTanggal) && {
+          tanggal: { [Op.between]: [dariTanggal, sampaiTanggal] },
+        }),
+      },
+      order: [
+        ["tanggal", "desc"],
+        [{ model: models.student, as: "siswa" }, "nama_siswa", "asc"],
+      ],
+      limit: pageSize,
+      offset: page,
+      include: [
+        {
+          model: models.student,
+          require: true,
+          as: "siswa",
+          attributes: ["id", "nama_siswa"],
+          where: {
+            ...(checkQuery(nama_siswa) && {
+              nama_siswa: {
+                [Op.substring]: nama_siswa,
+              },
+            }),
+          },
+        },
+        {
+          model: models.halaqoh,
+          require: true,
+          as: "halaqoh",
+
+          include: [
+            {
+              model: models.teacher,
+              require: true,
+              as: "teacher",
+              attributes: ["id", "nama_guru"],
+              where: {
+                ...(checkQuery(nama_guru) && {
+                  nama_guru: {
+                    [Op.substring]: nama_guru,
+                  },
+                }),
+              },
+            },
+            {
+              model: models.ta,
+              require: true,
+              as: "tahun_ajaran",
+              attributes: ["id", "nama_tahun_ajaran"],
+
+              where: {
+                ...(checkQuery(tahun_ajaran) && {
+                  nama_tahun_ajaran: {
+                    [Op.substring]: tahun_ajaran,
+                  },
+                }),
+              },
+            },
+          ],
+        },
+
+        {
+          model: models.status_kehadiran,
+          require: true,
+          as: "kehadiran",
+          attributes: ["id", "nama_status_kehadiran"],
+          where: {
+            ...(checkQuery(status_kehadiran) && {
+              id: {
+                [Op.substring]: status_kehadiran,
+              },
+            }),
+          },
+        },
+        {
+          model: models.alquran,
+          require: true,
+          as: "surat_awal",
+          attributes: ["id", "nama_surat"],
+          
+        },
+        {
+          model: models.alquran,
+          require: true,
+          as: "surat_akhir",
+          attributes: ["id", "nama_surat"],
+          
+        },
+      ],
+    });
+
+    return res.json({
+      status: "Success",
+      msg: "Absensi ditemukan",
+      page: req.page,
+      pageSize: pageSize,
+      absensi,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(403).json({
+      status: "Fail",
+      msg: "Terjadi Kesalahan",
+    });
+  }
+}
 module.exports = {
   listHalaqoh,
   updateHalaqoh,
   notifikasiHalaqoh,
   listPengampuHalaqoh,
   updatePengampuHalaqoh,
-  belumAbsensitHalaqoh
+  belumAbsensitHalaqoh,
+  RekapHalaqoh,
 };
