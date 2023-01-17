@@ -1,7 +1,5 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
+"use strict";
+const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class halaqoh_student extends Model {
     /**
@@ -16,17 +14,21 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "halaqoh_id",
       });
       halaqoh_student.belongsTo(models.student, {
-        as: "student",
+        as: "siswa",
         foreignKey: "student_id",
       });
     }
-  };
-  halaqoh_student.init({
-    halaqoh_id: DataTypes.INTEGER,
-    student_id: DataTypes.INTEGER
-  }, {
-    sequelize,
-    modelName: 'halaqoh_student',
-  });
+  }
+  halaqoh_student.init(
+    {
+      halaqoh_id: DataTypes.INTEGER,
+      student_id: DataTypes.INTEGER,
+      status: DataTypes.INTEGER,
+    },
+    {
+      sequelize,
+      modelName: "halaqoh_student",
+    }
+  );
   return halaqoh_student;
 };

@@ -27,7 +27,9 @@ const {
   listPengampuHalaqoh,
   updatePengampuHalaqoh,
   belumAbsensitHalaqoh,
-  RekapHalaqoh
+  RekapHalaqoh,
+  createHalaqohStudent,
+  halaqohGroup
 } = require("../../controllers/Guru/HalaqohController");
 const {
   listPelanggaran,
@@ -79,6 +81,7 @@ const {
 } = require("../../controllers/Admin/jadwalController");
 
 const { listSiswa } = require("../../controllers/Guru/SiswaController");
+const { listHalaqohGroup } = require("../../controllers/Daftar/indexController");
 
 guru.use(guruAccessMiddleware);
 
@@ -110,6 +113,8 @@ guru.get("/halaqoh/pengampu/list", listPengampuHalaqoh);
 guru.put("/halaqoh/pengampu/update", updatePengampuHalaqoh);
 guru.get("/halaqoh/belum-absensi", belumAbsensitHalaqoh);
 guru.get("/halaqoh/absensi/rekap", RekapHalaqoh);
+guru.post("/halaqoh/student/create", createHalaqohStudent);
+guru.get("/halaqoh/student/list", halaqohGroup);
 //pelanggaran
 
 guru.get("/pelanggaran/list", listPelanggaran);
@@ -152,4 +157,8 @@ guru.get("/laporan/guru-piket/notifikasi", notifikasiPiket);
 //siswa
 
 guru.get("/siswa/list", listSiswa);
+
+//list
+
+guru.get("/halaqoh-grup/list", listHalaqohGroup)
 module.exports = guru;

@@ -1,5 +1,6 @@
 const HalaqohModel = require("../../models").absensi_halaqoh;
 const PengampuModel = require("../../models").pengampu_halaqoh;
+const HalaqohStudentModel = require("../../models").halaqoh_student;
 const { checkQuery } = require("../../utils/format");
 const models = require("../../models");
 const { Op } = require("sequelize");
@@ -509,14 +510,12 @@ async function RekapHalaqoh(req, res) {
           require: true,
           as: "surat_awal",
           attributes: ["id", "nama_surat"],
-          
         },
         {
           model: models.alquran,
           require: true,
           as: "surat_akhir",
           attributes: ["id", "nama_surat"],
-          
         },
       ],
     });
@@ -536,6 +535,86 @@ async function RekapHalaqoh(req, res) {
     });
   }
 }
+
+async function createHalaqohStudent(req, res) {
+  let { data } = req.body;
+  try {
+    await HalaqohStudentModel.bulkCreate(data);
+    return res.json({
+      status: "Success",
+      msg: "Siswa Berhasil ditambahkan",
+    
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(403).json({
+      status: "Fail",
+      msg: "Terjadi Kesalahan",
+    });
+  }
+}
+
+async function halaqohGroup(req, res) {
+  try {
+    let { page, pageSize, keyword } = req.query;
+    const halaqohGroup = await HalaqohStudentModel.findAndCountAll({
+      where: {
+        status: 1,
+      },
+      attributes: ["id", "status"],
+      include: [
+        {
+          model: models.student,
+          require: true,
+          as: "siswa",
+          attributes: ["id", "nama_siswa"],
+          // where : {
+          //   ...(checkQuery(keyword) && {
+          //   nama_siswa: {
+          //     [Op.substring]: keyword,
+          //   },
+          // }),
+          // }
+        },
+        {
+          model: models.halaqoh,
+          require: true,
+          as: "halaqoh",
+          attributes: ["id"],
+          include: [
+            {
+              model: models.teacher,
+              require: true,
+              as: "teacher",
+              attributes: ["id", "nama_guru"],
+              where: {
+                ...(checkQuery(keyword) && {
+                  nama_guru: {
+                    [Op.substring]: keyword,
+                  },
+                }),
+              },
+            },
+          ],
+        },
+      ],
+      limit: pageSize,
+      offset: page,
+    });
+    return res.status(200).json({
+      status: "Success",
+      page: req.page,
+      pageSize: pageSize,
+      data: halaqohGroup,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(403).json({
+      status: "Fail",
+      msg: "Terjadi Kesalahan",
+    });
+  }
+}
 module.exports = {
   listHalaqoh,
   updateHalaqoh,
@@ -544,4 +623,6 @@ module.exports = {
   updatePengampuHalaqoh,
   belumAbsensitHalaqoh,
   RekapHalaqoh,
+  createHalaqohStudent,
+  halaqohGroup,
 };

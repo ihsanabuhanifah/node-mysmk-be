@@ -7,10 +7,43 @@ const GuruModel = require("../../models").teacher;
 const RoleModel = require("../../models").role;
 const AlquranModel = require("../../models").alquran;
 const PelanggaranModel = require("../../models").pelanggaran;
+const HalaqohModel = require("../../models").halaqoh
 const { sequelize } = require("../../models");
 const { QueryTypes } = require("sequelize");
 const { Op } = require("sequelize");
 const { checkQuery } = require("../../utils/format");
+
+const listHalaqohGroup = async (req, res) => {
+  try {
+    const { page, pageSize, keyword } = req.query;
+    const siswa = await HalaqohModel.findAll({
+      attributes: ["id", "nama_kelompok"],
+      limit: pageSize,
+      offset: page,
+      order: [["nama_kelompok", "asc"]],
+      // where: {
+      //   ...(checkQuery(keyword) && {
+      //     nama_siswa: {
+      //       [Op.like]: `%${keyword}%`,
+      //     },
+      //   }),
+      // },
+     
+    });
+
+    return res.json({
+      status: "Success",
+      
+      data: siswa,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(403).json({
+      status: "fail",
+      msg: "Terjadi Kesalahan",
+    });
+  }
+}
 
 const listSiswa = async (req, res) => {
   try {
@@ -259,4 +292,5 @@ module.exports = {
   listAlquran,
   listPelanggaran,
   listSiswa,
+  listHalaqohGroup
 };

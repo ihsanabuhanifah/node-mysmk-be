@@ -17,7 +17,7 @@ async function createJadwal(req, res) {
     return res.json({
       status: "Success",
       msg: "Jadwal Berhasil ditambahkan",
-      data: data,
+
     });
   }catch (err) {
     console.log(err);
