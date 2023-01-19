@@ -293,12 +293,12 @@ async function scheduleHalaqohManual(req, res) {
       });
     }
 
-    if (hari === "sabtu")
+    if (hari.toLowerCase() === "sabtu")
       return res.json({
         msg: "hari ini libur",
       });
 
-    if (hari === "minggu")
+    if (hari.toLowerCase() === "minggu")
       return res.json({
         msg: "hari ini libur",
       });
