@@ -141,17 +141,7 @@ async function scheduleKelas(req, res) {
 async function scheduleKelasManual(req, res) {
   try {
    
-    // try {
-    //   const success = await ssendNotificationToClient(tokens, notificationData);
-    //   console.log('berhasil')
-    //   return res.json({
-    //     msg: "Absensi hari ini sudah dbuat",
-    //     success
-    //   });
-    // } catch (errs) {
-    //   console.log('err')
-    //   console.log(errs);
-    // }
+   
     const cek = await ScheduleMonitorModel.findOne({
       where: {
         tanggal: tanggal,
@@ -169,13 +159,15 @@ async function scheduleKelasManual(req, res) {
 
     const jadwal = await JadwalModel.findAll({
       where: {
-        hari: hari,
+        hari: hari.toLowerCase(),
         status: 1,
       },
     });
     if (jadwal.length === 0) {
       return res.json({
         msg: "Tidak ada Jadwal",
+        hari : hari,
+      
       });
     }
     const jadwalGuruPiket = await GuruPiketModel.findAll({
