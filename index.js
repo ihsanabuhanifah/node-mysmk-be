@@ -3,6 +3,7 @@ const app = express();
 const router = require("./routers");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
+var path = require('path');
 require("dotenv").config();
 const port = process.env.PORT || 8000;
 cors

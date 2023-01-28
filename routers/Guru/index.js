@@ -1,5 +1,7 @@
 const express = require("express");
 const guruAccessMiddleware = require("../../middleware/guruAccessMiddleware");
+//upload middleware mysmk mobile
+const { upload } = require('../../middleware/uploadNoticeMiddleware');
 
 const guru = express.Router();
 
@@ -83,6 +85,15 @@ const {
 const { listSiswa } = require("../../controllers/Guru/SiswaController");
 const { listHalaqohGroup } = require("../../controllers/Daftar/indexController");
 
+//notice controller mysmk mobile
+const { 
+  getNotice,
+  getSingleNotice,
+  saveNotice,
+  updateNotice,
+  deleteNotice
+} = require("../../controllers/noticeController");
+
 guru.use(guruAccessMiddleware);
 
 //role
@@ -160,5 +171,13 @@ guru.get("/siswa/list", listSiswa);
 
 //list
 
-guru.get("/halaqoh-grup/list", listHalaqohGroup)
+guru.get("/halaqoh-grup/list", listHalaqohGroup);
+
+//Notice mysmk mobile
+guru.get("/notice/list", getNotice);
+guru.get("/notice/list/:id", getSingleNotice);
+guru.post("/notice/save", upload.single("gambar_notice"), saveNotice);
+guru.put("/notice/update/:id", upload.single("gambar_notice"), updateNotice);
+guru.delete("/notice/delete/:id", deleteNotice);
+
 module.exports = guru;
