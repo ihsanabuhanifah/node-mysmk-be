@@ -25,6 +25,11 @@ const {
   detailIzinPulang,
   updateIzinPulang,
 } = require("../../controllers/Wali/PulangController");
+//notice mobile
+const {
+  getNotice
+} = require("../../controllers/noticeController");
+
 wali.use(waliAccessMiddleware);
 wali.get("/absensi/kelas/list", list);
 wali.get("/absensi/halaqoh/list", listHalaqoh);
@@ -44,5 +49,7 @@ wali.post("/pulang/tambah", buatIzinPulang);
 wali.get("/pulang/list", listIzinPulang);
 wali.get("/pulang/detail/:id", detailIzinPulang);
 wali.put("/pulang/update/:id", updateIzinPulang);
+//notice
+wali.get("/notice/list", getNotice);
 
 module.exports = wali;
