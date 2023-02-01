@@ -13,7 +13,9 @@ cloudinary.config({
 
 async function getNotice(req, res) {
     try {
-        let notice = await noticeModel.findAll();
+        let notice = await noticeModel.findAll({
+            order: [["id", "desc"]]
+        });
 
         return res.json({
             status: 200,
