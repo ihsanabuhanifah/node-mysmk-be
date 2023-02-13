@@ -1,7 +1,7 @@
 const express = require("express");
 const guruAccessMiddleware = require("../../middleware/guruAccessMiddleware");
 //upload middleware mysmk mobile
-const { upload } = require('../../middleware/uploadNoticeMiddleware');
+const { upload } = require("../../middleware/uploadNoticeMiddleware");
 
 const guru = express.Router();
 
@@ -20,7 +20,7 @@ const {
   downloadExcelrekapAbsensi,
   rekapAgenda,
   listJadwalAll,
-  createJadwal
+  createJadwal,
 } = require("../../controllers/Guru/AbsensiController");
 const {
   listHalaqoh,
@@ -31,7 +31,7 @@ const {
   belumAbsensitHalaqoh,
   RekapHalaqoh,
   createHalaqohStudent,
-  halaqohGroup
+  halaqohGroup,
 } = require("../../controllers/Guru/HalaqohController");
 const {
   listPelanggaran,
@@ -83,16 +83,32 @@ const {
 } = require("../../controllers/Admin/jadwalController");
 
 const { listSiswa } = require("../../controllers/Guru/SiswaController");
-const { listHalaqohGroup } = require("../../controllers/Daftar/indexController");
+const {
+  listHalaqohGroup,
+} = require("../../controllers/Daftar/indexController");
 
 //notice controller mysmk mobile
-const { 
+const {
   getNotice,
   getSingleNotice,
   saveNotice,
   updateNotice,
-  deleteNotice
+  deleteNotice,
 } = require("../../controllers/noticeController");
+const {
+  createSoal,
+  listSoal,
+  detailSoal,
+  updateSoal,
+  deleteSoal,
+} = require("../../controllers/Guru/BankSoalController");
+const {
+  createUjian,
+  listUjian,
+  detailUjian,
+  updateUjian,
+  deleteUjian,
+} = require("../../controllers/Guru/UjianController");
 
 guru.use(guruAccessMiddleware);
 
@@ -101,6 +117,7 @@ guru.use(guruAccessMiddleware);
 guru.get("/get-role-guru", getRole);
 guru.put("/token/save", saveToken);
 //jadwal
+
 guru.get("/absensi/manual", scheduleKelasManual);
 guru.get("/halaqoh/manual", scheduleHalaqohManual);
 guru.get("/monitor", scheduleCek);
@@ -179,5 +196,22 @@ guru.get("/notice/list/:id", getSingleNotice);
 guru.post("/notice/save", upload.single("gambar_notice"), saveNotice);
 guru.put("/notice/update/:id", upload.single("gambar_notice"), updateNotice);
 guru.delete("/notice/delete/:id", deleteNotice);
+
+//exam
+//bank soal
+
+guru.post("/bank-soal/create", createSoal);
+guru.get("/bank-soal/list", listSoal);
+guru.get("/bank-soal/detail/:id", detailSoal);
+guru.put("/bank-soal/update/:id", updateSoal);
+guru.delete("/bank-soal/delete", deleteSoal);
+
+//ujian
+
+guru.post("/ujian/create", createUjian);
+guru.get("/ujian/list", listUjian);
+guru.get("/ujian/detail/:id", detailUjian);
+guru.put("/ujian/update/:id", updateUjian);
+guru.delete("/ujian/delete", deleteUjian);
 
 module.exports = guru;

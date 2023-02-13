@@ -20,6 +20,14 @@ module.exports = (sequelize, DataTypes) => {
         as: "mapel",
         foreignKey: "mapel_id",
       });
+      mapel.hasMany(models.bank_soal, {
+        as: "bank_soal",
+        foreignKey: "mapel_id",
+      });
+      mapel.hasMany(models.ujian, {
+        as: "ujian",
+        foreignKey: "mapel_id",
+      });
     }
   }
   mapel.init(
