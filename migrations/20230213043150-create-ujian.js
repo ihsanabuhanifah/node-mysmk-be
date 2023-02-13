@@ -11,6 +11,16 @@ module.exports = {
       jenis_ujian: {
         type: Sequelize.STRING,
       },
+      kelas_id: {
+        type: Sequelize.INTEGER,
+
+        onDelete: "CASCADE",
+        references: {
+          model: "kelas",
+          key: "id",
+          as: "kelas_id",
+        },
+      },
       mapel_id: {
         type: Sequelize.INTEGER,
         onDelete: "CASCADE",

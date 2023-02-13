@@ -11,6 +11,11 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+
+      ujian.belongsTo(models.kelas, {
+        as: "kelas",
+        foreignKey: "kelas_id",
+      });
       ujian.belongsTo(models.mapel, {
         as: "mapel",
         foreignKey: "mapel_id",
@@ -24,6 +29,7 @@ module.exports = (sequelize, DataTypes) => {
   ujian.init({
     jenis_ujian: DataTypes.STRING,
     mapel_id: DataTypes.INTEGER,
+    kelas_id: DataTypes.INTEGER,
     teacher_id: DataTypes.INTEGER,
     soal: DataTypes.TEXT,
     waktu_mulai: DataTypes.DATE,

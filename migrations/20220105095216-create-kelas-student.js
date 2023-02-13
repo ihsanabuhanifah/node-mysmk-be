@@ -33,8 +33,6 @@ module.exports = {
       },
       ta_id: {
         type: Sequelize.INTEGER,
-        
-
       },
       status: {
         type: Sequelize.INTEGER,

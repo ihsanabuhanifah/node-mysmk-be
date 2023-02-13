@@ -212,6 +212,6 @@ guru.post("/ujian/create", createUjian);
 guru.get("/ujian/list", listUjian);
 guru.get("/ujian/detail/:id", detailUjian);
 guru.put("/ujian/update/:id", updateUjian);
-guru.delete("/ujian/delete", deleteUjian);
+guru.delete("/ujian/delete/:id", deleteUjian);
 
 module.exports = guru;

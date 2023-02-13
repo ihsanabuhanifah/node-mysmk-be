@@ -111,13 +111,13 @@ const updateSoal = async (req, res) => {
     });
 
     if (soal === null) {
-      return res.status(403).json({
+      return res.status(422).json({
         status: "Fail",
-        msg: "Soal Ditemukan",
+        msg: "Soal Tidak Ditemukan",
       });
     }
     if (soal.teacher_id !== req.teacher_id) {
-      return res.status(403).json({
+      return res.status(422).json({
         status: "Fail",
         msg: "Soal ini milik guru lain",
       });
