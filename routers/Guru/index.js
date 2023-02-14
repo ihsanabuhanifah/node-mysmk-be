@@ -204,7 +204,7 @@ guru.post("/bank-soal/create", createSoal);
 guru.get("/bank-soal/list", listSoal);
 guru.get("/bank-soal/detail/:id", detailSoal);
 guru.put("/bank-soal/update/:id", updateSoal);
-guru.delete("/bank-soal/delete", deleteSoal);
+guru.post("/bank-soal/delete", deleteSoal);
 
 //ujian
 

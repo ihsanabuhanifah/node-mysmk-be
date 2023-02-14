@@ -4,6 +4,7 @@ const { Op } = require("sequelize");
 const BankSoalController = require("../../models").bank_soal;
 const StudentModel = require("../../models").student;
 const models = require("../../models");
+const { checkQuery } = require("../../utils/format");
 const createUjian = async (req, res) => {
   try {
     const {
@@ -56,10 +57,12 @@ const listUjian = async (req, res) => {
   let = { mapel_id, is_all, jenis_ujian, page, pageSize } = req.query;
 
   try {
-    const soals = await UjianController.findAll({
+    const soals = await UjianController.findAndCountAll({
       // attributes: ["id", "materi", "soal", "tipe", "jawaban", "point"],
       where: {
-        mapel_id: mapel_id,
+        ...(checkQuery(mapel_id) && {
+          mapel_id: mapel_id,
+        }),
 
         ...(parseInt(is_all) === 1 && {
           teacher_id: req.teacher_id,
@@ -93,7 +96,7 @@ const listUjian = async (req, res) => {
       msg: "Berhasil ditemukan",
       page: req.page,
       pageSize: pageSize,
-      soal: soals,
+      data: soals,
     });
   } catch (err) {
     console.log(err);

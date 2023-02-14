@@ -1,6 +1,7 @@
 const BankSoalController = require("../../models").bank_soal;
 
 const models = require("../../models");
+const { checkQuery } = require("../../utils/format");
 const createSoal = async (req, res) => {
   try {
     const { payload } = req.body;
@@ -10,6 +11,8 @@ const createSoal = async (req, res) => {
     await Promise.all(
       payload?.map(async (item) => {
         try {
+          item.soal = JSON.stringify(item.soal);
+          item.teacher_id = req.teacher_id
           await BankSoalController.create(item);
           success = success + 1;
         } catch {
@@ -34,10 +37,12 @@ const listSoal = async (req, res) => {
   let = { mapel_id, is_all, keyword, page, pageSize } = req.query;
 
   try {
-    const soals = await BankSoalController.findAll({
+    const soals = await BankSoalController.findAndCountAll({
       attributes: ["id", "materi", "soal", "tipe", "jawaban", "point"],
       where: {
-        mapel_id: mapel_id,
+        ...(checkQuery(mapel_id) && {
+          mapel_id: mapel_id,
+        }),
 
         ...(parseInt(is_all) === 1 && {
           teacher_id: req.teacher_id,
@@ -65,7 +70,7 @@ const listSoal = async (req, res) => {
       msg: "Berhasil ditemukan",
       page: req.page,
       pageSize: pageSize,
-      soal: soals,
+      data: soals,
     });
   } catch (err) {
     console.log(err);
@@ -123,6 +128,10 @@ const updateSoal = async (req, res) => {
       });
     }
 
+    payload.soal = JSON.stringify(payload.soal)
+
+    
+
     await BankSoalController.update(payload, {
       where: {
         id,
@@ -143,6 +152,8 @@ const updateSoal = async (req, res) => {
 
 const deleteSoal = async (req, res) => {
   const { payload } = req.body;
+
+  console.log('pay', payload)
   try {
     let success = 0;
     let gagal = 0;
@@ -152,7 +163,7 @@ const deleteSoal = async (req, res) => {
         try {
           await BankSoalController.destroy({
             where: {
-              id : item
+              id: item,
             },
           });
           success = success + 1;
