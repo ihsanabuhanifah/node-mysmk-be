@@ -34,7 +34,7 @@ const sendEmail = async (email, subject, template, context) => {
       }
     });
     await transporter.sendMail({
-      from: "ihsanabuhanifah@smkmadinatulquran.sch.id",
+      from: "mysmk-no-reply@smkmadinatulquran.sch.id",
       to: email,
       subject: subject,
       template: template,
