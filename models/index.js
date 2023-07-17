@@ -11,7 +11,7 @@ const db = {};
 
 let sequelize;
 
-if (config.use_env_variable) {
+if (config?.use_env_variable !== undefined) {
   sequelize = new Sequelize(process.env[config.use_env_variable], {
     database: config.database,
     username: config.username,
