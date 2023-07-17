@@ -82,7 +82,7 @@ const {
   scheduleCek,
 } = require("../../controllers/Admin/jadwalController");
 
-const { listSiswa } = require("../../controllers/Guru/SiswaController");
+const { listSiswa, deleteSiswaKelas, createSiswaKelas } = require("../../controllers/Guru/SiswaController");
 const {
   listHalaqohGroup,
 } = require("../../controllers/Daftar/indexController");
@@ -185,6 +185,8 @@ guru.get("/laporan/guru-piket/notifikasi", notifikasiPiket);
 //siswa
 
 guru.get("/siswa/list", listSiswa);
+guru.post("/siswa/kelas/create", createSiswaKelas);
+guru.delete("/siswa/kelas/delete/:id", deleteSiswaKelas)
 
 //list
 

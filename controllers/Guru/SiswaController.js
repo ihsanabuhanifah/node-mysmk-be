@@ -1,4 +1,3 @@
-
 const KelasStudentModel = require("../../models").kelas_student;
 const models = require("../../models");
 const { Op } = require("sequelize");
@@ -17,7 +16,6 @@ async function listSiswa(req, res) {
     pageSize,
   } = req.query;
   try {
-    
     const siswa = await KelasStudentModel.findAndCountAll({
       where: {
         ...(checkQuery(status) && {
@@ -92,6 +90,47 @@ async function listSiswa(req, res) {
   }
 }
 
+async function createSiswaKelas(req, res) {
+  let { data } = req.body;
+  try {
+    await KelasStudentModel.bulkCreate(data);
+    return res.json({
+      status: "Success",
+      msg: "Jadwal Berhasil ditambahkan",
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(403).json({
+      status: "Fail",
+      msg: "Terjadi Kesalahan",
+    });
+  }
+}
+
+const deleteSiswaKelas = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await KelasStudentModel.destroy({
+      where: {
+        id: id,
+      },
+    });
+
+    return res.json({
+      status: "Success",
+      msg: `data berhasil terhapus`,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(403).json({
+      status: "Fail",
+      msg: "Terjadi Kesalahan",
+    });
+  }
+};
+
 module.exports = {
   listSiswa,
+  createSiswaKelas,
+  deleteSiswaKelas,
 };
