@@ -30,6 +30,8 @@ async function scheduleKelas(req, res) {
     if (cek) {
       return res.json({
         msg: "Absensi hari ini sudah dbuat",
+        hari : hari,
+        tanggal : tanggal
       });
     }
 
