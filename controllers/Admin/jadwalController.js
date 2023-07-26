@@ -9,6 +9,7 @@ const ScheduleMonitorModel = require("../../models").schedule_monitor;
 const LaporanGuruPiketModel = require("../../models").laporan_guru_piket;
 const GuruPiketModel = require("../../models").guru_piket;
 const PengampuModel = require("../../models").pengampu_halaqoh;
+const moment = require("moment-timezone");
 // const { sendNotificationToClient } = require("../../firebase/notify");
 // const {fcm} = require('../../firebase/firebaseInit');
 
@@ -16,9 +17,11 @@ const models = require("../../models");
 const dotenv = require("dotenv");
 dotenv.config();
 
-const { hari, tanggal } = require("../../utils/tanggal");
+// const { hari, tanggal } = require("../../utils/tanggal");
 
 async function scheduleKelas(req, res) {
+  let hari = formatHari(moment().tz("Asia/Jakarta").format("YYYY-MM-DD"));
+  let tanggal = moment().tz("Asia/Jakarta").format("YYYY-MM-DD");
   try {
     const cek = await ScheduleMonitorModel.findOne({
       where: {
@@ -30,8 +33,8 @@ async function scheduleKelas(req, res) {
     if (cek) {
       return res.json({
         msg: "Absensi hari ini sudah dbuat",
-        hari : hari,
-        tanggal : tanggal
+        hari: hari,
+        tanggal: tanggal,
       });
     }
 
@@ -141,9 +144,9 @@ async function scheduleKelas(req, res) {
 //manual
 
 async function scheduleKelasManual(req, res) {
+  let hari = formatHari(moment().tz("Asia/Jakarta").format("YYYY-MM-DD"));
+  let tanggal = moment().tz("Asia/Jakarta").format("YYYY-MM-DD");
   try {
-   
-   
     const cek = await ScheduleMonitorModel.findOne({
       where: {
         tanggal: tanggal,
@@ -151,13 +154,11 @@ async function scheduleKelasManual(req, res) {
       },
     });
 
-   
-
     if (cek) {
       return res.json({
         msg: "Absensi hari ini sudah dbuat",
-        hari : hari,
-        tanggal : tanggal
+        hari: hari,
+        tanggal: tanggal,
       });
     }
 
@@ -170,8 +171,7 @@ async function scheduleKelasManual(req, res) {
     if (jadwal.length === 0) {
       return res.json({
         msg: "Tidak ada Jadwal",
-        hari : hari,
-      
+        hari: hari,
       });
     }
     const jadwalGuruPiket = await GuruPiketModel.findAll({
@@ -275,6 +275,8 @@ async function scheduleKelasManual(req, res) {
 }
 
 async function scheduleHalaqohManual(req, res) {
+  let hari = formatHari(moment().tz("Asia/Jakarta").format("YYYY-MM-DD"));
+  let tanggal = moment().tz("Asia/Jakarta").format("YYYY-MM-DD");
   try {
     const cek = await ScheduleMonitorModel.findOne({
       where: {
@@ -412,6 +414,8 @@ async function scheduleHalaqohManual(req, res) {
 }
 
 async function scheduleCek(req, res) {
+  let hari = formatHari(moment().tz("Asia/Jakarta").format("YYYY-MM-DD"));
+  let tanggal = moment().tz("Asia/Jakarta").format("YYYY-MM-DD");
   try {
     const cek = await ScheduleMonitorModel.findOne({
       where: {
@@ -439,6 +443,9 @@ async function scheduleCek(req, res) {
 }
 
 async function scheduleHalaqoh(req, res) {
+  let hari = formatHari(moment().tz("Asia/Jakarta").format("YYYY-MM-DD"));
+  let tanggal = moment().tz("Asia/Jakarta").format("YYYY-MM-DD");
+
   try {
     const cek = await ScheduleMonitorModel.findOne({
       where: {
@@ -576,6 +583,8 @@ async function scheduleHalaqoh(req, res) {
 }
 
 async function scheduleCek(req, res) {
+  let hari = formatHari(moment().tz("Asia/Jakarta").format("YYYY-MM-DD"));
+  let tanggal = moment().tz("Asia/Jakarta").format("YYYY-MM-DD");
   try {
     const cek = await ScheduleMonitorModel.findOne({
       where: {
