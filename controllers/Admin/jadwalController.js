@@ -10,6 +10,7 @@ const LaporanGuruPiketModel = require("../../models").laporan_guru_piket;
 const GuruPiketModel = require("../../models").guru_piket;
 const PengampuModel = require("../../models").pengampu_halaqoh;
 const moment = require("moment-timezone");
+const {formatHari} = require("../../utils/format")
 // const { sendNotificationToClient } = require("../../firebase/notify");
 // const {fcm} = require('../../firebase/firebaseInit');
 
@@ -144,8 +145,10 @@ async function scheduleKelas(req, res) {
 //manual
 
 async function scheduleKelasManual(req, res) {
-  let hari = formatHari(moment().tz("Asia/Jakarta").format("YYYY-MM-DD"));
-  let tanggal = moment().tz("Asia/Jakarta").format("YYYY-MM-DD");
+
+const {hari, tanggal} = req.query
+ console.log('req', req.query)
+  
   try {
     const cek = await ScheduleMonitorModel.findOne({
       where: {
@@ -275,8 +278,7 @@ async function scheduleKelasManual(req, res) {
 }
 
 async function scheduleHalaqohManual(req, res) {
-  let hari = formatHari(moment().tz("Asia/Jakarta").format("YYYY-MM-DD"));
-  let tanggal = moment().tz("Asia/Jakarta").format("YYYY-MM-DD");
+  const {hari, tanggal} = req.query
   try {
     const cek = await ScheduleMonitorModel.findOne({
       where: {

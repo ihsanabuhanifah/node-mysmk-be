@@ -3,7 +3,7 @@ const app = express();
 const router = require("./routers");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
-var path = require('path');
+var path = require("path");
 require("dotenv").config();
 const port = process.env.PORT || 8000;
 
@@ -17,9 +17,6 @@ const {
   scheduleKelas,
   scheduleHalaqoh,
 } = require("./controllers/Admin/jadwalController");
-
-
-
 
 const job = cron.schedule("06 00 * * *", scheduleKelas);
 const halaqoh = cron.schedule("02 00 * * *", scheduleHalaqoh);
