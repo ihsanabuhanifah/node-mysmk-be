@@ -7,7 +7,7 @@ const TeacherModel = require("../models").teacher;
 const TokenModel = require("../models").token_reset_password;
 
 const { sequelize } = require("../models");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const JWT = require("jsonwebtoken");
 const { OAuth2Client } = require("google-auth-library");
 const { Op, where } = require("sequelize");

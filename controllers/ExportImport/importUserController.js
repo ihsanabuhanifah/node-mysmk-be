@@ -9,7 +9,7 @@ const parentModel = require("../../models").parent;
 const userRoleModel = require("../../models").user_role;
 const fs = require("fs");
 const readXlsxFile = require("read-excel-file/node");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const dotenv = require("dotenv");
 dotenv.config();
 
