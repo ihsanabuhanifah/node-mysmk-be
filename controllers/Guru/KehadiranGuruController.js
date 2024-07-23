@@ -6,6 +6,42 @@ const moment = require("moment-timezone");
 const { formatHari } = require("../../utils/format");
 const { checkQuery } = require("../../utils/format");
 
+async function submitIzin(req, res) {
+  const { status, keterangan } = req.body;
+  let jam = moment().tz("Asia/Jakarta").format("HH:mm:ss");
+  try {
+    const { tanggal } = req.body;
+    const cek = await KehadiranGuruModel.findOne({
+      where: {
+        tanggal: tanggal,
+        teacher_id: req.teacher_id,
+      },
+    });
+
+    await KehadiranGuruModel.update(
+      { status, keterangan },
+      {
+        where: {
+          id: cek.id,
+        },
+      }
+    );
+
+    return res.json({
+      status: "Success",
+      msg: "Konfirmasi ketidakhadiran berhasil disimpan",
+      data: cek,  
+      jam,
+    });
+  } catch (err) {
+    console.log("err", err);
+    return res.status(403).json({
+      status: "Fail",
+      msg: "Terjadi Kesalahan",
+    });
+  }
+}
+
 async function submitDatang(req, res) {
   let jam = moment().tz("Asia/Jakarta").format("HH:mm:ss");
   try {
@@ -71,7 +107,7 @@ async function submitPulang(req, res) {
 
     return res.json({
       status: "Success",
-      msg: "Jam Kedatangan Berhasil disimpan",
+      msg: "Jam Kepulangan Berhasil disimpan",
       data: cek,
       jam,
     });
@@ -97,7 +133,7 @@ async function listKehadiran(req, res) {
           model: models.teacher,
           require: true,
           as: "teacher",
-          attributes: ["id", "nama_guru"],
+          attributes: ["id", "nama_guru", "user_id"],
           where: {
             ...(checkQuery(nama_guru) && {
               nama_guru: {
@@ -173,4 +209,4 @@ async function createKehadiran(req, res) {
   }
 }
 
-module.exports = { listKehadiran, createKehadiran, submitDatang, submitPulang };
+module.exports = { listKehadiran, createKehadiran, submitDatang, submitPulang, submitIzin };
