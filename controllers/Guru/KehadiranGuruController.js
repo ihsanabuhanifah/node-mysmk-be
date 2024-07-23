@@ -7,10 +7,10 @@ const { formatHari } = require("../../utils/format");
 const { checkQuery } = require("../../utils/format");
 
 async function submitIzin(req, res) {
-  const { status, keterangan } = req.body;
+  const { status, keterangan, tanggal } = req.body;
   let jam = moment().tz("Asia/Jakarta").format("HH:mm:ss");
   try {
-    const { tanggal } = req.body;
+    let tanggal = moment().tz("Asia/Jakarta").format("YYYY-MM-DD");
     const cek = await KehadiranGuruModel.findOne({
       where: {
         tanggal: tanggal,
@@ -44,8 +44,9 @@ async function submitIzin(req, res) {
 
 async function submitDatang(req, res) {
   let jam = moment().tz("Asia/Jakarta").format("HH:mm:ss");
+  let tanggal = moment().tz("Asia/Jakarta").format("YYYY-MM-DD");
   try {
-    const { tanggal } = req.body;
+  
     const cek = await KehadiranGuruModel.findOne({
       where: {
         tanggal: tanggal,
@@ -65,7 +66,7 @@ async function submitDatang(req, res) {
     return res.json({
       status: "Success",
       msg: "Jam Kedatangan Berhasil disimpan",
-      data: cek,
+      tanggal,
       jam,
     });
   } catch (err) {
@@ -80,7 +81,7 @@ async function submitDatang(req, res) {
 async function submitPulang(req, res) {
   let jam = moment().tz("Asia/Jakarta").format("HH:mm:ss");
   try {
-    const { tanggal } = req.body;
+    let tanggal = moment().tz("Asia/Jakarta").format("YYYY-MM-DD");
     const cek = await KehadiranGuruModel.findOne({
       where: {
         tanggal: tanggal,
@@ -108,7 +109,7 @@ async function submitPulang(req, res) {
     return res.json({
       status: "Success",
       msg: "Jam Kepulangan Berhasil disimpan",
-      data: cek,
+      tanggal,
       jam,
     });
   } catch (err) {
