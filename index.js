@@ -17,8 +17,12 @@ const {
   scheduleKelas,
   scheduleHalaqoh,
 } = require("./controllers/Admin/jadwalController");
+const {
+  createKehadiran,
+} = require("./controllers/Guru/KehadiranGuruController");
 
 const job = cron.schedule("06 00 * * *", scheduleKelas);
+const kehadiran_guru = cron.schedule("05 00 * * *", createKehadiran);
 const halaqoh = cron.schedule("02 00 * * *", scheduleHalaqoh);
 app.use(cors());
 app.use(express.json());
@@ -27,6 +31,7 @@ app.use(cookieParser());
 app.use(router);
 
 job.start();
+kehadiran_guru.start();
 halaqoh.start();
 app.listen(port, async () => {
   try {

@@ -109,8 +109,15 @@ const {
   updateUjian,
   deleteUjian,
 } = require("../../controllers/Guru/UjianController");
+const { createKehadiran, listKehadiran, submitDatang, submitPulang } = require("../../controllers/Guru/KehadiranGuruController");
 
 guru.use(guruAccessMiddleware);
+
+//absensi kehadairan
+guru.post("/create/kehadiran", createKehadiran)
+guru.get("/list/kehadiran", listKehadiran)
+guru.put("/submit-datang/kehadiran", submitDatang)
+guru.put("/submit-pulang/kehadiran", submitPulang)
 
 //role
 
