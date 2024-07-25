@@ -112,6 +112,7 @@ const {
   detailUjian,
   updateUjian,
   deleteUjian,
+  createPenilaian,
 } = require("../../controllers/Guru/UjianController");
 const {
   createKehadiran,
@@ -236,5 +237,6 @@ guru.get("/ujian/list", listUjian);
 guru.get("/ujian/detail/:id", detailUjian);
 guru.put("/ujian/update/:id", updateUjian);
 guru.delete("/ujian/delete/:id", deleteUjian);
+guru.post("/nilai/create", createPenilaian)
 
 module.exports = guru;
