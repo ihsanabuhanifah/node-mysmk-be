@@ -82,7 +82,11 @@ const {
   scheduleCek,
 } = require("../../controllers/Admin/jadwalController");
 
-const { listSiswa, deleteSiswaKelas, createSiswaKelas } = require("../../controllers/Guru/SiswaController");
+const {
+  listSiswa,
+  deleteSiswaKelas,
+  createSiswaKelas,
+} = require("../../controllers/Guru/SiswaController");
 const {
   listHalaqohGroup,
 } = require("../../controllers/Daftar/indexController");
@@ -109,16 +113,25 @@ const {
   updateUjian,
   deleteUjian,
 } = require("../../controllers/Guru/UjianController");
-const { createKehadiran, listKehadiran, submitDatang, submitPulang, submitIzin } = require("../../controllers/Guru/KehadiranGuruController");
+const {
+  createKehadiran,
+  listKehadiran,
+  submitDatang,
+  submitPulang,
+  submitIzin,
+  submitByAdmin,
+} = require("../../controllers/Guru/KehadiranGuruController");
+const adminAccessMiddleware = require("../../middleware/adminAccessMiddleware");
 
 guru.use(guruAccessMiddleware);
 
 //absensi kehadairan
-guru.post("/create/kehadiran", createKehadiran)
-guru.get("/list/kehadiran", listKehadiran)
-guru.put("/submit-datang/kehadiran", submitDatang)
-guru.put("/submit-pulang/kehadiran", submitPulang)
-guru.put("/submit-izin/kehadiran", submitIzin)
+guru.post("/create/kehadiran", createKehadiran);
+guru.get("/list/kehadiran", listKehadiran);
+guru.put("/submit-datang/kehadiran", submitDatang);
+guru.put("/submit-pulang/kehadiran", submitPulang);
+guru.put("/submit-izin/kehadiran", submitIzin);
+guru.put("/submit-by-Admin/kehadiran", adminAccessMiddleware, submitByAdmin);
 
 //role
 
@@ -194,7 +207,7 @@ guru.get("/laporan/guru-piket/notifikasi", notifikasiPiket);
 
 guru.get("/siswa/list", listSiswa);
 guru.post("/siswa/kelas/create", createSiswaKelas);
-guru.delete("/siswa/kelas/delete/:id", deleteSiswaKelas)
+guru.delete("/siswa/kelas/delete/:id", deleteSiswaKelas);
 
 //list
 
