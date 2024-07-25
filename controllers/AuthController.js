@@ -139,8 +139,6 @@ async function login(req, res) {
       }
     );
 
-   
-
     if (loginAs === 8) {
       return res.status(200).json({
         status: "Success",
@@ -249,34 +247,18 @@ async function authme(req, res) {
   let email = req.email;
 
   try {
-    const user = await userModel.findOne({
-      where: {
-        email: email,
-      },
-    });
-    if (!user) {
-      return res.status(404).json({
-        status: "fail",
-        msg: "Email tidak ditemukan",
-      });
-    }
-
-    
-
-   
-
     const token = JWT.sign(
       {
-        email: user.email,
-        name: user.name,
-        id: user.id,
-        role: user.role,
-        roleId: user.Role_id,
+        email: req.email,
+        name: req.name,
+        id: req.id,
+        role: req.role,
+        roleId: req.Role_id,
         StudentId: req?.StudentId,
         teacher_id: req?.teacher_id,
         semesterAktif: req?.semesterAktif,
         tahunAjaranAktif: req?.tahunAjaranAktif,
-        allRole : req.allRole,
+        allRole: req.allRole,
       },
       process.env.JWT_SECRET_ACCESS_TOKEN,
       {
@@ -288,7 +270,13 @@ async function authme(req, res) {
       return res.status(200).json({
         status: "Success",
         msg: "Berhasil Wali Santri Authme",
-        user: user,
+        user: {
+          email: req.email,
+          name: req.name,
+          id: req.id,
+          role: req.role,
+          roleId: req.Role_id,
+        },
         role: req.role,
         token: token,
         semesterAktif: req?.semesterAktif,
@@ -298,7 +286,13 @@ async function authme(req, res) {
     return res.status(200).json({
       status: "Success",
       msg: "Berhasil Authme",
-      user: user,
+      user: {
+        email: req.email,
+        name: req.name,
+        id: req.id,
+        role: req.role,
+        roleId: req.Role_id,
+      },
       role: req.role,
       token: token,
     });
