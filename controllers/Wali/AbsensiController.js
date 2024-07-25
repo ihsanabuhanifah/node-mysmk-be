@@ -101,7 +101,8 @@ async function list(req, res) {
       if (absensi.length === 0) {
         return res.json({
           status: "Fail",
-          msg: "Tidak ditemukan absensi halaqoh pada periode yang dipilih",
+          msg: "Tidak ditemukan absensi kelas pada periode yang dipilih",
+          student_id : req.StudentId
         });
       }
 
