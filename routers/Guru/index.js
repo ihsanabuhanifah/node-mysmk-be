@@ -125,6 +125,7 @@ const {
 const adminAccessMiddleware = require("../../middleware/adminAccessMiddleware");
 const { listPenilaianByTeacher } = require("../../controllers/Guru/NilaiController");
 
+
 guru.use(guruAccessMiddleware);
 
 //absensi kehadairan
@@ -244,5 +245,6 @@ guru.post("/nilai/create", createPenilaian)
 //nilai
 
 guru.get("/nilai/list/teacher", listPenilaianByTeacher);
+itur-siswa
 
 module.exports = guru;

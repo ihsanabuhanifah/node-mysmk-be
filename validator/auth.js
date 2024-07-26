@@ -2,7 +2,7 @@ const userModel = require("../models").User;
 const { check } = require("express-validator");
 
 const loginValidation = [
-  check("email").isEmail().withMessage("Masukan Email "),
+  // check("email").isEmail().withMessage("Masukan Email"),
   check("password").isLength({ min: 8 }).withMessage("Password minimal 8 karakter"),
 ];
 
