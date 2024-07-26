@@ -43,7 +43,7 @@ module.exports = (sequelize, DataTypes) => {
       exam4: DataTypes.DECIMAL(4, 2),
       exam_result: DataTypes.DECIMAL(4, 2),
       refresh_count: DataTypes.INTEGER,
-      status: DataTypes.STRING,
+      status: DataTypes.ENUM('finish', 'open', 'progress', 'locked'),
     },
     {
       sequelize,

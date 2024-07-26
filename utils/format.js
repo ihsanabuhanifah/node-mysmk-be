@@ -102,4 +102,18 @@ function checkQuery(value) {
   return true;
 }
 
-module.exports = { formatDate, formatHari, checkQuery };
+const calculateMinutesDifference = (startTime, endTime) => {
+  const start = new Date(startTime);
+  const end = new Date(endTime);
+
+  // Hitung perbedaan dalam milidetik
+  const differenceInMilliseconds = end - start;
+
+  // Konversi milidetik ke menit
+  const differenceInMinutes = Math.floor(differenceInMilliseconds / 1000 / 60);
+
+  return differenceInMinutes;
+};
+
+
+module.exports = { formatDate, formatHari, checkQuery, calculateMinutesDifference };

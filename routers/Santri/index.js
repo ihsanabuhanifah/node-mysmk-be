@@ -5,7 +5,7 @@ const validateFields = require('./validateFields')
 
 const santri = express.Router();
 const { profile, updateSiswa } = require('../../controllers/Santri/ProfileController');
-const { getExam } = require("../../controllers/Santri/ExamController");
+const { getExam, takeExam } = require("../../controllers/Santri/ExamController");
 
 const validateUpdate = [
   check("nama_siswa").optional().isString().withMessage("Nama harus berupa string"),
@@ -29,6 +29,7 @@ santri.use(santriAccessMiddleware);
 santri.get('/profile', profile);
 santri.put('/profile/update/:id', validateFields, validateUpdate, updateSiswa);
 santri.get("/exam/list", getExam )
+santri.put("/exam/take/:id", takeExam )
 
 module.exports = santri;
 

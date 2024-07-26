@@ -69,7 +69,8 @@ module.exports = {
         type: Sequelize.INTEGER,
       },
       status: {
-        type: Sequelize.STRING,
+        type: Sequelize.ENUM('finish', 'open', 'progress', 'locked'),
+        defaultValue : 'open'
       },
 
       created_at: {
