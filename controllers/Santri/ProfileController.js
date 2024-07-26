@@ -1,47 +1,57 @@
-const studentModel = require('../../models').student
-const models = require('../../models')
+const studentModel = require("../../models").student;
+const models = require("../../models");
 
 const profile = async (req, res) => {
-	try {
-		const siswa = await studentModel.findAll({
-			where: {
-				user_id: req.id
-			},
-			include: [
-				{
-					model: models.parent,
-					require: true,
-					as: "parent",
-					attributes: ["id", "nama_wali"]
-				}
-			]
-		});
-		
-		return res.json({
-			siswa
-		})
-	} catch (err) {
-		console.log(err)
-		res.status(403).json({
-			msg: 'Terjadi Kesalahan',
-		})
-	}
-	res.json({
-		status: 'ok',
-	})
-}
+  
+  try {
+    const siswa = await studentModel.findAll({
+      where: {
+        user_id: req.student_id, //ambil dari token
+      },
+      include: [
+        {
+          model: models.parent,
+          require: true,
+          as: "parent",
+          attributes: ["id", "nama_wali"],
+        },
+      ],
+    });
 
-const updateSiswa = async(req, res) => {
-	try {
-		const { id } = req.params;
-		const { nama_siswa, nik, tempat_lahir, tanggal_lahir, alamat, sekolah_asal, jenis_kelamin, anak_ke } = req.body;
+    return res.json({
+      siswa,
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(403).json({
+      msg: "Terjadi Kesalahan",
+    });
+  }
+  res.json({
+    status: "ok",
+  });
+};
 
-		const detail = await studentModel.findOne({
-			where: {
-				id,
-			}
-		});
-		if (!detail) {
+const updateSiswa = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      nama_siswa,
+      nik,
+      tempat_lahir,
+      tanggal_lahir,
+      alamat,
+      sekolah_asal,
+      jenis_kelamin,
+      anak_ke,
+    } = req.body;
+
+    const detail = await studentModel.findOne({
+      where: {
+        id,
+      },
+    });
+    if (!detail) {
       return res.json({
         status: "Success",
         msg: "Santri tidak ditemukan",
@@ -49,7 +59,7 @@ const updateSiswa = async(req, res) => {
       });
     }
 
-		const fieldsToUpdate = {};
+    const fieldsToUpdate = {};
 
     if (nama_siswa) fieldsToUpdate.nama_siswa = nama_siswa;
     if (nik) fieldsToUpdate.nik = nik;
@@ -60,7 +70,7 @@ const updateSiswa = async(req, res) => {
     if (jenis_kelamin) fieldsToUpdate.jenis_kelamin = jenis_kelamin;
     if (anak_ke) fieldsToUpdate.anak_ke = anak_ke;
 
-		if (Object.keys(fieldsToUpdate).length > 0) {
+    if (Object.keys(fieldsToUpdate).length > 0) {
       await studentModel.update(fieldsToUpdate, {
         where: { id },
       });
@@ -75,9 +85,9 @@ const updateSiswa = async(req, res) => {
         msg: "Tidak ada data yang diperbarui",
       });
     }
-	} catch (err) {
-		return res.status(403).send("Ada Kesalahan");
-	}
-}
+  } catch (err) {
+    return res.status(403).send("Ada Kesalahan");
+  }
+};
 
 module.exports = { profile, updateSiswa };

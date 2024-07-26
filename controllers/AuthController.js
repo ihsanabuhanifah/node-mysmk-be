@@ -6,6 +6,7 @@ const RolesModel = require("../models").role;
 const KelasStudentModel = require("../models").kelas_student;
 const ParentModel = require("../models").parent;
 const TeacherModel = require("../models").teacher;
+const StudentModel = require("../models").student;
 const TokenModel = require("../models").token_reset_password;
 
 const { sequelize } = require("../models");
@@ -62,6 +63,7 @@ async function login(req, res) {
     let parent;
     let KelasStudent;
     let guru;
+    let siswa;
     let allRole = [];
 
     if (loginAs === 8) {
@@ -72,7 +74,12 @@ async function login(req, res) {
         },
       });
     } else if (loginAs === 9) {
-      console.log("okkkkkkkkkkkkkkkkkkkkkkkk");
+      siswa = await StudentModel.findOne({
+        attributes: ["id"],
+        where: {
+          user_id: user.id,
+        },
+      });
     } else {
       guru = await TeacherModel.findOne({
         attributes: ["id"],
@@ -126,6 +133,7 @@ async function login(req, res) {
         role: roleName.role_name,
         roleId: loginAs,
         StudentId: parent?.student_id,
+        student_id: siswa.id,
         teacher_id: guru?.id,
         allRole: allRole,
         semesterAktif:
@@ -255,6 +263,7 @@ async function authme(req, res) {
         role: req.role,
         roleId: req.Role_id,
         StudentId: req?.StudentId,
+        student_id: req.student_id,
         teacher_id: req?.teacher_id,
         semesterAktif: req?.semesterAktif,
         tahunAjaranAktif: req?.tahunAjaranAktif,

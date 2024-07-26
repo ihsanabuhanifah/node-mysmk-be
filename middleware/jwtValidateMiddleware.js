@@ -16,17 +16,21 @@ const jwtValidateMiddleware = (req, res, next) => {
           data: err,
         });
       } else {
+
+        console.log('dec', decoded)
         req.id = decoded.id;
         req.email = decoded.email;
         req.name = decoded.name;
         req.role = decoded.role;
         req.roleId = decoded.roleId;
         req.StudentId = decoded?.StudentId;
+       
         (req.semesterAktif = decoded?.semesterAktif),
           (req.tahunAjaranAktif = decoded?.tahunAjaranAktif),
           (req.teacher_id = decoded?.teacher_id);
 
         req.allRole = decoded.allRole;
+        req.student_id = decoded.student_id
 
         next();
       }
