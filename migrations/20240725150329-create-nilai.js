@@ -38,6 +38,13 @@ module.exports = {
       jawaban: {
         type: Sequelize.TEXT,
       },
+
+      jam_mulai: {
+        type: Sequelize.DATE,
+      },
+      jam_selesai: {
+        type: Sequelize.DATE,
+      },
       
       waktu_tersisa: {
         type: Sequelize.INTEGER,

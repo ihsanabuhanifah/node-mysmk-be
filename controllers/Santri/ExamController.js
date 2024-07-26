@@ -15,15 +15,50 @@ const getExam = response.requestResponse(async (req, res) => {
   const exam = await NilaiController.findAndCountAll({
     ...(pageSize !== undefined && { limit: pageSize }),
     ...(page !== undefined && { offset: page }),
-   where : {
-    student_id: req.student_id
-   }
+    where: {
+      student_id: req.student_id,
+    },
+    include: [
+      {
+        model: models.teacher,
+        require: true,
+        as: "teacher",
+        attributes: ["id", "nama_guru"],
+      },
+      {
+        model: models.ujian,
+        require: true,
+        as: "ujian",
+        attributes: [
+          "id",
+          "jenis_ujian",
+          
+          "tipe_ujian",
+          "waktu_mulai",
+          "waktu_selesai",
+          "status",
+          "soal",
+        ],
+        include: [
+          {
+            model: models.mapel,
+            require: true,
+            as: "mapel",
+            attributes: ["id", "nama_mapel"],
+          },
+        ],
+      },
+    ],
+    order: [["id", "desc"]],
+    limit: pageSize,
+    offset: page,
   });
 
-  
   return {
-    msg: "Data berhasil di update",
+    msg: "Data Ujian berhasil ditemukan",
     data: exam,
+    limit: pageSize,
+    offset: page,
 
     page: req.page,
     pageSize: pageSize,
