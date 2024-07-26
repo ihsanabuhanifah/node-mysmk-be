@@ -2,7 +2,7 @@
 
 /storage/*.key
 /vendor
-/public/data/uploads
+/public
 
 .env
 .env.backup
