@@ -38,6 +38,13 @@ module.exports = {
       jawaban: {
         type: Sequelize.TEXT,
       },
+
+      jam_mulai: {
+        type: Sequelize.DATE,
+      },
+      jam_selesai: {
+        type: Sequelize.DATE,
+      },
       
       waktu_tersisa: {
         type: Sequelize.INTEGER,
@@ -62,7 +69,8 @@ module.exports = {
         type: Sequelize.INTEGER,
       },
       status: {
-        type: Sequelize.STRING,
+        type: Sequelize.ENUM('finish', 'open', 'progress', 'locked'),
+        defaultValue : 'open'
       },
 
       created_at: {

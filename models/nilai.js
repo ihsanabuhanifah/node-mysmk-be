@@ -34,6 +34,8 @@ module.exports = (sequelize, DataTypes) => {
       student_id: DataTypes.INTEGER,
       jawaban: DataTypes.TEXT,
       waktu_tersisa: DataTypes.INTEGER,
+      jam_mulai: DataTypes.DATE,
+      jam_selesai: DataTypes.DATE,
 
       exam1: DataTypes.DECIMAL(4, 2),
       exam2: DataTypes.DECIMAL(4, 2),
@@ -41,7 +43,7 @@ module.exports = (sequelize, DataTypes) => {
       exam4: DataTypes.DECIMAL(4, 2),
       exam_result: DataTypes.DECIMAL(4, 2),
       refresh_count: DataTypes.INTEGER,
-      status: DataTypes.STRING,
+      status: DataTypes.ENUM('finish', 'open', 'progress', 'locked'),
     },
     {
       sequelize,

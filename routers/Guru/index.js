@@ -245,6 +245,6 @@ guru.post("/nilai/create", createPenilaian)
 //nilai
 
 guru.get("/nilai/list/teacher", listPenilaianByTeacher);
-itur-siswa
+
 
 module.exports = guru;
