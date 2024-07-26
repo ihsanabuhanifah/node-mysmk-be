@@ -11,7 +11,7 @@ const {
 
 const createPenilaian = async (req, res) => {
   try {
-    const payload = req.body;
+   
 
     const response = await UjianController.update(
       {
@@ -37,10 +37,7 @@ const createPenilaian = async (req, res) => {
           ujian_id: req.body.id,
           teacher_id: req.teacher_id,
           student_id: data.id,
-          waktu_tersisa: calculateMinutesDifference(
-            response.waktu_mulai,
-            response.waktu_selesai
-          ),
+          waktu_tersisa: req.body.durasi,
 
           status: "open",
         });

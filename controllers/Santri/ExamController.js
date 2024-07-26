@@ -71,6 +71,7 @@ const takeExam = response.requestResponse(async (req, res) => {
   const exam = await NilaiController.findOne({
     where: {
       id: id,
+      student_id: req.student_id,
     },
     include: [
       {
@@ -98,9 +99,24 @@ const takeExam = response.requestResponse(async (req, res) => {
     ],
   });
 
+  if (!exam) {
+    return {
+      status: 442,
+      msg: "Ujian tidak ditemukan",
+    };
+  }
+
   if (exam.status === "finish") {
     return {
+      status: 442,
       msg: "Ujian telah berakhir",
+    };
+  }
+
+  if (exam.refresh_count <= 0 && exam.status === "progress") {
+    return {
+      status: 442,
+      msg: "Anda tidak dapat mengambil ujian ini , Silahkan  menghubungi pengawas",
     };
   }
 
@@ -112,12 +128,10 @@ const takeExam = response.requestResponse(async (req, res) => {
     if (exam.status === "open") {
       await NilaiController.update(
         {
+          refresh_count: 3,
           status: "progress",
           jam_mulai: new Date(),
-          waktu_tersisa: calculateMinutesDifference(
-            exam.ujian.waktu_mulai,
-            exam.ujian.waktu_selesai
-          ),
+          waktu_tersisa: exam.ujian.waktu_tersisa
         },
         {
           where: {
@@ -127,31 +141,42 @@ const takeExam = response.requestResponse(async (req, res) => {
       );
       return {
         msg: "Selamat melakukan Ujian",
-        waktu_tersisa: calculateMinutesDifference(
-          exam.ujian.waktu_mulai,
-          exam.ujian.waktu_selesai
-        ),
+        waktu_tersisa: exam.ujian.waktu_tersisa,
+        refresh_count: 3,
         data: exam,
       };
     }
 
     if (exam.status === "progress") {
+      await NilaiController.update(
+        {
+          refresh_count: exam.refresh_count - 1,
+        },
+        {
+          where: {
+            id: exam.id,
+          },
+        }
+      );
       return {
         msg: "Selamat melanjutkan Ujian",
         waktu_tersisa: calculateMinutesDifference(
           exam.jam_mulai,
           exam.ujian.waktu_selesai
         ),
+        refresh_count: exam.refresh_count - 1,
         data: exam,
       };
     }
   } else {
     if (now < startTime) {
       return {
+        status: 422,
         msg: "Waktu Ujian belum dimulai",
       };
     } else {
       return {
+        status: 422,
         msg: "Waktu Ujian sudah terlewat",
       };
     }
