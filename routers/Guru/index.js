@@ -123,7 +123,10 @@ const {
   submitByAdmin,
 } = require("../../controllers/Guru/KehadiranGuruController");
 const adminAccessMiddleware = require("../../middleware/adminAccessMiddleware");
+<<<<<<< HEAD
 const { listPenilaianByTeacher } = require("../../controllers/Guru/NilaiController");
+=======
+>>>>>>> fitur-siswa
 
 guru.use(guruAccessMiddleware);
 
@@ -244,5 +247,6 @@ guru.post("/nilai/create", createPenilaian)
 //nilai
 
 guru.get("/nilai/list/teacher", listPenilaianByTeacher);
+itur-siswa
 
 module.exports = guru;
