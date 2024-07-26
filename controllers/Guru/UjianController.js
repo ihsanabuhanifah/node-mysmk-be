@@ -4,13 +4,16 @@ const NilaiController = require("../../models").nilai;
 const BankSoalController = require("../../models").bank_soal;
 const StudentModel = require("../../models").kelas_student;
 const models = require("../../models");
-const { checkQuery } = require("../../utils/format");
+const {
+  checkQuery,
+  calculateMinutesDifference,
+} = require("../../utils/format");
 
 const createPenilaian = async (req, res) => {
   try {
     const payload = req.body;
 
-    await UjianController.update(
+    const response = await UjianController.update(
       {
         status: "open",
       },
@@ -21,6 +24,7 @@ const createPenilaian = async (req, res) => {
       }
     );
 
+    console.log("res", response);
     const student = await StudentModel.findAll({
       where: {
         kelas_id: req.body.kelas_id,
@@ -33,7 +37,12 @@ const createPenilaian = async (req, res) => {
           ujian_id: req.body.id,
           teacher_id: req.teacher_id,
           student_id: data.id,
-          waktu_tersisa: 90,
+          waktu_tersisa: calculateMinutesDifference(
+            response.waktu_mulai,
+            response.waktu_selesai
+          ),
+
+          status: "open",
         });
       })
     );
@@ -43,7 +52,7 @@ const createPenilaian = async (req, res) => {
     return res.status(201).json({
       status: "Success",
       msg: "Berhasil membuat Penilaian Ujian",
-      
+
       // msg: `Berhasil upload ${success} soal dari ${total} soal`,
     });
   } catch (err) {

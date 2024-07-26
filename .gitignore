@@ -5,6 +5,7 @@
 /public
 
 .env
+.env.prod
 .env.backup
 .DS_Store
 
