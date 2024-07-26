@@ -68,7 +68,7 @@ async function login(req, res) {
         },
       });
     } else if (loginAs === 9) {
-      console.log("ok");
+      console.log("okkkkkkkkkkkkkkkkkkkkkkkk");
     } else {
       guru = await TeacherModel.findOne({
         attributes: ["id"],
