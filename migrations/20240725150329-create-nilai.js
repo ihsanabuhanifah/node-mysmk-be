@@ -38,6 +38,7 @@ module.exports = {
       jawaban: {
         type: Sequelize.TEXT,
       },
+      
       waktu_tersisa: {
         type: Sequelize.INTEGER,
       },
@@ -54,8 +55,14 @@ module.exports = {
       exam4: {
         type: Sequelize.DECIMAL(4, 2),
       },
-      examResult: {
+      exam_result: {
         type: Sequelize.DECIMAL(4, 2),
+      },
+      refresh_count: {
+        type: Sequelize.INTEGER,
+      },
+      status: {
+        type: Sequelize.STRING,
       },
 
       created_at: {

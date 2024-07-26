@@ -123,6 +123,8 @@ const {
   submitByAdmin,
 } = require("../../controllers/Guru/KehadiranGuruController");
 const adminAccessMiddleware = require("../../middleware/adminAccessMiddleware");
+const { listPenilaianByTeacher } = require("../../controllers/Guru/NilaiController");
+
 
 guru.use(guruAccessMiddleware);
 
@@ -238,5 +240,11 @@ guru.get("/ujian/detail/:id", detailUjian);
 guru.put("/ujian/update/:id", updateUjian);
 guru.delete("/ujian/delete/:id", deleteUjian);
 guru.post("/nilai/create", createPenilaian)
+
+
+//nilai
+
+guru.get("/nilai/list/teacher", listPenilaianByTeacher);
+itur-siswa
 
 module.exports = guru;
