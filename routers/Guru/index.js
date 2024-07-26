@@ -123,10 +123,8 @@ const {
   submitByAdmin,
 } = require("../../controllers/Guru/KehadiranGuruController");
 const adminAccessMiddleware = require("../../middleware/adminAccessMiddleware");
-<<<<<<< HEAD
 const { listPenilaianByTeacher } = require("../../controllers/Guru/NilaiController");
-=======
->>>>>>> fitur-siswa
+
 
 guru.use(guruAccessMiddleware);
 
