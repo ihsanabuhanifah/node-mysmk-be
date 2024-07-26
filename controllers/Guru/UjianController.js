@@ -32,7 +32,7 @@ const createPenilaian = async (req, res) => {
         await NilaiController.create({
           ujian_id: req.body.id,
           teacher_id: req.teacher_id,
-          student_id: data.student_id,
+          student_id: data.id,
           waktu_tersisa: 90,
         });
       })
