@@ -9,6 +9,22 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+
+     
+      nilai.belongsTo(models.student, {
+        as: "siswa",
+        foreignKey: "student_id",
+      });
+
+      nilai.belongsTo(models.teacher, {
+        as: "teacher",
+        foreignKey: "teacher_id",
+      });
+      nilai.belongsTo(models.ujian, {
+        as: "ujian",
+        foreignKey: "ujian_id",
+      });
+     
     }
   }
   nilai.init(
@@ -18,11 +34,14 @@ module.exports = (sequelize, DataTypes) => {
       student_id: DataTypes.INTEGER,
       jawaban: DataTypes.TEXT,
       waktu_tersisa: DataTypes.INTEGER,
+
       exam1: DataTypes.DECIMAL(4, 2),
       exam2: DataTypes.DECIMAL(4, 2),
       exam3: DataTypes.DECIMAL(4, 2),
       exam4: DataTypes.DECIMAL(4, 2),
-      examResult: DataTypes.DECIMAL(4, 2),
+      exam_result: DataTypes.DECIMAL(4, 2),
+      refresh_count: DataTypes.INTEGER,
+      status: DataTypes.STRING,
     },
     {
       sequelize,
