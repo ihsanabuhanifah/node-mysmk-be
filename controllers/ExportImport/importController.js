@@ -411,7 +411,6 @@ async function uploadImage(req, res) {
     });
   }
 }
-
 module.exports = {
   importRoles,
   importAlquran,
