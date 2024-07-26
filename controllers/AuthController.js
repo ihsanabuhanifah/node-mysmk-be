@@ -133,7 +133,7 @@ async function login(req, res) {
         role: roleName.role_name,
         roleId: loginAs,
         StudentId: parent?.student_id,
-        student_id: siswa.id,
+        student_id: siswa?.id,
         teacher_id: guru?.id,
         allRole: allRole,
         semesterAktif:
