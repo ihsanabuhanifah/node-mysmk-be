@@ -1,4 +1,5 @@
 const multer = require("multer");
+const path = require('path')
 
 const excelFilter = (req, file, cb) => {
   if (
@@ -16,7 +17,10 @@ const storage = multer.diskStorage({
     cb(null, "public/data/uploads/");
   },
   filename: (req, file, cb) => {
-    cb(null, file.fieldname + "-" + Date.now() + "-" + file.originalname);
+
+    console.log('file', file)
+    const originalExtension = path.extname(file.originalname);
+    cb(null, file.fieldname + "-" + Date.now()+originalExtension);
   },
 });
 const upload = multer({ storage: storage });

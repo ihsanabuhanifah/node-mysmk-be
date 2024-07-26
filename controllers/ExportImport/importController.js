@@ -10,6 +10,7 @@ const fs = require("fs");
 const readXlsxFile = require("read-excel-file/node");
 
 const dotenv = require("dotenv");
+const path = require("path");
 dotenv.config();
 async function importRoles(req, res) {
   try {
@@ -383,6 +384,34 @@ async function importRombel(req, res) {
     });
   }
 }
+
+async function uploadImage(req, res) {
+  try {
+    if (req.file == undefined) {
+      return res.status(400).json({
+        msg: "Upload File Excel",
+      });
+    }
+
+    console.log("req", req.file);
+
+    // let target = path.join(__dirname, "public/data/uploads/", req.file.filename);
+    // fs.renameSync(req.path, target);
+    url = `${req.protocol}://${req.get("host")}/${req.file.filename}`;
+    res.json({
+      status: "Success",
+      msg: "Rombel Berhasil dibuat",
+      url: url,
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(400).json({
+      status: "Fail",
+      msg: "Terjadi Kesalahan",
+    });
+  }
+}
+
 module.exports = {
   importRoles,
   importAlquran,
@@ -390,5 +419,6 @@ module.exports = {
   importMapel,
   importKelas,
   importJadwal,
-  importRombel
+  uploadImage,
+  importRombel,
 };
