@@ -50,6 +50,7 @@ module.exports = {
         type: Sequelize.INTEGER,
       },
 
+     
       exam1: {
         type: Sequelize.DECIMAL(4, 2),
       },
