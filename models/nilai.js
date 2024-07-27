@@ -36,7 +36,7 @@ module.exports = (sequelize, DataTypes) => {
       waktu_tersisa: DataTypes.INTEGER,
       jam_mulai: DataTypes.DATE,
       jam_selesai: DataTypes.DATE,
-
+      remidial_count : DataTypes.INTEGER,
       exam1: DataTypes.DECIMAL(4, 2),
       exam2: DataTypes.DECIMAL(4, 2),
       exam3: DataTypes.DECIMAL(4, 2),
