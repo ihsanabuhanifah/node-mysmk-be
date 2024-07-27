@@ -68,7 +68,6 @@ const getExam = response.requestResponse(async (req, res) => {
 });
 
 const takeExam = response.requestResponse(async (req, res) => {
-  const { page, pageSize } = req.query;
   const { id } = req.params;
 
   const exam = await NilaiController.findOne({
@@ -89,7 +88,7 @@ const takeExam = response.requestResponse(async (req, res) => {
           "waktu_selesai",
           "status",
           "soal",
-          "durasi"
+          "durasi",
         ],
         include: [
           {
@@ -140,7 +139,7 @@ const takeExam = response.requestResponse(async (req, res) => {
           refresh_count: 3,
           status: "progress",
           jam_mulai: new Date(),
-          waktu_tersisa : exam.ujian.durasi,
+          waktu_tersisa: exam.ujian.durasi,
           jam_selesai: calculateWaktuSelesai(exam.waktu_tersisa),
         },
         {
