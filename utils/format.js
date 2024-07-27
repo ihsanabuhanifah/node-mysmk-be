@@ -115,5 +115,12 @@ const calculateMinutesDifference = (startTime, endTime) => {
   return differenceInMinutes;
 };
 
+const calculateWaktuSelesai = (durasi)=> {
+  const now = new Date();
+  const futureTime = new Date(now.getTime() + durasi * 60 * 1000);
+  return futureTime
 
-module.exports = { formatDate, formatHari, checkQuery, calculateMinutesDifference };
+}
+
+
+module.exports = { formatDate, formatHari, checkQuery, calculateMinutesDifference, calculateWaktuSelesai };

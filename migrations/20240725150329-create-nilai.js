@@ -49,7 +49,11 @@ module.exports = {
       waktu_tersisa: {
         type: Sequelize.INTEGER,
       },
+      remidial_count: {
+        type: Sequelize.INTEGER,
+      },
 
+     
       exam1: {
         type: Sequelize.DECIMAL(4, 2),
       },

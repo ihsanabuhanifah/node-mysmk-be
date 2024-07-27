@@ -42,6 +42,7 @@ module.exports = (sequelize, DataTypes) => {
     waktu_selesai: DataTypes.DATE,
     status: DataTypes.STRING,
     student_access: DataTypes.TEXT,
+    durasi:DataTypes.INTEGER,
     
   }, {
     sequelize,
