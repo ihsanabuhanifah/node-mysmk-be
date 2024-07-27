@@ -89,6 +89,7 @@ const takeExam = response.requestResponse(async (req, res) => {
           "waktu_selesai",
           "status",
           "soal",
+          "durasi"
         ],
         include: [
           {
@@ -130,7 +131,8 @@ const takeExam = response.requestResponse(async (req, res) => {
   if (
     (now >= startTime && now <= endTime) ||
     exam.ujian.tipe_ujian === "open" ||
-    exam.status === "progress"
+    exam.status === "progress" ||
+    exam.remidial_count === 1
   ) {
     if (exam.status === "open") {
       await NilaiController.update(
@@ -138,6 +140,7 @@ const takeExam = response.requestResponse(async (req, res) => {
           refresh_count: 3,
           status: "progress",
           jam_mulai: new Date(),
+          waktu_tersisa : exam.ujian.durasi,
           jam_selesai: calculateWaktuSelesai(exam.waktu_tersisa),
         },
         {
@@ -148,7 +151,7 @@ const takeExam = response.requestResponse(async (req, res) => {
       );
       return {
         msg: "Selamat melakukan Ujian",
-        waktu_tersisa: exam.waktu_tersisa,
+        waktu_tersisa: exam.ujian.durasi,
         refresh_count: 3,
         data: exam,
       };

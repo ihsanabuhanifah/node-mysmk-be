@@ -49,6 +49,9 @@ module.exports = {
       waktu_tersisa: {
         type: Sequelize.INTEGER,
       },
+      remidial_count: {
+        type: Sequelize.INTEGER,
+      },
 
      
       exam1: {
