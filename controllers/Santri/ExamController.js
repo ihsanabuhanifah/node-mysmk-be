@@ -4,7 +4,10 @@ const models = require("../../models");
 const UjianController = require("../../models").ujian;
 const { Op, where } = require("sequelize");
 const { RESPONSE_API } = require("../../utils/response");
-const { calculateMinutesDifference } = require("../../utils/format");
+const {
+  calculateMinutesDifference,
+  calculateWaktuSelesai,
+} = require("../../utils/format");
 const NilaiController = require("../../models").nilai;
 const BankSoalController = require("../../models").bank_soal;
 const StudentModel = require("../../models").kelas_student;
@@ -124,14 +127,18 @@ const takeExam = response.requestResponse(async (req, res) => {
   const startTime = new Date(exam.ujian.waktu_mulai);
   const endTime = new Date(exam.ujian.waktu_selesai);
 
-  if (now >= startTime && now <= endTime) {
+  if (
+    (now >= startTime && now <= endTime) ||
+    exam.ujian.tipe_ujian === "open" ||
+    exam.status === "progress"
+  ) {
     if (exam.status === "open") {
       await NilaiController.update(
         {
           refresh_count: 3,
           status: "progress",
           jam_mulai: new Date(),
-          waktu_tersisa: exam.ujian.waktu_tersisa
+          jam_selesai: calculateWaktuSelesai(exam.waktu_tersisa),
         },
         {
           where: {
@@ -141,7 +148,7 @@ const takeExam = response.requestResponse(async (req, res) => {
       );
       return {
         msg: "Selamat melakukan Ujian",
-        waktu_tersisa: exam.ujian.waktu_tersisa,
+        waktu_tersisa: exam.waktu_tersisa,
         refresh_count: 3,
         data: exam,
       };
@@ -151,6 +158,10 @@ const takeExam = response.requestResponse(async (req, res) => {
       await NilaiController.update(
         {
           refresh_count: exam.refresh_count - 1,
+          waktu_tersisa: calculateMinutesDifference(
+            new Date(),
+            exam.jam_selesai
+          ),
         },
         {
           where: {
@@ -160,10 +171,10 @@ const takeExam = response.requestResponse(async (req, res) => {
       );
       return {
         msg: "Selamat melanjutkan Ujian",
-        waktu_tersisa: calculateMinutesDifference(
-          exam.jam_mulai,
-          exam.ujian.waktu_selesai
-        ),
+        waktu_tersisa: calculateMinutesDifference(new Date(), exam.jam_selesai),
+        jam_mulai: exam.jam_mulai,
+        jam_selesai: exam.jam_selesai,
+
         refresh_count: exam.refresh_count - 1,
         data: exam,
       };
