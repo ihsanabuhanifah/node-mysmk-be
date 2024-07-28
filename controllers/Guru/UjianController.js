@@ -150,6 +150,17 @@ const detailUjian = async (req, res) => {
       },
     });
 
+
+    let soal = await BankSoalController.findAll({
+      where: {
+        id: {
+          [Op.in]: JSON.parse(ujian.soal),
+        },
+      },
+    });
+
+    ujian.soal = JSON.stringify(soal)
+
     return res.json({
       status: "Success",
       msg: "Berhasil ditemukan",
@@ -176,10 +187,21 @@ const updateUjian = async (req, res) => {
       },
     });
 
+
+    
+
     if (ujian === null) {
-      return res.status(403).json({
+      return res.status(422).json({
         status: "Fail",
         msg: "ujian tidak Ditemukan",
+      });
+    }
+
+
+    if(ujian.status === 'open') {
+      return res.status(422).json({
+        status: "Fail",
+        msg: "ujian sudah dimulai, tidak bisa memperbaharui",
       });
     }
     if (ujian.teacher_id !== req.teacher_id) {

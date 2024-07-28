@@ -92,12 +92,10 @@ function formatDate(timeStamps) {
 }
 
 function checkQuery(value) {
-
- 
   if (value === undefined) return false;
 
   if (value === "") return false;
-  console.log('mauk aini', value);
+  console.log("mauk aini", value);
   if (value === null) return false;
   return true;
 }
@@ -115,12 +113,16 @@ const calculateMinutesDifference = (startTime, endTime) => {
   return differenceInMinutes;
 };
 
-const calculateWaktuSelesai = (durasi)=> {
+const calculateWaktuSelesai = (durasi) => {
   const now = new Date();
   const futureTime = new Date(now.getTime() + durasi * 60 * 1000);
-  return futureTime
+  return futureTime;
+};
 
-}
-
-
-module.exports = { formatDate, formatHari, checkQuery, calculateMinutesDifference, calculateWaktuSelesai };
+module.exports = {
+  formatDate,
+  formatHari,
+  checkQuery,
+  calculateMinutesDifference,
+  calculateWaktuSelesai,
+};
