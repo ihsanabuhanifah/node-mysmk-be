@@ -209,8 +209,8 @@ const takeExam = response.requestResponse(async (req, res) => {
         refresh_count: exam.refresh_count - 1,
         status_ujian: exam.status,
         jawaban: exam.jawaban,
-
         soal: JSON.stringify(soal),
+
       };
     }
   } else {
@@ -325,6 +325,7 @@ const submitExam = response.requestResponse(async (req, res) => {
         status: "finish",
         remidial_count: 0,
         jawaban: JSON.stringify(jawaban),
+       
       },
       {
         where: {
