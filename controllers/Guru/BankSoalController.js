@@ -1,5 +1,6 @@
 const BankSoalController = require("../../models").bank_soal;
 
+const { Op } = require("sequelize");
 const models = require("../../models");
 const { checkQuery } = require("../../utils/format");
 const createSoal = async (req, res) => {
@@ -34,7 +35,7 @@ const createSoal = async (req, res) => {
 };
 
 const listSoal = async (req, res) => {
-  let = { mapel_id, is_all, keyword, page, pageSize, isExam } = req.query;
+  let = { mapel_id, is_all, keyword, page, pageSize, isExam, materi } = req.query;
 
 
   if(isExam && !!mapel_id === false ){
@@ -51,12 +52,20 @@ const listSoal = async (req, res) => {
     });
   }
 
+  console.log('materi', materi)
+
   try {
     const soals = await BankSoalController.findAndCountAll({
       attributes: ["id", "materi", "soal", "tipe", "jawaban", "point"],
       where: {
         ...(checkQuery(mapel_id) && {
           mapel_id: mapel_id,
+        }),
+
+        ...(checkQuery(materi) && {
+          materi: {
+            [Op.like]: `%${materi}%`
+          }
         }),
 
         ...(parseInt(is_all) === 1 && {
