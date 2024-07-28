@@ -45,6 +45,18 @@ module.exports = {
       jam_selesai: {
         type: Sequelize.DATE,
       },
+      jam_submit: {
+        type: Sequelize.DATE,
+      },
+      jam_progress: {
+        type: Sequelize.DATE,
+      },
+      keterangan: {
+        type: Sequelize.STRING,
+      },
+      upload_file: {
+        type: Sequelize.STRING,
+      },
       
       waktu_tersisa: {
         type: Sequelize.INTEGER,
@@ -52,6 +64,7 @@ module.exports = {
       remidial_count: {
         type: Sequelize.INTEGER,
       },
+      
 
      
       exam1: {

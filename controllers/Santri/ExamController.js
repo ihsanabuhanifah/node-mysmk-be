@@ -104,22 +104,39 @@ const takeExam = response.requestResponse(async (req, res) => {
 
   if (!exam) {
     return {
-      status: 442,
+      statusCode: 422,
       msg: "Ujian tidak ditemukan",
     };
   }
 
   if (exam.status === "finish") {
     return {
-      status: 442,
+      statusCode: 422,
       msg: "Ujian telah berakhir",
     };
   }
 
   if (exam.refresh_count <= 0 && exam.status === "progress") {
     return {
-      status: 442,
+      statusCode: 422,
       msg: "Anda tidak dapat mengambil ujian ini , Silahkan  menghubungi pengawas",
+    };
+  }
+
+  if (exam.waktu_tersisa <= 0 && exam.status === "progress") {
+    await NilaiController.update(
+      {
+        status: "finish",
+      },
+      {
+        where: {
+          id: exam.id,
+        },
+      }
+    );
+    return {
+      statusCode: 422,
+      msg: "Waktu Telah habis, Ujian berakhir",
     };
   }
 
@@ -133,12 +150,24 @@ const takeExam = response.requestResponse(async (req, res) => {
     exam.status === "progress" ||
     exam.remidial_count === 1
   ) {
+    let soal = await JSON.parse(exam.ujian.soal);
+    soal = soal.map((item) => {
+      return {
+        id: item.id,
+        soal: item.soal,
+        tipe: item.tipe,
+        point: item.point,
+        
+      };
+    });
+
     if (exam.status === "open") {
       await NilaiController.update(
         {
           refresh_count: 3,
           status: "progress",
           jam_mulai: new Date(),
+          remidial_count : 0,
           waktu_tersisa: exam.ujian.durasi,
           jam_selesai: calculateWaktuSelesai(exam.waktu_tersisa),
         },
@@ -152,7 +181,9 @@ const takeExam = response.requestResponse(async (req, res) => {
         msg: "Selamat melakukan Ujian",
         waktu_tersisa: exam.ujian.durasi,
         refresh_count: 3,
-        data: exam,
+        status_ujian: "progress",
+        jawaban: [],
+        soal: JSON.stringify(soal),
       };
     }
 
@@ -178,7 +209,9 @@ const takeExam = response.requestResponse(async (req, res) => {
         jam_selesai: exam.jam_selesai,
 
         refresh_count: exam.refresh_count - 1,
-        data: exam,
+        status_ujian: exam.status,
+        jawaban: exam.jawaban,
+        soal: JSON.stringify(soal),
       };
     }
   } else {
@@ -196,4 +229,219 @@ const takeExam = response.requestResponse(async (req, res) => {
   }
 });
 
-module.exports = { getExam, takeExam };
+const submitExam = response.requestResponse(async (req, res) => {
+  const jawaban = req.body.data;
+  const id = req.body.id;
+
+  const exam = await NilaiController.findOne({
+    where: {
+      id: id,
+      student_id: req.student_id,
+    },
+    include: [
+      {
+        model: models.ujian,
+        require: true,
+        as: "ujian",
+        attributes: [
+          "id",
+          "jenis_ujian",
+          "tipe_ujian",
+          "waktu_mulai",
+          "waktu_selesai",
+          "status",
+          "soal",
+          "durasi",
+        ],
+      },
+    ],
+  });
+
+  if (exam.status === "finish") {
+    return {
+      statusCode: 422,
+      msg: "Ujian telah berakhir",
+    };
+  }
+
+  if (exam.status === "open") {
+    return {
+      statusCode: 422,
+      msg: "Ujian belum dimulai",
+    };
+  }
+
+  let soal = await JSON.parse(exam.ujian.soal);
+  soal = soal.map((item) => {
+    return {
+      id: item.id,
+      soal: item.soal,
+      tipe: item.tipe,
+      jawaban: item.jawaban,
+      point: item.point,
+    };
+  });
+
+  let total_point = 0;
+  let point_siswa = 0;
+  let keterangan = "";
+  let nilai = 0;
+  await soal.map((item) => {
+    total_point = total_point + item.point;
+    if (item.tipe !== "ES") {
+      jawaban?.map((jawab) => {
+        if (jawab.id === item.id && item.tipe !== "ES") {
+          if (jawab.jawaban === item.jawaban) {
+            point_siswa = point_siswa + item.point;
+          }
+        }
+      });
+    } else {
+      keterangan = "essay belum diberikan point";
+    }
+  });
+
+  nilai = (point_siswa / total_point) * 100;
+
+  if (!!exam.exam1 === false) {
+    await NilaiController.update(
+      {
+        jam_submit: new Date(),
+        keterangan: keterangan,
+        exam1: nilai,
+        status: "finish",
+        remidial_count: 0,
+        jawaban: JSON.stringify(jawaban),
+      },
+      {
+        where: {
+          id: id,
+        },
+      }
+    );
+
+    return {
+      msg: "Jawaban berhasil tersimpan",
+      nilai: nilai,
+      keterangan: keterangan,
+    };
+  }
+
+  if (!!exam.exam2 === false) {
+    await NilaiController.update(
+      {
+        jam_submit: new Date(),
+        keterangan: keterangan,
+        exam2: nilai,
+        status: "finish",
+        remidial_count: 0,
+        jawaban: JSON.stringify(jawaban),
+      },
+      {
+        where: {
+          id: id,
+        },
+      }
+    );
+
+    return {
+      msg: "Jawaban berhasil tersimpan",
+      nilai: nilai,
+      keterangan: keterangan,
+    };
+  }
+  if (!!exam.exam3 === false) {
+    await NilaiController.update(
+      {
+        jam_submit: new Date(),
+        keterangan: keterangan,
+        exam3: nilai,
+        status: "finish",
+        remidial_count: 0,
+        jawaban: JSON.stringify(jawaban),
+      },
+      {
+        where: {
+          id: id,
+        },
+      }
+    );
+
+    return {
+      msg: "Jawaban berhasil tersimpan",
+      nilai: nilai,
+      keterangan: keterangan,
+    };
+  }
+
+  if (!!exam.exam4 === false) {
+    await NilaiController.update(
+      {
+        jam_submit: new Date(),
+        keterangan: keterangan,
+        exam4: nilai,
+        status: "finish",
+        remidial_count: 0,
+        jawaban: JSON.stringify(jawaban),
+      },
+      {
+        where: {
+          id: id,
+        },
+      }
+    );
+
+    return {
+      msg: "Jawaban berhasil tersimpan",
+      nilai: nilai,
+      keterangan: keterangan,
+    };
+  }
+});
+
+const progressExam = response.requestResponse(async (req, res) => {
+  const jawaban = req.body.data;
+  const id = req.body.id;
+
+  const exam = await NilaiController.findOne({
+    where: {
+      id: id,
+      student_id: req.student_id,
+    },
+  });
+
+  if (exam.status === "open") {
+    return {
+      statusCode: 422,
+      msg: "Ujian belum dimulai",
+    };
+  }
+
+  if (
+    calculateMinutesDifference(new Date(), exam.jam_selesai) < -1 ||
+    exam.status === "finish"
+  ) {
+    return {
+      msg: "Waktu Ujian telah berakhir",
+      statusCode: 422,
+    };
+  }
+
+  await NilaiController.update(
+    {
+      jam_progress: new Date(),
+      jawaban: JSON.stringify(jawaban),
+    },
+    {
+      where: {
+        id: id,
+      },
+    }
+  );
+
+  return {
+    msg: "Progress Ujian tersimpan",
+  };
+});
+
+module.exports = { getExam, takeExam, submitExam, progressExam };

@@ -4,7 +4,9 @@ class RESPONSE_API {
       try {
         const response = await handler(req, res, next);
 
-        if (response.status === 422) {
+        console.log('res', response.statusCode)
+
+        if (response.statusCode === 422) {
           return res.status(422).json({
             status: "Warning",
             response,
