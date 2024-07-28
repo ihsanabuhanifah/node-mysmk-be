@@ -90,16 +90,16 @@ const takeExam = response.requestResponse(async (req, res) => {
           "soal",
           "durasi",
         ],
-        include: [
-          {
-            model: models.mapel,
-            require: true,
-            as: "mapel",
-            attributes: ["id", "nama_mapel"],
-          },
-        ],
       },
     ],
+  });
+
+  let soal = await BankSoalController.findAll({
+    where: {
+      id: {
+        [Op.in]: JSON.parse(exam.ujian.soal),
+      },
+    },
   });
 
   if (!exam) {
@@ -150,14 +150,12 @@ const takeExam = response.requestResponse(async (req, res) => {
     exam.status === "progress" ||
     exam.remidial_count === 1
   ) {
-    let soal = await JSON.parse(exam.ujian.soal);
     soal = soal.map((item) => {
       return {
         id: item.id,
         soal: item.soal,
         tipe: item.tipe,
         point: item.point,
-        
       };
     });
 
@@ -167,7 +165,7 @@ const takeExam = response.requestResponse(async (req, res) => {
           refresh_count: 3,
           status: "progress",
           jam_mulai: new Date(),
-          remidial_count : 0,
+          remidial_count: 0,
           waktu_tersisa: exam.ujian.durasi,
           jam_selesai: calculateWaktuSelesai(exam.waktu_tersisa),
         },
@@ -211,7 +209,8 @@ const takeExam = response.requestResponse(async (req, res) => {
         refresh_count: exam.refresh_count - 1,
         status_ujian: exam.status,
         jawaban: exam.jawaban,
-        soal: JSON.stringify(soal),
+        soal,
+        // soal: JSON.stringify(soal),
       };
     }
   } else {
@@ -257,6 +256,21 @@ const submitExam = response.requestResponse(async (req, res) => {
     ],
   });
 
+  if (!exam) {
+    return {
+      statusCode: 422,
+      msg: "Ujian tidak ditemukan",
+    };
+  }
+
+  let soal = await BankSoalController.findAll({
+    where: {
+      id: {
+        [Op.in]: JSON.parse(exam.ujian.soal),
+      },
+    },
+  });
+
   if (exam.status === "finish") {
     return {
       statusCode: 422,
@@ -271,7 +285,6 @@ const submitExam = response.requestResponse(async (req, res) => {
     };
   }
 
-  let soal = await JSON.parse(exam.ujian.soal);
   soal = soal.map((item) => {
     return {
       id: item.id,
@@ -312,6 +325,7 @@ const submitExam = response.requestResponse(async (req, res) => {
         status: "finish",
         remidial_count: 0,
         jawaban: JSON.stringify(jawaban),
+       
       },
       {
         where: {
@@ -324,6 +338,8 @@ const submitExam = response.requestResponse(async (req, res) => {
       msg: "Jawaban berhasil tersimpan",
       nilai: nilai,
       keterangan: keterangan,
+      total_point,
+      point_siswa,
     };
   }
 
@@ -348,6 +364,8 @@ const submitExam = response.requestResponse(async (req, res) => {
       msg: "Jawaban berhasil tersimpan",
       nilai: nilai,
       keterangan: keterangan,
+      total_point,
+      point_siswa,
     };
   }
   if (!!exam.exam3 === false) {
@@ -371,6 +389,8 @@ const submitExam = response.requestResponse(async (req, res) => {
       msg: "Jawaban berhasil tersimpan",
       nilai: nilai,
       keterangan: keterangan,
+      total_point,
+      point_siswa,
     };
   }
 
@@ -395,6 +415,8 @@ const submitExam = response.requestResponse(async (req, res) => {
       msg: "Jawaban berhasil tersimpan",
       nilai: nilai,
       keterangan: keterangan,
+      total_point,
+      point_siswa,
     };
   }
 });

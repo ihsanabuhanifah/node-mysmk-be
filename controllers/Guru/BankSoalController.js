@@ -34,7 +34,22 @@ const createSoal = async (req, res) => {
 };
 
 const listSoal = async (req, res) => {
-  let = { mapel_id, is_all, keyword, page, pageSize } = req.query;
+  let = { mapel_id, is_all, keyword, page, pageSize, isExam } = req.query;
+
+
+  if(isExam && !!mapel_id === false ){
+    return res.json({
+      status: "Success",
+      msg: "Berhasil ditemukan",
+      page: req.page,
+      pageSize: pageSize,
+      data: {
+        
+          rows : []
+        
+      },
+    });
+  }
 
   try {
     const soals = await BankSoalController.findAndCountAll({
