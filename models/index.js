@@ -22,7 +22,8 @@ if (config?.use_env_variable !== undefined) {
     dialectOptions: config?.dialectOptions,
     define: {
       underscored: true,
-      
+      charset: "utf8mb4",
+      collate: "utf8mb4_unicode_ci",
     },
   });
 } else {
