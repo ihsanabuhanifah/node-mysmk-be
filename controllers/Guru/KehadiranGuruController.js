@@ -44,22 +44,19 @@ async function submitIzin(req, res) {
 
 
 async function submitByAdmin(req, res) {
-  const { status, keterangan, tanggal, id } = req.body;
+  const { status, keterangan, tanggal, values } = req.body;
   let jam = moment().tz("Asia/Jakarta").format("HH:mm:ss");
   try {
-    let tanggal = moment().tz("Asia/Jakarta").format("YYYY-MM-DD");
-    const cek = await KehadiranGuruModel.findOne({
-      where: {
-        tanggal: tanggal,
-        teacher_id: id,
-      },
-    });
+   
 
     await KehadiranGuruModel.update(
       { status, keterangan },
       {
         where: {
-          id: cek.id,
+          tanggal : tanggal,
+          id: {
+            [Op.in]: values, // arrayOfIds adalah array yang berisi ID-ID yang ingin di-update
+          },
         },
       }
     );
@@ -67,7 +64,7 @@ async function submitByAdmin(req, res) {
     return res.json({
       status: "Success",
       msg: "Konfirmasi ketidakhadiran berhasil disimpan",
-      data: cek,  
+     
       jam,
     });
   } catch (err) {

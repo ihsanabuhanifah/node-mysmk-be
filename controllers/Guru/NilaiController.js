@@ -9,6 +9,28 @@ const { RESPONSE_API } = require("../../utils/response");
 
 const response = new RESPONSE_API();
 
+const remidial = response.requestResponse(async (req, res) => {
+  const { payload } = req.body;
+
+  await NilaiController.update(
+    { remidial_count: 1, status: "open" },
+    {
+      where: {
+        teacher_id: req.teacher_id,
+
+        id: {
+          [Op.in]: payload, // arrayOfIds adalah array yang berisi ID-ID yang ingin di-update
+        },
+      },
+    }
+  );
+
+  return {
+    status: "Success",
+    msg: "Daftar remidial berhasil di perbaharui",
+  };
+});
+
 const listPenilaianByTeacher = response.requestResponse(async (req, res) => {
   let = { mapel_id, ujian_id, page, pageSize } = req.query;
 
@@ -56,4 +78,5 @@ const listPenilaianByTeacher = response.requestResponse(async (req, res) => {
 
 module.exports = {
   listPenilaianByTeacher,
+  remidial,
 };

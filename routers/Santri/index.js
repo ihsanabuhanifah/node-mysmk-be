@@ -29,7 +29,7 @@ santri.use(santriAccessMiddleware);
 santri.get('/profile', profile);
 santri.put('/profile/update/:id', validateFields, validateUpdate, updateSiswa);
 santri.get("/exam/list", getExam )
-santri.put("/exam/take/:id", takeExam )
+santri.get("/exam/take/:id", takeExam )
 santri.put("/exam/progress", progressExam)
 santri.put("/exam/submit", submitExam)
 

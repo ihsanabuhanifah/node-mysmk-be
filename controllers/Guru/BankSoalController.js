@@ -14,7 +14,7 @@ const createSoal = async (req, res) => {
         try {
           item.soal = JSON.stringify(item.soal);
           item.teacher_id = req.teacher_id
-          await BankSoalController.create(item);
+          await BankSoalController.create(item)
           success = success + 1;
         } catch {
           gagal = gagal + 1;
@@ -52,7 +52,7 @@ const listSoal = async (req, res) => {
     });
   }
 
-  console.log('materi', materi)
+ 
 
   try {
     const soals = await BankSoalController.findAndCountAll({
