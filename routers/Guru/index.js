@@ -224,4 +224,8 @@ guru.get("/ujian/detail/:id", detailUjian);
 guru.put("/ujian/update/:id", updateUjian);
 guru.delete("/ujian/delete/:id", deleteUjian);
 
+//tempat_pkl
+
+
+
 module.exports = guru;
