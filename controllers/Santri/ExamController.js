@@ -22,6 +22,9 @@ const getExam = response.requestResponse(async (req, res) => {
     where: {
       student_id: req.student_id,
     },
+    attributes : {
+      exclude : 'jawaban'
+    },
     include: [
       {
         model: models.teacher,
@@ -40,6 +43,7 @@ const getExam = response.requestResponse(async (req, res) => {
           "waktu_mulai",
           "waktu_selesai",
           "status",
+          "durasi"
         ],
         include: [
           {
@@ -102,43 +106,43 @@ const takeExam = response.requestResponse(async (req, res) => {
     },
   });
 
-  if (!exam) {
-    return {
-      statusCode: 422,
-      msg: "Ujian tidak ditemukan",
-    };
-  }
+  // if (!exam) {
+  //   return {
+  //     statusCode: 422,
+  //     msg: "Ujian tidak ditemukan",
+  //   };
+  // }
 
-  if (exam.status === "finish") {
-    return {
-      statusCode: 422,
-      msg: "Ujian telah berakhir",
-    };
-  }
+  // if (exam.status === "finish") {
+  //   return {
+  //     statusCode: 422,
+  //     msg: "Ujian telah berakhir",
+  //   };
+  // }
 
-  if (exam.refresh_count <= 0 && exam.status === "progress") {
-    return {
-      statusCode: 422,
-      msg: "Anda tidak dapat mengambil ujian ini , Silahkan  menghubungi pengawas",
-    };
-  }
+  // if (exam.refresh_count <= 0 && exam.status === "progress") {
+  //   return {
+  //     statusCode: 422,
+  //     msg: "Anda tidak dapat mengambil ujian ini , Silahkan  menghubungi pengawas",
+  //   };
+  // }
 
-  if (exam.waktu_tersisa <= 0 && exam.status === "progress") {
-    await NilaiController.update(
-      {
-        status: "finish",
-      },
-      {
-        where: {
-          id: exam.id,
-        },
-      }
-    );
-    return {
-      statusCode: 422,
-      msg: "Waktu Telah habis, Ujian berakhir",
-    };
-  }
+  // if (exam.waktu_tersisa <= 0 && exam.status === "progress") {
+  //   await NilaiController.update(
+  //     {
+  //       status: "finish",
+  //     },
+  //     {
+  //       where: {
+  //         id: exam.id,
+  //       },
+  //     }
+  //   );
+  //   return {
+  //     statusCode: 422,
+  //     msg: "Waktu Telah habis, Ujian berakhir",
+  //   };
+  // }
 
   const now = new Date();
   const startTime = new Date(exam.ujian.waktu_mulai);
@@ -210,7 +214,6 @@ const takeExam = response.requestResponse(async (req, res) => {
         status_ujian: exam.status,
         jawaban: exam.jawaban,
         soal: JSON.stringify(soal),
-
       };
     }
   } else {
@@ -231,6 +234,7 @@ const takeExam = response.requestResponse(async (req, res) => {
 const submitExam = response.requestResponse(async (req, res) => {
   const jawaban = req.body.data;
   const id = req.body.id;
+
 
   const exam = await NilaiController.findOne({
     where: {
@@ -316,40 +320,22 @@ const submitExam = response.requestResponse(async (req, res) => {
 
   nilai = (point_siswa / total_point) * 100;
 
+  let exam_result = [];
+  if (!!exam.exam === true) {
+    exam_result = JSON.parse(exam.exam);
+    exam_result = [...exam_result, nilai];
+  } else {
+    exam_result = [nilai];
+  }
+
   if (!!exam.exam1 === false) {
     await NilaiController.update(
       {
         jam_submit: new Date(),
         keterangan: keterangan,
-        exam1: nilai,
+        exam: JSON.stringify(exam_result),
         status: "finish",
-        remidial_count: 0,
-        jawaban: JSON.stringify(jawaban),
-       
-      },
-      {
-        where: {
-          id: id,
-        },
-      }
-    );
-
-    return {
-      msg: "Jawaban berhasil tersimpan",
-      nilai: nilai,
-      keterangan: keterangan,
-      total_point,
-      point_siswa,
-    };
-  }
-
-  if (!!exam.exam2 === false) {
-    await NilaiController.update(
-      {
-        jam_submit: new Date(),
-        keterangan: keterangan,
-        exam2: nilai,
-        status: "finish",
+        
         remidial_count: 0,
         jawaban: JSON.stringify(jawaban),
       },
@@ -363,57 +349,7 @@ const submitExam = response.requestResponse(async (req, res) => {
     return {
       msg: "Jawaban berhasil tersimpan",
       nilai: nilai,
-      keterangan: keterangan,
-      total_point,
-      point_siswa,
-    };
-  }
-  if (!!exam.exam3 === false) {
-    await NilaiController.update(
-      {
-        jam_submit: new Date(),
-        keterangan: keterangan,
-        exam3: nilai,
-        status: "finish",
-        remidial_count: 0,
-        jawaban: JSON.stringify(jawaban),
-      },
-      {
-        where: {
-          id: id,
-        },
-      }
-    );
-
-    return {
-      msg: "Jawaban berhasil tersimpan",
-      nilai: nilai,
-      keterangan: keterangan,
-      total_point,
-      point_siswa,
-    };
-  }
-
-  if (!!exam.exam4 === false) {
-    await NilaiController.update(
-      {
-        jam_submit: new Date(),
-        keterangan: keterangan,
-        exam4: nilai,
-        status: "finish",
-        remidial_count: 0,
-        jawaban: JSON.stringify(jawaban),
-      },
-      {
-        where: {
-          id: id,
-        },
-      }
-    );
-
-    return {
-      msg: "Jawaban berhasil tersimpan",
-      nilai: nilai,
+      
       keterangan: keterangan,
       total_point,
       point_siswa,
