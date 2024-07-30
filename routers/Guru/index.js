@@ -248,4 +248,8 @@ guru.get("/nilai/list/teacher", listPenilaianByTeacher);
 guru.put("/nilai/remidial/teacher", remidial);
 
 
+//tempat_pkl
+
+
+
 module.exports = guru;
