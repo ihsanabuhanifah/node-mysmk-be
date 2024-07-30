@@ -16,3 +16,7 @@ async function createTempatPkl(req, res) {
     console.log(err);
   }
 }
+
+module.exports = {
+    createTempatPkl
+}

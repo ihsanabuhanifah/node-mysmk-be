@@ -74,6 +74,13 @@ const {
 } = require("../../controllers/Guru/LaporanController");
 //absensi
 
+
+//Tempat Pkl
+
+const {
+  createTempatPkl
+} = require("../../controllers/Guru/TempatPklController")
+
 //jadwal
 
 const {
@@ -110,6 +117,8 @@ const {
   deleteUjian,
 } = require("../../controllers/Guru/UjianController");
 const { createKehadiran, listKehadiran, submitDatang, submitPulang, submitIzin } = require("../../controllers/Guru/KehadiranGuruController");
+
+
 
 guru.use(guruAccessMiddleware);
 
@@ -225,7 +234,7 @@ guru.put("/ujian/update/:id", updateUjian);
 guru.delete("/ujian/delete/:id", deleteUjian);
 
 //tempat_pkl
-
+guru.post("/tempat-pkl/create", createTempatPkl)
 
 
 module.exports = guru;
