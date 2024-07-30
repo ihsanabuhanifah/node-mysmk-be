@@ -32,6 +32,7 @@ module.exports = (sequelize, DataTypes) => {
       image: DataTypes.STRING,
       email_verified: DataTypes.BOOLEAN,
       status: DataTypes.STRING,
+      no_hp: DataTypes.STRING,
       notif:DataTypes.TEXT,
     },
     {
