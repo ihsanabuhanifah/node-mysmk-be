@@ -8,6 +8,7 @@ const rolesRouter = require("./rolesRouter");
 const importRouter = require("./importRouter");
 const guruRouter = require("./Guru");
 const waliRouter = require("./Wali");
+const santriRouter = require('./Santri');
 const daftarRouter = require("./Daftar");
 const { hari, tanggal, jam } = require("../utils/tanggal");
 
@@ -28,6 +29,7 @@ router.use("/users", userRouter);
 router.use("/info", logRouter);
 router.use("/identitas", identitasRouter);
 router.use("/admin/roles", rolesRouter);
+router.use("/santri", santriRouter);
 router.use("/wali", waliRouter),
   router.use("/list", daftarRouter),
   router.use("/guru", guruRouter),

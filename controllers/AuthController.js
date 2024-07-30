@@ -1,15 +1,18 @@
 const userModel = require("../models").user;
+const models = require("../models");
 const userRoleModel = require("../models").user_role;
+
 const RolesModel = require("../models").role;
 const KelasStudentModel = require("../models").kelas_student;
 const ParentModel = require("../models").parent;
 const TeacherModel = require("../models").teacher;
+const StudentModel = require("../models").student;
 const TokenModel = require("../models").token_reset_password;
 
 const { sequelize } = require("../models");
 const bcrypt = require("bcryptjs");
 const JWT = require("jsonwebtoken");
-const { OAuth2Client } = require("google-auth-library");
+const { OAuth2Client, auth } = require("google-auth-library");
 const { Op, where } = require("sequelize");
 const { QueryTypes } = require("sequelize");
 generator = require("generate-password");
@@ -60,6 +63,9 @@ async function login(req, res) {
     let parent;
     let KelasStudent;
     let guru;
+    let siswa;
+    let allRole = [];
+
     if (loginAs === 8) {
       parent = await ParentModel.findOne({
         attributes: ["id", "nama_wali", "user_id", "student_id", "hubungan"],
@@ -68,7 +74,12 @@ async function login(req, res) {
         },
       });
     } else if (loginAs === 9) {
-      console.log("ok");
+      siswa = await StudentModel.findOne({
+        attributes: ["id"],
+        where: {
+          user_id: user.id,
+        },
+      });
     } else {
       guru = await TeacherModel.findOne({
         attributes: ["id"],
@@ -76,6 +87,28 @@ async function login(req, res) {
           user_id: user.id,
         },
       });
+
+      allRole = await userRoleModel.findAll({
+        where: {
+          [Op.and]: [{ user_id: user.id }],
+        },
+
+        include: [
+          {
+            model: models.role,
+            require: true,
+            as: "role",
+          },
+        ],
+      });
+
+      const mapRole = allRole.map((item) => {
+        return item.role.role_name;
+      });
+
+      allRole = mapRole;
+
+      console.log("allRole", user);
     }
 
     if (parent !== null && parent !== undefined) {
@@ -100,7 +133,9 @@ async function login(req, res) {
         role: roleName.role_name,
         roleId: loginAs,
         StudentId: parent?.student_id,
+        student_id: siswa?.id,
         teacher_id: guru?.id,
+        allRole: allRole,
         semesterAktif:
           parent?.student_id !== undefined ? KelasStudent[0]?.semester : "",
         tahunAjaranAktif:
@@ -152,7 +187,7 @@ async function register(req, res) {
   }
   payload.password = await bcrypt.hashSync(req.body.password, 10);
 
-  console.log(payload)
+  console.log(payload);
   try {
     await userModel.create(payload);
 
@@ -220,31 +255,19 @@ async function authme(req, res) {
   let email = req.email;
 
   try {
-    const user = await userModel.findOne({
-      where: {
-        email: email,
-      },
-    });
-    if (!user) {
-      return res.status(404).json({
-        status: "fail",
-        msg: "Email tidak ditemukan",
-      });
-    }
-
-   
-
     const token = JWT.sign(
       {
-        email: user.email,
-        name: user.name,
-        id: user.id,
-        role: user.role,
-        roleId: user.Role_id,
+        email: req.email,
+        name: req.name,
+        id: req.id,
+        role: req.role,
+        roleId: req.Role_id,
         StudentId: req?.StudentId,
+        student_id: req.student_id,
         teacher_id: req?.teacher_id,
         semesterAktif: req?.semesterAktif,
         tahunAjaranAktif: req?.tahunAjaranAktif,
+        allRole: req.allRole,
       },
       process.env.JWT_SECRET_ACCESS_TOKEN,
       {
@@ -252,12 +275,17 @@ async function authme(req, res) {
       }
     );
 
-   
     if (req.role === "Wali Siswa") {
       return res.status(200).json({
         status: "Success",
         msg: "Berhasil Wali Santri Authme",
-        user: user,
+        user: {
+          email: req.email,
+          name: req.name,
+          id: req.id,
+          role: req.role,
+          roleId: req.Role_id,
+        },
         role: req.role,
         token: token,
         semesterAktif: req?.semesterAktif,
@@ -267,7 +295,13 @@ async function authme(req, res) {
     return res.status(200).json({
       status: "Success",
       msg: "Berhasil Authme",
-      user: user,
+      user: {
+        email: req.email,
+        name: req.name,
+        id: req.id,
+        role: req.role,
+        roleId: req.Role_id,
+      },
       role: req.role,
       token: token,
     });
@@ -452,8 +486,6 @@ async function forgotPassword(req, res) {
     "lupa_password",
     context
   );
-
-  
 
   if (mail === "error") {
     return res.status(422).json({

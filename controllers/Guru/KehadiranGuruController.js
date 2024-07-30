@@ -42,6 +42,40 @@ async function submitIzin(req, res) {
   }
 }
 
+
+async function submitByAdmin(req, res) {
+  const { status, keterangan, tanggal, values } = req.body;
+  let jam = moment().tz("Asia/Jakarta").format("HH:mm:ss");
+  try {
+   
+
+    await KehadiranGuruModel.update(
+      { status, keterangan },
+      {
+        where: {
+          tanggal : tanggal,
+          id: {
+            [Op.in]: values, // arrayOfIds adalah array yang berisi ID-ID yang ingin di-update
+          },
+        },
+      }
+    );
+
+    return res.json({
+      status: "Success",
+      msg: "Konfirmasi ketidakhadiran berhasil disimpan",
+     
+      jam,
+    });
+  } catch (err) {
+    console.log("err", err);
+    return res.status(403).json({
+      status: "Fail",
+      msg: "Terjadi Kesalahan",
+    });
+  }
+}
+
 async function submitDatang(req, res) {
   let jam = moment().tz("Asia/Jakarta").format("HH:mm:ss");
   let tanggal = moment().tz("Asia/Jakarta").format("YYYY-MM-DD");
@@ -210,4 +244,4 @@ async function createKehadiran(req, res) {
   }
 }
 
-module.exports = { listKehadiran, createKehadiran, submitDatang, submitPulang, submitIzin };
+module.exports = { listKehadiran, createKehadiran, submitDatang, submitPulang, submitIzin, submitByAdmin };

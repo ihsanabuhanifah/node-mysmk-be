@@ -1,5 +1,6 @@
 const parentModel = require("../../models").parent;
 const models = require("../../models");
+
 const profile = async (req, res) => {
   try {
     const parent = await parentModel.findOne({
@@ -44,6 +45,7 @@ const profile = async (req, res) => {
       msg: "Terjadi Kesalahan",
     });
   }
+
   res.json({
     status: "ok",
   });

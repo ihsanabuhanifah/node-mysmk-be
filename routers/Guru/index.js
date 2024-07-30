@@ -82,7 +82,11 @@ const {
   scheduleCek,
 } = require("../../controllers/Admin/jadwalController");
 
-const { listSiswa, deleteSiswaKelas, createSiswaKelas } = require("../../controllers/Guru/SiswaController");
+const {
+  listSiswa,
+  deleteSiswaKelas,
+  createSiswaKelas,
+} = require("../../controllers/Guru/SiswaController");
 const {
   listHalaqohGroup,
 } = require("../../controllers/Daftar/indexController");
@@ -108,17 +112,29 @@ const {
   detailUjian,
   updateUjian,
   deleteUjian,
+  createPenilaian,
 } = require("../../controllers/Guru/UjianController");
-const { createKehadiran, listKehadiran, submitDatang, submitPulang, submitIzin } = require("../../controllers/Guru/KehadiranGuruController");
+const {
+  createKehadiran,
+  listKehadiran,
+  submitDatang,
+  submitPulang,
+  submitIzin,
+  submitByAdmin,
+} = require("../../controllers/Guru/KehadiranGuruController");
+const adminAccessMiddleware = require("../../middleware/adminAccessMiddleware");
+const { listPenilaianByTeacher, remidial } = require("../../controllers/Guru/NilaiController");
+
 
 guru.use(guruAccessMiddleware);
 
 //absensi kehadairan
-guru.post("/create/kehadiran", createKehadiran)
-guru.get("/list/kehadiran", listKehadiran)
-guru.put("/submit-datang/kehadiran", submitDatang)
-guru.put("/submit-pulang/kehadiran", submitPulang)
-guru.put("/submit-izin/kehadiran", submitIzin)
+guru.post("/create/kehadiran", createKehadiran);
+guru.get("/list/kehadiran", listKehadiran);
+guru.put("/submit-datang/kehadiran", submitDatang);
+guru.put("/submit-pulang/kehadiran", submitPulang);
+guru.put("/submit-izin/kehadiran", submitIzin);
+guru.put("/submit-by-Admin/kehadiran", adminAccessMiddleware, submitByAdmin);
 
 //role
 
@@ -194,7 +210,7 @@ guru.get("/laporan/guru-piket/notifikasi", notifikasiPiket);
 
 guru.get("/siswa/list", listSiswa);
 guru.post("/siswa/kelas/create", createSiswaKelas);
-guru.delete("/siswa/kelas/delete/:id", deleteSiswaKelas)
+guru.delete("/siswa/kelas/delete/:id", deleteSiswaKelas);
 
 //list
 
@@ -223,6 +239,14 @@ guru.get("/ujian/list", listUjian);
 guru.get("/ujian/detail/:id", detailUjian);
 guru.put("/ujian/update/:id", updateUjian);
 guru.delete("/ujian/delete/:id", deleteUjian);
+guru.post("/nilai/create", createPenilaian)
+
+
+//nilai
+
+guru.get("/nilai/list/teacher", listPenilaianByTeacher);
+guru.put("/nilai/remidial/teacher", remidial);
+
 
 //tempat_pkl
 
