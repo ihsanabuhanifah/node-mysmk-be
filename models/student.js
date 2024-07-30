@@ -11,10 +11,14 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       student.belongsTo(models.user),
-      student.hasMany(models.parent, {
+        student.hasMany(models.parent, {
           as: "parent",
           foreignKey: "student_id",
         });
+      student.hasMany(models.tempat_pkl, {
+        as: "tempat_pkl",
+        foreignKey: "student_id",
+      });
       student.hasMany(models.kelas_student, {
         as: "kelas_student",
         foreignKey: "student_id",
@@ -27,7 +31,7 @@ module.exports = (sequelize, DataTypes) => {
         as: "absensi_halaqoh",
         foreignKey: "student_id",
       });
-      
+
       student.hasMany(models.pelanggaran_siswa, {
         as: "pelanggaran",
         foreignKey: "student_id",
