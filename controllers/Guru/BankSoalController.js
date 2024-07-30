@@ -1,5 +1,6 @@
 const BankSoalController = require("../../models").bank_soal;
 
+const { Op } = require("sequelize");
 const models = require("../../models");
 const { checkQuery } = require("../../utils/format");
 const createSoal = async (req, res) => {
@@ -13,7 +14,7 @@ const createSoal = async (req, res) => {
         try {
           item.soal = JSON.stringify(item.soal);
           item.teacher_id = req.teacher_id
-          await BankSoalController.create(item);
+          await BankSoalController.create(item)
           success = success + 1;
         } catch {
           gagal = gagal + 1;
@@ -34,7 +35,24 @@ const createSoal = async (req, res) => {
 };
 
 const listSoal = async (req, res) => {
-  let = { mapel_id, is_all, keyword, page, pageSize } = req.query;
+  let = { mapel_id, is_all, keyword, page, pageSize, isExam, materi } = req.query;
+
+
+  if(isExam && !!mapel_id === false ){
+    return res.json({
+      status: "Success",
+      msg: "Berhasil ditemukan",
+      page: req.page,
+      pageSize: pageSize,
+      data: {
+        
+          rows : []
+        
+      },
+    });
+  }
+
+ 
 
   try {
     const soals = await BankSoalController.findAndCountAll({
@@ -42,6 +60,12 @@ const listSoal = async (req, res) => {
       where: {
         ...(checkQuery(mapel_id) && {
           mapel_id: mapel_id,
+        }),
+
+        ...(checkQuery(materi) && {
+          materi: {
+            [Op.like]: `%${materi}%`
+          }
         }),
 
         ...(parseInt(is_all) === 1 && {

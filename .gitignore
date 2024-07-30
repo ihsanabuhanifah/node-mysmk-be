@@ -2,10 +2,12 @@
 
 /storage/*.key
 /vendor
-/public/data/uploads
+/public
 
 .env
+.env.prod
 .env.backup
+.DS_Store
 
 docker-compose.override.yml
 Homestead.json

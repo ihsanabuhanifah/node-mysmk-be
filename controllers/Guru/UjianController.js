@@ -1,44 +1,78 @@
 const UjianController = require("../../models").ujian;
-const { Op } = require("sequelize");
-
+const { Op, where } = require("sequelize");
+const NilaiController = require("../../models").nilai;
 const BankSoalController = require("../../models").bank_soal;
-const StudentModel = require("../../models").student;
+const StudentModel = require("../../models").kelas_student;
 const models = require("../../models");
-const { checkQuery } = require("../../utils/format");
+const {
+  checkQuery,
+  calculateMinutesDifference,
+} = require("../../utils/format");
+
+const createPenilaian = async (req, res) => {
+  try {
+   
+
+    const response = await UjianController.update(
+      {
+        status: "open",
+      },
+      {
+        where: {
+          id: req.body.id,
+        },
+      }
+    );
+
+    console.log("res", response);
+    const student = await StudentModel.findAll({
+      where: {
+        kelas_id: req.body.kelas_id,
+      },
+    });
+
+    await Promise.all(
+      student.map(async (data) => {
+        await NilaiController.create({
+          ujian_id: req.body.id,
+          teacher_id: req.teacher_id,
+          student_id: data.id,
+          waktu_tersisa: req.body.durasi,
+
+          status: "open",
+        });
+      })
+    );
+
+    console.log("pay", student);
+
+    return res.status(201).json({
+      status: "Success",
+      msg: "Berhasil membuat Penilaian Ujian",
+
+      // msg: `Berhasil upload ${success} soal dari ${total} soal`,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(403).json({
+      status: "Fail",
+      msg: "Terjadi Kesalahan",
+    });
+  }
+};
+
 const createUjian = async (req, res) => {
   try {
-    const {
-      jenis_ujian,
-      mapel_id,
-      kelas_id,
-      teacher_id,
-      soal,
-      waktu_mulai,
-      waktu_selesai,
-      status,
-      student_access,
-    } = req.body;
+    const payload = req.body.payload[0];
+
     await UjianController.create({
-      jenis_ujian,
-      mapel_id,
-      kelas_id,
-      teacher_id,
-      soal: JSON.stringify(soal),
-      waktu_mulai,
-      waktu_selesai,
-      status,
-      student_access: JSON.stringify(student_access),
+      ...payload,
+      status: "draft",
+      soal: JSON.stringify(payload.soal),
+      student_access: JSON.stringify(payload.student_access),
+      teacher_id: req.teacher_id,
     });
-    // await Promise.all(
-    //   payload?.map(async (item) => {
-    //     try {
-    //       await BankSoalController.create(item);
-    //       success = success + 1;
-    //     } catch {
-    //       gagal = gagal + 1;
-    //     }
-    //   })
-    // );
+
     return res.status(201).json({
       status: "Success",
       msg: "Berhasil membuat soal ujian",
@@ -116,31 +150,21 @@ const detailUjian = async (req, res) => {
       },
     });
 
-    const soalUjian = JSON.parse(ujian.soal);
-    const siswaAccess = JSON.parse(ujian.student_access);
-    const soal = await BankSoalController.findAll({
-      attributes: {
-        exclude: ["createdAt", "updatedAt"],
-      },
+
+    let soal = await BankSoalController.findAll({
       where: {
         id: {
-          [Op.in]: soalUjian,
+          [Op.in]: JSON.parse(ujian.soal),
         },
       },
     });
-    const siswa = await StudentModel.findAll({
-      attributes: ["id", "nama_siswa"],
-      where: {
-        id: {
-          [Op.in]: siswaAccess,
-        },
-      },
-    });
+
+    ujian.soal = JSON.stringify(soal)
+
     return res.json({
       status: "Success",
       msg: "Berhasil ditemukan",
-      student_access: siswa,
-      soal_ujian: soal,
+
       detail_ujian: ujian,
     });
   } catch (err) {
@@ -156,28 +180,28 @@ const updateUjian = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const {
-      jenis_ujian,
-      mapel_id,
-      teacher_id,
-      soal,
-      waktu_mulai,
-      waktu_selesai,
-      status,
-      student_access,
-      kelas_id,
-    } = req.body;
-
+    const payload = req.body.payload[0];
     const ujian = await UjianController.findOne({
       where: {
         id: id,
       },
     });
 
+
+    
+
     if (ujian === null) {
-      return res.status(403).json({
+      return res.status(422).json({
         status: "Fail",
         msg: "ujian tidak Ditemukan",
+      });
+    }
+
+
+    if(ujian.status === 'open') {
+      return res.status(422).json({
+        status: "Fail",
+        msg: "ujian sudah dimulai, tidak bisa memperbaharui",
       });
     }
     if (ujian.teacher_id !== req.teacher_id) {
@@ -187,17 +211,15 @@ const updateUjian = async (req, res) => {
       });
     }
 
+    console.log("pua", payload);
+
     await UjianController.update(
       {
-        jenis_ujian,
-        mapel_id,
-        kelas_id,
-        teacher_id,
-        soal: JSON.stringify(soal),
-        waktu_mulai,
-        waktu_selesai,
-        status,
-        student_access: JSON.stringify(student_access),
+        ...payload,
+
+        soal: JSON.stringify(payload.soal),
+        student_access: JSON.stringify(payload.student_access),
+        teacher_id: req.teacher_id,
       },
       {
         where: {
@@ -241,15 +263,14 @@ const deleteUjian = async (req, res) => {
       });
     }
     await UjianController.destroy({
-      where : {
-        id : ujian.id
-      }
-    })
+      where: {
+        id: ujian.id,
+      },
+    });
 
     return res.status(200).json({
       status: "Success",
       msg: `Delete Success`,
-     
     });
   } catch (err) {
     console.log(err);
@@ -260,10 +281,14 @@ const deleteUjian = async (req, res) => {
   }
 };
 
+
+
+
 module.exports = {
   createUjian,
   listUjian,
   detailUjian,
   updateUjian,
   deleteUjian,
+  createPenilaian,
 };

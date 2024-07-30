@@ -92,14 +92,37 @@ function formatDate(timeStamps) {
 }
 
 function checkQuery(value) {
-
- 
   if (value === undefined) return false;
 
   if (value === "") return false;
-  console.log('mauk aini', value);
+  console.log("mauk aini", value);
   if (value === null) return false;
   return true;
 }
 
-module.exports = { formatDate, formatHari, checkQuery };
+const calculateMinutesDifference = (startTime, endTime) => {
+  const start = new Date(startTime);
+  const end = new Date(endTime);
+
+  // Hitung perbedaan dalam milidetik
+  const differenceInMilliseconds = end - start;
+
+  // Konversi milidetik ke menit
+  const differenceInMinutes = Math.floor(differenceInMilliseconds / 1000 / 60);
+
+  return differenceInMinutes;
+};
+
+const calculateWaktuSelesai = (durasi) => {
+  const now = new Date();
+  const futureTime = new Date(now.getTime() + durasi * 60 * 1000);
+  return futureTime;
+};
+
+module.exports = {
+  formatDate,
+  formatHari,
+  checkQuery,
+  calculateMinutesDifference,
+  calculateWaktuSelesai,
+};

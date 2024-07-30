@@ -12,6 +12,11 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
 
+      ujian.hasMany(models.nilai, {
+        as: "nilai",
+        foreignKey: "ujian_id",
+      });
+
       ujian.belongsTo(models.kelas, {
         as: "kelas",
         foreignKey: "kelas_id",
@@ -28,6 +33,7 @@ module.exports = (sequelize, DataTypes) => {
   };
   ujian.init({
     jenis_ujian: DataTypes.STRING,
+    tipe_ujian: DataTypes.STRING,
     mapel_id: DataTypes.INTEGER,
     kelas_id: DataTypes.INTEGER,
     teacher_id: DataTypes.INTEGER,
@@ -36,6 +42,7 @@ module.exports = (sequelize, DataTypes) => {
     waktu_selesai: DataTypes.DATE,
     status: DataTypes.STRING,
     student_access: DataTypes.TEXT,
+    durasi:DataTypes.INTEGER,
     
   }, {
     sequelize,
