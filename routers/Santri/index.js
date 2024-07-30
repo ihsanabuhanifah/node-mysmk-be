@@ -27,7 +27,7 @@ const validateUpdate = [
 
 santri.use(santriAccessMiddleware);
 santri.get('/profile', profile);
-santri.put('/profile/update/:id', validateFields, validateUpdate, updateSiswa);
+santri.put('/profile/update', validateFields, validateUpdate, updateSiswa);
 santri.get("/exam/list", getExam )
 santri.put("/exam/take/:id", takeExam )
 
