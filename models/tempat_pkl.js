@@ -16,7 +16,7 @@ module.exports = (sequelize, DataTypes) => {
       });
       tempat_pkl.belongsTo(models.teacher, {
         as: "teacher",
-        foreignKey: "created_by",
+        foreignKey: "crated_by",
       });
     }
   }
@@ -37,8 +37,8 @@ module.exports = (sequelize, DataTypes) => {
       student_id: DataTypes.INTEGER,
       created_at : DataTypes.DATE,
       updated_at : DataTypes.DATE,
-      long : DataTypes.DECIMAL(10, 2),
-      latitude : DataTypes.DECIMAL(10, 2)
+      long : DataTypes.DECIMAL(10, 8),
+      latitude : DataTypes.DECIMAL(10, 8)
     },
     {
       sequelize,
