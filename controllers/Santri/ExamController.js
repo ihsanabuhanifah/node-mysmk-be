@@ -12,6 +12,7 @@ const NilaiController = require("../../models").nilai;
 const BankSoalController = require("../../models").bank_soal;
 const StudentModel = require("../../models").kelas_student;
 
+
 const response = new RESPONSE_API();
 
 const getExam = response.requestResponse(async (req, res) => {
@@ -106,47 +107,47 @@ const takeExam = response.requestResponse(async (req, res) => {
     },
   });
 
-  if (!exam) {
-    return {
-      statusCode: 422,
-      msg: "Ujian tidak ditemukan",
-    };
-  }
+  // if (!exam) {
+  //   return {
+  //     statusCode: 422,
+  //     msg: "Ujian tidak ditemukan",
+  //   };
+  // }
 
-  if (exam.status === "finish") {
-    return {
-      statusCode: 422,
-      msg: "Ujian telah berakhir",
-    };
-  }
+  // if (exam.status === "finish") {
+  //   return {
+  //     statusCode: 422,
+  //     msg: "Ujian telah berakhir",
+  //   };
+  // }
 
-  if (
-    exam.refresh_count <= 0 &&
-    exam.status === "progress" &&
-    exam.ujian.tipe_ujian === "closed"
-  ) {
-    return {
-      statusCode: 422,
-      msg: "Anda tidak dapat mengambil ujian ini , Silahkan  menghubungi pengawas",
-    };
-  }
+  // if (
+  //   exam.refresh_count <= 0 &&
+  //   exam.status === "progress" &&
+  //   exam.ujian.tipe_ujian === "closed"
+  // ) {
+  //   return {
+  //     statusCode: 422,
+  //     msg: "Anda tidak dapat mengambil ujian ini , Silahkan  menghubungi pengawas",
+  //   };
+  // }
 
-  if (exam.waktu_tersisa <= 0 && exam.status === "progress") {
-    await NilaiController.update(
-      {
-        status: "finish",
-      },
-      {
-        where: {
-          id: exam.id,
-        },
-      }
-    );
-    return {
-      statusCode: 422,
-      msg: "Waktu Telah habis, Ujian berakhir",
-    };
-  }
+  // if (exam.waktu_tersisa <= 0 && exam.status === "progress") {
+  //   await NilaiController.update(
+  //     {
+  //       status: "finish",
+  //     },
+  //     {
+  //       where: {
+  //         id: exam.id,
+  //       },
+  //     }
+  //   );
+  //   return {
+  //     statusCode: 422,
+  //     msg: "Waktu Telah habis, Ujian berakhir",
+  //   };
+  // }
 
   const now = new Date();
   const startTime = new Date(exam.ujian.waktu_mulai);
@@ -186,11 +187,12 @@ const takeExam = response.requestResponse(async (req, res) => {
       );
       return {
         msg: "Selamat melakukan Ujian",
-        waktu_tersisa: exam.ujian.durasi,
+        waktu_tersisa: Number(exam.ujian.durasi) * 60,
         refresh_count: 3,
         status_ujian: "progress",
         jawaban: JSON.stringify([]),
         soal: JSON.stringify(soal),
+        tipe_ujian: exam.ujian.tipe_ujian,
       };
     }
 
@@ -198,10 +200,8 @@ const takeExam = response.requestResponse(async (req, res) => {
       await NilaiController.update(
         {
           refresh_count: exam.refresh_count - 1,
-          waktu_tersisa: calculateMinutesDifference(
-            new Date(),
-            exam.jam_selesai
-          ),
+          waktu_tersisa:
+            calculateMinutesDifference(new Date(), exam.jam_selesai) * 60,
         },
         {
           where: {
@@ -211,13 +211,15 @@ const takeExam = response.requestResponse(async (req, res) => {
       );
       return {
         msg: "Selamat melanjutkan Ujian",
-        waktu_tersisa: calculateMinutesDifference(new Date(), exam.jam_selesai),
+        waktu_tersisa:
+          calculateMinutesDifference(new Date(), exam.jam_selesai) * 60,
         jam_mulai: exam.jam_mulai,
         jam_selesai: exam.jam_selesai,
         refresh_count: exam.refresh_count - 1,
         status_ujian: exam.status,
         jawaban: exam.jawaban,
         soal: JSON.stringify(soal),
+        tipe_ujian: exam.ujian.tipe_ujian,
       };
     }
   } else {
@@ -405,5 +407,6 @@ const progressExam = response.requestResponse(async (req, res) => {
     msg: "Progress Ujian tersimpan",
   };
 });
+
 
 module.exports = { getExam, takeExam, submitExam, progressExam };

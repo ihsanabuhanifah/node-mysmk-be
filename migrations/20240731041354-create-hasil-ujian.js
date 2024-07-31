@@ -38,25 +38,7 @@ module.exports = {
         },
       },
 
-      presentasi_tugas: {
-        type: Sequelize.INTEGER,
-      },
-      presentasi_harian: {
-        type: Sequelize.INTEGER,
-      },
-      presentasi_pts : {
-        type: Sequelize.INTEGER,
-      },
-      presentasi_pas : {
-        type: Sequelize.INTEGER,
-      },
-      presentasi_us : {
-        type: Sequelize.INTEGER,
-      },
-      presentasi_kehadiran : {
-        type: Sequelize.INTEGER,
-      },
-
+     
       rata_nilai_tugas: {
         type: Sequelize.INTEGER,
       },
@@ -83,11 +65,15 @@ module.exports = {
         type: Sequelize.STRING
       },
 
-      createdAt: {
+      isLocked : {
+        type : Sequelize.BOOLEAN
+      },
+
+      created_at: {
         allowNull: false,
         type: Sequelize.DATE
       },
-      updatedAt: {
+      updated_at: {
         allowNull: false,
         type: Sequelize.DATE
       }
