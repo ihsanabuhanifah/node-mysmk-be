@@ -9,9 +9,12 @@ module.exports = {
      * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
      */
 
-    await queryInterface.addColumn("ujians", "durasi", {
-      type: Sequelize.INTEGER,
-    });
+    await queryInterface.sequelize.query(`
+      ALTER TABLE bank_soals CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+    `);
+    await queryInterface.sequelize.query(`
+      ALTER TABLE ujians CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+    `);
   },
 
   down: async (queryInterface, Sequelize) => {
@@ -21,6 +24,5 @@ module.exports = {
      * Example:
      * await queryInterface.dropTable('users');
      */
-    await queryInterface.removeColumn("ujians", "durasi", {});
   },
 };

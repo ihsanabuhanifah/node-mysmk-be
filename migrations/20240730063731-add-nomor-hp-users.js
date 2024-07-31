@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
@@ -9,8 +9,8 @@ module.exports = {
      * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
      */
 
-    await queryInterface.addColumn("ujians", "durasi", {
-      type: Sequelize.INTEGER,
+    await queryInterface.addColumn("users", "no_hp", {
+      type: Sequelize.STRING,
     });
   },
 
@@ -21,6 +21,7 @@ module.exports = {
      * Example:
      * await queryInterface.dropTable('users');
      */
-    await queryInterface.removeColumn("ujians", "durasi", {});
-  },
+
+    await queryInterface.removeColumn("users", "no_hp", {});
+  }
 };

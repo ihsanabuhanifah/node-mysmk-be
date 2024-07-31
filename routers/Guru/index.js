@@ -123,7 +123,7 @@ const {
   submitByAdmin,
 } = require("../../controllers/Guru/KehadiranGuruController");
 const adminAccessMiddleware = require("../../middleware/adminAccessMiddleware");
-const { listPenilaianByTeacher } = require("../../controllers/Guru/NilaiController");
+const { listPenilaianByTeacher, remidial } = require("../../controllers/Guru/NilaiController");
 
 
 guru.use(guruAccessMiddleware);
@@ -245,6 +245,11 @@ guru.post("/nilai/create", createPenilaian)
 //nilai
 
 guru.get("/nilai/list/teacher", listPenilaianByTeacher);
+guru.put("/nilai/remidial/teacher", remidial);
+
+
+//tempat_pkl
+
 
 
 module.exports = guru;
