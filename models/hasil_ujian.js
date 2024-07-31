@@ -32,6 +32,12 @@ module.exports = (sequelize, DataTypes) => {
       presentasi_pas: DataTypes.INTEGER,
       presentasi_us: DataTypes.INTEGER,
       presentasi_kehadiran: DataTypes.INTEGER,
+     rata_nilai_tugas: DataTypes.INTEGER,
+     rata_nilai_harian: DataTypes.INTEGER,
+     rata_nilai_pts: DataTypes.INTEGER,
+     rata_nilai_pas: DataTypes.INTEGER,
+     rata_nilai_us: DataTypes.INTEGER,
+     rata_nilai_kehadiran: DataTypes.INTEGER,
     },
     {
       sequelize,

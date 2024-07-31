@@ -22,8 +22,8 @@ const getExam = response.requestResponse(async (req, res) => {
     where: {
       student_id: req.student_id,
     },
-    attributes : {
-      exclude : 'jawaban'
+    attributes: {
+      exclude: "jawaban",
     },
     include: [
       {
@@ -43,7 +43,7 @@ const getExam = response.requestResponse(async (req, res) => {
           "waktu_mulai",
           "waktu_selesai",
           "status",
-          "durasi"
+          "durasi",
         ],
         include: [
           {
@@ -120,7 +120,11 @@ const takeExam = response.requestResponse(async (req, res) => {
     };
   }
 
-  if (exam.refresh_count <= 0 && exam.status === "progress") {
+  if (
+    exam.refresh_count <= 0 &&
+    exam.status === "progress" &&
+    exam.ujian.tipe_ujian === "closed"
+  ) {
     return {
       statusCode: 422,
       msg: "Anda tidak dapat mengambil ujian ini , Silahkan  menghubungi pengawas",
@@ -170,7 +174,7 @@ const takeExam = response.requestResponse(async (req, res) => {
           status: "progress",
           jam_mulai: new Date(),
           remidial_count: 0,
-          jawaban : JSON.stringify([]),
+          jawaban: JSON.stringify([]),
           waktu_tersisa: exam.ujian.durasi,
           jam_selesai: calculateWaktuSelesai(exam.ujian.durasi),
         },
@@ -234,7 +238,6 @@ const takeExam = response.requestResponse(async (req, res) => {
 const submitExam = response.requestResponse(async (req, res) => {
   const jawaban = req.body.data;
   const id = req.body.id;
-
 
   const exam = await NilaiController.findOne({
     where: {
@@ -319,7 +322,7 @@ const submitExam = response.requestResponse(async (req, res) => {
   });
 
   nilai = (point_siswa / total_point) * 100;
-  nilai = Math.ceil(nilai)
+  nilai = Math.ceil(nilai);
 
   let exam_result = [];
   if (!!exam.exam === true) {
@@ -336,7 +339,7 @@ const submitExam = response.requestResponse(async (req, res) => {
         keterangan: keterangan,
         exam: JSON.stringify(exam_result),
         status: "finish",
-        
+
         remidial_count: 0,
         jawaban: JSON.stringify(jawaban),
       },
@@ -350,7 +353,7 @@ const submitExam = response.requestResponse(async (req, res) => {
     return {
       msg: "Jawaban berhasil tersimpan",
       nilai: nilai,
-      
+
       keterangan: keterangan,
       total_point,
       point_siswa,

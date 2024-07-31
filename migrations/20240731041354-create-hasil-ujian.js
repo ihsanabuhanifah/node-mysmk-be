@@ -8,6 +8,16 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
+
+      student_id: {
+        type: Sequelize.INTEGER,
+        onDelete: "CASCADE",
+        references: {
+          model: "students",
+          key: "id",
+          as: "student_id",
+        },
+      },
       teacher_id: {
         type: Sequelize.INTEGER,
         onDelete: "CASCADE",
@@ -46,6 +56,26 @@ module.exports = {
       presentasi_kehadiran : {
         type: Sequelize.INTEGER,
       },
+
+      rata_nilai_tugas: {
+        type: Sequelize.INTEGER,
+      },
+      rata_nilai_harian: {
+        type: Sequelize.INTEGER,
+      },
+      rata_nilai_pts : {
+        type: Sequelize.INTEGER,
+      },
+      rata_nilai_pas : {
+        type: Sequelize.INTEGER,
+      },
+      rata_nilai_us : {
+        type: Sequelize.INTEGER,
+      },
+      rata_nilai_kehadiran : {
+        type: Sequelize.INTEGER,
+      },
+
       nilai: {
         type: Sequelize.INTEGER
       },
