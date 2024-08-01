@@ -18,13 +18,13 @@ const getListWali = response.requestResponse(async (req, res) => {
       {
         model: models.student,
         require: true,
-        as: "santri",
+        as: "siswa",
         attributes: ["id", "nama_siswa"],
       },
       {
         model: models.user,
         require: true,
-        as: "Pengguna",
+        as: "wali",
         attributes: [
           "id",
           "name",

@@ -11,15 +11,17 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      pembayaran_spp.belongsTo(models.parents, {
-        as: "walisantri",
+      pembayaran_spp.belongsTo(models.user, {
+        as: "user",
+        foreignKey: "user_id",
+      }
+      );
+      pembayaran_spp.belongsTo(models.parent, {
+        as: "parent",
         foreignKey: "walsan_id"
-      });
+      }
 
-      pembayaran_spp.belongsTo({
-        as: "pengguna",
-        foreignKey: "user_id"
-      })
+      );
     }
   }
   pembayaran_spp.init({
