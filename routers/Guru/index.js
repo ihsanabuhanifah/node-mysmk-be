@@ -74,6 +74,17 @@ const {
 } = require("../../controllers/Guru/LaporanController");
 //absensi
 
+
+//Tempat Pkl
+
+const {
+  createTempatPkl,
+  updateTempatPkl,
+  deteleTempatPkl,
+  detailTempatPkl,
+  listTempatPkl
+} = require("../../controllers/Guru/TempatPklController")
+
 //jadwal
 
 const {
@@ -124,6 +135,8 @@ const {
 } = require("../../controllers/Guru/KehadiranGuruController");
 const adminAccessMiddleware = require("../../middleware/adminAccessMiddleware");
 const { listPenilaianByTeacher, remidial, refreshCount, getSoal } = require("../../controllers/Guru/NilaiController");
+
+
 
 
 guru.use(guruAccessMiddleware);
@@ -251,7 +264,11 @@ guru.get("/nilai/soal/teacher/:id", getSoal);
 
 
 //tempat_pkl
-
+guru.post("/tempat-pkl/create", createTempatPkl)
+guru.put("/tempat-pkl/update/:id", updateTempatPkl)
+guru.delete("/tempat-pkl/delete/:id", deteleTempatPkl)
+guru.get("/tempat-pkl/detail/:id", detailTempatPkl)
+guru.get("/tempat-pkl/list", listTempatPkl)
 
 
 module.exports = guru;
