@@ -17,16 +17,23 @@ const registerValidation = [
         if (user) return Promise.reject("Email sudah digunakan");
       });
     }),
+    check("no_hp")
+    .isMobilePhone("id-ID")
+    .withMessage("Masukan nomor HP yang valid")
+    .custom((value) => {
+      return userModel.findOne({ where: { no_hp: value } }).then((user) => {
+        if (user) return Promise.reject("Nomor HP sudah digunakan");
+      });
+    }),
   check("password")
     .isLength({ min: 8 })
     .withMessage("Password minimal 8 karakter"),
   check("passwordConfirmation")
     .isLength({ min: 8 })
-    .withMessage("Password minimal 8 karakter")
+    .withMessage("Password Tidak sesuai")
     .custom((value, { req }) => {
       if (value !== req.body.password)
         return Promise.reject("Password dan Password Konfirmasi tidak sama");
-
       // Indicates the success of this synchronous custom validator
       return true;
     }),
