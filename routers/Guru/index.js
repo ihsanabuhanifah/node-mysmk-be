@@ -78,7 +78,11 @@ const {
 //Tempat Pkl
 
 const {
-  createTempatPkl
+  createTempatPkl,
+  updateTempatPkl,
+  deteleTempatPkl,
+  detailTempatPkl,
+  listTempatPkl
 } = require("../../controllers/Guru/TempatPklController")
 
 //jadwal
@@ -259,6 +263,10 @@ guru.put("/nilai/remidial/teacher", remidial);
 
 //tempat_pkl
 guru.post("/tempat-pkl/create", createTempatPkl)
+guru.put("/tempat-pkl/update/:id", updateTempatPkl)
+guru.delete("/tempat-pkl/delete/:id", deteleTempatPkl)
+guru.get("/tempat-pkl/detail/:id", detailTempatPkl)
+guru.get("/tempat-pkl/list", listTempatPkl)
 
 
 module.exports = guru;

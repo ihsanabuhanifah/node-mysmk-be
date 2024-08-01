@@ -16,12 +16,13 @@ module.exports = (sequelize, DataTypes) => {
       });
       tempat_pkl.belongsTo(models.teacher, {
         as: "teacher",
-        foreignKey: "crated_by",
+        foreignKey: "created_by",
       });
     }
   }
   tempat_pkl.init(
     {
+      nama_perusahaan: DataTypes.STRING,
       kota: DataTypes.STRING,
       kecamatan: DataTypes.STRING,
       alamat: DataTypes.TEXT,
@@ -43,6 +44,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       sequelize,
       modelName: "tempat_pkl",
+      tableName : "tempat_pkl"
     }
   );
   return tempat_pkl;

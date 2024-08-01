@@ -26,6 +26,10 @@ module.exports = {
           as: "created_by",
         },
       },
+      nama_perusahaan: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
       kota: {
         type: Sequelize.STRING,
         allowNull: false,
