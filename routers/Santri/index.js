@@ -5,6 +5,7 @@ const validateFields = require('./validateFields')
 
 const santri = express.Router();
 const { profile, updateSiswa } = require('../../controllers/Santri/ProfileController');
+const { getHasilBelajar, detailHasilBelajar } = require('../../controllers/Santri/HasilBelajarController');
 const { getExam, takeExam, submitExam, progressExam } = require("../../controllers/Santri/ExamController");
 
 const validateUpdate = [
@@ -32,6 +33,8 @@ santri.get("/exam/list", getExam )
 santri.put("/exam/take/:id", takeExam )
 santri.put("/exam/progress", progressExam)
 santri.put("/exam/submit", submitExam)
+santri.get('/hasil-belajar', getHasilBelajar)
+santri.get('/hasil-belajar-detail/:id', detailHasilBelajar)
 
 
 module.exports = santri;
