@@ -134,8 +134,9 @@ const {
   submitByAdmin,
 } = require("../../controllers/Guru/KehadiranGuruController");
 const adminAccessMiddleware = require("../../middleware/adminAccessMiddleware");
-const { listPenilaianByTeacher, remidial, refreshCount, getSoal } = require("../../controllers/Guru/NilaiController");
 
+const { listPenilaianByTeacher, remidial, refreshCount, getSoal } = require("../../controllers/Guru/NilaiController");
+const { getListWali, createBulkWali } = require("../../controllers/Guru/WaliController");
 
 
 
@@ -269,6 +270,11 @@ guru.put("/tempat-pkl/update/:id", updateTempatPkl)
 guru.delete("/tempat-pkl/delete/:id", deteleTempatPkl)
 guru.get("/tempat-pkl/detail/:id", detailTempatPkl)
 guru.get("/tempat-pkl/list", listTempatPkl)
+
+// Walisantri
+
+guru.get("/walisantri/list", getListWali);
+guru.post("/walisantri/create", createBulkWali)
 
 
 module.exports = guru;
