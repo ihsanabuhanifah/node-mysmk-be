@@ -31,6 +31,28 @@ const remidial = response.requestResponse(async (req, res) => {
   };
 });
 
+const refreshCount = response.requestResponse(async (req, res) => {
+  const { payload } = req.body;
+
+  await NilaiController.update(
+    { refresh_count: 3 },
+    {
+      where: {
+        teacher_id: req.teacher_id,
+
+        id: {
+          [Op.in]: payload, // arrayOfIds adalah array yang berisi ID-ID yang ingin di-update
+        },
+      },
+    }
+  );
+
+  return {
+    status: "Success",
+    msg: "Siswa sudah bisa ujian kembali",
+  };
+});
+
 const listPenilaianByTeacher = response.requestResponse(async (req, res) => {
   let = { mapel_id, ujian_id, page, pageSize } = req.query;
 
@@ -79,4 +101,5 @@ const listPenilaianByTeacher = response.requestResponse(async (req, res) => {
 module.exports = {
   listPenilaianByTeacher,
   remidial,
+  refreshCount,
 };

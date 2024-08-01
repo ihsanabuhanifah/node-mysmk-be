@@ -26,6 +26,16 @@ module.exports = {
           as: "teacher_id",
         },
       },
+
+      mapel_id: {
+        type: Sequelize.INTEGER,
+        onDelete: "CASCADE",
+        references: {
+          model: "mapels",
+          key: "id",
+          as: "mapel_id",
+        },
+      },
       student_id: {
         type: Sequelize.INTEGER,
         onDelete: "CASCADE",
