@@ -41,7 +41,7 @@ async function importRoles(req, res) {
         roles.push(role);
       });
 
-      fs.unlinkSync(path);
+      fs.unlinkSync(`./public/data/uploads/${path}`);
       console.log(roles);
       await Promise.all(
         roles.map(async (role) => {
@@ -92,7 +92,7 @@ async function importTa(req, res) {
         tas.push(ta);
       });
 
-      fs.unlinkSync(path);
+      fs.unlinkSync(`./public/data/uploads/${path}`);
 
       await Promise.all(
         tas.map(async (ta) => {
@@ -144,7 +144,7 @@ async function importMapel(req, res) {
         mapels.push(mapel);
       });
 
-      fs.unlinkSync(path);
+      fs.unlinkSync(`./public/data/uploads/${path}`);
 
       console.log("maoel", mapels);
       await Promise.all(
@@ -196,7 +196,7 @@ async function importKelas(req, res) {
         tas.push(ta);
       });
 
-      fs.unlinkSync(path);
+      fs.unlinkSync(`./public/data/uploads/${path}`);
 
       await Promise.all(
         tas.map(async (ta) => {
@@ -249,7 +249,7 @@ async function importAlquran(req, res) {
         mapels.push(mapel);
       });
 
-      fs.unlinkSync(path);
+      fs.unlinkSync(`./public/data/uploads/${path}`);
 
       await Promise.all(
         mapels.map(async (mapel) => {
@@ -308,7 +308,7 @@ async function importJadwal(req, res) {
       });
 
       console.log(jadwals);
-      fs.unlinkSync(path);
+      fs.unlinkSync(`./public/data/uploads/${path}`);
 
       await Promise.all(
         jadwals.map(async (jadwal) => {
@@ -362,7 +362,7 @@ async function importRombel(req, res) {
       });
 
       console.log(rombels);
-      fs.unlinkSync(path);
+      fs.unlinkSync(`./public/data/uploads/${path}`);
 
       await Promise.all(
         rombels.map(async (rombel) => {
@@ -394,9 +394,6 @@ async function uploadImage(req, res) {
     }
 
     console.log("req", req.file);
-
-    // let target = path.join(__dirname, "public/data/uploads/", req.file.filename);
-    // fs.renameSync(req.path, target);
     url = `${req.protocol}://${req.get("host")}/${req.file.filename}`;
     res.json({
       status: "Success",
@@ -405,6 +402,23 @@ async function uploadImage(req, res) {
     });
   } catch (err) {
     console.log(err);
+    res.status(400).json({
+      status: "Fail",
+      msg: "Terjadi Kesalahan",
+    });
+  }
+}
+
+async function hapusFile(req, res) {
+  const { path } = req.body;
+  try {
+    fs.unlinkSync(`./public/data/uploads/${path}`);
+    return res.json({
+      status: "Success",
+      msg: "File Berhasil dihapus",
+    });
+  } catch (err) {
+    console.log("error", err);
     res.status(400).json({
       status: "Fail",
       msg: "Terjadi Kesalahan",
@@ -420,4 +434,5 @@ module.exports = {
   importJadwal,
   uploadImage,
   importRombel,
+  hapusFile,
 };

@@ -1,48 +1,46 @@
 'use strict';
+/** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('bank_soals', {
+  async up(queryInterface, Sequelize) {
+    await queryInterface.createTable('pembayaran_spps', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      materi: {
-        type: Sequelize.STRING
-      },
-      mapel_id: {
+      user_id: {
         type: Sequelize.INTEGER,
         onDelete: "CASCADE",
         references: {
-          model: "mapels",
+          model: "users",
           key: "id",
-          as: "mapel_id",
-        },
+          as: "user_id"
+        }
       },
-      teacher_id: {
+      walsan_id: {
         type: Sequelize.INTEGER,
         onDelete: "CASCADE",
         references: {
-          model: "teachers",
+          model: "parents",
           key: "id",
-          as: "teacher_id",
-        },
+          as: "walsan_id"
+        }
       },
-      file: {
+      tanggal: {
+        type: Sequelize.DATE
+      },
+      foto: {
         type: Sequelize.STRING
       },
-      tipe: {
+      status: {
         type: Sequelize.STRING
       },
-      soal: {
-        type: Sequelize.TEXT
+      bulan: {
+        type: Sequelize.STRING
       },
-      jawaban : {
-        type : Sequelize.STRING
-      },
-      point : {
-        type : Sequelize.INTEGER
+      tahun: {
+        type: Sequelize.STRING
       },
       created_at: {
         allowNull: false,
@@ -54,7 +52,7 @@ module.exports = {
       }
     });
   },
-  down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('bank_soals');
+  async down(queryInterface, Sequelize) {
+    await queryInterface.dropTable('pembayaran_spps');
   }
 };
