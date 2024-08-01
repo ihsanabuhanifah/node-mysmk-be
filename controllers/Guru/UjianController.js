@@ -11,9 +11,7 @@ const {
 
 const createPenilaian = async (req, res) => {
   try {
-   
-
-    const response = await UjianController.update(
+    await UjianController.update(
       {
         status: "open",
       },
@@ -24,7 +22,6 @@ const createPenilaian = async (req, res) => {
       }
     );
 
-    console.log("res", response);
     const student = await StudentModel.findAll({
       where: {
         kelas_id: req.body.kelas_id,
@@ -35,6 +32,8 @@ const createPenilaian = async (req, res) => {
       student.map(async (data) => {
         await NilaiController.create({
           ujian_id: req.body.id,
+          mapel_id: req.body.mapel_id,
+          exam_result: 0,
           teacher_id: req.teacher_id,
           student_id: data.id,
           waktu_tersisa: req.body.durasi,
@@ -150,7 +149,6 @@ const detailUjian = async (req, res) => {
       },
     });
 
-
     let soal = await BankSoalController.findAll({
       where: {
         id: {
@@ -159,7 +157,7 @@ const detailUjian = async (req, res) => {
       },
     });
 
-    ujian.soal = JSON.stringify(soal)
+    ujian.soal = JSON.stringify(soal);
 
     return res.json({
       status: "Success",
@@ -187,9 +185,6 @@ const updateUjian = async (req, res) => {
       },
     });
 
-
-    
-
     if (ujian === null) {
       return res.status(422).json({
         status: "Fail",
@@ -197,8 +192,7 @@ const updateUjian = async (req, res) => {
       });
     }
 
-
-    if(ujian.status === 'open') {
+    if (ujian.status === "open") {
       return res.status(422).json({
         status: "Fail",
         msg: "ujian sudah dimulai, tidak bisa memperbaharui",
@@ -280,9 +274,6 @@ const deleteUjian = async (req, res) => {
     });
   }
 };
-
-
-
 
 module.exports = {
   createUjian,

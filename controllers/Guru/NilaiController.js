@@ -9,6 +9,29 @@ const { RESPONSE_API } = require("../../utils/response");
 
 const response = new RESPONSE_API();
 
+const getSoal = response.requestResponse(async (req, res) => {
+ const exam = await UjianController.findOne({
+  attributes: ["soal"],
+  where : {
+    id : req.params.id
+  }
+ })
+
+  let soal = await BankSoalController.findAll({
+    where: {
+      id: {
+        [Op.in]: JSON.parse(exam.soal),
+      },
+    },
+  });
+  return {
+    status: "Success",
+    msg: "Soal ditemukan",
+    soal
+    
+  };
+});
+
 const remidial = response.requestResponse(async (req, res) => {
   const { payload } = req.body;
 
@@ -28,6 +51,28 @@ const remidial = response.requestResponse(async (req, res) => {
   return {
     status: "Success",
     msg: "Daftar remidial berhasil di perbaharui",
+  };
+});
+
+const refreshCount = response.requestResponse(async (req, res) => {
+  const { payload } = req.body;
+
+  await NilaiController.update(
+    { refresh_count: 3 },
+    {
+      where: {
+        teacher_id: req.teacher_id,
+
+        id: {
+          [Op.in]: payload, // arrayOfIds adalah array yang berisi ID-ID yang ingin di-update
+        },
+      },
+    }
+  );
+
+  return {
+    status: "Success",
+    msg: "Siswa sudah bisa ujian kembali",
   };
 });
 
@@ -79,4 +124,6 @@ const listPenilaianByTeacher = response.requestResponse(async (req, res) => {
 module.exports = {
   listPenilaianByTeacher,
   remidial,
+  refreshCount,
+  getSoal
 };

@@ -134,7 +134,7 @@ const {
   submitByAdmin,
 } = require("../../controllers/Guru/KehadiranGuruController");
 const adminAccessMiddleware = require("../../middleware/adminAccessMiddleware");
-const { listPenilaianByTeacher, remidial } = require("../../controllers/Guru/NilaiController");
+const { listPenilaianByTeacher, remidial, refreshCount, getSoal } = require("../../controllers/Guru/NilaiController");
 
 
 
@@ -259,6 +259,8 @@ guru.post("/nilai/create", createPenilaian)
 
 guru.get("/nilai/list/teacher", listPenilaianByTeacher);
 guru.put("/nilai/remidial/teacher", remidial);
+guru.put("/nilai/refresh/teacher", refreshCount);
+guru.get("/nilai/soal/teacher/:id", getSoal);
 
 
 //tempat_pkl
