@@ -65,7 +65,7 @@ module.exports = {
         type: Sequelize.STRING
       },
 
-      isLocked : {
+      is_locked : {
         type : Sequelize.BOOLEAN
       },
 

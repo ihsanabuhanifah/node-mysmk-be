@@ -27,7 +27,7 @@ module.exports = (sequelize, DataTypes) => {
       mapel_id: DataTypes.INTEGER,
       nilai: DataTypes.INTEGER,
       deskripsi: DataTypes.STRING,
-      isLocked: DataTypes.BOOLEAN,
+      is_locked: DataTypes.BOOLEAN,
       rata_nilai_tugas: DataTypes.INTEGER,
       rata_nilai_harian: DataTypes.INTEGER,
       rata_nilai_pts: DataTypes.INTEGER,

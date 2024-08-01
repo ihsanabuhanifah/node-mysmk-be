@@ -12,7 +12,6 @@ const NilaiController = require("../../models").nilai;
 const BankSoalController = require("../../models").bank_soal;
 const StudentModel = require("../../models").kelas_student;
 
-
 const response = new RESPONSE_API();
 
 const getExam = response.requestResponse(async (req, res) => {
@@ -238,7 +237,7 @@ const takeExam = response.requestResponse(async (req, res) => {
 });
 
 const submitExam = response.requestResponse(async (req, res) => {
-  const jawaban = req.body.data;
+  let jawaban = req.body.data;
   const id = req.body.id;
 
   const exam = await NilaiController.findOne({
@@ -308,15 +307,17 @@ const submitExam = response.requestResponse(async (req, res) => {
   let point_siswa = 0;
   let keterangan = "";
   let nilai = 0;
+  let jawaban_siswa;
   await soal.map((item) => {
     total_point = total_point + item.point;
     if (item.tipe !== "ES") {
-      jawaban?.map((jawab) => {
+      jawaban_siswa = jawaban?.map((jawab) => {
         if (jawab.id === item.id && item.tipe !== "ES") {
           if (jawab.jawaban === item.jawaban) {
             point_siswa = point_siswa + item.point;
+            
           }
-        }
+        } 
       });
     } else {
       keterangan = "essay belum diberikan point";
@@ -343,7 +344,7 @@ const submitExam = response.requestResponse(async (req, res) => {
         status: "finish",
 
         remidial_count: 0,
-        jawaban: JSON.stringify(jawaban),
+        jawaban: JSON.stringify(jawaban_siswa),
       },
       {
         where: {
@@ -407,6 +408,5 @@ const progressExam = response.requestResponse(async (req, res) => {
     msg: "Progress Ujian tersimpan",
   };
 });
-
 
 module.exports = { getExam, takeExam, submitExam, progressExam };
