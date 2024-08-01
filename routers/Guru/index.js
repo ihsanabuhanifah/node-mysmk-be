@@ -96,6 +96,8 @@ const {
   listSiswa,
   deleteSiswaKelas,
   createSiswaKelas,
+  detailSiswa,
+  updateSiswa,
 } = require("../../controllers/Guru/SiswaController");
 const {
   listHalaqohGroup,
@@ -229,6 +231,9 @@ guru.get("/laporan/guru-piket/notifikasi", notifikasiPiket);
 //siswa
 
 guru.get("/siswa/list", listSiswa);
+guru.get("/siswa/detail/:id", detailSiswa);
+guru.put("/siswa/update/:id", updateSiswa);
+guru.put("/siswa/kelas/delete/:id", deleteSiswaKelas);
 guru.post("/siswa/kelas/create", createSiswaKelas);
 guru.delete("/siswa/kelas/delete/:id", deleteSiswaKelas);
 
