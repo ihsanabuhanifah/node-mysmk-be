@@ -27,7 +27,7 @@ module.exports = {
           as: "walsan_id"
         }
       },
-      tgl: {
+      tanggal: {
         type: Sequelize.DATE
       },
       foto: {
@@ -42,11 +42,11 @@ module.exports = {
       tahun: {
         type: Sequelize.STRING
       },
-      createdAt: {
+      created_at: {
         allowNull: false,
         type: Sequelize.DATE
       },
-      updatedAt: {
+      updated_at: {
         allowNull: false,
         type: Sequelize.DATE
       }

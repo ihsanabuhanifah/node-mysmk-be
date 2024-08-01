@@ -27,7 +27,7 @@ module.exports = (sequelize, DataTypes) => {
   pembayaran_spp.init({
     user_id: DataTypes.INTEGER,
     walsan_id: DataTypes.INTEGER,
-    tgl: DataTypes.DATE,
+    tanggal: DataTypes.DATE,
     foto: DataTypes.STRING,
     status: DataTypes.STRING,
     bulan: DataTypes.STRING,
