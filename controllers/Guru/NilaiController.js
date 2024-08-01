@@ -9,6 +9,29 @@ const { RESPONSE_API } = require("../../utils/response");
 
 const response = new RESPONSE_API();
 
+const getSoal = response.requestResponse(async (req, res) => {
+ const exam = await UjianController.findOne({
+  attributes: ["soal"],
+  where : {
+    id : req.params.id
+  }
+ })
+
+  let soal = await BankSoalController.findAll({
+    where: {
+      id: {
+        [Op.in]: JSON.parse(exam.soal),
+      },
+    },
+  });
+  return {
+    status: "Success",
+    msg: "Soal ditemukan",
+    soal
+    
+  };
+});
+
 const remidial = response.requestResponse(async (req, res) => {
   const { payload } = req.body;
 
@@ -102,4 +125,5 @@ module.exports = {
   listPenilaianByTeacher,
   remidial,
   refreshCount,
+  getSoal
 };
