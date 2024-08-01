@@ -74,7 +74,6 @@ const {
 } = require("../../controllers/Guru/LaporanController");
 //absensi
 
-
 //Tempat Pkl
 
 const {
@@ -82,8 +81,8 @@ const {
   updateTempatPkl,
   deteleTempatPkl,
   detailTempatPkl,
-  listTempatPkl
-} = require("../../controllers/Guru/TempatPklController")
+  listTempatPkl,
+} = require("../../controllers/Guru/TempatPklController");
 
 //jadwal
 
@@ -135,10 +134,17 @@ const {
 } = require("../../controllers/Guru/KehadiranGuruController");
 const adminAccessMiddleware = require("../../middleware/adminAccessMiddleware");
 
-const { listPenilaianByTeacher, remidial, refreshCount, getSoal } = require("../../controllers/Guru/NilaiController");
-const { getListWali, createBulkWali } = require("../../controllers/Guru/WaliController");
-
-
+const {
+  listPenilaianByTeacher,
+  remidial,
+  refreshCount,
+  getSoal,
+  updateLastExam,
+} = require("../../controllers/Guru/NilaiController");
+const {
+  getListWali,
+  createBulkWali,
+} = require("../../controllers/Guru/WaliController");
 
 guru.use(guruAccessMiddleware);
 
@@ -253,8 +259,8 @@ guru.get("/ujian/list", listUjian);
 guru.get("/ujian/detail/:id", detailUjian);
 guru.put("/ujian/update/:id", updateUjian);
 guru.delete("/ujian/delete/:id", deleteUjian);
-guru.post("/nilai/create", createPenilaian)
-
+guru.post("/nilai/create", createPenilaian);
+guru.put("/nilai/update-last-exam", updateLastExam);
 
 //nilai
 
@@ -263,18 +269,16 @@ guru.put("/nilai/remidial/teacher", remidial);
 guru.put("/nilai/refresh/teacher", refreshCount);
 guru.get("/nilai/soal/teacher/:id", getSoal);
 
-
 //tempat_pkl
-guru.post("/tempat-pkl/create", createTempatPkl)
-guru.put("/tempat-pkl/update/:id", updateTempatPkl)
-guru.delete("/tempat-pkl/delete/:id", deteleTempatPkl)
-guru.get("/tempat-pkl/detail/:id", detailTempatPkl)
-guru.get("/tempat-pkl/list", listTempatPkl)
+guru.post("/tempat-pkl/create", createTempatPkl);
+guru.put("/tempat-pkl/update/:id", updateTempatPkl);
+guru.delete("/tempat-pkl/delete/:id", deteleTempatPkl);
+guru.get("/tempat-pkl/detail/:id", detailTempatPkl);
+guru.get("/tempat-pkl/list", listTempatPkl);
 
 // Walisantri
 
 guru.get("/walisantri/list", getListWali);
-guru.post("/walisantri/create", createBulkWali)
-
+guru.post("/walisantri/create", createBulkWali);
 
 module.exports = guru;
