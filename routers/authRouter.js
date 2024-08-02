@@ -4,6 +4,7 @@ const authController = require("../controllers/AuthController");
 const validationMiddleware = require("../middleware/validationMiddleware");
 const jwtValidateMiddleware = require("../middleware/jwtValidateMiddleware");
 const { loginValidation, registerValidation } = require("../validator/auth");
+const ppdbController = require("../controllers/ppdb/AuthController");
 
 authRouter.post(
   "/login",
@@ -11,12 +12,10 @@ authRouter.post(
   validationMiddleware,
   authController.login
 );
+authRouter.post("/login-ppdb", loginValidation, ppdbController.login);
+authRouter.post("/register-ppdb", registerValidation, ppdbController.register);
 
-authRouter.post(
-  "/register",
-  registerValidation,
-  authController.register
-);
+authRouter.post("/register", registerValidation, authController.register);
 
 authRouter.get("/authme", jwtValidateMiddleware, authController.authme);
 authRouter.post("/google-register", authController.googleRegister);
