@@ -1,6 +1,7 @@
 const mapelModel = require('../../models').mapel;
 const nilaiModel = require('../../models').nilai;
 const hasilBelajarModel = require('../../models').hasil_belajar;
+const ujianModel = require('../../models').ujian;
 const models = require("../../models");
 
 const getHasilBelajar = async (req, res) => {
@@ -37,6 +38,10 @@ const detailHasilBelajar = async (req, res) => {
         model: mapelModel,
         as: 'mapel',
         attributes: ['nama_mapel', 'kategori']
+      },
+      {
+        model: ujianModel,
+        as: 'ujian'
       }
     ]
   })
