@@ -124,7 +124,7 @@ const {
 } = require("../../controllers/Guru/KehadiranGuruController");
 const adminAccessMiddleware = require("../../middleware/adminAccessMiddleware");
 const { listPenilaianByTeacher, remidial } = require("../../controllers/Guru/NilaiController");
-const { getListWali, createBulkWali } = require("../../controllers/Guru/WaliController");
+const { getListWali, createBulkWali, updateWali, detailWali } = require("../../controllers/Guru/WaliController");
 
 
 guru.use(guruAccessMiddleware);
@@ -251,7 +251,8 @@ guru.put("/nilai/remidial/teacher", remidial);
 // Walisantri
 
 guru.get("/walisantri/list", getListWali);
-guru.post("/walisantri/create", createBulkWali)
+guru.put("/walisantri/update/:id", updateWali);
+guru.get("/walisantri/detail/:id", detailWali)
 
 
 module.exports = guru;
