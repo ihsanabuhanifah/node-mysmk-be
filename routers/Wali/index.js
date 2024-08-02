@@ -29,6 +29,7 @@ const {
 const {
   getNotice
 } = require("../../controllers/noticeController");
+const { createPembayaran } = require("../../controllers/Wali/PembayaranController");
 
 wali.use(waliAccessMiddleware);
 wali.get("/absensi/kelas/list", list);
@@ -51,5 +52,7 @@ wali.get("/pulang/detail/:id", detailIzinPulang);
 wali.put("/pulang/update/:id", updateIzinPulang);
 //notice
 wali.get("/notice/list", getNotice);
+//Pembayaran
+wali.post("/pembayaran/bayar", createPembayaran)
 
 module.exports = wali;

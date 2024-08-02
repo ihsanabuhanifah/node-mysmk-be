@@ -21,10 +21,14 @@ module.exports = {
         type: Sequelize.INTEGER,
         onDelete: "CASCADE",
         references: {
-          model: "teacher",
+          model: "teachers",
           key: "id",
           as: "created_by",
         },
+      },
+      nama_perusahaan: {
+        type: Sequelize.STRING,
+        allowNull: false,
       },
       kota: {
         type: Sequelize.STRING,
@@ -80,11 +84,11 @@ module.exports = {
       },
       long: {
         allowNull: false,
-        type: Sequelize.DECIMAL(10, 2),
+        type: Sequelize.DECIMAL(10, 8),
       },
       latitude: {
         allowNull: false,
-        type: Sequelize.DECIMAL(10, 2),
+        type: Sequelize.DECIMAL(10, 8),
       },
     });
   },

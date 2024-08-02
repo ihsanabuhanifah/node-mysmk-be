@@ -10,7 +10,8 @@ const {
   importJadwal,
   importRombel,
   
-  uploadImage
+  uploadImage,
+  hapusFile
 } = require("../controllers/ExportImport/importController");
 const {
   importGuru,
@@ -28,4 +29,5 @@ importRouter.post("/import/alquran", upload.single("file"), importAlquran);
 importRouter.post("/import/jadwal", upload.single("file"), importJadwal);
 importRouter.post("/import/rombel", upload.single("file"), importRombel);
 importRouter.post("/upload/file", upload.single("file"), uploadImage);
+importRouter.post("/delete/file", hapusFile);
 module.exports = importRouter;
