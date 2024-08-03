@@ -142,6 +142,7 @@ const {
   refreshCount,
   getSoal,
   updateLastExam,
+  submitExamResult,
 } = require("../../controllers/Guru/NilaiController");
 const {
   getListWali,
@@ -266,6 +267,7 @@ guru.put("/ujian/update/:id", updateUjian);
 guru.delete("/ujian/delete/:id", deleteUjian);
 guru.post("/nilai/create", createPenilaian);
 guru.put("/nilai/update-last-exam", updateLastExam);
+guru.put("/nilai/exam-result", submitExamResult);
 
 //nilai
 

@@ -24,6 +24,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       teacher_id: DataTypes.INTEGER,
       student_id: DataTypes.INTEGER,
+      kelas_id: DataTypes.INTEGER,
       mapel_id: DataTypes.INTEGER,
       nilai: DataTypes.INTEGER,
       deskripsi: DataTypes.STRING,
@@ -33,6 +34,7 @@ module.exports = (sequelize, DataTypes) => {
       rata_nilai_pts: DataTypes.INTEGER,
       rata_nilai_pas: DataTypes.INTEGER,
       rata_nilai_us: DataTypes.INTEGER,
+      ta_id: DataTypes.INTEGER,
       rata_nilai_kehadiran: DataTypes.INTEGER,
     },
     {
