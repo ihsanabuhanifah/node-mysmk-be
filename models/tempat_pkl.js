@@ -38,13 +38,14 @@ module.exports = (sequelize, DataTypes) => {
       student_id: DataTypes.INTEGER,
       created_at : DataTypes.DATE,
       updated_at : DataTypes.DATE,
-      long : DataTypes.DECIMAL(10, 8),
+      longtitude : DataTypes.DECIMAL(10, 8),
       latitude : DataTypes.DECIMAL(10, 8)
     },
     {
       sequelize,
       modelName: "tempat_pkl",
-      tableName : "tempat_pkl"
+      tableName : "tempat_pkl",
+      timestamps : false
     }
   );
   return tempat_pkl;

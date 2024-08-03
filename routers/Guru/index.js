@@ -85,6 +85,9 @@ const {
   listTempatPkl,
 } = require("../../controllers/Guru/TempatPklController");
 
+// Laporan harian pkl
+const { laporanPklList, detailLaporanPkl } = require("../../controllers/Guru/LaporanHarianPklController")
+
 //jadwal
 
 const {
@@ -316,5 +319,8 @@ guru.delete("/pembayaran/hapusKartu", deleteKartu);
 // siswa
 guru.get("/siswa/daftarSpp", daftarSiswa);
 guru.get("/siswa/listPembayaran/:student_id", detailSiswa)
+// Laporan harian pkl
+guru.get("/laporan-harian-pkl/list", laporanPklList)
+guru.get("/laporan-harian-pkl/detail/:id", detailLaporanPkl)
 
 module.exports = guru;

@@ -11,6 +11,7 @@ const createTempatPkl = response.requestResponse(async (req, res) => {
 
   const tempatPklPayload = await TempatPklModel.create({
     ...payload,
+    created_at: new Date(),
     created_by: req.teacher_id,
   });
   return {
@@ -35,11 +36,17 @@ const updateTempatPkl = response.requestResponse(async (req, res) => {
       msg: `Tempat pkl dengan id ${id} tidak dapat Ditemukan`,
     });
   }
-  await TempatPklModel.update(payload, {
-    where: {
-      id: id,
+  await TempatPklModel.update(
+    {
+      ...payload,
+      updated_at: new Date(),
     },
-  });
+    {
+      where: {
+        id: id,
+      },
+    }
+  );
   return {
     statusCode: 201,
     message: `Data dengan id ${id} Berhasil Di Update`,
@@ -85,40 +92,33 @@ const detailTempatPkl = response.requestResponse(async (req, res) => {
 });
 
 const listTempatPkl = response.requestResponse(async (req, res) => {
-  let { page = 1, pageSize = 10 } = req.query;
+  let { page, pageSize } = req.query;
 
-  page = parseInt(page);
-  pageSize = parseInt(pageSize);
-
-  const offset = (page - 1) * pageSize;
-
-  const { count, rows } = await TempatPklModel.findAndCountAll({
+  const { rows, count } = await TempatPklModel.findAndCountAll({
     limit: pageSize,
-    offset: offset,
+    offset: page,
     include: [
       {
-        require : true,
-        as : "siswa",
+        require: true,
+        as: "siswa",
         model: StudentModel,
-        attributes: ['nama_siswa'], 
+        attributes: ["nama_siswa"],
       },
       {
         model: TeacherModel,
-        require : true,
-        as : "teacher",
-        attributes: ['nama_guru'], 
+        require: true,
+        as: "teacher",
+        attributes: ["nama_guru"],
       },
     ],
   });
-
-  const totalPages = Math.ceil(count / pageSize);
 
   return {
     message: "Berhasil",
     data: rows,
     pagination: {
       totalItems: count,
-      totalPages: totalPages,
+      totalPages: Math.ceil(count / pageSize),
       currentPage: page,
       pageSize: pageSize,
     },
@@ -130,5 +130,5 @@ module.exports = {
   updateTempatPkl,
   deteleTempatPkl,
   detailTempatPkl,
-  listTempatPkl
+  listTempatPkl,
 };

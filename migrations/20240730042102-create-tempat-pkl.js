@@ -79,10 +79,10 @@ module.exports = {
         type: Sequelize.DATE,
       },
       updated_at: {
-        allowNull: false,
+        allowNull: true,
         type: Sequelize.DATE,
       },
-      long: {
+      longtitude: {
         allowNull: false,
         type: Sequelize.DECIMAL(10, 8),
       },
