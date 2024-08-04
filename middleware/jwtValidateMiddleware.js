@@ -18,7 +18,7 @@ const jwtValidateMiddleware = (req, res, next) => {
         });
       } else {
         console.log("dec", decoded);
-        req.id = decoded.id;
+        req.user_id = decoded.id;
         req.email = decoded.email;
         req.name = decoded.name;
         req.role = decoded.role;
@@ -33,9 +33,8 @@ const jwtValidateMiddleware = (req, res, next) => {
         req.student_id = decoded.student_id;
 
         next();
-        console.log("Token:", req.headers.authorization);
-
-        console.log("User ID di middleware:", req.user_id);
+        console.log("Token:", req.headers["x-authorization"]);
+        console.log("User ID di middleware:", req.id);
         console.log("Bearer Header:", bearerHeader);
         console.log("Bearer Token:", bearerToken);
         console.log("Decoded:", decoded);

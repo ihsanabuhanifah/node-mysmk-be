@@ -7,6 +7,8 @@ const { login, register } = require("../../controllers/ppdb/AuthController");
 const { registerValidation } = require("../../validator/auth");
 const {
   createInfoCalsan,
+  updateInfoCalsan,
+  getDetailCalsan,
 } = require("../../controllers/ppdb/InformasiCalsanController");
 const { check } = require("express-validator");
 const validateFields = require("./validateFields");
@@ -79,5 +81,7 @@ const validation = [
 
 ppdb.use(calonSantriAccessMiddleware);
 ppdb.post("/create", validation, validateFields, createInfoCalsan);
+ppdb.put("/update/:id", validation, validateFields, updateInfoCalsan);
+ppdb.get("/detail", getDetailCalsan);
 
 module.exports = ppdb;

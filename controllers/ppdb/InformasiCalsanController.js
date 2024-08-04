@@ -84,8 +84,8 @@ const updateInfoCalsan = async (req, res) => {
     } = req.body;
 
     const user_id = req.user_id;
-
-    const detail = await studentModel.findOne({
+    console.log(`user_id:`, req.user_id);
+    const detail = await info_calsan.findOne({
       where: {
         id,
         user_id,
@@ -100,7 +100,7 @@ const updateInfoCalsan = async (req, res) => {
 
     const fieldsToUpdate = {};
 
-    if (user_id) fieldsToUpdate.user_id = user_id;
+    // if (user_id) fieldsToUpdate.user_id = user_id;
     if (nama_siswa) fieldsToUpdate.nama_siswa = nama_siswa;
     if (nis) fieldsToUpdate.nis = nis;
     if (nisn) fieldsToUpdate.nisn = nisn;
@@ -121,7 +121,7 @@ const updateInfoCalsan = async (req, res) => {
 
     if (Object.keys(fieldsToUpdate).length > 0) {
       await info_calsan.update(fieldsToUpdate, {
-        where: { id },
+        where: { id, user_id },
       });
 
       return res.json({
@@ -142,8 +142,36 @@ const updateInfoCalsan = async (req, res) => {
     });
   }
 };
+const getDetailCalsan = async (req, res) => {
+  try {
+    const user_id = req.user_id;
+    console.log(`user_id:`, req.user_id);
 
+    const detail = await info_calsan.findOne({
+      where: { user_id },
+    });
+
+    if (!detail) {
+      return res.status(404).json({
+        status: "fail",
+        msg: "Data tidak ditemukan",
+      });
+    }
+
+    return res.json({
+      status: "Success",
+      data: detail,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      status: "fail",
+      msg: "Terjadi Kesalahan",
+    });
+  }
+};
 module.exports = {
   createInfoCalsan,
   updateInfoCalsan,
+  getDetailCalsan,
 };
