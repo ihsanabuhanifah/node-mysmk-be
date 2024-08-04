@@ -148,6 +148,7 @@ const {
   getListWali,
   createBulkWali,
 } = require("../../controllers/Guru/WaliController");
+const { listReport } = require("../../controllers/Guru/RaportController");
 
 guru.use(guruAccessMiddleware);
 
@@ -275,6 +276,10 @@ guru.get("/nilai/list/teacher", listPenilaianByTeacher);
 guru.put("/nilai/remidial/teacher", remidial);
 guru.put("/nilai/refresh/teacher", refreshCount);
 guru.get("/nilai/soal/teacher/:id", getSoal);
+
+//report
+
+guru.get("/report/list", listReport)
 
 //tempat_pkl
 guru.post("/tempat-pkl/create", createTempatPkl);

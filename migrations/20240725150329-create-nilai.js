@@ -20,6 +20,15 @@ module.exports = {
           as: "ujian_id",
         },
       },
+      ta_id: {
+        type: Sequelize.INTEGER,
+        onDelete: "RESTRICT",
+        references: {
+          model: "ta",
+          key: "id",
+          as: "ta_id",
+        },
+      },
       kelas_id: {
         type: Sequelize.INTEGER,
 

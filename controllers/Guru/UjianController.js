@@ -37,6 +37,7 @@ const createPenilaian = async (req, res) => {
         },
       }
     );
+   
 
     await Promise.all(
       student.map(async (data) => {
@@ -44,10 +45,12 @@ const createPenilaian = async (req, res) => {
           ujian_id: req.body.id,
           mapel_id: req.body.mapel_id,
           kelas_id: req.body.kelas_id,
+          jenis_ujian : req.body.jenis_ujian,
           exam_result: 0,
           teacher_id: req.teacher_id,
           student_id: data.student_id,
           waktu_tersisa: req.body.durasi,
+          ta_id : req.body.ta_id,
 
           status: "open",
         });

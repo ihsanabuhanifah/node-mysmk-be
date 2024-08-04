@@ -34,9 +34,10 @@ module.exports = (sequelize, DataTypes) => {
   nilai.init(
     {
       ujian_id: DataTypes.INTEGER,
+      ta_id: DataTypes.INTEGER,
       teacher_id: DataTypes.INTEGER,
       mapel_id: DataTypes.INTEGER,
-      tipe_ujian: DataTypes.STRING,
+      jenis_ujian: DataTypes.STRING,
       student_id: DataTypes.INTEGER,
       kelas_id: DataTypes.INTEGER,
       jawaban: DataTypes.TEXT,
