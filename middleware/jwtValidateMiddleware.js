@@ -18,7 +18,7 @@ const jwtValidateMiddleware = (req, res, next) => {
         });
       } else {
         console.log("dec", decoded);
-        req.user_id = decoded.id;
+        req.id = decoded.id;
         req.email = decoded.email;
         req.name = decoded.name;
         req.role = decoded.role;

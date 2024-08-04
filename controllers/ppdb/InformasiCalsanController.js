@@ -22,7 +22,7 @@ const createInfoCalsan = async (req, res) => {
       hubungan,
     } = req.body;
 
-    const user_id = req.user_id;
+    const user_id = req.id;
 
     const newInfoCalsan = await info_calsan.create({
       user_id,
@@ -46,7 +46,7 @@ const createInfoCalsan = async (req, res) => {
     });
 
     console.log(user_id);
-    console.log("req.user_id:", req.user_id);
+    console.log("req.user_id:", req.id);
     res.status(201).json({
       message: "Informasi calon santri berhasil dibuat",
       data: newInfoCalsan,
@@ -83,8 +83,8 @@ const updateInfoCalsan = async (req, res) => {
       hubungan,
     } = req.body;
 
-    const user_id = req.user_id;
-    console.log(`user_id:`, req.user_id);
+    const user_id = req.id;
+    console.log(`user_id:`, req.id);
     const detail = await info_calsan.findOne({
       where: {
         id,
@@ -144,8 +144,8 @@ const updateInfoCalsan = async (req, res) => {
 };
 const getDetailCalsan = async (req, res) => {
   try {
-    const user_id = req.user_id;
-    console.log(`user_id:`, req.user_id);
+    const user_id = req.id;
+    console.log(`user_id:`, req.id);
 
     const detail = await info_calsan.findOne({
       where: { user_id },
