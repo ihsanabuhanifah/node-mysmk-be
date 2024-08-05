@@ -16,7 +16,7 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey : "student_id"
       });
       laporan_diniyyah_harian.belongsTo(models.laporan_harian_pkl, {
-        as : "laporan_harian_pkl",
+        as : "laporan_diniyyah_harian",
         foreignKey : "laporan_harian_pkl_id"
       });
     }
@@ -29,7 +29,10 @@ module.exports = (sequelize, DataTypes) => {
     sholat_ashar: DataTypes.BOOLEAN,
     sholat_magrib: DataTypes.BOOLEAN,
     sholat_isya: DataTypes.BOOLEAN,
-    tanggal : DataTypes.DATEONLY
+    tanggal : DataTypes.DATEONLY,
+    laporan_harian_pkl_id : DataTypes.INTEGER,
+    created_at: DataTypes.DATE,
+    updated_at: DataTypes.DATE,
   }, {
     sequelize,
     modelName: 'laporan_diniyyah_harian',

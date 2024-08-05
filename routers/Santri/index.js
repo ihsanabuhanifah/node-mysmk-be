@@ -59,6 +59,14 @@ const validateUpdate = [
   },
 ];
 
+// Laporan laporanDiniyyahHarian
+const {
+createLaporanDiniyyah,
+laporanDiniyyahList,
+updateLaporanDiniyyah
+
+} = require("../../controllers/Santri/LaporanDiniyyahHarianController")
+
 santri.use(santriAccessMiddleware);
 santri.get("/profile", profile);
 santri.put("/profile/update/:id", validateFields, validateUpdate, updateSiswa);
@@ -84,5 +92,10 @@ santri.get('/hasil-belajar', getHasilBelajar)
 santri.get('/hasil-belajar-detail/:id/:ta_id', detailHasilBelajar)
 santri.get('/hasil-ujian', listHasilUjain)
 
+
+// Laporan Diniyyah
+santri.post("/laporan-diniyyah/create", createLaporanDiniyyah)
+santri.get("/laporan-diniyyah/list", laporanDiniyyahList);
+santri.put("/laporan-diniyyah/update/:id",updateLaporanDiniyyah);
 
 module.exports = santri;
