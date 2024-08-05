@@ -20,6 +20,7 @@ const {
 const {
   createKehadiran,
 } = require("./controllers/Guru/KehadiranGuruController");
+const { resetPerbulan } = require("./controllers/Wali/PembayaranController");
 
 const job = cron.schedule("06 00 * * *", scheduleKelas);
 const kehadiran_guru = cron.schedule("05 00 * * *", createKehadiran);
@@ -28,6 +29,8 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static("public/data/uploads"));
 app.use(cookieParser());
+// use the cron
+resetPerbulan
 
 app.use(router);
 

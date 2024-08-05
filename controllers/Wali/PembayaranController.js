@@ -1,5 +1,6 @@
 const PembayaranController = require("../../models").pembayaran_spp;
 const models = require("../../models");
+const cron = require("node-cron")
 
 const createPembayaran = async (req, res) => {
   try {
@@ -145,6 +146,19 @@ async function updatePembayaran (req, res) {
     }
     
 
+
 }
 
-module.exports = { createPembayaran, detailPembayaran, ListPembayaran, updatePembayaran };
+async function resetPerbulan () {
+  try {
+    await PembayaranController.destroy({where: {}})
+    console.log("Berhasil")
+  } catch (error) {
+    console.log(error)
+    return res.status(403).send("Terjadi Kesalahan")
+  }
+}
+
+cron.require("0 0 10 * *", resetPerbulan)
+
+module.exports = { createPembayaran, detailPembayaran, ListPembayaran, updatePembayaran, resetPerbulan };
