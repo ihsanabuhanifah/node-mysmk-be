@@ -2,22 +2,35 @@ const LaporanHarianPklModel = require("../../models").laporan_harian_pkl;
 const { RESPONSE_API } = require("../../utils/response");
 const response = new RESPONSE_API();
 const StudentModel = require("../../models").student;
+const laporanDiniyyahModel = require("../../models").laporan_diniyyah_harian;
 const { checkQuery } = require("../../utils/format");
 const { Op } = require("sequelize");
-const dayjs = require("dayjs")
+const dayjs = require("dayjs");
+const { createLaporanDiniyyah } = require("./LaporanDiniyyahHarianController");
 const createLaporanPkl = response.requestResponse(async (req, res) => {
-  let payload = req.body;
+  let { laporanDiniyyah, ...payload } = req.body;
   const laporanHarianPkl = await LaporanHarianPklModel.create({
     ...payload,
     student_id: req.student_id,
-    tanggal : dayjs(new Date()).format("YYYY-MM-DD"),
-    is_absen : true
+    tanggal: dayjs(new Date()).format("YYYY-MM-DD"),
+    is_absen: true,
   });
+
+  const laporanDiniyyahResult = await createLaporanDiniyyah(
+    req,
+    res,
+    laporanHarianPkl.id,
+    req.student_id
+  );
+
   return {
     statusCode: 201,
     status: "success",
     message: "Data Berhasil Diupload",
-    data: laporanHarianPkl,
+    data: {
+      laporanHarianPkl,
+      laporanDiniyyah: laporanDiniyyahResult,
+    },
   };
 });
 const updateLaporanPkl = response.requestResponse(async (req, res) => {
@@ -64,6 +77,11 @@ const laporanPklList = response.requestResponse(async (req, res) => {
         as: "siswa",
         model: StudentModel,
       },
+      {
+        require: true,
+        as: "laporan_diniyyah_harian",
+        model: laporanDiniyyahModel,
+      },
     ],
   });
 
@@ -86,7 +104,12 @@ const detailLaporanPkl = response.requestResponse(async (req, res) => {
         require: true,
         as: "siswa",
         model: StudentModel,
-        attributes : ['id', 'nama_siswa']
+        attributes: ["id", "nama_siswa"],
+      },
+      {
+        require: true,
+        as: "laporan_diniyyah_harian",
+        model: laporanDiniyyahModel,
       },
     ],
   });

@@ -80,11 +80,33 @@ const deteleTempatPkl = response.requestResponse(async (req, res) => {
 
 const detailTempatPkl = response.requestResponse(async (req, res) => {
   const { id } = req.params;
+  console.log("Executing Query:", TempatPklModel.findAndCountAll.toString());
   const tempatPkl = await TempatPklModel.findOne({
     where: {
       id: id,
     },
+    include: [
+      {
+        require: true,
+        as: "siswa",
+        model: StudentModel,
+        attributes: ["nama_siswa"],
+      },
+      {
+        model: TeacherModel,
+        require: true,
+        as: "teacher",
+        attributes: ["nama_guru"],
+      },
+      {
+        model: TeacherModel,
+        require: true,
+        as: "pembimbing",
+        attributes: ["nama_guru"],
+      },
+    ],
   });
+  
   return {
     message: `Berhasil menemukan data dengan id ${id}`,
     data: tempatPkl,
@@ -108,7 +130,13 @@ const listTempatPkl = response.requestResponse(async (req, res) => {
         model: TeacherModel,
         require: true,
         as: "teacher",
-        attributes: ["nama_guru"],
+        attributes: ["nama_guru", "id"],
+      },
+      {
+        model: TeacherModel,
+        require: true,
+        as: "pembimbing",
+        attributes: ["nama_guru", "id"],
       },
     ],
   });
