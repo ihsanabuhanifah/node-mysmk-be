@@ -37,8 +37,6 @@ module.exports = (sequelize, DataTypes) => {
         as: "hasil_belajar",
         foreignKey: "mapel_id",
       });
-
-
     }
   }
   mapel.init(
