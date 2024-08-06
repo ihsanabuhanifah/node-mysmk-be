@@ -1,9 +1,12 @@
 const KelasStudentModel = require("../../models").kelas_student;
+const StudentModel = require("../../models").student;
 const models = require("../../models");
-const { Op } = require("sequelize");
-
+const { Op, where } = require("sequelize");
+const UserModel = require("../../models").user;
 const { checkQuery } = require("../../utils/format");
 const excel = require("exceljs");
+const { RESPONSE_API } = require("../../utils/response");
+const response = new RESPONSE_API();
 
 async function listSiswa(req, res) {
   let {
@@ -129,8 +132,101 @@ const deleteSiswaKelas = async (req, res) => {
   }
 };
 
+const detailSiswa = response.requestResponse(async (req, res) => {
+  const { id } = req.params;
+  const siswa = await StudentModel.findOne({
+    where: {
+      id,
+    },
+
+    include: [
+      {
+        model: models.user,
+        require: true,
+        as: "user",
+        attributes: ["email"],
+      },
+    ],
+  });
+
+  if (!siswa) {
+    return {
+      statusCode: 422,
+      msg: "Siswa tidak ditemukan",
+    };
+  }
+
+  return {
+    msg: "Berhasil",
+    siswa,
+  };
+});
+
+const updateSiswa = response.requestResponse(async (req, res) => {
+  const { id } = req.params;
+
+  const {
+    nama_siswa,
+    nis,
+    nisn,
+    nik,
+    tempat_lahir,
+    tanggal_lahir,
+    alamat,
+    sekolah_asal,
+    anak_ke,
+    status,
+    angkatan,
+    tahub_ajaran,
+    keterangan,
+    user_id,
+    email,
+  } = req.body;
+
+  await UserModel.update(
+    {
+      name: nama_siswa,
+      email: email,
+    },
+    {
+      where: {
+        id: user_id,
+      },
+    }
+  );
+
+  await StudentModel.update(
+    {
+      nama_siswa,
+      nis,
+      nisn,
+      nik,
+      tempat_lahir,
+      tanggal_lahir,
+      alamat,
+      sekolah_asal,
+      anak_ke,
+      status,
+      angkatan,
+      tahub_ajaran,
+      keterangan,
+    },
+    {
+      where: {
+        id: id,
+      },
+    }
+  );
+
+  return {
+    msg: "Perbaharui data siswa berhasil",
+  };
+});
+
 module.exports = {
   listSiswa,
   createSiswaKelas,
   deleteSiswaKelas,
+  detailSiswa,
+  updateSiswa,
 };

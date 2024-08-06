@@ -317,9 +317,14 @@ const submitExam = response.requestResponse(async (req, res) => {
             point_siswa = point_siswa + item.point;
           }
         }
+
+        return {
+          ...jawab,
+          point : jawab.id === item.id ? item.point : 0
+        }
       });
     } else {
-      keterangan = "essay belum diberikan point";
+      keterangan = "terdapat essay belum diberikan point";
     }
   });
 

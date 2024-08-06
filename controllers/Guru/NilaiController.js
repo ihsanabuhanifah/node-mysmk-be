@@ -9,6 +9,156 @@ const { RESPONSE_API } = require("../../utils/response");
 
 const response = new RESPONSE_API();
 
+const submitExamResult = response.requestResponse(async (req, res) => {
+  const payload = req.body;
+
+  await Promise.all(
+    payload?.map(async (item) => {
+      await NilaiController.update({
+      
+        exam_result: item.exam_result,
+      },{
+        where : {
+          id : item.id
+        }
+      });
+    })
+  );
+
+  return {
+    msg : 'Berhasil'
+  };
+});
+
+const updateLastExam = response.requestResponse(async (req, res) => {
+  const { student_id, id, jawaban } = req.body;
+  const exam = await NilaiController.findOne({
+    where: {
+      id: id,
+      student_id: student_id,
+    },
+    include: [
+      {
+        model: models.ujian,
+        require: true,
+        as: "ujian",
+        attributes: ["status", "soal"],
+      },
+    ],
+  });
+
+  if (exam.status !== "finish") {
+    return {
+      statusCode: 422,
+      msg: "Ujian belum berakhir",
+    };
+  }
+
+  let soal = await BankSoalController.findAll({
+    where: {
+      id: {
+        [Op.in]: JSON.parse(exam.ujian.soal),
+      },
+    },
+  });
+
+  soal = soal.map((item) => {
+    return {
+      id: item.id,
+      soal: item.soal,
+      tipe: item.tipe,
+      jawaban: item.jawaban,
+      point: item.point,
+    };
+  });
+
+  let total_point = 0;
+  let point_siswa = 0;
+  let keterangan = "";
+  let nilai = 0;
+  let jawaban_siswa;
+  await soal.map((item) => {
+    total_point = total_point + item.point;
+    jawaban_siswa = jawaban?.map((jawab) => {
+      if (jawab.id === item.id) {
+        if (item.tipe !== "ES") {
+          if (jawab.jawaban === item.jawaban) {
+            point_siswa = point_siswa + item.point;
+          }
+        } else {
+          if (!!jawab.point === true) {
+            point_siswa = point_siswa + (Number(jawab.point) || 0);
+          } else {
+            keterangan = " Terdapat essay belum diberikan point";
+          }
+        }
+      }
+      return jawab;
+    });
+  });
+
+  nilai = (Number(point_siswa) / Number(total_point)) * 100;
+
+  nilai = Number(nilai.toFixed(2));
+  let exam_result = [];
+  if (!!exam.exam === true) {
+    exam_result = JSON.parse(exam.exam);
+    exam_result[exam_result.length - 1] = nilai;
+  } else {
+    exam_result = [nilai];
+  }
+
+  if (!!exam.exam1 === false) {
+    await NilaiController.update(
+      {
+        jam_submit: new Date(),
+        keterangan: keterangan,
+        exam: JSON.stringify(exam_result),
+        status: "finish",
+
+        remidial_count: 0,
+        jawaban: JSON.stringify(jawaban_siswa),
+      },
+      {
+        where: {
+          id: id,
+        },
+      }
+    );
+
+    return {
+      msg: "Jawaban berhasil tersimpan",
+      nilai: nilai,
+
+      keterangan: keterangan,
+      total_point,
+      point_siswa,
+    };
+  }
+});
+
+const getSoal = response.requestResponse(async (req, res) => {
+  const exam = await UjianController.findOne({
+    attributes: ["soal"],
+    where: {
+      id: req.params.id,
+    },
+  });
+
+  let soal = await BankSoalController.findAll({
+    where: {
+      id: {
+        [Op.in]: JSON.parse(exam.soal),
+      },
+    },
+  });
+  return {
+    status: "Success",
+    msg: "Soal ditemukan",
+    soal,
+  };
+});
+
 const remidial = response.requestResponse(async (req, res) => {
   const { payload } = req.body;
 
@@ -102,4 +252,7 @@ module.exports = {
   listPenilaianByTeacher,
   remidial,
   refreshCount,
+  getSoal,
+  updateLastExam,
+  submitExamResult,
 };

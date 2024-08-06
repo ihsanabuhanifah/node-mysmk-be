@@ -22,6 +22,7 @@ module.exports = (sequelize, DataTypes) => {
   }
   tempat_pkl.init(
     {
+      nama_perusahaan: DataTypes.STRING,
       kota: DataTypes.STRING,
       kecamatan: DataTypes.STRING,
       alamat: DataTypes.TEXT,
@@ -37,12 +38,13 @@ module.exports = (sequelize, DataTypes) => {
       student_id: DataTypes.INTEGER,
       created_at : DataTypes.DATE,
       updated_at : DataTypes.DATE,
-      long : DataTypes.DECIMAL(10, 2),
-      latitude : DataTypes.DECIMAL(10, 2)
+      long : DataTypes.DECIMAL(10, 8),
+      latitude : DataTypes.DECIMAL(10, 8)
     },
     {
       sequelize,
       modelName: "tempat_pkl",
+      tableName : "tempat_pkl"
     }
   );
   return tempat_pkl;

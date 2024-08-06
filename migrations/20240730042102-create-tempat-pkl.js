@@ -26,6 +26,10 @@ module.exports = {
           as: "created_by",
         },
       },
+      nama_perusahaan: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
       kota: {
         type: Sequelize.STRING,
         allowNull: false,
@@ -80,11 +84,11 @@ module.exports = {
       },
       long: {
         allowNull: false,
-        type: Sequelize.DECIMAL(10, 2),
+        type: Sequelize.DECIMAL(10, 8),
       },
       latitude: {
         allowNull: false,
-        type: Sequelize.DECIMAL(10, 2),
+        type: Sequelize.DECIMAL(10, 8),
       },
     });
   },

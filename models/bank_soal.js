@@ -25,7 +25,7 @@ module.exports = (sequelize, DataTypes) => {
     materi: DataTypes.STRING,
     mapel_id: DataTypes.INTEGER,
     teacher_id: DataTypes.INTEGER,
-    soal: DataTypes.STRING,
+    file: DataTypes.STRING,
     tipe: DataTypes.STRING,
     soal: DataTypes.TEXT,
     jawaban : DataTypes.STRING,

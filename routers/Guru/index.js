@@ -74,6 +74,16 @@ const {
 } = require("../../controllers/Guru/LaporanController");
 //absensi
 
+//Tempat Pkl
+
+const {
+  createTempatPkl,
+  updateTempatPkl,
+  deteleTempatPkl,
+  detailTempatPkl,
+  listTempatPkl,
+} = require("../../controllers/Guru/TempatPklController");
+
 //jadwal
 
 const {
@@ -86,6 +96,8 @@ const {
   listSiswa,
   deleteSiswaKelas,
   createSiswaKelas,
+  detailSiswa,
+  updateSiswa,
 } = require("../../controllers/Guru/SiswaController");
 const {
   listHalaqohGroup,
@@ -123,8 +135,20 @@ const {
   submitByAdmin,
 } = require("../../controllers/Guru/KehadiranGuruController");
 const adminAccessMiddleware = require("../../middleware/adminAccessMiddleware");
-const { listPenilaianByTeacher, remidial, refreshCount } = require("../../controllers/Guru/NilaiController");
 
+const {
+  listPenilaianByTeacher,
+  remidial,
+  refreshCount,
+  getSoal,
+  updateLastExam,
+  submitExamResult,
+} = require("../../controllers/Guru/NilaiController");
+const {
+  getListWali,
+  createBulkWali,
+} = require("../../controllers/Guru/WaliController");
+const { listReport, generateReport } = require("../../controllers/Guru/RaportController");
 
 guru.use(guruAccessMiddleware);
 
@@ -209,6 +233,9 @@ guru.get("/laporan/guru-piket/notifikasi", notifikasiPiket);
 //siswa
 
 guru.get("/siswa/list", listSiswa);
+guru.get("/siswa/detail/:id", detailSiswa);
+guru.put("/siswa/update/:id", updateSiswa);
+guru.put("/siswa/kelas/delete/:id", deleteSiswaKelas);
 guru.post("/siswa/kelas/create", createSiswaKelas);
 guru.delete("/siswa/kelas/delete/:id", deleteSiswaKelas);
 
@@ -239,18 +266,32 @@ guru.get("/ujian/list", listUjian);
 guru.get("/ujian/detail/:id", detailUjian);
 guru.put("/ujian/update/:id", updateUjian);
 guru.delete("/ujian/delete/:id", deleteUjian);
-guru.post("/nilai/create", createPenilaian)
-
+guru.post("/nilai/create", createPenilaian);
+guru.put("/nilai/update-last-exam", updateLastExam);
+guru.put("/nilai/exam-result", submitExamResult);
 
 //nilai
 
 guru.get("/nilai/list/teacher", listPenilaianByTeacher);
 guru.put("/nilai/remidial/teacher", remidial);
 guru.put("/nilai/refresh/teacher", refreshCount);
+guru.get("/nilai/soal/teacher/:id", getSoal);
 
+//report
+
+guru.get("/report/list", listReport)
+guru.post("/report/generate", generateReport)
 
 //tempat_pkl
+guru.post("/tempat-pkl/create", createTempatPkl);
+guru.put("/tempat-pkl/update/:id", updateTempatPkl);
+guru.delete("/tempat-pkl/delete/:id", deteleTempatPkl);
+guru.get("/tempat-pkl/detail/:id", detailTempatPkl);
+guru.get("/tempat-pkl/list", listTempatPkl);
 
+// Walisantri
 
+guru.get("/walisantri/list", getListWali);
+guru.post("/walisantri/create", createBulkWali);
 
 module.exports = guru;

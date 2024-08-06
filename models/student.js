@@ -36,10 +36,7 @@ module.exports = (sequelize, DataTypes) => {
         as: "pelanggaran",
         foreignKey: "student_id",
       });
-      student.hasMany(models.hasil_belajar, {
-        as: "hasil_belajar",
-        foreignKey: "student_id",
-      });
+
       student.hasMany(models.prestasi, {
         as: "prestasi",
         foreignKey: "student_id",
@@ -54,6 +51,10 @@ module.exports = (sequelize, DataTypes) => {
       });
       student.hasMany(models.absensi_sholat, {
         as: "absensi_sholat",
+        foreignKey: "student_id",
+      });
+      student.hasMany(models.hasil_belajar, {
+        as: "hasil_belajar",
         foreignKey: "student_id",
       });
     }
