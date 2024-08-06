@@ -84,6 +84,9 @@ const {
   listTempatPkl,
 } = require("../../controllers/Guru/TempatPklController");
 
+// Laporan harian pkl
+const { laporanPklList, detailLaporanPkl } = require("../../controllers/Guru/LaporanHarianPklController")
+
 //jadwal
 
 const {
@@ -291,7 +294,13 @@ guru.get("/tempat-pkl/list", listTempatPkl);
 
 // Walisantri
 
+
+// Laporan harian pkl
+guru.get("/laporan-harian-pkl/list", laporanPklList)
+guru.get("/laporan-harian-pkl/detail/:id", detailLaporanPkl)
+
 guru.get("/walisantri/list", getListWali);
 guru.post("/walisantri/create", createBulkWali);
+
 
 module.exports = guru;

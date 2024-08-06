@@ -18,6 +18,10 @@ module.exports = (sequelize, DataTypes) => {
         as: "teacher",
         foreignKey: "created_by",
       });
+      tempat_pkl.belongsTo(models.teacher, {
+        as: "pembimbing",
+        foreignKey: "pembimbing_id",
+      });
     }
   }
   tempat_pkl.init(
@@ -33,18 +37,19 @@ module.exports = (sequelize, DataTypes) => {
       no_hp: DataTypes.STRING,
       kode_pos: DataTypes.INTEGER,
       penanggung_jawab_perusahaan: DataTypes.STRING,
-      penanggung_jawab_sekolah: DataTypes.STRING,
+      pembimbing_id: DataTypes.STRING,
       created_by: DataTypes.INTEGER,
       student_id: DataTypes.INTEGER,
-      created_at : DataTypes.DATE,
-      updated_at : DataTypes.DATE,
-      long : DataTypes.DECIMAL(10, 8),
-      latitude : DataTypes.DECIMAL(10, 8)
+      created_at: DataTypes.DATE,
+      updated_at: DataTypes.DATE,
+      longtitude: DataTypes.DECIMAL(10, 8),
+      latitude: DataTypes.DECIMAL(10, 8),
     },
     {
       sequelize,
       modelName: "tempat_pkl",
-      tableName : "tempat_pkl"
+      tableName: "tempat_pkl",
+      timestamps: false,
     }
   );
   return tempat_pkl;

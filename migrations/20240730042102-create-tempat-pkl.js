@@ -26,6 +26,15 @@ module.exports = {
           as: "created_by",
         },
       },
+      pembimbing_id: {
+        type: Sequelize.INTEGER,
+        onDelete: "CASCADE",
+        references: {
+          model: "teachers",
+          key: "id",
+          as: "pembimbing_id",
+        },
+      },
       nama_perusahaan: {
         type: Sequelize.STRING,
         allowNull: false,
@@ -70,19 +79,15 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      penanggung_jawab_sekolah: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
       created_at: {
         allowNull: false,
         type: Sequelize.DATE,
       },
       updated_at: {
-        allowNull: false,
+        allowNull: true,
         type: Sequelize.DATE,
       },
-      long: {
+      longtitude: {
         allowNull: false,
         type: Sequelize.DECIMAL(10, 8),
       },
