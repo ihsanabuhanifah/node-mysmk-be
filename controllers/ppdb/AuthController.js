@@ -19,14 +19,14 @@ async function register(req, res) {
   const payload = req.body;
   const { email, secretKey, no_hp } = payload;
   payload.password = await bcrypt.hashSync(req.body.password, 10);
-  console.log(payload);
+  console.log(`user:`, payload);
 
   try {
-    const existingUser = await userModel.findOne({
+    const existingUserByEmail = await userModel.findOne({
       where: { email: email },
     });
 
-    if (existingUser) {
+    if (existingUserByEmail) {
       return res.status(400).json({
         status: "fail",
         msg: "Email sudah terdaftar",
@@ -44,33 +44,30 @@ async function register(req, res) {
       });
     }
 
-    await userModel.create(payload);
-    const user = await userModel.findOne({
-      where: {
-        email: email,
-        // no_hp: no_hp,
-      },
-      attributes: ["id", "name", "email", "no_hp"],
+    const newUser = await userModel.create(payload);
+
+    await userRoleModel.create({
+      user_id: newUser.id,
+      role_id: 11, 
     });
 
-    const userRole = await userRoleModel.create({
-      user_id: user.id,
-      role_id: 11,
-    });
-
-    console.log(user, userRole);
+    console.log(`User created and role assigned`);
     return res.status(201).json({
       status: "Success",
       msg: "Registrasi Berhasil",
     });
   } catch (err) {
     console.log(err);
+    return res.status(500).json({
+      status: "fail",
+      msg: "Terjadi Kesalahan",
+    });
   }
 }
 
 async function login(req, res) {
   try {
-    let { email, no_hp, password, loginAs } = req.body;
+    let { email, no_hp, password } = req.body;
 
     if (!email && !no_hp) {
       return res.status(400).json({
@@ -104,38 +101,28 @@ async function login(req, res) {
         msg: "Password tidak sesuai",
       });
     }
-
-    const roleName = await RolesModel.findByPk(loginAs);
-    if (!roleName) {
-      return res.status(422).json({
-        status: "fail",
-        msg: "Role tidak ditemukan",
-      });
-    }
-
-    const checkRole = await userRoleModel.findOne({
-      attributes: ["id", "role_id"],
-      where: {
-        [Op.and]: [{ user_id: user.id }, { role_id: loginAs }],
+    const userRole = await userRoleModel.findOne({
+      where: { user_id: user.id },
+      include: {
+        model: RolesModel,
+        as: "role",
+        attributes: ["role_name"],
       },
     });
+    const roleName =
+      userRole && userRole.role
+        ? userRole.role.role_name
+        : "Role tidak ditemukan";
 
-    console.log(`role:`, roleName.role_name);
+    console.log(`role:`, roleName);
 
-    if (!checkRole) {
-      return res.status(422).json({
-        status: "fail",
-        msg: `Anda tidak memiliki role sebagai ${roleName.role_name}`,
-      });
-    }
     const token = JWT.sign(
       {
         email: user.email,
         name: user.name,
         no_hp: user.no_hp,
         id: user.id,
-        role: roleName.role_name,
-        roleId: loginAs,
+        role: roleName,
       },
       process.env.JWT_SECRET_ACCESS_TOKEN,
       { expiresIn: "7d" }
@@ -149,7 +136,7 @@ async function login(req, res) {
         name: user.name,
         email: user.email,
         no_hp: user.no_hp,
-        role: roleName.role_name,
+        role: roleName,
       },
       token: token,
     };
