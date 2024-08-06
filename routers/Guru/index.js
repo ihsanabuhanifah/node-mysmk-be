@@ -148,7 +148,7 @@ const {
   getListWali,
   createBulkWali,
 } = require("../../controllers/Guru/WaliController");
-const { listReport } = require("../../controllers/Guru/RaportController");
+const { listReport, generateReport } = require("../../controllers/Guru/RaportController");
 
 guru.use(guruAccessMiddleware);
 
@@ -280,6 +280,7 @@ guru.get("/nilai/soal/teacher/:id", getSoal);
 //report
 
 guru.get("/report/list", listReport)
+guru.post("/report/generate", generateReport)
 
 //tempat_pkl
 guru.post("/tempat-pkl/create", createTempatPkl);

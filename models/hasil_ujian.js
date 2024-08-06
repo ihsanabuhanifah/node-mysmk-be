@@ -12,6 +12,18 @@ module.exports = (sequelize, DataTypes) => {
         as: "teacher",
         foreignKey: "teacher_id",
       });
+      hasil_belajar.belongsTo(models.student, {
+        as: "siswa",
+        foreignKey: "student_id",
+      });
+      hasil_belajar.belongsTo(models.ta, {
+        as: "tahun_ajaran",
+        foreignKey: "ta_id",
+      });
+      hasil_belajar.belongsTo(models.kelas, {
+        as: "kelas",
+        foreignKey: "kelas_id",
+      });
 
       hasil_belajar.belongsTo(models.mapel, {
         as: "mapel",
