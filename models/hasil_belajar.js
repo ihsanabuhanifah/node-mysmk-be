@@ -12,6 +12,18 @@ module.exports = (sequelize, DataTypes) => {
         as: "teacher",
         foreignKey: "teacher_id",
       });
+      hasil_belajar.belongsTo(models.student, {
+        as: "siswa",
+        foreignKey: "student_id",
+      });
+      hasil_belajar.belongsTo(models.ta, {
+        as: "tahun_ajaran",
+        foreignKey: "ta_id",
+      });
+      hasil_belajar.belongsTo(models.kelas, {
+        as: "kelas",
+        foreignKey: "kelas_id",
+      });
 
       hasil_belajar.belongsTo(models.mapel, {
         as: "mapel",
@@ -24,6 +36,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       teacher_id: DataTypes.INTEGER,
       student_id: DataTypes.INTEGER,
+      kelas_id: DataTypes.INTEGER,
       mapel_id: DataTypes.INTEGER,
       nilai: DataTypes.INTEGER,
       deskripsi: DataTypes.STRING,
@@ -33,6 +46,7 @@ module.exports = (sequelize, DataTypes) => {
       rata_nilai_pts: DataTypes.INTEGER,
       rata_nilai_pas: DataTypes.INTEGER,
       rata_nilai_us: DataTypes.INTEGER,
+      ta_id: DataTypes.INTEGER,
       rata_nilai_kehadiran: DataTypes.INTEGER,
     },
     {
