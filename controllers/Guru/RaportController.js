@@ -15,21 +15,33 @@ const StudentModel = require("../../models").kelas_student;
 
 const response = new RESPONSE_API();
 function calculateAveragesForAllStudents(data) {
-  const students = {};
+  const results = {};
 
-  const mapelId = data[0].mapel_id;
-  const guruId = data[0].teacher_id;
-  const kelasId = data[0].kelas_id;
-  const taId = data[0].ta_id;
-
-  // Group data by student ID and exam type
+  // Iterate through the data to group it by student_id, mapel_id, teacher_id, kelas_id, and ta_id
   data.forEach((entry) => {
     const studentId = entry.student_id;
-
+    const mapelId = entry.mapel_id;
+    const guruId = entry.teacher_id;
+    const kelasId = entry.kelas_id;
+    const taId = entry.ta_id;
     const examType = entry.jenis_ujian;
+    const examResult = parseFloat(entry.exam_result);
 
-    if (!students[studentId]) {
-      students[studentId] = {
+    // Initialize the nested structure if it doesn't exist
+    if (!results[studentId]) {
+      results[studentId] = {};
+    }
+    if (!results[studentId][mapelId]) {
+      results[studentId][mapelId] = {};
+    }
+    if (!results[studentId][mapelId][guruId]) {
+      results[studentId][mapelId][guruId] = {};
+    }
+    if (!results[studentId][mapelId][guruId][kelasId]) {
+      results[studentId][mapelId][guruId][kelasId] = {};
+    }
+    if (!results[studentId][mapelId][guruId][kelasId][taId]) {
+      results[studentId][mapelId][guruId][kelasId][taId] = {
         harian: { totalScore: 0, count: 0 },
         tugas: { totalScore: 0, count: 0 },
         projek: { totalScore: 0, count: 0 },
@@ -39,52 +51,57 @@ function calculateAveragesForAllStudents(data) {
       };
     }
 
-    if (students[studentId][examType]) {
-      students[studentId][examType].totalScore += parseFloat(entry.exam_result);
-      students[studentId][examType].count += 1;
+    // Add the exam result to the correct place in the nested structure
+    const studentData = results[studentId][mapelId][guruId][kelasId][taId];
+    if (studentData[examType]) {
+      studentData[examType].totalScore += examResult;
+      studentData[examType].count += 1;
     }
   });
 
-  // Calculate averages for each student
-  const results = [];
-  for (const studentId in students) {
-    if (students.hasOwnProperty(studentId)) {
-      const studentData = students[studentId];
-      const averages = {
-        student_id: parseInt(studentId),
-        kelas_id: parseInt(kelasId),
-        mapel_id: parseInt(mapelId),
-        teacher_id: parseInt(guruId),
-        ta_id: parseInt(taId),
-        rata_nilai_tugas: studentData.tugas.count
-          ? (studentData.tugas.totalScore / studentData.tugas.count).toFixed(2)
-          : null,
-        rata_nilai_harian: studentData.harian.count
-          ? (studentData.harian.totalScore / studentData.harian.count).toFixed(
-              2
-            )
-          : null,
-        rata_nilai_projek: studentData.projek.count
-          ? (studentData.projek.totalScore / studentData.projek.count).toFixed(
-              2
-            )
-          : null,
-        rata_nilai_pts: studentData.pts.count
-          ? (studentData.pts.totalScore / studentData.pts.count).toFixed(2)
-          : null,
-        rata_nilai_pas: studentData.pas.count
-          ? (studentData.pas.totalScore / studentData.pas.count).toFixed(2)
-          : null,
-        rata_nilai_us: studentData.us.count
-          ? (studentData.us.totalScore / studentData.us.count).toFixed(2)
-          : null,
-      };
-      results.push(averages);
+  // Calculate averages for each student and their respective identifiers
+  const averagesList = [];
+  for (const studentId in results) {
+    for (const mapelId in results[studentId]) {
+      for (const guruId in results[studentId][mapelId]) {
+        for (const kelasId in results[studentId][mapelId][guruId]) {
+          for (const taId in results[studentId][mapelId][guruId][kelasId]) {
+            const studentData = results[studentId][mapelId][guruId][kelasId][taId];
+            const averages = {
+              student_id: parseInt(studentId),
+              mapel_id: parseInt(mapelId),
+              teacher_id: parseInt(guruId),
+              kelas_id: parseInt(kelasId),
+              ta_id: parseInt(taId),
+              rata_nilai_tugas: studentData.tugas.count
+                ? (studentData.tugas.totalScore / studentData.tugas.count).toFixed(2)
+                : null,
+              rata_nilai_harian: studentData.harian.count
+                ? (studentData.harian.totalScore / studentData.harian.count).toFixed(2)
+                : null,
+              rata_nilai_projek: studentData.projek.count
+                ? (studentData.projek.totalScore / studentData.projek.count).toFixed(2)
+                : null,
+              rata_nilai_pts: studentData.pts.count
+                ? (studentData.pts.totalScore / studentData.pts.count).toFixed(2)
+                : null,
+              rata_nilai_pas: studentData.pas.count
+                ? (studentData.pas.totalScore / studentData.pas.count).toFixed(2)
+                : null,
+              rata_nilai_us: studentData.us.count
+                ? (studentData.us.totalScore / studentData.us.count).toFixed(2)
+                : null,
+            };
+            averagesList.push(averages);
+          }
+        }
+      }
     }
   }
 
-  return results;
+  return averagesList;
 }
+
 const listReport = response.requestResponse(async (req, res) => {
   const { ta_id, mapel_id, kelas_id, student_id } = req.query;
   const report = await ReportController.findAll({
