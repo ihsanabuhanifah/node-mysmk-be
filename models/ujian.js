@@ -33,6 +33,7 @@ module.exports = (sequelize, DataTypes) => {
   };
   ujian.init({
     jenis_ujian: DataTypes.STRING,
+    judul_ujian: DataTypes.STRING,
     tipe_ujian: DataTypes.STRING,
     ta_id: DataTypes.STRING,
     mapel_id: DataTypes.INTEGER,
