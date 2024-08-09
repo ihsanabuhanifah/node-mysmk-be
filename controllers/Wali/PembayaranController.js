@@ -1,23 +1,67 @@
 const PembayaranController = require("../../models").pembayaran_spp;
 const models = require("../../models");
+const pembayaranModel = require("../../models").pembayaran_spp;
 const cron = require("node-cron")
 
-const createPembayaran = async (req, res) => {
+const createKartuSpp = async (req, res) => {
   try {
-    const payload = req.body;
 
-    payload.status = "Belum Valid";
+    const {payload} = req.body;
 
-    const buat = await PembayaranController.create({
-      ...payload,
-      walsan_id: req.walsan_id,
-      user_id: req.user_id,
-    });
+    let gagal = 0;
+    let berhasil = 0;
+
+    if (!Array.isArray(payload)) {
+      return res.status(400).json({
+        status: "Fail",
+        msg: "Invalid payload format. Payload should be an array.",
+      });
+    }
+
+    const months = [
+      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ];
+
+    await Promise.all(
+      payload.map(async (item) => {
+        try {
+          const bulan = months.map((month) => ({
+            student_id: item.student_id,
+            ta_id : item.ta_id,
+            nominal: item.nominal,
+            status: "Belum",
+            bulan: month
+          }))
+
+          console.log("gagal = ",bulan)
+
+          const buat = await PembayaranController.bulkCreate(bulan);
+
+          
+
+          if (buat) {
+            berhasil = berhasil + 1;
+          } else {
+            console.log("Error:",item);
+            gagal = gagal + 1;
+          }
+        } catch (error) {
+          console.log(item, "Error :", error)
+          gagal = gagal + 1;
+          
+        }
+      })
+    )
+     
+    
 
     return res.status(201).json({
       status: "Success",
-      msg: "Berhasil Mengirim Pembayaran",
-      data: buat,
+      berhasil,
+      gagal,
+      msg: `Berhasil Membuat Kartu Pembayaran Sebanyak ${berhasil} kali dan Gagal Sebanyak ${gagal} kali`,
+      data: payload
     });
   } catch (error) {
     console.log(error);
@@ -32,22 +76,36 @@ const detailPembayaran = async (req, res) => {
     const pembayaran = await PembayaranController.findOne({
       where: {
          id: id,
-        user_id: req.user_id
+        walsan_id: req.walsan_id
        },
       include: [
         {
           model: models.parent,
           require: true,
-          as: "parent",
+          as: "walsan",
           attributes: ["id", "nama_wali"],
         },
         {
-          model: models.user,
+          model: models.student,
           require: true,
-          as: "user",
-          attributes: ["id", "email"],
+          as: "murid",
+          attributes: ["id", "nama_siswa"],
         },
+        {
+          model: models.ta,
+          require: true,
+          as: "ta",
+          attributes: ["id", "nama_tahun_ajaran"],
+        },
+        {
+          model: models.teacher,
+          require: true,
+          as: "guru",
+          attributes: ["id", "nama_guru", "status"]
+        }
       ],
+
+      order: ["id"]
     });
 
     return res.json({
@@ -70,19 +128,31 @@ const ListPembayaran = async (req, res) => {
       ...(page !== undefined && { offset: page }),
       include: [
         {
-            model: models.parent,
-            require: true,
-            as: "parent",
-            attributes: ["id", "nama_wali"]
+          model: models.parent,
+          require: true,
+          as: "walsan",
+          attributes: ["id", "nama_wali"],
         },
         {
-            model: models.user,
-            require: true,
-            as: "user",
-            attributes: ["id", "email"]
+          model: models.student,
+          require: true,
+          as: "murid",
+          attributes: ["id", "nama_siswa"],
+        },
+        {
+          model: models.ta,
+          require: true,
+          as: "ta",
+          attributes: ["id", "nama_tahun_ajaran"],
+        },
+        {
+          model: models.teacher,
+          require: true,
+          as: "guru",
+          attributes: ["id", "nama_guru", "status"]
         }
       ],
-      order: ["id"],
+      order: ["id","student_id"],
 
       
     });
@@ -108,27 +178,27 @@ const ListPembayaran = async (req, res) => {
   }
 };
 
-async function updatePembayaran (req, res) {
+async function createPembayaran (req, res) {
     try {
         const {id} = req.params;
-        const {payload} = req.body;
+        const {walsan_id, foto} = req.body;
 
         const detail = await PembayaranController.findOne({
             where: {
                 id: id,
-                user_id: req.user_id
             },
 
         });
 
         if (!detail) {
             return res.json({
-                status: "Pembayaran Belum Ditemukan"
+                status: "Kartu Santri Belum Ditambahkan"
             })
         }
 
         const proses = await PembayaranController.update({
-            payload
+        walsan_id: walsan_id,
+        foto: foto
         }, {
             where: {
                 id:id
@@ -149,16 +219,54 @@ async function updatePembayaran (req, res) {
 
 }
 
-async function resetPerbulan () {
+
+async function updateAprroval (req, res) {
   try {
-    await PembayaranController.destroy({where: {}})
-    console.log("Berhasil")
+    const {id} = req.params;
+    const {tanggal_konfirmasi} = req.body;
+
+    const detail = await PembayaranController.findOne({
+      where: {id: id,
+        teacher_id : req.teacher_id
+      }
+    })
+
+    if (!detail) {
+      return res.json({status: "Belum Menemukan Kartu Pembayaran"})
+    }
+
+    const proses = await PembayaranController.update({
+      where: {
+        id: id
+      },
+      teacher_id: req.teacher_id,
+      tanggal_konfirmasi: tanggal_konfirmasi
+    })
+
+
+    return res.status(201).json({
+      status: "Success",
+      msg: "Berhasil Menyetujui Pembayaran",
+      data: detail
+    })
+
   } catch (error) {
     console.log(error)
     return res.status(403).send("Terjadi Kesalahan")
   }
 }
 
-cron.require("0 0 10 * *", resetPerbulan)
 
-module.exports = { createPembayaran, detailPembayaran, ListPembayaran, updatePembayaran, resetPerbulan };
+// async function resetPerbulan () {
+//   try {
+//     await PembayaranController.destroy({where: {}})
+//     console.log("Berhasil")
+//   } catch (error) {
+//     console.log(error)
+//     return res.status(403).send("Terjadi Kesalahan")
+//   }
+// }
+
+module.exports = { createKartuSpp, detailPembayaran, ListPembayaran, createPembayaran, updateAprroval};
+
+
