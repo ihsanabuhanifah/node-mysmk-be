@@ -43,6 +43,7 @@ module.exports = {
       },
       dzikir_pagi: {
         allowNull: false,
+        defaultValue : false,
         type: Sequelize.BOOLEAN,
       },
       dzikir_petang: {
@@ -69,6 +70,7 @@ module.exports = {
         allowNull: false,
         type: Sequelize.BOOLEAN,
       },
+      
     });
   },
   down: async (queryInterface, Sequelize) => {
