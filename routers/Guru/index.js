@@ -99,6 +99,7 @@ const {
   detailSiswa,
   updateSiswa,
   getHasilBelajar,
+  detailHasilBelajar,
 } = require("../../controllers/Guru/SiswaController");
 const {
   listHalaqohGroup,
@@ -241,6 +242,7 @@ guru.post("/siswa/kelas/create", createSiswaKelas);
 guru.delete("/siswa/kelas/delete/:id", deleteSiswaKelas);
 // task rizky
 guru.get("/siswa/hasil-belajar/:id", getHasilBelajar);
+guru.get("/siswa/detail-hasil-belajar/:id/:id_siswa", detailHasilBelajar);
 
 //list
 

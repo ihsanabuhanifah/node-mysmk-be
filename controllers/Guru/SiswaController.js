@@ -204,7 +204,7 @@ const updateSiswa = response.requestResponse(async (req, res) => {
 	}
 })
 
-// task detail nilai
+// task rizky
 const getHasilBelajar = async (req, res) => {
 	let { id } = req.params
 	let { nama_mapel, page, pageSize, ta_id } = req.query
@@ -253,6 +253,39 @@ const getHasilBelajar = async (req, res) => {
 	})
 }
 
+const detailHasilBelajar = async (req, res) => {
+  const { id, id_siswa } = req.params;
+
+  console.log(req.params)
+
+  const result = await nilaiModel.findAll({
+    where: { mapel_id: id, student_id: id_siswa },
+    include: [
+      {
+        model: mapelModel,
+        as: 'mapel',
+        attributes: ['nama_mapel', 'kategori']
+      },
+      {
+        model: ujianModel,
+        as: 'ujian'
+      }
+    ]
+  })
+
+  if(result.length === 0) {
+    return res.json({
+      status: 'Gagal mendapatkan data',
+      data: null
+    })
+  }
+
+  return res.json({
+    status: 'Success',
+    data: result
+  })
+}
+
 module.exports = {
 	listSiswa,
 	createSiswaKelas,
@@ -260,4 +293,5 @@ module.exports = {
 	detailSiswa,
 	updateSiswa,
 	getHasilBelajar,
+  detailHasilBelajar
 }
