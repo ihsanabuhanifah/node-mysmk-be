@@ -53,9 +53,7 @@ wali.put("/pulang/update/:id", updateIzinPulang);
 //notice
 wali.get("/notice/list", getNotice);
 //Pembayaran
-// wali.post("/pembayaran/createKartu", createKartuSpp);
-// wali.get("/pembayaran/list", ListPembayaran);
-// wali.get("/pembayaran/detail/:id", detailPembayaran);
-// wali.put("/pembayaran/update/:id", updatePembayaran);
-
+wali.get("/pembayaran/list", ListPembayaran);
+wali.get("/pembayaran/detail/:id", detailPembayaran);
+wali.put("/pembayaran/bayar/:id", createPembayaran)
 module.exports = wali;
