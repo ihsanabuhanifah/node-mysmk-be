@@ -309,6 +309,6 @@ guru.get("/walisantri/detail/:id", detailWali)
 // Pembayaran
 guru.get("/pembayaran/list", ListPembayaran);
 guru.post("/pembayaran/createKartu", createKartuSpp);
-guru.put("/pembayaran/persetujuan", updateAprroval)
+guru.put("/pembayaran/persetujuan/:id", updateAprroval);
 
 module.exports = guru;

@@ -75,8 +75,7 @@ const detailPembayaran = async (req, res) => {
 
     const pembayaran = await PembayaranController.findOne({
       where: {
-         id: id,
-        walsan_id: req.walsan_id
+         id: id
        },
       include: [
         {
@@ -226,7 +225,8 @@ async function updateAprroval (req, res) {
     const {tanggal_konfirmasi} = req.body;
 
     const detail = await PembayaranController.findOne({
-      where: {id: id,
+      where: {
+        id: id,
         teacher_id : req.teacher_id
       }
     })
@@ -236,11 +236,11 @@ async function updateAprroval (req, res) {
     }
 
     const proses = await PembayaranController.update({
+      teacher_id: req.teacher_id,
+      tanggal_konfirmasi: tanggal_konfirmasi,
       where: {
         id: id
       },
-      teacher_id: req.teacher_id,
-      tanggal_konfirmasi: tanggal_konfirmasi
     })
 
 
