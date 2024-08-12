@@ -9,6 +9,27 @@ const { RESPONSE_API } = require("../../utils/response");
 
 const response = new RESPONSE_API();
 
+const submitExamResult = response.requestResponse(async (req, res) => {
+  const payload = req.body;
+
+  await Promise.all(
+    payload?.map(async (item) => {
+      await NilaiController.update({
+      
+        exam_result: item.exam_result,
+      },{
+        where : {
+          id : item.id
+        }
+      });
+    })
+  );
+
+  return {
+    msg : 'Berhasil'
+  };
+});
+
 const updateLastExam = response.requestResponse(async (req, res) => {
   const { student_id, id, jawaban } = req.body;
   const exam = await NilaiController.findOne({
@@ -77,7 +98,7 @@ const updateLastExam = response.requestResponse(async (req, res) => {
   });
 
   nilai = (Number(point_siswa) / Number(total_point)) * 100;
-  
+
   nilai = Number(nilai.toFixed(2));
   let exam_result = [];
   if (!!exam.exam === true) {
@@ -233,4 +254,5 @@ module.exports = {
   refreshCount,
   getSoal,
   updateLastExam,
+  submitExamResult,
 };

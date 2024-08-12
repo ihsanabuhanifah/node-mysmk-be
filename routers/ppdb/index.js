@@ -2,16 +2,23 @@ const express = require("express");
 const calonSantriAccessMiddleware = require("../../middleware/calonSantriAccessMiddleware");
 
 const ppdb = express.Router();
-
-const { login, register } = require("../../controllers/ppdb/AuthController");
-const { registerValidation } = require("../../validator/auth");
 const {
   createInfoCalsan,
   updateInfoCalsan,
   getDetailCalsan,
 } = require("../../controllers/ppdb/InformasiCalsanController");
+const {
+  createTestimoni,
+  updateTestimoni,
+  deleteTestimoni,
+  getDetailTestimoni,
+  listTestimoni,
+} = require("../../controllers/ppdb/testimoniController");
 const { check } = require("express-validator");
 const validateFields = require("./validateFields");
+const {
+  createMitraSekolah,
+} = require("../../controllers/ppdb/mitraSekolahController");
 
 const validation = [
   check("nama_siswa")
@@ -83,5 +90,11 @@ ppdb.use(calonSantriAccessMiddleware);
 ppdb.post("/create", validation, validateFields, createInfoCalsan);
 ppdb.put("/update/:id", validation, validateFields, updateInfoCalsan);
 ppdb.get("/detail", getDetailCalsan);
+ppdb.post("/testimoni/create", createTestimoni);
+ppdb.put("/testimoni/update/:id", updateTestimoni);
+ppdb.delete("/testimoni/delete/:id", deleteTestimoni);
+ppdb.get("/testimoni/detail/:id", getDetailTestimoni);
+ppdb.get("/testimoni/list", listTestimoni);
+ppdb.post("/mitra-sekolah/create", createMitraSekolah);
 
 module.exports = ppdb;

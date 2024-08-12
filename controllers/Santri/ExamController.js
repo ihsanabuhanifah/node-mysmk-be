@@ -329,7 +329,7 @@ const submitExam = response.requestResponse(async (req, res) => {
   });
 
   nilai = (point_siswa / total_point) * 100;
-  nilai = Number(nilai.toFixed(2));
+  nilai = Math.ceil(nilai);
 
   let exam_result = [];
   if (!!exam.exam === true) {

@@ -88,7 +88,6 @@ const updateInfoCalsan = async (req, res) => {
     const detail = await info_calsan.findOne({
       where: {
         id,
-        user_id,
       },
     });
     if (!detail) {
@@ -121,7 +120,7 @@ const updateInfoCalsan = async (req, res) => {
 
     if (Object.keys(fieldsToUpdate).length > 0) {
       await info_calsan.update(fieldsToUpdate, {
-        where: { id, user_id },
+        where: { id },
       });
 
       return res.json({

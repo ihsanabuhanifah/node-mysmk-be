@@ -11,6 +11,20 @@ const {
 
 const createPenilaian = async (req, res) => {
   try {
+    const student = await StudentModel.findAll({
+      where: {
+        kelas_id: req.body.kelas_id,
+      },
+    });
+
+    if (student.length === 0) {
+      return res.status(422).json({
+        status: "Success",
+        msg: "Kelas ini tidak memili siswa",
+
+        // msg: `Berhasil upload ${success} soal dari ${total} soal`,
+      });
+    }
     await UjianController.update(
       {
         status: "open",
@@ -22,21 +36,19 @@ const createPenilaian = async (req, res) => {
       }
     );
 
-    const student = await StudentModel.findAll({
-      where: {
-        kelas_id: req.body.kelas_id,
-      },
-    });
-
     await Promise.all(
       student.map(async (data) => {
         await NilaiController.create({
           ujian_id: req.body.id,
           mapel_id: req.body.mapel_id,
+          kelas_id: req.body.kelas_id,
+          jenis_ujian: req.body.jenis_ujian,
+
           exam_result: 0,
           teacher_id: req.teacher_id,
-          student_id: data.id,
+          student_id: data.student_id,
           waktu_tersisa: req.body.durasi,
+          ta_id: req.body.ta_id,
 
           status: "open",
         });
@@ -97,9 +109,9 @@ const listUjian = async (req, res) => {
           mapel_id: mapel_id,
         }),
 
-        ...(parseInt(is_all) === 1 && {
-          teacher_id: req.teacher_id,
-        }),
+        // ...(parseInt(is_all) === 1 && {
+        //   teacher_id: req.teacher_id,
+        // }),
       },
       include: [
         {
@@ -241,13 +253,14 @@ const deleteUjian = async (req, res) => {
     const ujian = await UjianController.findOne({
       where: {
         id: id,
+        teacher_id: req.teacher_id,
       },
     });
 
     if (ujian === null) {
       return res.status(422).json({
         status: "Fail",
-        msg: "Ujian Tidak Ditemukan",
+        msg: "Ujian ini milik guru lain",
       });
     }
     if (ujian.teacher_id !== req.teacher_id) {
