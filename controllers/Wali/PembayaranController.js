@@ -13,13 +13,13 @@ let snap = new midtrans.Snap({
 let parameter = {
   transaction_details : {
     order_id : "",
-    gross_amount : 2500000
+    gross_amount : pembayaranModel.nominal
   },
   credit_card: {
     secure : true
   },
   customer_details: {
-
+    
   }
 }
 
