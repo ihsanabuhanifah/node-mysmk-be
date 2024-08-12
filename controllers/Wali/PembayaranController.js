@@ -256,14 +256,17 @@ async function updateAprroval (req, res) {
       return res.json({status: "Belum Menemukan Kartu Pembayaran"})
     }
 
-    const customDate = format(new Date(), 'dd MMMM yyyy');
-
-    const parsedDate = parse(customDate, 'dd MMMM yyyy', new Date());
+     // Custom date string (in the format "12 August 2024")
+     const customDateString = format(new Date(), 'dd MMMM yyyy'); // Adjust as needed
+     console.log("Formatted Date:", customDateString);
+ 
+     // Parse the date string into a Date object
+     const parsedDate = parse(customDateString, 'dd MMMM yyyy', new Date());
 
    await PembayaranController.update({
       teacher_id: req.teacher_id,
       status: "Sudah",
-      tanggal_konfirmasi: customDate
+      tanggal_konfirmasi: parsedDate
     },
     {
       where: {
