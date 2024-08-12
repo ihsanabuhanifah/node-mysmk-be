@@ -2,6 +2,26 @@ const PembayaranController = require("../../models").pembayaran_spp;
 const models = require("../../models");
 const pembayaranModel = require("../../models").pembayaran_spp;
 const cron = require("node-cron")
+const midtrans = require("midtrans-client");
+const {format, parse} = require("date-fns")
+
+let snap = new midtrans.Snap({
+  isProduction: false,
+  serverKey: ''
+})
+
+let parameter = {
+  transaction_details : {
+    order_id : "",
+    gross_amount : 2500000
+  },
+  credit_card: {
+    secure : true
+  },
+  customer_details: {
+
+  }
+}
 
 const createKartuSpp = async (req, res) => {
   try {
@@ -222,26 +242,35 @@ async function createPembayaran (req, res) {
 async function updateAprroval (req, res) {
   try {
     const {id} = req.params;
-    const {tanggal_konfirmasi} = req.body;
+    const {tanggal_konfirmasi, teacher_id} = req.body;
 
     const detail = await PembayaranController.findOne({
       where: {
         id: id,
-        teacher_id : req.teacher_id
       }
     })
 
     if (!detail) {
+      console.log(id)
+      console.log(detail)
       return res.json({status: "Belum Menemukan Kartu Pembayaran"})
     }
 
-    const proses = await PembayaranController.update({
+    const customDate = format(new Date(), 'dd MMMM yyyy');
+
+    const parsedDate = parse(customDate, 'dd MMMM yyyy', new Date());
+
+   await PembayaranController.update({
       teacher_id: req.teacher_id,
-      tanggal_konfirmasi: tanggal_konfirmasi,
+      status: "Sudah",
+      tanggal_konfirmasi: customDate
+    },
+    {
       where: {
         id: id
-      },
-    })
+      }
+    }
+  )
 
 
     return res.status(201).json({
