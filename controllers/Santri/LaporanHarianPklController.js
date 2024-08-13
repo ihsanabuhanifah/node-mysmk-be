@@ -8,7 +8,7 @@ const { Op } = require("sequelize");
 const dayjs = require("dayjs");
 const { createLaporanDiniyyah } = require("./LaporanDiniyyahHarianController");
 const createLaporanPkl = response.requestResponse(async (req, res) => {
-  let { laporanDiniyyah, ...payload } = req.body;
+  let payload = req.body;
   const laporanHarianPkl = await LaporanHarianPklModel.create({
     ...payload,
     student_id: req.student_id,
@@ -16,21 +16,12 @@ const createLaporanPkl = response.requestResponse(async (req, res) => {
     is_absen: true,
   });
 
-  const laporanDiniyyahResult = await createLaporanDiniyyah(
-    req,
-    res,
-    laporanHarianPkl.id,
-    req.student_id
-  );
-
+ 
   return {
     statusCode: 201,
     status: "success",
     message: "Data Berhasil Diupload",
-    data: {
-      laporanHarianPkl,
-      laporanDiniyyah: laporanDiniyyahResult,
-    },
+    data: laporanHarianPkl
   };
 });
 const updateLaporanPkl = response.requestResponse(async (req, res) => {
