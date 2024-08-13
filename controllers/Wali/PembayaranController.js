@@ -3,25 +3,15 @@ const models = require("../../models");
 const pembayaranModel = require("../../models").pembayaran_spp;
 const cron = require("node-cron")
 const midtrans = require("midtrans-client");
-const {format, parse} = require("date-fns")
+const {format, parse} = require("date-fns");
+const userModel = require("../../models").user;
 
 let snap = new midtrans.Snap({
   isProduction: false,
   serverKey: ''
 })
 
-let parameter = {
-  transaction_details : {
-    order_id : "",
-    gross_amount : pembayaranModel.nominal
-  },
-  credit_card: {
-    secure : true
-  },
-  customer_details: {
-    
-  }
-}
+
 
 const createKartuSpp = async (req, res) => {
   try {
@@ -288,6 +278,24 @@ async function updateAprroval (req, res) {
   }
 }
 
+async function createPembayaranOtomatis (req, res) {
+  try {
+    let parameter = {
+      transaction_details : {
+        order_id : "",
+        gross_amount : pembayaranModel.nominal
+      },
+      credit_card: {
+        secure : true
+      },
+      customer_details: {
+        
+      }
+    }
+  } catch (error) {
+    
+  }
+}
 
 // async function resetPerbulan () {
 //   try {
