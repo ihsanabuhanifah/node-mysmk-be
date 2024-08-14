@@ -8,21 +8,7 @@ const lokasiTempatPkl = response.requestResponse(async (req, res) => {
     where: {
       student_id: req.student_id,
     },
-    attributes: [
-      "id",
-      "nama_siswa",
-      "longtitude",
-      "lattitude",
-      "nama_perusahaan",
-      "kota",
-      "kecamatan",
-      "alamat",
-      "provinsi",
-      "desa",
-      "rt",
-      "rw",
-      "kode_pos",
-    ],
+    attributes: ["id", "longtitude", "lattitude"],
     include: [
       {
         require: true,
@@ -38,7 +24,6 @@ const lokasiTempatPkl = response.requestResponse(async (req, res) => {
   };
 });
 
-
 module.exports = {
-    lokasiTempatPkl
-}
+  lokasiTempatPkl,
+};
