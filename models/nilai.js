@@ -15,6 +15,10 @@ module.exports = (sequelize, DataTypes) => {
         as: "siswa",
         foreignKey: "student_id",
       });
+      nilai.belongsTo(models.kelas, {
+        as: "kelas",
+        foreignKey: "kelas_id",
+      });
       nilai.belongsTo(models.mapel, {
         as: "mapel",
         foreignKey: "mapel_id",

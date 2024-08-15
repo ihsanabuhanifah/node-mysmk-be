@@ -162,6 +162,7 @@ const {
   getSoal,
   updateLastExam,
   submitExamResult,
+  listNotificationExam,
 } = require("../../controllers/Guru/NilaiController");
 const {
   listReport,
@@ -290,6 +291,7 @@ guru.delete("/ujian/delete/:id", deleteUjian);
 guru.post("/nilai/create", createPenilaian);
 guru.put("/nilai/update-last-exam", updateLastExam);
 guru.put("/nilai/exam-result", submitExamResult);
+guru.get("/nilai/notifikasi", listNotificationExam);
 
 //nilai
 
