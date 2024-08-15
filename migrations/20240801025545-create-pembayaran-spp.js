@@ -67,6 +67,9 @@ module.exports = {
           as: "teacher_id"
         }
       },
+      no_telepon: {
+        type: Sequelize.STRING
+      },
       created_at: {
         allowNull: false,
         type: Sequelize.DATE
