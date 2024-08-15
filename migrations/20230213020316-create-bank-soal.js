@@ -29,7 +29,7 @@ module.exports = {
           as: "teacher_id",
         },
       },
-      soal: {
+      file: {
         type: Sequelize.STRING
       },
       tipe: {

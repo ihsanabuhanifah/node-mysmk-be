@@ -9,7 +9,7 @@ class RESPONSE_API {
         if (response.statusCode === 422) {
           return res.status(422).json({
             status: "Warning",
-            response,
+            ...response,
           });
         }
         return res.json({

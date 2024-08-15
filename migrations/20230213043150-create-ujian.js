@@ -8,7 +8,13 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER,
       },
+      judul_ujian: {
+        type: Sequelize.STRING,
+      },
       jenis_ujian: {
+        type: Sequelize.STRING,
+      },
+      tipe_ujian: {
         type: Sequelize.STRING,
       },
       kelas_id: {
@@ -19,6 +25,15 @@ module.exports = {
           model: "kelas",
           key: "id",
           as: "kelas_id",
+        },
+      },
+      ta_id: {
+        type: Sequelize.INTEGER,
+        onDelete: "RESTRICT",
+        references: {
+          model: "ta",
+          key: "id",
+          as: "ta_id",
         },
       },
       mapel_id: {
@@ -53,6 +68,9 @@ module.exports = {
       },
       student_access: {
         type: Sequelize.TEXT,
+      },
+      durasi: {
+        type : Sequelize.INTEGER
       },
      
       created_at: {

@@ -8,6 +8,7 @@ const { userAttribute } = require("../utils/attiributes");
 
 async function store(req, res) {
   const payload = req.body;
+  
   payload.password = await bcrypt.hashSync(req.body.password, 10);
 
   try {

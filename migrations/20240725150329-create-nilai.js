@@ -8,6 +8,9 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER,
       },
+      jenis_ujian: {
+        type: Sequelize.STRING,
+      },
       ujian_id: {
         type: Sequelize.INTEGER,
         onDelete: "RESTRICT",
@@ -17,18 +20,47 @@ module.exports = {
           as: "ujian_id",
         },
       },
+      ta_id: {
+        type: Sequelize.INTEGER,
+        onDelete: "RESTRICT",
+        references: {
+          model: "ta",
+          key: "id",
+          as: "ta_id",
+        },
+      },
+      kelas_id: {
+        type: Sequelize.INTEGER,
+
+        onDelete: "RESTRICT",
+        references: {
+          model: "kelas",
+          key: "id",
+          as: "kelas_id",
+        },
+      },
       teacher_id: {
         type: Sequelize.INTEGER,
-        onDelete: "CASCADE",
+        onDelete: "RESTRICT",
         references: {
           model: "teachers",
           key: "id",
           as: "teacher_id",
         },
       },
+
+      mapel_id: {
+        type: Sequelize.INTEGER,
+        onDelete: "RESTRICT",
+        references: {
+          model: "mapels",
+          key: "id",
+          as: "mapel_id",
+        },
+      },
       student_id: {
         type: Sequelize.INTEGER,
-        onDelete: "CASCADE",
+        onDelete: "RESTRICT",
         references: {
           model: "students",
           key: "id",
@@ -72,7 +104,7 @@ module.exports = {
       },
       
       exam_result: {
-        type: Sequelize.DECIMAL(4, 2),
+        type: Sequelize.DECIMAL(5, 2),
       },
       refresh_count: {
         type: Sequelize.INTEGER,
