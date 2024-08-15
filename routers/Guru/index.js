@@ -140,7 +140,7 @@ const {
 const adminAccessMiddleware = require("../../middleware/adminAccessMiddleware");
 const { listPenilaianByTeacher, remidial } = require("../../controllers/Guru/NilaiController");
 const { getListWali, createBulkWali, updateWali, detailWali } = require("../../controllers/Guru/WaliController");
-const { ListPembayaran, createKartuSpp, updateAprroval } = require("../../controllers/Wali/PembayaranController");
+const { ListPembayaran, createKartuSpp, updateAprroval, detailPembayaran, deleteKartu, daftarSiswa, detailSiswa } = require("../../controllers/Wali/PembayaranController");
 
 const {
   listPenilaianByTeacher,
@@ -310,5 +310,11 @@ guru.get("/walisantri/detail/:id", detailWali)
 guru.get("/pembayaran/list", ListPembayaran);
 guru.post("/pembayaran/createKartu", createKartuSpp);
 guru.put("/pembayaran/persetujuan/:id", updateAprroval);
+guru.get("/pembayaran/detail/:id", detailPembayaran);
+guru.delete("/pembayaran/hapusKartu", deleteKartu);
+
+// siswa
+guru.get("/siswa/daftarSpp", daftarSiswa);
+guru.get("/siswa/listPembayaran/:student_id", detailSiswa)
 
 module.exports = guru;
