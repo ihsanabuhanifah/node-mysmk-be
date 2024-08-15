@@ -9,19 +9,32 @@ const dayjs = require("dayjs");
 const { createLaporanDiniyyah } = require("./LaporanDiniyyahHarianController");
 const createLaporanPkl = response.requestResponse(async (req, res) => {
   let payload = req.body;
+  let today = dayjs(new Date()).format("YYYY-MM-DD");
+  const existingLaporan = await LaporanHarianPklModel.findOne({
+    where: {
+      student_id: studentId,
+      tanggal: today,
+    },
+  });
+  if (existingLaporan) {
+    return {
+      statusCode: 400,
+      status: "fail",
+      message: "Anda hanya dapat membuat satu laporan per hari.",
+    };
+  }
   const laporanHarianPkl = await LaporanHarianPklModel.create({
     ...payload,
     student_id: req.student_id,
-    tanggal: dayjs(new Date()).format("YYYY-MM-DD"),
+    tanggal: today,
     is_absen: true,
   });
 
- 
   return {
     statusCode: 201,
     status: "success",
     message: "Data Berhasil Diupload",
-    data: laporanHarianPkl
+    data: laporanHarianPkl,
   };
 });
 const updateLaporanPkl = response.requestResponse(async (req, res) => {

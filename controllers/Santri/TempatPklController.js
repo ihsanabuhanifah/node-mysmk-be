@@ -8,7 +8,7 @@ const lokasiTempatPkl = response.requestResponse(async (req, res) => {
     where: {
       student_id: req.student_id,
     },
-    attributes: ["id", "longtitude", "lattitude"],
+    attributes: ["id", "longtitude", "latitude"],
     include: [
       {
         require: true,
