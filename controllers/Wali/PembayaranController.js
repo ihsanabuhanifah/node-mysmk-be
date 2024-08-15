@@ -3,7 +3,8 @@ const models = require("../../models");
 const pembayaranModel = require("../../models").pembayaran_spp;
 const cron = require("node-cron")
 const midtrans = require("midtrans-client");
-const {format, parse} = require("date-fns");
+const {format, parse, eachMonthOfInterval} = require("date-fns");
+const { param } = require("express-validator");
 const userModel = require("../../models").user;
 
 let snap = new midtrans.Snap({
@@ -280,20 +281,38 @@ async function updateAprroval (req, res) {
 
 async function createPembayaranOtomatis (req, res) {
   try {
+
+    const user = await userModel.findOne({
+      where: {
+        id : req.id
+      }
+    })
+
+    const {nominal, walsan_id, no_telepon} = req.body
+
     let parameter = {
       transaction_details : {
-        order_id : "",
-        gross_amount : pembayaranModel.nominal
+        order_id : "PCX-123",
+        gross_amount : nominal
       },
       credit_card: {
         secure : true
       },
       customer_details: {
-        
+        email: user.email,
+        first_name: "Santri",
+        last_name: "MQ",
+        phone: no_telepon
       }
     }
+
+    snap.createTransaction(parameter).then((transaksi) => {
+      let tokenTransaksi = transaksi.token;
+      console.log("Transaksi Token: ", tokenTransaksi)
+    })
   } catch (error) {
-    
+    console.log(error)
+    return res.status(403).send("Terjadi Kesalahan")
   }
 }
 
