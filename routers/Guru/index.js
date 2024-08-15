@@ -169,14 +169,12 @@ const {
   getSoal,
   updateLastExam,
   submitExamResult,
-  listPenilaianByTeacher
+  listPenilaianByTeacher,
+  listNotificationExam,
 } = require("../../controllers/Guru/NilaiController");
 
 
 const {
-  listReport,
-  generateReport,
-} = require("../../controllers/Guru/RaportController");
   listReport,
   generateReport,
 } = require("../../controllers/Guru/RaportController");
@@ -304,6 +302,7 @@ guru.delete("/ujian/delete/:id", deleteUjian);
 guru.post("/nilai/create", createPenilaian);
 guru.put("/nilai/update-last-exam", updateLastExam);
 guru.put("/nilai/exam-result", submitExamResult);
+guru.get("/nilai/notifikasi", listNotificationExam);
 
 //nilai
 
