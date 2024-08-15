@@ -91,6 +91,10 @@ const {
   detailLaporanPkl,
   laporanPklListForPembimbing,
 } = require("../../controllers/Guru/LaporanHarianPklController");
+const {
+  laporanPklList,
+  detailLaporanPkl,
+} = require("../../controllers/Guru/LaporanHarianPklController");
 
 //jadwal
 
@@ -145,8 +149,17 @@ const {
   submitByAdmin,
 } = require("../../controllers/Guru/KehadiranGuruController");
 const adminAccessMiddleware = require("../../middleware/adminAccessMiddleware");
-const { getListWali, updateWali, detailWali } = require("../../controllers/Guru/WaliController");
-const { ListPembayaran, createKartuSpp, updateAprroval, detailPembayaran, deleteKartu, daftarSiswa, detailPembayaranSiswa, createNotification, updateResponse } = require("../../controllers/Wali/PembayaranController");
+const {
+  getListWali,
+  createBulkWali,
+  updateWali,
+  detailWali,
+} = require("../../controllers/Guru/WaliController");
+const {
+  ListPembayaran,
+  createKartuSpp,
+  updateAprroval,
+} = require("../../controllers/Wali/PembayaranController");
 
 const {
   
@@ -161,6 +174,9 @@ const {
 
 
 const {
+  listReport,
+  generateReport,
+} = require("../../controllers/Guru/RaportController");
   listReport,
   generateReport,
 } = require("../../controllers/Guru/RaportController");
@@ -298,8 +314,8 @@ guru.get("/nilai/soal/teacher/:id", getSoal);
 
 //report
 
-guru.get("/report/list", listReport);
-guru.post("/report/generate", generateReport);
+guru.get("/report/list", listReport);;
+guru.post("/report/generate", generateReport);;
 
 //tempat_pkl
 guru.post("/tempat-pkl/create", createTempatPkl);
@@ -309,12 +325,14 @@ guru.get("/tempat-pkl/detail/:id", detailTempatPkl);
 guru.get("/tempat-pkl/list", listTempatPkl);
 
 // Walisantri
+
+// Laporan harian pkl
+guru.get("/laporan-harian-pkl/list", laporanPklList);
+guru.get("/laporan-harian-pkl/detail/:id", detailLaporanPkl);
 guru.get("/walisantri/list", getListWali);
 guru.post("/walisantri/create", createBulkWali);
 guru.put("/walisantri/update/:id", updateWali);
-guru.get("/walisantri/detail/:id", detailWali)
-
-
+guru.get("/walisantri/detail/:id", detailWali);
 
 
 // Pembayaran
