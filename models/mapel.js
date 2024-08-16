@@ -28,6 +28,15 @@ module.exports = (sequelize, DataTypes) => {
         as: "ujian",
         foreignKey: "mapel_id",
       });
+      mapel.hasMany(models.nilai, {
+        as: "nilai",
+        foreignKey: "mapel_id",
+      });
+
+      mapel.hasMany(models.hasil_belajar, {
+        as: "hasil_belajar",
+        foreignKey: "mapel_id",
+      });
     }
   }
   mapel.init(

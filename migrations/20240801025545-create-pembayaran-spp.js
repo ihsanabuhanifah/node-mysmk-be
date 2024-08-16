@@ -27,6 +27,7 @@ module.exports = {
           as: "walsan_id"
         }
       },
+
       ta_id: {
         type:Sequelize.INTEGER,
         onDelete: "RESTRICT",
@@ -36,6 +37,7 @@ module.exports = {
           as: "ta_id"
         }
       },
+
       tanggal: {
         type: Sequelize.DATE
       },
@@ -70,6 +72,7 @@ module.exports = {
       no_telepon: {
         type: Sequelize.STRING
       },
+
       created_at: {
         allowNull: false,
         type: Sequelize.DATE
