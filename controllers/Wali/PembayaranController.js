@@ -23,6 +23,7 @@ const createKartuSpp = async (req, res) => {
     let gagal = 0;
     let berhasil = 0;
 
+    // Check if payload is an array
     if (!Array.isArray(payload)) {
       return res.status(400).json({
         status: "Fail",
@@ -31,67 +32,65 @@ const createKartuSpp = async (req, res) => {
     }
 
     const months = [
-      "Januari",
-      "Februari",
-      "Maret",
-      "April",
-      "Mei",
-      "Juni",
-      "Juli",
-      "Agustus",
-      "September",
-      "Oktober",
-      "November",
-      "Desember",
+      "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+      "Juli", "Agustus", "September", "Oktober", "November", "Desember"
     ];
 
     let newRecords = [];
 
+    // Process each item in the payload
     await Promise.all(
       payload.map(async (item) => {
         try {
-          if (item.student_id && item.ta_id != null) {
-            gagal += 1;
-          } else {
-            // Use map to create an array of new records for each month
-            const recordsForMonths = months.map((month, index) => {
-              let year;
-              if (index < 6) {
-                year = 2024;
-              } else {
-                year = 2025;
-              }
+         if (item.student_id === null && item.ta_id === null) {
+          console.log("Barang ID_siswa Dan ID_TA Tidak Ada")
+          gagal += 1
+          return;
+         }
 
-              return {
-                student_id: item.student_id,
-                ta_id: item.ta_id,
-                nominal: item.nominal,
-                status: "Belum",
-                bulan: month, // 'bulan' is defined here as 'month'
-                tahun: year,
-                tanggal: new Date(),
-              };
-            });
-
-            // Add all the new records to the newRecords array
-            newRecords = newRecords.concat(recordsForMonths);
+         const cari = await pembayaranModel.findOne({
+          where: {
+            student_id: item.student_id,
+            ta_id: item.ta_id
           }
+         })
+
+         if (cari) {
+          console.log(`Data Yang Sudah Ada: id_siswa:${item.student_id} dan id_ta: ${item.ta_id}`);
+          gagal +=1;
+         } else {
+          const recordsForMonths = months.map((month, index) => {
+            const year = index < 6 ? 2025 : 2024;
+
+            return {
+              student_id: item.student_id,
+              ta_id: item.ta_id,
+              nominal: item.nominal,
+              walsan_id: item.walsan_id,
+              status: "Belum",
+              bulan: month,
+              tahun: year,
+              tanggal: new Date(),
+            };
+          });
+
+          newRecords = newRecords.concat(recordsForMonths);
+          berhasil += 1;
+         }
+
         } catch (error) {
-          console.log(item, "Error :", error);
+          console.log(item, "Error:", error);
           gagal += 1;
         }
       })
     );
 
-    // Bulk create the new records
-    const buat = await PembayaranController.bulkCreate(newRecords);
-
-    if (buat) {
-      berhasil += newRecords.length;
-    } else {
-      console.log("Error:", newRecords);
-      gagal += newRecords.length;
+    if (newRecords.length > 0) {
+      await pembayaranModel.bulkCreate(newRecords);
     }
+
+    console.log("Barang Baru:", newRecords);
+
 
     return res.status(201).json({
       status: "Success",
@@ -105,6 +104,10 @@ const createKartuSpp = async (req, res) => {
     return res.status(403).send("Terjadi Kesalahan Dalam Pembayaran");
   }
 };
+
+
+
+
 
 const detailPembayaran = async (req, res) => {
   try {
@@ -127,6 +130,11 @@ const detailPembayaran = async (req, res) => {
           require: true,
           as: "murid",
           attributes: ["id", "nama_siswa"],
+          where: {
+            ...(checkQuery(nana_siswa)) && {
+              nama_siswa: {[Op.substring] : nama_siswa}
+            }
+          }
         },
         {
           model: models.ta,
@@ -140,6 +148,7 @@ const detailPembayaran = async (req, res) => {
           as: "guru",
           attributes: ["id", "nama_guru", "status"],
         },
+      
       ],
 
       order: ["id"],
@@ -157,12 +166,12 @@ const detailPembayaran = async (req, res) => {
 };
 
 const ListPembayaran = async (req, res) => {
-  const { page, pageSize } = req.query;
+  const { page, pageSize, nama_siswa, bulan } = req.query;
 
   try {
     const list = await PembayaranController.findAndCountAll({
-      ...(pageSize !== undefined && { limit: pageSize }),
-      ...(page !== undefined && { offset: page }),
+  limit: pageSize,
+  offset: page,
       include: [
         {
           model: models.parent,
@@ -175,6 +184,11 @@ const ListPembayaran = async (req, res) => {
           require: true,
           as: "murid",
           attributes: ["id", "nama_siswa"],
+          where: {
+            ...(checkQuery(nama_siswa)) && {
+              nama_siswa: {[Op.substring] : nama_siswa}
+            }
+          }
         },
         {
           model: models.ta,
@@ -188,6 +202,17 @@ const ListPembayaran = async (req, res) => {
           as: "guru",
           attributes: ["id", "nama_guru", "status"],
         },
+        {
+          model: models.pembayaran,
+          as: "pembayaran",
+          require: true,
+          attributes: ["id", "bulan", "tahun"],
+          where: {
+            ...(checkQuery(bulan)) && {
+              bulan: {[Op.substring] : bulan}
+            }
+          }
+        }
       ],
       order: ["id", "student_id"],
     });
@@ -500,7 +525,7 @@ async function daftarSiswa(req, res) {
   }
 }
 
-async function detailSiswa (req, res) {
+async function detailPembayaranSiswa (req, res) {
   try {
     const {student_id} = req.params;
     const {page, pageSize} = req.query;
@@ -511,7 +536,7 @@ async function detailSiswa (req, res) {
       },
       limit: pageSize,
       offset: page,
-      order: [
+      order: ["id",
         ["bulan", "ASC"]
       ]
     })
@@ -546,5 +571,5 @@ module.exports = {
   updateAprroval,
   deleteKartu,
   daftarSiswa,
-  detailSiswa
+  detailPembayaranSiswa
 };
