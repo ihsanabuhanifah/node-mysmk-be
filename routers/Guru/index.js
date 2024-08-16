@@ -145,18 +145,20 @@ const {
   submitByAdmin,
 } = require("../../controllers/Guru/KehadiranGuruController");
 const adminAccessMiddleware = require("../../middleware/adminAccessMiddleware");
-const { listPenilaianByTeacher, remidial } = require("../../controllers/Guru/NilaiController");
 const { getListWali, updateWali, detailWali } = require("../../controllers/Guru/WaliController");
 const { ListPembayaran, createKartuSpp, updateAprroval, detailPembayaran, deleteKartu, daftarSiswa, detailPembayaranSiswa, createNotification, updateResponse } = require("../../controllers/Wali/PembayaranController");
 
 const {
   
 
+  remidial,
   refreshCount,
   getSoal,
   updateLastExam,
   submitExamResult,
+  listPenilaianByTeacher
 } = require("../../controllers/Guru/NilaiController");
+
 
 const {
   listReport,

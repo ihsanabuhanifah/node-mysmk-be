@@ -12,7 +12,7 @@ const createLaporanPkl = response.requestResponse(async (req, res) => {
   let today = dayjs(new Date()).format("YYYY-MM-DD");
   const existingLaporan = await LaporanHarianPklModel.findOne({
     where: {
-      student_id: studentId,
+      student_id: req.student_id,
       tanggal: today,
     },
   });
