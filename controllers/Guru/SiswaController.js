@@ -1,5 +1,6 @@
 const KelasStudentModel = require('../../models').kelas_student
 const StudentModel = require('../../models').student
+const TahunAjaranModel = require('../../models').ta
 const models = require('../../models')
 const { Op, where } = require('sequelize')
 const UserModel = require('../../models').user
@@ -12,6 +13,18 @@ const mapelModel = require('../../models').mapel
 const nilaiModel = require('../../models').nilai
 const hasilBelajarModel = require('../../models').hasil_belajar
 const ujianModel = require('../../models').ujian
+
+const getGrade = (nilai) => {
+	if (nilai === null) return '-';
+  if (nilai >= 90) return 'A+';
+  if (nilai >= 80) return 'A';
+  if (nilai >= 70) return 'B+';
+  if (nilai >= 60) return 'B';
+  if (nilai >= 50) return 'C+';
+  if (nilai >= 40) return 'C';
+  if (nilai >= 30) return 'D+';
+  return 'D';
+};
 
 async function listSiswa(req, res) {
 	let { nama_kelas, nama_siswa, keyword, tahun_ajaran, status, page, pageSize } = req.query
@@ -234,6 +247,13 @@ const getHasilBelajar = async (req, res) => {
 					}),
 					student_id: id,
 				},
+				include: [
+					{
+						model: TahunAjaranModel,
+						require: true,
+						as: 'tahun_ajaran'
+					}
+				]
 			},
 		],
 	})
@@ -244,6 +264,12 @@ const getHasilBelajar = async (req, res) => {
 			data: null,
 		})
 	}
+
+	result.forEach((mapel) => {
+    mapel.hasil_belajar.forEach((hasil) => {
+      hasil.dataValues.grade = getGrade(hasil.nilai);
+    });
+  });
 
 	return res.json({
 		status: 'Success',
@@ -269,7 +295,11 @@ const detailHasilBelajar = async (req, res) => {
       {
         model: ujianModel,
         as: 'ujian'
-      }
+      },
+			{
+				model: TahunAjaranModel,
+				as: 'tahun_ajaran'
+			}
     ]
   })
 
