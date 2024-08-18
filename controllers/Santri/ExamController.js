@@ -4,6 +4,7 @@ const models = require("../../models");
 const UjianController = require("../../models").ujian;
 const { Op, where } = require("sequelize");
 const { RESPONSE_API } = require("../../utils/response");
+
 const {
   calculateMinutesDifference,
   calculateWaktuSelesai,
@@ -57,6 +58,7 @@ const getExam = response.requestResponse(async (req, res) => {
           "waktu_selesai",
           "status",
           "durasi",
+          "judul_ujian"
         ],
         include: [
           {
