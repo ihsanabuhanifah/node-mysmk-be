@@ -9,23 +9,17 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      user_id: {
-        type: Sequelize.INTEGER,
-        onDelete: "RESTRICT",
-        references: {
-          model: "users",
-          key: "id",
-          as: "user_id"
-        }
+      tanggal :{
+        type: Sequelize.DATE
       },
       isi_pesan: {
         type: Sequelize.STRING
       },
-      createdAt: {
+      created_at: {
         allowNull: false,
         type: Sequelize.DATE
       },
-      updatedAt: {
+      updated_at: {
         allowNull: false,
         type: Sequelize.DATE
       }

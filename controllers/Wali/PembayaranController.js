@@ -9,7 +9,12 @@ const { checkQuery } = require("../../utils/format");
 const userModel = require("../../models").user;
 const notificationModel = require("../../models").notification;
 const studentModel = require("../../models").student;
-const {Op} = require("sequelize")
+const parentModel = require("../../models").parent;
+const {Op} = require("sequelize");
+const axios = require('axios');
+require("dotenv").config();
+
+
 
 let snap = new midtrans.Snap({
   isProduction: false,
@@ -130,11 +135,7 @@ const detailPembayaran = async (req, res) => {
           require: true,
           as: "murid",
           attributes: ["id", "nama_siswa"],
-          where: {
-            ...(checkQuery(nana_siswa)) && {
-              nama_siswa: {[Op.substring] : nama_siswa}
-            }
-          }
+          
         },
         {
           model: models.ta,
@@ -172,6 +173,11 @@ const ListPembayaran = async (req, res) => {
     const list = await PembayaranController.findAndCountAll({
   limit: pageSize,
   offset: page,
+  where: {
+    ...(checkQuery(bulan) && {
+      bulan: {[Op.substring] : bulan}
+    })
+  },
       include: [
         {
           model: models.parent,
@@ -201,17 +207,6 @@ const ListPembayaran = async (req, res) => {
           require: true,
           as: "guru",
           attributes: ["id", "nama_guru", "status"],
-        },
-        {
-          model: models.pembayaran,
-          as: "pembayaran",
-          require: true,
-          attributes: ["id", "bulan", "tahun"],
-          where: {
-            ...(checkQuery(bulan)) && {
-              bulan: {[Op.substring] : bulan}
-            }
-          }
         }
       ],
       order: ["id", "student_id"],
@@ -390,12 +385,35 @@ async function createPembayaranOtomatis(req, res) {
 
 async function createNotification(req, res) {
   try {
-    const { user_id, isi_pesan } = req.body;
+    // const walsan = await parentModel.findOne({
+    //   where: {
+    //     id: id
+    //   }
+    // })
+    console.log("WABLAS", process.env.WABLAS_TOKEN);
+
+const TOKEN_WA_BLAS='hIcQxtpRplbVVvY46d0GsMDWSCNYpIcbs95SucC6DNS3E5rUn1osPECHuiL1jJRI'
+
+    const { tanggal, isi_pesan } = req.body;
 
     const buat = await notificationModel.create({
-      user_id: req.id,
+      tanggal : new Date(),
       isi_pesan: isi_pesan,
     });
+
+    const response = await axios.get('https://jogja.wablas.com/api/send-message', {
+      headers: {
+        'Authorization': `Bearer ${process.env.WABLAS_TOKEN}`,
+        'Accept' : 'application/json, text/plain, */*',
+        'Content-Type': 'application/json',
+        'Accept-Encoding': 'gzip, compress, deflate, br'
+      },
+      params: {
+        phone:'6281311295106',
+        message: isi_pesan
+      }
+    })
+    console.log('Notification sent:', response.data);
 
     return res.status(201).json({
       status: "Success",
@@ -403,71 +421,12 @@ async function createNotification(req, res) {
       data: buat,
     });
   } catch (error) {
+    console.log(error.response ? error.response.data : error.message);
     return res.status(403).send("Terjadi Kesalahan");
   }
 }
 
-async function detailNotification(req, res) {
-  try {
-    const { id } = req.params;
 
-    const cari = await notificationModel.findOne({
-      where: { id: id },
-      include: [
-        {
-          model: models.user,
-          as: "user",
-          require: true,
-          attributes: ["id", "name", "email"],
-        },
-      ],
-    });
-
-    return res.status(201).json({
-      stauts: "Success",
-      msg: "Berhasil Menampilkan Notifikasi",
-      data: cari,
-    });
-  } catch (error) {
-    return res.status(403).json({
-      status: "Failed",
-      msg: "Gagal Menampilkan Detail Notifikasi",
-    });
-  }
-}
-
-async function deleteKartu(req, res) {
-  try {
-    const { payload } = req.body;
-
-    payload.map(async (item) => {
-      let gagal = 0;
-      let berhasil = 0;
-      try {
-        const hapus = await PembayaranController.destroy(item)
-
-        if (hapus) {
-          berhasil = berhasil + 1
-        } else {
-          gagal = gagal + 1;
-        }
-      } catch (error) {
-        console.log("Error:", error)
-        gagal = gagal + 1
-      }
-    });
-
-    return res.status(201).json({
-      status: "Success",
-      msg: `Berhasil Mneghapus Kartu SPP Sebanyak ${berhasil} dan Gagal sebanyak ${gagal}`,
-      berhasil,
-      gagal
-    })
-  } catch (error) {
-    console.log(error)
-    return res.status(403).send("Terjadi Kesalahan");
-  }
-}
 
 async function daftarSiswa(req, res) {
   const {page, pageSize, angkatan, tahun_ajaran, status, nama_siswa} = req.query;
@@ -569,7 +528,7 @@ module.exports = {
   ListPembayaran,
   createPembayaran,
   updateAprroval,
-  deleteKartu,
+createNotification,
   daftarSiswa,
   detailPembayaranSiswa
 };

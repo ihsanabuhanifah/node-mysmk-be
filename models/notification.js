@@ -11,14 +11,11 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      notification.belongsTo(models.user, {
-        as: "user",
-        foreignKey: "user_id"
-      })
+     
     }
   }
   notification.init({
-    user_id: DataTypes.INTEGER,
+    tanggal: DataTypes.DATE,
     isi_pesan: DataTypes.STRING
   }, {
     sequelize,
