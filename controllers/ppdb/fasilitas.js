@@ -1,8 +1,9 @@
-const mitraSekolah = require("../../models").mitra_sekolah;
-const uploadFoto = require("../../utils/multer");
+const fasilitas = require("../../models").fasilitas_smkmq;
 const cloudinary = require("../../config/cloudinary");
 const fs = require("fs");
-const createMitraSekolah = async (req, res) => {
+
+// Create a new fasilitas entry
+const createFasilitas = async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).send({
@@ -10,30 +11,18 @@ const createMitraSekolah = async (req, res) => {
         message: "No file uploaded",
       });
     }
+
     const result = await cloudinary.uploader.upload(req.file.path, {
-      folder: "/ppdb/mitraSekolah",
+      folder: "/ppdb/fasilitas",
     });
-    const newMitraSekolah = await mitraSekolah.create({
+
+    const newFasilitas = await fasilitas.create({
       img_url: result.secure_url,
+      description: req.body.description || "",
     });
     res.send({
       status: "success",
-      img_url: newMitraSekolah,
-    });
-  } catch (err) {
-    console.log(err);
-    return res.status(500).json({
-      status: "fail",
-      msg: "Terjadi Kesalahan",
-    });
-  }
-};
-const getMitraSekolah = async (req, res) => {
-  try {
-    const mitraSekolahList = await mitraSekolah.findAll();
-    res.status(200).send({
-      status: "success",
-      data: mitraSekolahList,
+      data: newFasilitas,
     });
   } catch (err) {
     console.log(err);
@@ -44,11 +33,29 @@ const getMitraSekolah = async (req, res) => {
   }
 };
 
-const getMitraSekolahById = async (req, res) => {
+// Get all fasilitas entries
+const getFasilitas = async (req, res) => {
+  try {
+    const fasilitasList = await fasilitas.findAll();
+    res.status(200).send({
+      status: "success",
+      data: fasilitasList,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      status: "fail",
+      msg: "Terjadi Kesalahan",
+    });
+  }
+};
+
+// Get a fasilitas entry by ID
+const getFasilitasById = async (req, res) => {
   try {
     const { id } = req.params;
-    const mitraSekolahItem = await mitraSekolah.findByPk(id);
-    if (!mitraSekolahItem) {
+    const fasilitasItem = await fasilitas.findByPk(id);
+    if (!fasilitasItem) {
       return res.status(404).send({
         status: "fail",
         message: "Data tidak ditemukan",
@@ -56,7 +63,7 @@ const getMitraSekolahById = async (req, res) => {
     }
     res.status(200).send({
       status: "success",
-      data: mitraSekolahItem,
+      data: fasilitasItem,
     });
   } catch (err) {
     console.log(err);
@@ -66,22 +73,25 @@ const getMitraSekolahById = async (req, res) => {
     });
   }
 };
-const updateMitraSekolah = async (req, res) => {
+
+// Update a fasilitas entry
+const updateFasilitas = async (req, res) => {
   try {
     const { id } = req.params;
-    const { imgUrl } = req.body;
+    const { description } = req.body;
 
-    const mitraSekolahItem = await mitraSekolah.findByPk(id);
-    if (!mitraSekolahItem) {
+    const fasilitasItem = await fasilitas.findByPk(id);
+    if (!fasilitasItem) {
       return res.status(404).send({
         status: "fail",
         message: "Data tidak ditemukan",
       });
     }
-    await mitraSekolahItem.update({ imgUrl });
+
+    const updatedFasilitas = await fasilitasItem.update({ description });
     res.status(200).send({
       status: "success",
-      data: mitraSekolahItem,
+      data: updatedFasilitas,
     });
   } catch (err) {
     console.log(err);
@@ -91,19 +101,21 @@ const updateMitraSekolah = async (req, res) => {
     });
   }
 };
-const deleteMitraSekolah = async (req, res) => {
+
+// Delete a fasilitas entry
+const deleteFasilitas = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const mitraSekolahItem = await mitraSekolah.findByPk(id);
-    if (!mitraSekolahItem) {
+    const fasilitasItem = await fasilitas.findByPk(id);
+    if (!fasilitasItem) {
       return res.status(404).send({
         status: "fail",
         message: "Data tidak ditemukan",
       });
     }
 
-    await mitraSekolahItem.destroy();
+    await fasilitasItem.destroy();
     res.status(200).send({
       status: "success",
       message: "Data berhasil dihapus",
@@ -118,9 +130,9 @@ const deleteMitraSekolah = async (req, res) => {
 };
 
 module.exports = {
-  createMitraSekolah,
-  getMitraSekolahById,
-  getMitraSekolah,
-  updateMitraSekolah,
-  deleteMitraSekolah,
+  createFasilitas,
+  getFasilitas,
+  getFasilitasById,
+  updateFasilitas,
+  deleteFasilitas,
 };

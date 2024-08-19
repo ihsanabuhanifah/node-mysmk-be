@@ -1,8 +1,8 @@
-const mitraSekolah = require("../../models").mitra_sekolah;
-const uploadFoto = require("../../utils/multer");
+const galleryKegiatan = require("../../models").gallery_kegiatan;
 const cloudinary = require("../../config/cloudinary");
 const fs = require("fs");
-const createMitraSekolah = async (req, res) => {
+
+const createGalleryKegiatan = async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).send({
@@ -10,30 +10,17 @@ const createMitraSekolah = async (req, res) => {
         message: "No file uploaded",
       });
     }
+
     const result = await cloudinary.uploader.upload(req.file.path, {
-      folder: "/ppdb/mitraSekolah",
+      folder: "/ppdb/galleryKegiatan",
     });
-    const newMitraSekolah = await mitraSekolah.create({
+
+    const newGalleryKegiatan = await galleryKegiatan.create({
       img_url: result.secure_url,
     });
     res.send({
       status: "success",
-      img_url: newMitraSekolah,
-    });
-  } catch (err) {
-    console.log(err);
-    return res.status(500).json({
-      status: "fail",
-      msg: "Terjadi Kesalahan",
-    });
-  }
-};
-const getMitraSekolah = async (req, res) => {
-  try {
-    const mitraSekolahList = await mitraSekolah.findAll();
-    res.status(200).send({
-      status: "success",
-      data: mitraSekolahList,
+      data: newGalleryKegiatan,
     });
   } catch (err) {
     console.log(err);
@@ -44,11 +31,27 @@ const getMitraSekolah = async (req, res) => {
   }
 };
 
-const getMitraSekolahById = async (req, res) => {
+const getGalleryKegiatan = async (req, res) => {
+  try {
+    const galleryList = await galleryKegiatan.findAll();
+    res.status(200).send({
+      status: "success",
+      data: galleryList,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      status: "fail",
+      msg: "Terjadi Kesalahan",
+    });
+  }
+};
+
+const getDetailGallery = async (req, res) => {
   try {
     const { id } = req.params;
-    const mitraSekolahItem = await mitraSekolah.findByPk(id);
-    if (!mitraSekolahItem) {
+    const galleryItem = await galleryKegiatan.findByPk(id);
+    if (!galleryItem) {
       return res.status(404).send({
         status: "fail",
         message: "Data tidak ditemukan",
@@ -56,7 +59,7 @@ const getMitraSekolahById = async (req, res) => {
     }
     res.status(200).send({
       status: "success",
-      data: mitraSekolahItem,
+      data: galleryItem,
     });
   } catch (err) {
     console.log(err);
@@ -66,22 +69,24 @@ const getMitraSekolahById = async (req, res) => {
     });
   }
 };
-const updateMitraSekolah = async (req, res) => {
+
+const updateGalleryKegiatan = async (req, res) => {
   try {
     const { id } = req.params;
-    const { imgUrl } = req.body;
+    const { description } = req.body;
 
-    const mitraSekolahItem = await mitraSekolah.findByPk(id);
-    if (!mitraSekolahItem) {
+    const galleryItem = await galleryKegiatan.findByPk(id);
+    if (!galleryItem) {
       return res.status(404).send({
         status: "fail",
         message: "Data tidak ditemukan",
       });
     }
-    await mitraSekolahItem.update({ imgUrl });
+
+    const updatedGalleryItem = await galleryItem.update({ description });
     res.status(200).send({
       status: "success",
-      data: mitraSekolahItem,
+      data: updatedGalleryItem,
     });
   } catch (err) {
     console.log(err);
@@ -91,19 +96,20 @@ const updateMitraSekolah = async (req, res) => {
     });
   }
 };
-const deleteMitraSekolah = async (req, res) => {
+
+const deleteGalleryKegiatan = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const mitraSekolahItem = await mitraSekolah.findByPk(id);
-    if (!mitraSekolahItem) {
+    const galleryItem = await galleryKegiatan.findByPk(id);
+    if (!galleryItem) {
       return res.status(404).send({
         status: "fail",
         message: "Data tidak ditemukan",
       });
     }
 
-    await mitraSekolahItem.destroy();
+    await galleryItem.destroy();
     res.status(200).send({
       status: "success",
       message: "Data berhasil dihapus",
@@ -118,9 +124,9 @@ const deleteMitraSekolah = async (req, res) => {
 };
 
 module.exports = {
-  createMitraSekolah,
-  getMitraSekolahById,
-  getMitraSekolah,
-  updateMitraSekolah,
-  deleteMitraSekolah,
+  createGalleryKegiatan,
+  getGalleryKegiatan,
+  getDetailGallery,
+  updateGalleryKegiatan,
+  deleteGalleryKegiatan,
 };

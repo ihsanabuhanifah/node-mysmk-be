@@ -24,6 +24,20 @@ const {
   deleteMitraSekolah,
 } = require("../../controllers/ppdb/mitraSekolahController");
 const { uploadFoto } = require("../../utils/multer");
+const {
+  createGalleryKegiatan,
+  updateGalleryKegiatan,
+  getDetailGallery,
+  getGalleryKegiatan,
+  deleteGalleryKegiatan,
+} = require("../../controllers/ppdb/gallerykegiatan");
+const {
+  createFasilitas,
+  updateFasilitas,
+  getFasilitasById,
+  getFasilitas,
+  deleteFasilitas,
+} = require("../../controllers/ppdb/fasilitas");
 
 const validation = [
   check("nama_siswa")
@@ -113,4 +127,18 @@ ppdb.put(
   updateMitraSekolah
 );
 ppdb.delete("/mitra-sekolah/delete/:id", deleteMitraSekolah);
+ppdb.post("/gallery/create", uploadFoto.single("file"), createGalleryKegiatan);
+ppdb.put(
+  "/gallery/update/:id",
+  uploadFoto.single("file"),
+  updateGalleryKegiatan
+);
+ppdb.get("/gallery/detail/:id", getDetailGallery);
+ppdb.get("/gallery/list", getGalleryKegiatan);
+ppdb.delete("/gallery/delete/:id", deleteGalleryKegiatan);
+ppdb.post("/fasilitas/create", uploadFoto.single("file"), createFasilitas);
+ppdb.put("/fasilitas/update/:id", uploadFoto.single("file"), updateFasilitas);
+ppdb.get("/fasilitas/detail/:id", getFasilitasById);
+ppdb.get("/fasilitas/list", getFasilitas);
+ppdb.delete("/fasilitas/delete/:id", deleteFasilitas);
 module.exports = ppdb;
