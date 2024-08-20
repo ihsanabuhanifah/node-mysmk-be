@@ -21,6 +21,21 @@ let snap = new midtrans.Snap({
   serverKey: "",
 });
 
+const Monthmap = {
+  'Juli': 1,
+    'Agustus': 2,
+    'September': 3,
+    'Oktober': 4,
+    'November': 5,
+    'Desemeber': 6,
+    'Januari': 7,
+    'Februari': 8,
+    'Maret': 9,
+    'April': 10,
+    'Mei': 11,
+    'Juni': 12,
+    };
+
 const createKartuSpp = async (req, res) => {
   try {
     const { payload } = req.body;
@@ -37,8 +52,7 @@ const createKartuSpp = async (req, res) => {
     }
 
     const months = [
-      "Januari", "Februari", "Maret", "April", "Mei", "Juni",
-      "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni'
     ];
 
     let newRecords = [];
@@ -65,7 +79,7 @@ const createKartuSpp = async (req, res) => {
           gagal +=1;
          } else {
           const recordsForMonths = months.map((month, index) => {
-            const year = index < 6 ? 2025 : 2024;
+            const year = index < 6 ? 2024 : 2025;
 
             return {
               student_id: item.student_id,
@@ -167,17 +181,56 @@ const detailPembayaran = async (req, res) => {
 };
 
 const ListPembayaran = async (req, res) => {
-  const { page, pageSize, nama_siswa, bulan } = req.query;
+
+
+
 
   try {
+    const { page, pageSize, nama_siswa, dari_tahun, ke_tahun, dari_bulan, ke_bulan} = req.query;
+
+    let Result = {};
+
+
+
+    const dariBulan = dari_bulan ? Monthmap[dari_bulan] : null;
+    
+    const keBulan = ke_bulan ? Monthmap[ke_bulan] : null;
+  
+    console.log("Dari Bulan :", dariBulan);
+    console.log("Ke Bulan:", keBulan)
+    
+  
+    if (dari_bulan && ke_bulan) {
+    Result = {
+      bulan: {
+        [Op.or] : [
+          {[Op.eq]: dari_bulan},
+          {[Op.eq] : ke_bulan},
+          {
+            [Op.and] : [
+              {[Op.gte] : dari_bulan},
+              {
+              [Op.lte] : ke_bulan
+              }
+            ]
+          }
+        ]
+      }
+    }
+    }
+  
+    if (dari_tahun && ke_tahun) {
+      Result = {
+        tahun : {
+          [Op.between] : [dari_tahun, ke_tahun]
+        }
+      }
+    }
+
     const list = await PembayaranController.findAndCountAll({
   limit: pageSize,
   offset: page,
-  where: {
-    ...(checkQuery(bulan) && {
-      bulan: {[Op.substring] : bulan}
-    })
-  },
+  where: Result,
       include: [
         {
           model: models.parent,
@@ -273,54 +326,6 @@ async function createPembayaran(req, res) {
   }
 }
 
-async function updateAprroval(req, res) {
-  try {
-    const { id } = req.params;
-    const { tanggal_konfirmasi, teacher_id } = req.body;
-
-    const detail = await PembayaranController.findOne({
-      where: {
-        id: id,
-      },
-    });
-
-    if (!detail) {
-      console.log(id);
-      console.log(detail);
-      return res.json({ status: "Belum Menemukan Kartu Pembayaran" });
-    }
-
-    // Custom date string (in the format "12 August 2024")
-    const customDateString = format(new Date(), "dd MMMM yyyy"); // Adjust as needed
-    console.log("Formatted Date:", customDateString);
-
-    // Parse the date string into a Date object
-    const parsedDate = parse(customDateString, "dd MMMM yyyy", new Date());
-
-    await PembayaranController.update(
-      {
-        teacher_id: req.teacher_id,
-        status: "Sudah",
-        tanggal_konfirmasi: parsedDate,
-        tanggal: parsedDate,
-      },
-      {
-        where: {
-          id: id,
-        },
-      }
-    );
-
-    return res.status(201).json({
-      status: "Success",
-      msg: "Berhasil Menyetujui Pembayaran",
-      data: detail,
-    });
-  } catch (error) {
-    console.log(error);
-    return res.status(403).send("Terjadi Kesalahan");
-  }
-}
 
 async function createPembayaranOtomatis(req, res) {
   try {
@@ -392,7 +397,7 @@ async function createNotification(req, res) {
     // })
     console.log("WABLAS", process.env.WABLAS_TOKEN);
 
-const TOKEN_WA_BLAS='hIcQxtpRplbVVvY46d0GsMDWSCNYpIcbs95SucC6DNS3E5rUn1osPECHuiL1jJRI'
+// const TOKEN_WA_BLAS='hIcQxtpRplbVVvY46d0GsMDWSCNYpIcbs95SucC6DNS3E5rUn1osPECHuiL1jJRI'
 
     const { tanggal, isi_pesan } = req.body;
 
@@ -436,7 +441,7 @@ async function daftarSiswa(req, res) {
       offset: page,
       where: {
         ...(checkQuery(angkatan) && {
-          angkatan: angkatan
+          angkatan: {[Op.like]: "%angkatan%"}
         })
       },
       include: [
@@ -512,23 +517,61 @@ async function detailPembayaranSiswa (req, res) {
   }
 }
 
-// async function resetPerbulan () {
-//   try {
-//     await PembayaranController.destroy({where: {}})
-//     console.log("Berhasil")
-//   } catch (error) {
-//     console.log(error)
-//     return res.status(403).send("Terjadi Kesalahan")
-//   }
-// }
+async function updateResponse (req, res) {
+  try {
+    const {payload} = req.body;
+
+    let berhasil = 0;
+    let gagal = 0;
+
+    if (!Array.isArray(payload)) {
+      return res.status(400).json({
+        status: "Error",
+        msg: "Invalid payload format. Payload must be an array.",
+      });
+    }
+
+    await Promise.all(
+      payload.map(async (data) => {
+        try {
+          await pembayaranModel.update({
+            status: data.status,
+            tanggal_konfirmasi: new Date(),
+            teacher_id: req.teacher_id
+          },
+          {
+            where: {
+              id: data.id
+            }
+          }
+        )
+        berhasil += 1;
+        } catch (error) {
+          console.log(error);
+          gagal += 1;
+        }
+      })
+    );
+
+    
+    return res.status(201).json({
+      status: "Success",
+      msg: "Berhasil Menguhah Status Approval",
+      data: payload
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(403).send("Terjadi Kesalahan")
+  }
+}
 
 module.exports = {
   createKartuSpp,
   detailPembayaran,
   ListPembayaran,
   createPembayaran,
-  updateAprroval,
-createNotification,
+  updateResponse,
+  createNotification,
   daftarSiswa,
   detailPembayaranSiswa
 };
