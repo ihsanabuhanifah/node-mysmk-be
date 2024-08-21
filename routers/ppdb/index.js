@@ -18,7 +18,26 @@ const { check } = require("express-validator");
 const validateFields = require("./validateFields");
 const {
   createMitraSekolah,
+  getMitraSekolahById,
+  getMitraSekolah,
+  updateMitraSekolah,
+  deleteMitraSekolah,
 } = require("../../controllers/ppdb/mitraSekolahController");
+const { uploadFoto } = require("../../utils/multer");
+const {
+  createGalleryKegiatan,
+  updateGalleryKegiatan,
+  getDetailGallery,
+  getGalleryKegiatan,
+  deleteGalleryKegiatan,
+} = require("../../controllers/ppdb/gallerykegiatan");
+const {
+  createFasilitas,
+  updateFasilitas,
+  getFasilitasById,
+  getFasilitas,
+  deleteFasilitas,
+} = require("../../controllers/ppdb/fasilitas");
 
 const validation = [
   check("nama_siswa")
@@ -95,6 +114,31 @@ ppdb.put("/testimoni/update/:id", updateTestimoni);
 ppdb.delete("/testimoni/delete/:id", deleteTestimoni);
 ppdb.get("/testimoni/detail/:id", getDetailTestimoni);
 ppdb.get("/testimoni/list", listTestimoni);
-ppdb.post("/mitra-sekolah/create", createMitraSekolah);
-
+ppdb.post(
+  "/mitra-sekolah/create",
+  uploadFoto.single("file"),
+  createMitraSekolah
+);
+ppdb.get("/mitra-sekolah/detail/:id", getMitraSekolahById);
+ppdb.get("/mitra-sekolah/list", getMitraSekolah);
+ppdb.put(
+  "/mitra-sekolah/update/:id",
+  uploadFoto.single("file"),
+  updateMitraSekolah
+);
+ppdb.delete("/mitra-sekolah/delete/:id", deleteMitraSekolah);
+ppdb.post("/gallery/create", uploadFoto.single("file"), createGalleryKegiatan);
+ppdb.put(
+  "/gallery/update/:id",
+  uploadFoto.single("file"),
+  updateGalleryKegiatan
+);
+ppdb.get("/gallery/detail/:id", getDetailGallery);
+ppdb.get("/gallery/list", getGalleryKegiatan);
+ppdb.delete("/gallery/delete/:id", deleteGalleryKegiatan);
+ppdb.post("/fasilitas/create", uploadFoto.single("file"), createFasilitas);
+ppdb.put("/fasilitas/update/:id", uploadFoto.single("file"), updateFasilitas);
+ppdb.get("/fasilitas/detail/:id", getFasilitasById);
+ppdb.get("/fasilitas/list", getFasilitas);
+ppdb.delete("/fasilitas/delete/:id", deleteFasilitas);
 module.exports = ppdb;

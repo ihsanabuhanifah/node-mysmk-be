@@ -20,6 +20,10 @@ const createInfoCalsan = async (req, res) => {
       nama_wali,
       pekerjaan_wali,
       hubungan,
+      kk,
+      ijazah,
+      akte,
+      skb,
     } = req.body;
 
     const user_id = req.id;
@@ -43,6 +47,10 @@ const createInfoCalsan = async (req, res) => {
       nama_wali,
       pekerjaan_wali,
       hubungan,
+      kk,
+      ijazah,
+      akte,
+      skb,
     });
 
     console.log(user_id);
@@ -81,6 +89,10 @@ const updateInfoCalsan = async (req, res) => {
       nama_wali,
       pekerjaan_wali,
       hubungan,
+      kk,
+      ijazah,
+      akte,
+      skb,
     } = req.body;
 
     const user_id = req.id;
@@ -117,6 +129,10 @@ const updateInfoCalsan = async (req, res) => {
     if (nama_wali) fieldsToUpdate.nama_wali = nama_wali;
     if (pekerjaan_wali) fieldsToUpdate.pekerjaan_wali = pekerjaan_wali;
     if (hubungan) fieldsToUpdate.hubungan = hubungan;
+    if (kk) fieldsToUpdate.kk = kk;
+    if (ijazah) fieldsToUpdate.ijazah = ijazah;
+    if (akte) fieldsToUpdate.akte = akte;
+    if (skb) fieldsToUpdate.skb = skb;
 
     if (Object.keys(fieldsToUpdate).length > 0) {
       await info_calsan.update(fieldsToUpdate, {

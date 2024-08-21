@@ -36,7 +36,7 @@ var storage = multer.diskStorage({
 const ppdbStorage = new CloudinaryStorage({
   cloudinary: cloudinaryPPDB,
   params: {
-    folder: "/Home/ppdb",
+    // folder: "/ppdb",
     allowed_formats: ["jpg", "png", "jpeg"],
   },
 });

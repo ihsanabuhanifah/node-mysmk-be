@@ -68,6 +68,18 @@ module.exports = {
       hubungan: {
         type: Sequelize.STRING,
       },
+      kk: {
+        type: Sequelize.STRING,
+      },
+      ijazah: {
+        type: Sequelize.STRING,
+      },
+      akte: {
+        type: Sequelize.STRING,
+      },
+      skb: {
+        type: Sequelize.STRING,
+      },
       created_at: {
         allowNull: false,
         type: Sequelize.DATE,
