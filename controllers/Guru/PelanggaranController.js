@@ -70,12 +70,14 @@ const listPelanggaran = async (req, res) => {
   }
 };
 const pelanggaran = async (req, res) => {
-  let { nama_siswa, pelapor, penindak } = req.query;
+  let { nama_siswa, pelapor, penindakm, page, pageSize } = req.query;
   let { id: idSiswa } = req.params;
 
   try {
     const pelanggaran = await PelanggaranSiswaModel.findAndCountAll({
       attributes: ["id", "tanggal", "status", "tindakan", "semester"],
+      ...(pageSize !== undefined && { limit: pageSize }),
+      ...(page !== undefined && { offset: page }),
       include: [
         {
           model: StudentModel,
@@ -116,6 +118,8 @@ const pelanggaran = async (req, res) => {
     return res.json({
       status: "Success",
       data: pelanggaran,
+      page: req.page,
+      pageSize: pageSize,
     });
   } catch (err) {
     console.log(err);
