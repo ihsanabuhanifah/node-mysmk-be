@@ -1,5 +1,6 @@
 const mapelModel = require('../../models').mapel;
 const nilaiModel = require('../../models').nilai;
+const tahunAjaranModel = require('../../models').ta;
 const hasilBelajarModel = require('../../models').hasil_belajar;
 const ujianModel = require('../../models').ujian;
 const models = require("../../models");
@@ -17,7 +18,14 @@ const getHasilBelajar = async (req, res) => {
         model: hasilBelajarModel,
         require: true,
         as: 'hasil_belajar',
-        where: { student_id: req.student_id }
+        where: { student_id: req.student_id },
+        include: [
+          {
+            model: tahunAjaranModel,
+            require: true,
+            as: 'tahun_ajaran'
+          }
+        ]
       }
     ]
   }) 
@@ -42,6 +50,11 @@ const detailHasilBelajar = async (req, res) => {
       {
         model: ujianModel,
         as: 'ujian'
+      },
+      {
+        model: tahunAjaranModel,
+        require: true,
+        as: 'tahun_ajaran'
       }
     ]
   })

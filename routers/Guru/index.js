@@ -85,7 +85,10 @@ const {
 } = require("../../controllers/Guru/TempatPklController");
 
 // Laporan harian pkl
-const { laporanPklList, detailLaporanPkl } = require("../../controllers/Guru/LaporanHarianPklController")
+const {
+  laporanPklList,
+  detailLaporanPkl,
+} = require("../../controllers/Guru/LaporanHarianPklController");
 
 //jadwal
 
@@ -130,6 +133,7 @@ const {
   updateUjian,
   deleteUjian,
   createPenilaian,
+  AnalisislUjian,
 } = require("../../controllers/Guru/UjianController");
 const {
   createKehadiran,
@@ -144,16 +148,21 @@ const { listPenilaianByTeacher, remidial } = require("../../controllers/Guru/Nil
 const { getListWali, updateWali, detailWali } = require("../../controllers/Guru/WaliController");
 const { ListPembayaran, createKartuSpp, updateAprroval, detailPembayaran, deleteKartu, daftarSiswa, detailPembayaranSiswa, createNotification, updateResponse } = require("../../controllers/Wali/PembayaranController");
 
+
+
 const {
-  
+  remidial,
 
   refreshCount,
   getSoal,
   updateLastExam,
   submitExamResult,
+  listPenilaianByTeacher,
+  listNotificationExam
 } = require("../../controllers/Guru/NilaiController");
 
 const { listReport, generateReport } = require("../../controllers/Guru/RaportController");
+
 
 guru.use(guruAccessMiddleware);
 
@@ -272,11 +281,13 @@ guru.post("/bank-soal/delete", deleteSoal);
 guru.post("/ujian/create", createUjian);
 guru.get("/ujian/list", listUjian);
 guru.get("/ujian/detail/:id", detailUjian);
+guru.get("/ujian/analisa/:id", AnalisislUjian);
 guru.put("/ujian/update/:id", updateUjian);
 guru.delete("/ujian/delete/:id", deleteUjian);
 guru.post("/nilai/create", createPenilaian);
 guru.put("/nilai/update-last-exam", updateLastExam);
 guru.put("/nilai/exam-result", submitExamResult);
+guru.get("/nilai/notifikasi", listNotificationExam);
 
 //nilai
 
@@ -287,8 +298,8 @@ guru.get("/nilai/soal/teacher/:id", getSoal);
 
 //report
 
-guru.get("/report/list", listReport)
-guru.post("/report/generate", generateReport)
+guru.get("/report/list", listReport);
+guru.post("/report/generate", generateReport);
 
 //tempat_pkl
 guru.post("/tempat-pkl/create", createTempatPkl);
@@ -299,16 +310,13 @@ guru.get("/tempat-pkl/list", listTempatPkl);
 
 // Walisantri
 
-
 // Laporan harian pkl
-guru.get("/laporan-harian-pkl/list", laporanPklList)
-guru.get("/laporan-harian-pkl/detail/:id", detailLaporanPkl)
-
+guru.get("/laporan-harian-pkl/list", laporanPklList);
+guru.get("/laporan-harian-pkl/detail/:id", detailLaporanPkl);
 guru.get("/walisantri/list", getListWali);
 guru.put("/walisantri/update/:id", updateWali);
-guru.get("/walisantri/detail/:id", detailWali)
-
-
+guru.get("/walisantri/detail/:id", detailWali);
+guru.post("/walisantri/create", createBulkWali);
 
 
 // Pembayaran

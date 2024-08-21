@@ -164,4 +164,4 @@ const updateWali = async (req, res) => {
 }
 
 
-module.exports = { getListWali, detailWali, updateWali};
+module.exports = { getListWali, detailWali, updateWali, createBulkWali};
