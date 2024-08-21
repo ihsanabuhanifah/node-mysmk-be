@@ -97,5 +97,5 @@ module.exports = {
   createLaporanDiniyyah,
   laporanDiniyyahList,
   updateLaporanDiniyyah,
-  getDetailByPklId
+  getDetailByPklId,
 };
