@@ -104,7 +104,7 @@ santri.get('/hasil-belajar-detail/:id', detailHasilBelajar)
 santri.post("/laporan-harian-pkl/create", createLaporanPkl);
 santri.put("/laporan-harian-pkl/update/:id", updateLaporanPkl);
 santri.get("/laporan-harian-pkl/list", laporanPklList);
-santri.get("/laporan-harian-pkl/detail/:id", detailLaporanPkl);
+// santri.get("/laporan-harian-pkl/detail/:id", detailLaporanPkl);
 santri.get('/profile', profile);
 santri.put('/profile/update', validateFields, validateUpdate, updateSiswa);
 santri.post('/profile/update/image', updateImage)
