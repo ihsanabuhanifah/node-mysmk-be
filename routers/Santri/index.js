@@ -23,6 +23,22 @@ const {
   laporanPklList,
   detailLaporanPkl,
 } = require("../../controllers/Santri/LaporanHarianPklController");
+
+const {
+  profile,
+  updateSiswa,
+} = require("../../controllers/Santri/ProfileController");
+const {
+  getHasilBelajar,
+  detailHasilBelajar,
+} = require("../../controllers/Santri/HasilBelajarController");
+const {
+  getExam,
+  takeExam,
+  submitExam,
+  progressExam,
+} = require("../../controllers/Santri/ExamController");
+
 const validateUpdate = [
   check("nama_siswa")
     .optional()
@@ -64,6 +80,7 @@ const {
   createLaporanDiniyyah,
   laporanDiniyyahList,
   updateLaporanDiniyyah,
+  getDetailByPklId,
 } = require("../../controllers/Santri/LaporanDiniyyahHarianController");
 
 // tempat pkl
@@ -72,12 +89,15 @@ const {
 } = require("../../controllers/Santri/TempatPklController");
 
 santri.use(santriAccessMiddleware);
-santri.get("/profile", profile);
-santri.put("/profile/update/:id", validateFields, validateUpdate, updateSiswa);
-santri.get("/exam/list", getExam);
-santri.put("/exam/take/:id", takeExam);
-santri.put("/exam/progress", progressExam);
-santri.put("/exam/submit", submitExam);
+santri.get('/profile', profile);
+santri.put('/profile/update', validateFields, validateUpdate, updateSiswa);
+santri.get("/exam/list", getExam )
+santri.put("/exam/take/:id", takeExam )
+santri.put("/exam/progress", progressExam)
+santri.put("/exam/submit", submitExam)
+santri.get('/hasil-belajar', getHasilBelajar)
+santri.get('/hasil-belajar-detail/:id', detailHasilBelajar)
+
 
 // Laporan Harian pkl
 
@@ -100,6 +120,7 @@ santri.get('/hasil-ujian', listHasilUjain)
 // Laporan Diniyyah
 santri.post("/laporan-diniyyah/create", createLaporanDiniyyah);
 santri.get("/laporan-diniyyah/list", laporanDiniyyahList);
+santri.get("/laporan-diniyyah/detailPkl/:id", getDetailByPklId);
 santri.put("/laporan-diniyyah/update/:id", updateLaporanDiniyyah);
 
 // Tempat pkl
