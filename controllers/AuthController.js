@@ -253,7 +253,6 @@ async function register(req, res) {
 
 async function authme(req, res) {
   let email = req.email;
-
   try {
     const token = JWT.sign(
       {
