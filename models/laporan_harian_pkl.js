@@ -30,8 +30,9 @@ module.exports = (sequelize, DataTypes) => {
       tanggal: DataTypes.DATEONLY,
       created_at: DataTypes.DATE,
       updated_at: DataTypes.DATE,
+      status : DataTypes.ENUM('hadir', 'izin')
     },
-    {
+    { 
       sequelize,
       modelName: "laporan_harian_pkl",
     }
