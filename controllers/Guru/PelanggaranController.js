@@ -69,6 +69,62 @@ const listPelanggaran = async (req, res) => {
     });
   }
 };
+const pelanggaran = async (req, res) => {
+  let { nama_siswa, pelapor, penindak } = req.query;
+  let { id: idSiswa } = req.params;
+
+  try {
+    const pelanggaran = await PelanggaranSiswaModel.findAndCountAll({
+      attributes: ["id", "tanggal", "status", "tindakan", "semester"],
+      include: [
+        {
+          model: StudentModel,
+          require: true,
+          as: "siswa",
+          attributes: ["id", "nama_siswa"],
+          where: {
+            id: idSiswa
+          },
+        },
+        {
+          model: TeacherModel,
+          require: true,
+          as: "pelaporan",
+          attributes: ["id", "nama_guru"],
+        },
+        {
+          model: TeacherModel,
+          require: true,
+          as: "penindakan",
+          attributes: ["id", "nama_guru"],
+        },
+        {
+          model: PelanggaranModel,
+          require: true,
+          as: "pelanggaran",
+          attributes: ["id", "nama_pelanggaran", "tipe", "kategori", "point"],
+        },
+        {
+          model: TaModel,
+          require: true,
+          as: "tahun_ajaran",
+          attributes: ["id", "nama_tahun_ajaran"],
+        },
+      ],
+      order: [["id", "desc"]],
+    });
+    return res.json({
+      status: "Success",
+      data: pelanggaran,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(403).json({
+      status: "Fail",
+      msg: "Terjadi Kesalahan",
+    });
+  }
+};
 const detailPelanggaran = async (req, res) => {
   let { id } = req.params;
   try {
@@ -235,4 +291,5 @@ module.exports = {
   deletePelanggaran,
   createPelanggaran,
   updatePelanggaran,
+  pelanggaran
 };
