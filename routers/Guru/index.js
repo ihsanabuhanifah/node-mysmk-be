@@ -88,7 +88,6 @@ const {
 const {
   laporanPklList,
   detailLaporanPkl,
-  laporanPklListForPembimbing,
 } = require("../../controllers/Guru/LaporanHarianPklController");
 
 //jadwal
@@ -147,6 +146,7 @@ const adminAccessMiddleware = require("../../middleware/adminAccessMiddleware");
 const { getListWali, createBulkWali, updateWali, detailWali } = require("../../controllers/Guru/WaliController");
 const { ListPembayaran, createKartuSpp, updateAprroval } = require("../../controllers/Wali/PembayaranController");
 
+
 const {
   remidial,
   refreshCount,
@@ -155,6 +155,7 @@ const {
   submitExamResult,
   listPenilaianByTeacher
 } = require("../../controllers/Guru/NilaiController");
+
 
 const {
   listReport,
@@ -283,6 +284,7 @@ guru.delete("/ujian/delete/:id", deleteUjian);
 guru.post("/nilai/create", createPenilaian);
 guru.put("/nilai/update-last-exam", updateLastExam);
 guru.put("/nilai/exam-result", submitExamResult);
+guru.get("/nilai/notifikasi", listNotificationExam);
 
 //nilai
 
@@ -308,18 +310,14 @@ guru.get("/tempat-pkl/list", listTempatPkl);
 // Laporan harian pkl
 guru.get("/laporan-harian-pkl/list", laporanPklList);
 guru.get("/laporan-harian-pkl/detail/:id", detailLaporanPkl);
-guru.get("/laporan-harian-pkl/list/pembimbing", laporanPklListForPembimbing);
-
 guru.get("/walisantri/list", getListWali);
 guru.put("/walisantri/update/:id", updateWali);
-guru.get("/walisantri/detail/:id", detailWali)
-
+guru.get("/walisantri/detail/:id", detailWali);
 guru.post("/walisantri/create", createBulkWali);
 
 // Pembayaran
 guru.get("/pembayaran/list", ListPembayaran);
 guru.post("/pembayaran/createKartu", createKartuSpp);
 guru.put("/pembayaran/persetujuan/:id", updateAprroval);
-
 
 module.exports = guru;
