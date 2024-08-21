@@ -186,7 +186,7 @@ const ListPembayaran = async (req, res) => {
 
 
   try {
-    const { page, pageSize, nama_siswa, dari_tahun, ke_tahun, dari_bulan, ke_bulan} = req.query;
+    const { page, pageSize, nama_siswa, dari_tahun, ke_tahun, dari_bulan, ke_bulan, tahun, bulan} = req.query;
 
     let Result = {};
 
@@ -217,6 +217,19 @@ const ListPembayaran = async (req, res) => {
         ]
       }
     }
+    } else if (dari_bulan) {
+      Result = {
+        bulan: {
+          [Op.substring] : dari_bulan
+        }
+      }
+    } else if (ke_bulan) {
+      Result = {
+        bulan : {
+          [Op.substring] : ke_bulan
+        }
+      }
+      
     }
   
     if (dari_tahun && ke_tahun) {
@@ -224,6 +237,18 @@ const ListPembayaran = async (req, res) => {
         tahun : {
           [Op.between] : [dari_tahun, ke_tahun]
         }
+      }
+    }
+
+    if (bulan) {
+      Result.bulan = {
+        [Op.substring] : bulan
+      }
+    }
+
+    if (tahun) {
+      Result.tahun = {
+        [Op.substring] : tahun 
       }
     }
 
@@ -389,7 +414,7 @@ async function createPembayaranOtomatis(req, res) {
 }
 
 async function createNotification(req, res) {
-  try {
+  // try {
     // const walsan = await parentModel.findOne({
     //   where: {
     //     id: id
@@ -397,38 +422,32 @@ async function createNotification(req, res) {
     // })
     console.log("WABLAS", process.env.WABLAS_TOKEN);
 
-// const TOKEN_WA_BLAS='hIcQxtpRplbVVvY46d0GsMDWSCNYpIcbs95SucC6DNS3E5rUn1osPECHuiL1jJRI'
+    const token = `${process.env.WABLAS_TOKEN}`
 
-    const { tanggal, isi_pesan } = req.body;
+    const { tanggal, isi_pesan } = req.body; 
 
-    const buat = await notificationModel.create({
-      tanggal : new Date(),
-      isi_pesan: isi_pesan,
-    });
+    const data =  {
+      phone: '6285794120637',
+      message: isi_pesan
+    }
 
-    const response = await axios.get('https://jogja.wablas.com/api/send-message', {
+
+    const response = await axios.post('https://jogja.wablas.com/api/send-message', data, {
       headers: {
-        'Authorization': `Bearer ${process.env.WABLAS_TOKEN}`,
-        'Accept' : 'application/json, text/plain, */*',
-        'Content-Type': 'application/json',
-        'Accept-Encoding': 'gzip, compress, deflate, br'
-      },
-      params: {
-        phone:'6281311295106',
-        message: isi_pesan
+                'Authorization': token,
+                'Content-Type': 'application/json',
       }
     })
-    console.log('Notification sent:', response.data);
+    // console.log('Notification sent:', response.data);
 
     return res.status(201).json({
       status: "Success",
       msg: "Berhasil Menambahkan Pesan",
-      data: buat,
     });
-  } catch (error) {
-    console.log(error.response ? error.response.data : error.message);
-    return res.status(403).send("Terjadi Kesalahan");
-  }
+  // } catch (error) {
+  //   console.log(error.response ? error.response.data : error.message);
+  //   return res.status(403).send("Terjadi Kesalahan");
+  // }
 }
 
 
