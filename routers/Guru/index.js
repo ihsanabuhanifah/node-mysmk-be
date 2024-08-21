@@ -144,12 +144,15 @@ const {
   submitByAdmin,
 } = require("../../controllers/Guru/KehadiranGuruController");
 const adminAccessMiddleware = require("../../middleware/adminAccessMiddleware");
-const { getListWali, createBulkWali, updateWali, detailWali } = require("../../controllers/Guru/WaliController");
-const { ListPembayaran, createKartuSpp, updateAprroval } = require("../../controllers/Wali/PembayaranController");
+const { listPenilaianByTeacher, remidial } = require("../../controllers/Guru/NilaiController");
+const { getListWali, updateWali, detailWali } = require("../../controllers/Guru/WaliController");
+const { ListPembayaran, createKartuSpp, updateAprroval, detailPembayaran, deleteKartu, daftarSiswa, detailPembayaranSiswa, createNotification, updateResponse } = require("../../controllers/Wali/PembayaranController");
+
 
 
 const {
   remidial,
+
   refreshCount,
   getSoal,
   updateLastExam,
@@ -158,11 +161,8 @@ const {
   listNotificationExam
 } = require("../../controllers/Guru/NilaiController");
 
+const { listReport, generateReport } = require("../../controllers/Guru/RaportController");
 
-const {
-  listReport,
-  generateReport,
-} = require("../../controllers/Guru/RaportController");
 
 guru.use(guruAccessMiddleware);
 
@@ -318,9 +318,17 @@ guru.put("/walisantri/update/:id", updateWali);
 guru.get("/walisantri/detail/:id", detailWali);
 guru.post("/walisantri/create", createBulkWali);
 
+
 // Pembayaran
 guru.get("/pembayaran/list", ListPembayaran);
 guru.post("/pembayaran/createKartu", createKartuSpp);
-guru.put("/pembayaran/persetujuan/:id", updateAprroval);
+guru.get("/pembayaran/detail/:id", detailPembayaran);
+guru.put("/pembayaran/update", updateResponse);
+
+
+// siswa
+guru.get("/siswa/daftarSpp", daftarSiswa);
+guru.get("/siswa/listPembayaran/:student_id", detailPembayaranSiswa);
+guru.post("/pesan/create", createNotification)
 
 module.exports = guru;

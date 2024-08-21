@@ -33,7 +33,7 @@ const getListWali = response.requestResponse(async (req, res) => {
         ],
       },
     ],
-    order: [["tanggal", "bulan"]],
+    order: [["id"]],
     limit: pageSize,
     offset: page,
   });
