@@ -463,33 +463,6 @@ async function daftarSiswa(req, res) {
           angkatan: {[Op.like]: "%angkatan%"}
         })
       },
-      include: [
-        {
-          model: models.student,
-          as: "siswa",
-          require: true,
-          where: {
-            ...(checkQuery(nama_siswa) && {
-            nama_siswa:{
-            [Op.substring] : nama_siswa
-            }
-            })
-          }
-        },
-        {
-          model : models.ta,
-          require: true,
-          attributes: ["id", "nama_tahun_ajaran"],
-          as: "tahun_ajaran",
-          where: {
-            ...(checkQuery(tahun_ajaran) && {
-              nama_tahun_ajaran: {
-                [Op.substring] : tahun_ajaran
-              }
-            })
-          }
-        }
-      ]
     })
 
 
