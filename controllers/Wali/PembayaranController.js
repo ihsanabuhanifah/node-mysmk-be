@@ -85,11 +85,10 @@ const createKartuSpp = async (req, res) => {
               student_id: item.student_id,
               ta_id: item.ta_id,
               nominal: item.nominal,
-              walsan_id: item.walsan_id,
               status: "Belum",
               bulan: month,
               tahun: year,
-              tanggal: new Date(),
+
             };
           });
 
@@ -414,12 +413,12 @@ async function createPembayaranOtomatis(req, res) {
 }
 
 async function createNotification(req, res) {
-  // try {
-    // const walsan = await parentModel.findOne({
-    //   where: {
-    //     id: id
-    //   }
-    // })
+  try {
+    const walsan = await parentModel.findOne({
+      where: {
+        id: id
+      }
+    })
     console.log("WABLAS", process.env.WABLAS_TOKEN);
 
     const token = `${process.env.WABLAS_TOKEN}`
@@ -427,7 +426,7 @@ async function createNotification(req, res) {
     const { tanggal, isi_pesan } = req.body; 
 
     const data =  {
-      phone: '6285794120637',
+      phone: `62${walsan.no_hp}`,
       message: isi_pesan
     }
 
@@ -438,16 +437,22 @@ async function createNotification(req, res) {
                 'Content-Type': 'application/json',
       }
     })
+
+    const tambah = notificationModel.create({
+      isi_pesan: isi_pesan,
+      tanggal: new Date()
+    })
     // console.log('Notification sent:', response.data);
 
     return res.status(201).json({
       status: "Success",
       msg: "Berhasil Menambahkan Pesan",
+      data: tambah
     });
-  // } catch (error) {
-  //   console.log(error.response ? error.response.data : error.message);
-  //   return res.status(403).send("Terjadi Kesalahan");
-  // }
+  } catch (error) {
+    console.log(error.response ? error.response.data : error.message);
+    return res.status(403).send("Terjadi Kesalahan");
+  }
 }
 
 
