@@ -33,7 +33,7 @@ const getListWali = response.requestResponse(async (req, res) => {
         ],
       },
     ],
-    order: [["id", "desc"]],
+    order: [["tanggal", "bulan"]],
     limit: pageSize,
     offset: page,
   });
@@ -91,6 +91,77 @@ const createBulkWali = async (req, res) => {
   }
 }
 
+const detailWali = async (req, res) => {
+  try {
+    const {id} = req.params;
+
+    const wali = await ParentController.findOne({
+      where: {
+        id: id,
+      },
+      include: [
+        {
+          model: models.user,
+          require: true,
+          as: "wali",
+          attributes: ["id", "name", "email"]
+        },
+        {
+          model: models.student,
+          require: true,
+          as: "siswa",
+          attributes: ["id", "nama_siswa"]
+        }
+      ]
+    });
+
+    return res.json({
+      status: "Success",
+      msg: "Berhasil Menampilkan Detail Parent",
+      data: wali
+    })
+  } catch (error) {
+    console.log(error);
+    return res.status(403).send("Terjadi Kesalahan")
+  }
+}
+
+const updateWali = async (req, res) => {
+  try {
+    const {id} = req.params;
+    const {nama_wali, student_id, hubungan, image} = req.body;
+
+    const cari = await ParentController.findOne({
+      where: {id: id}
+    })
+
+    if (!cari) {
+      return res.json({
+          status: "Walisantri Belum Ditemukan"
+      })
+  }
+
+    const perbarui = await ParentController.update({
+      nama_wali,
+      student_id,
+      hubungan,
+      image
+    }, {
+      where: {
+        id: id
+      }
+    })
+
+    return res.json({
+      status: "Success",
+      msg: "Berhasil Memperbarui Walisantri",
+      data: perbarui
+    })
+  } catch (error) {
+    console.log(error)
+    res.status(403).send("Terjadi Kesalaahan")
+  }
+}
 
 
-module.exports = { getListWali, createBulkWali};
+module.exports = { getListWali, detailWali, updateWali, createBulkWali};
