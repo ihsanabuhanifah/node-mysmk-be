@@ -251,6 +251,77 @@ async function register(req, res) {
   }
 }
 
+async function registerWali(req, res) {
+  const payload = req.body;
+  const { email } = payload;
+
+  payload.password = await bcrypt.hashSync(req.body.password, 10);
+
+  try {
+    const cek = await userModel.findOne({
+      where: {
+        email: email,
+      },
+      attributes: ["id", "name", "email"],
+    });
+
+    if (cek) {
+      return res.status(422).json({
+        status: "Gagal",
+        msg: "Email sudah terdaftar",
+       
+      });
+    }
+
+    const user = await userModel.create(payload);
+
+    const userRole = await userRoleModel.create({
+      userId: user.id,
+      roleId: 8,
+      status: "noactive",
+    });
+
+    const myRoles = await RolesModel.findByPk(userRole.id);
+
+    await ParentModel.create({
+      user_id: user.id,
+      nama_wali: payload.name,
+      hubungan: payload.hubungan,
+      no_hp: payload.no_hp,
+      nisn: payload.nisn,
+    });
+
+    // const token = {
+    //   UserId: user.id,
+    //   token: generator.generate({
+    //     length: 100,
+    //     numbers: true,
+    //   }),
+    // };
+    // const message = `http://localhost:8000/users/verify/${user.id}/${token.token}`;
+    // const kirim = await sendEmail(email, "Verify Email", message);
+    // if (kirim === "email not sent")
+    //   return res.json({
+    //     status: "fail",
+    //     message: "Gunaka email valid",
+    //   });
+
+    // await EmailVerifiedModel.create(token);
+    // console.log(morgan("user-agent"))
+    // await LoginHistory.create({
+    //   UserId: user.id,
+    //   device: morgan(":user-agent"),
+    // });
+    return res.status(201).json({
+      status: "Success",
+      msg: "Registrasi Berhasil",
+      user: user,
+    });
+  } catch (err) {
+    console.log(err);
+  }
+}
+
 async function authme(req, res) {
   let email = req.email;
 
@@ -556,4 +627,5 @@ module.exports = {
   resetPassword,
   forgotPassword,
   resetPasswordEmail,
+  registerWali,
 };
