@@ -68,7 +68,7 @@ async function login(req, res) {
 
     if (loginAs === 8) {
       parent = await ParentModel.findOne({
-        attributes: ["id", "nama_wali", "user_id", "student_id", "hubungan"],
+        attributes: ["id", "nama_wali", "user_id", "student_id", "hubungan", "nama_siswa"],
         where: {
           user_id: user.id,
         },
@@ -133,6 +133,7 @@ async function login(req, res) {
         role: roleName.role_name,
         roleId: loginAs,
         StudentId: parent?.student_id,
+        nama_siswa: parent?.nama_siswa,
         student_id: siswa?.id,
         teacher_id: guru?.id,
         allRole: allRole,
@@ -148,6 +149,15 @@ async function login(req, res) {
     );
 
     if (loginAs === 8) {
+
+
+      if(!!parent?.student_id === false ){
+        return res.status(422).json({
+          status: "Fail",
+          msg: `Akun dalam proses mapping antara Wali dan Siswa`,
+        });
+      }
+
       return res.status(200).json({
         status: "Success",
         msg: "Berhasil Login",
@@ -199,8 +209,8 @@ async function register(req, res) {
     });
 
     const userRole = await userRoleModel.create({
-      userId: user.id,
-      roleId: 1,
+      user_id: user.id,
+      role_id: 1,
     });
 
     const myRoles = await RolesModel.findByPk(userRole.id);
@@ -276,8 +286,8 @@ async function registerWali(req, res) {
     const user = await userModel.create(payload);
 
     const userRole = await userRoleModel.create({
-      userId: user.id,
-      roleId: 8,
+      user_id: user.id,
+      role_id: 8,
       status: "noactive",
     });
 
