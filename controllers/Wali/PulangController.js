@@ -1,12 +1,43 @@
 const IzinModel = require("../../models").izin_pulang;
 const { Op } = require("sequelize");
 const models = require("../../models");
+const { default: axios } = require("axios");
+const dotenv = require("dotenv");
+dotenv.config();
 async function buatIzinPulang(req, res) {
   try {
     const payload = req.body;
     (payload.user_id = req.id), (payload.student_id = req.StudentId);
     payload.status_approval = "menunggu";
     await IzinModel.create(payload);
+
+    const urlAPI = process.env.URL_WA;
+    const token = process.env.WA_TOKEN;
+    const pesan = `⚠ *SMK MQ NOTIF* ⚠
+    
+    Bismillah, ada wali santri yang mengisi data Tiket Izin Kepulangan berikut data detailnya:
+    Nama santri : Fullan
+    Kelas : XII RPL
+    Jenis : Izin Kepulangan
+    Tanggal Jemput : 30-02-2025
+    Tanggal Antar : 31-02-2025
+    Kepentinggan : Berobat ke rumah sakit
+    
+    Untuk data lebih lengkapnya & menyetujuinya silahkan buka website https://mysmk.smkmadinatulquran.sch.id/`;
+
+    const data = {
+      "phone": 120363225259421052,
+      "message": pesan,
+      "isGroup": true
+    };
+
+    const response = await axios.post(urlAPI, data, {
+      headers: {
+        'Authorization': token,
+        'Content-Type': 'application/json'
+      }
+    });
+
     return res.json({
       status: "Success",
       msg: "Pengajuan Pulang Berhasil dibuat",
