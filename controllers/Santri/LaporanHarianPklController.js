@@ -96,7 +96,7 @@ const laporanPklList = response.requestResponse(async (req, res) => {
     pagination: {
       page: req.page,
       pageSize: pageSize,
-      total: rows.length,
+      total: count,
     },
   };
 });
