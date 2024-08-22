@@ -6,6 +6,7 @@ const {
   createInfoCalsan,
   updateInfoCalsan,
   getDetailCalsan,
+  detailCalsan,
 } = require("../../controllers/ppdb/InformasiCalsanController");
 const {
   createTestimoni,
@@ -109,6 +110,7 @@ ppdb.use(calonSantriAccessMiddleware);
 ppdb.post("/create", validation, validateFields, createInfoCalsan);
 ppdb.put("/update/:id", validation, validateFields, updateInfoCalsan);
 ppdb.get("/detail", getDetailCalsan);
+ppdb.get("/detail-calsan/:id", detailCalsan);
 ppdb.post("/testimoni/create", createTestimoni);
 ppdb.put("/testimoni/update/:id", updateTestimoni);
 ppdb.delete("/testimoni/delete/:id", deleteTestimoni);

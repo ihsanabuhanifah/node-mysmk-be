@@ -185,8 +185,27 @@ const getDetailCalsan = async (req, res) => {
     });
   }
 };
+
+const detailCalsan = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const detail = await info_calsan.findByPk(id);
+    if (!detail) {
+      return res.status(404).send({
+        status: "fail",
+        message: "Data tidak ditemukan",
+      });
+    }
+    res.status(200).send({
+      status: "success",
+      data: detail,
+    });
+  } catch {}
+};
+
 module.exports = {
   createInfoCalsan,
   updateInfoCalsan,
   getDetailCalsan,
+  detailCalsan,
 };
