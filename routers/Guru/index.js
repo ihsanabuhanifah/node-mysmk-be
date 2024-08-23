@@ -153,7 +153,8 @@ const {
   getSoal,
   updateLastExam,
   submitExamResult,
-  listPenilaianByTeacher
+  listPenilaianByTeacher,
+  listNotificationExam
 } = require("../../controllers/Guru/NilaiController");
 
 
