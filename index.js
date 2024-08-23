@@ -25,7 +25,7 @@ const { createPembayaran, createNotification } = require("./controllers/Wali/Pem
 const job = cron.schedule("06 00 * * *", scheduleKelas);
 const kehadiran_guru = cron.schedule("05 00 * * *", createKehadiran);
 const halaqoh = cron.schedule("02 00 * * *", scheduleHalaqoh);
-const notifikasi = cron.schedule("30 * * * * *", createNotification)
+const notifikasi = cron.schedule("00 00 05 * *", createNotification)
 
 
 app.use(cors());
