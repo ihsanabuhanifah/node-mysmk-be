@@ -7,11 +7,26 @@ const dayjs = require("dayjs");
 const response = new RESPONSE_API();
 
 const createLaporanDiniyyah = response.requestResponse(async (req, res) => {
+  let today = dayjs(new Date()).format("YYYY-MM-DD");
+
   let payload = req.body;
+  const existingLaporan = await LaporanDiniyyahModel.findOne({
+    where: {
+      student_id: req.student_id,
+      tanggal: today,
+    },
+  });
+  if (existingLaporan) {
+    return {
+      statusCode: 400,
+      status: "fail",
+      message: "Anda hanya dapat membuat satu laporan diniyyah per hari.",
+    };
+  }
   const laporanDiniyyahHarian = await LaporanDiniyyahModel.create({
     ...payload,
     student_id: req.student_id,
-    tanggal: dayjs(new Date()).format("YYYY-MM-DD"),
+    tanggal: today,
   });
   return {
     statusCode: 201,
