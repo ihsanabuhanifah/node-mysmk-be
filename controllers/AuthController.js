@@ -299,6 +299,7 @@ async function registerWali(req, res) {
       hubungan: payload.hubungan,
       no_hp: payload.no_hp,
       nisn: payload.nisn,
+      nama_siswa : payload.nama_siswa
     });
 
     // const token = {
