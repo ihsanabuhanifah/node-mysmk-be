@@ -93,6 +93,7 @@ const updateInfoCalsan = async (req, res) => {
       ijazah,
       akte,
       skb,
+      surat_pernyataan,
     } = req.body;
 
     const user_id = req.id;
@@ -110,8 +111,6 @@ const updateInfoCalsan = async (req, res) => {
     }
 
     const fieldsToUpdate = {};
-
-    // if (user_id) fieldsToUpdate.user_id = user_id;
     if (nama_siswa) fieldsToUpdate.nama_siswa = nama_siswa;
     if (nis) fieldsToUpdate.nis = nis;
     if (nisn) fieldsToUpdate.nisn = nisn;
@@ -133,6 +132,7 @@ const updateInfoCalsan = async (req, res) => {
     if (ijazah) fieldsToUpdate.ijazah = ijazah;
     if (akte) fieldsToUpdate.akte = akte;
     if (skb) fieldsToUpdate.skb = skb;
+    if (surat_pernyataan) fieldsToUpdate.surat_pernyataan = surat_pernyataan;
 
     if (Object.keys(fieldsToUpdate).length > 0) {
       await info_calsan.update(fieldsToUpdate, {

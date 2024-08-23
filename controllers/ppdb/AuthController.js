@@ -2,18 +2,12 @@ const userModel = require("../../models").user;
 const models = require("../../models");
 const userRoleModel = require("../../models").user_role;
 const RolesModel = require("../../models").role;
-const ParentModel = require("../../models").parent;
-const TeacherModel = require("../../models").teacher;
-const StudentModel = require("../../models").student;
-const TokenModel = require("../../models").token_reset_password;
-const { sequalize } = require("../../models");
 const bcrypt = require("bcryptjs");
 const JWT = require("jsonwebtoken");
 const { Op, where } = require("sequelize");
 const { QueryTypes } = require("sequelize");
 const dotenv = require("dotenv");
 dotenv.config();
-const crypto = require("crypto");
 
 async function register(req, res) {
   const payload = req.body;

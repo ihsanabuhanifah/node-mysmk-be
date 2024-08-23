@@ -35,6 +35,7 @@ module.exports = (sequelize, DataTypes) => {
       ijazah: DataTypes.STRING,
       akte: DataTypes.STRING,
       skb: DataTypes.STRING,
+      surat_pernyataan:DataTypes.STRING
     },
     {
       sequelize,
