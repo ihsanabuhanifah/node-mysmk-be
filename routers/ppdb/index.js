@@ -39,6 +39,9 @@ const {
   getFasilitas,
   deleteFasilitas,
 } = require("../../controllers/ppdb/fasilitas");
+const {
+  createPembayaran,
+} = require("../../controllers/ppdb/pembayaranController");
 
 const validation = [
   check("nama_siswa")
@@ -107,15 +110,20 @@ const validation = [
 ];
 
 ppdb.use(calonSantriAccessMiddleware);
+//Info calon santri
 ppdb.post("/create", validation, validateFields, createInfoCalsan);
 ppdb.put("/update/:id", validation, validateFields, updateInfoCalsan);
 ppdb.get("/detail", getDetailCalsan);
 ppdb.get("/detail-calsan/:id", detailCalsan);
+
+//Testimoni
 ppdb.post("/testimoni/create", createTestimoni);
 ppdb.put("/testimoni/update/:id", updateTestimoni);
 ppdb.delete("/testimoni/delete/:id", deleteTestimoni);
 ppdb.get("/testimoni/detail/:id", getDetailTestimoni);
 ppdb.get("/testimoni/list", listTestimoni);
+
+//Mitra Sekolah
 ppdb.post(
   "/mitra-sekolah/create",
   uploadFoto.single("file"),
@@ -129,6 +137,8 @@ ppdb.put(
   updateMitraSekolah
 );
 ppdb.delete("/mitra-sekolah/delete/:id", deleteMitraSekolah);
+
+//gallery
 ppdb.post("/gallery/create", uploadFoto.single("file"), createGalleryKegiatan);
 ppdb.put(
   "/gallery/update/:id",
@@ -138,9 +148,14 @@ ppdb.put(
 ppdb.get("/gallery/detail/:id", getDetailGallery);
 ppdb.get("/gallery/list", getGalleryKegiatan);
 ppdb.delete("/gallery/delete/:id", deleteGalleryKegiatan);
+
+//fasilitas
 ppdb.post("/fasilitas/create", uploadFoto.single("file"), createFasilitas);
 ppdb.put("/fasilitas/update/:id", uploadFoto.single("file"), updateFasilitas);
 ppdb.get("/fasilitas/detail/:id", getFasilitasById);
 ppdb.get("/fasilitas/list", getFasilitas);
 ppdb.delete("/fasilitas/delete/:id", deleteFasilitas);
+
+//pembayaran
+ppdb.post("/pembayaran-ppdb", createPembayaran);
 module.exports = ppdb;

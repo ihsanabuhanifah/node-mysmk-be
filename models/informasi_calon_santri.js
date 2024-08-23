@@ -8,7 +8,7 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      // define association here
+      informasi_calon_santri.belongsTo(models.user, { foreignKey: "user_id" });
     }
   }
   informasi_calon_santri.init(
@@ -35,7 +35,7 @@ module.exports = (sequelize, DataTypes) => {
       ijazah: DataTypes.STRING,
       akte: DataTypes.STRING,
       skb: DataTypes.STRING,
-      surat_pernyataan:DataTypes.STRING
+      surat_pernyataan: DataTypes.STRING,
     },
     {
       sequelize,
