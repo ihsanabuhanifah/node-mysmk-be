@@ -32,6 +32,10 @@ module.exports = (sequelize, DataTypes) => {
         as: "ujian",
         foreignKey: "ujian_id",
       });
+      nilai.belongsTo(models.ta, {
+        as: "tahun_ajaran",
+        foreignKey: "ta_id",
+      });
      
     }
   }

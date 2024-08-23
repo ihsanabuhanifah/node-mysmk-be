@@ -18,6 +18,12 @@ authRouter.post(
   authController.register
 );
 
+authRouter.post(
+  "/register/wali",
+
+  authController.registerWali
+);
+
 authRouter.get("/authme", jwtValidateMiddleware, authController.authme);
 authRouter.post("/google-register", authController.googleRegister);
 authRouter.post("/google-login", authController.googleLogin);

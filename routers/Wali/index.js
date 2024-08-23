@@ -55,5 +55,5 @@ wali.get("/notice/list", getNotice);
 //Pembayaran
 wali.get("/pembayaran/list", ListPembayaran);
 wali.get("/pembayaran/detail/:id", detailPembayaran);
-wali.put("/pembayaran/bayar/:id", createPembayaran)
+wali.put("/pembayaran/bayar/:id", createPembayaran);
 module.exports = wali;
