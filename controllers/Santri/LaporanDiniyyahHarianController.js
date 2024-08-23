@@ -83,10 +83,11 @@ const getDetailByPklId = response.requestResponse(async (req, res) => {
     },
   });
   if (laporanDiniyyah === null) {
-    return res.status(422).json({
+    return {
       status: "Fail",
       msg: `Laporan Pkl dengan id ${id} tidak dapat Ditemukan`,
-    });
+      data : null
+    };
   }
   return {
     message: `Berhasil Menemukan data dengan id ${id}`,
