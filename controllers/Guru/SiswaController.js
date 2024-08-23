@@ -55,6 +55,16 @@ async function listSiswa(req, res) {
 					model: models.student,
 					require: true,
 					as: 'siswa',
+					include : [
+						{
+							model: models.user,
+							require: true,
+							as: 'user',
+							attributes: ['id', 'email'],
+		
+							
+						},
+					],
 					//   attributes: ["id", "nama_siswa"],
 					where: {
 						...(checkQuery(nama_siswa) && {
