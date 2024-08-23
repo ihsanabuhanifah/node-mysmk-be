@@ -79,14 +79,14 @@ const getDetailByPklId = response.requestResponse(async (req, res) => {
   const id = req.params;
   const laporanDiniyyah = await LaporanDiniyyahModel.findOne({
     where: {
-      id: id,
+      laporan_harian_pkl_id: id,
     },
   });
   if (laporanDiniyyah === null) {
     return {
       status: "Fail",
       msg: `Laporan Pkl dengan id ${id} tidak dapat Ditemukan`,
-      data : null
+      data: null,
     };
   }
   return {
