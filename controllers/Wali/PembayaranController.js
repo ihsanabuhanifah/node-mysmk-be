@@ -85,11 +85,10 @@ const createKartuSpp = async (req, res) => {
               student_id: item.student_id,
               ta_id: item.ta_id,
               nominal: item.nominal,
-              walsan_id: item.walsan_id,
               status: "Belum",
               bulan: month,
               tahun: year,
-              tanggal: new Date(),
+
             };
           });
 
@@ -186,7 +185,7 @@ const ListPembayaran = async (req, res) => {
 
 
   try {
-    const { page, pageSize, nama_siswa, dari_tahun, ke_tahun, dari_bulan, ke_bulan} = req.query;
+    const { page, pageSize, nama_siswa, dari_tahun, ke_tahun, dari_bulan, ke_bulan, tahun, bulan} = req.query;
 
     let Result = {};
 
@@ -217,6 +216,19 @@ const ListPembayaran = async (req, res) => {
         ]
       }
     }
+    } else if (dari_bulan) {
+      Result = {
+        bulan: {
+          [Op.substring] : dari_bulan
+        }
+      }
+    } else if (ke_bulan) {
+      Result = {
+        bulan : {
+          [Op.substring] : ke_bulan
+        }
+      }
+      
     }
   
     if (dari_tahun && ke_tahun) {
@@ -224,6 +236,18 @@ const ListPembayaran = async (req, res) => {
         tahun : {
           [Op.between] : [dari_tahun, ke_tahun]
         }
+      }
+    }
+
+    if (bulan) {
+      Result.bulan = {
+        [Op.substring] : bulan
+      }
+    }
+
+    if (tahun) {
+      Result.tahun = {
+        [Op.substring] : tahun 
       }
     }
 
@@ -390,40 +414,40 @@ async function createPembayaranOtomatis(req, res) {
 
 async function createNotification(req, res) {
   try {
-    // const walsan = await parentModel.findOne({
-    //   where: {
-    //     id: id
-    //   }
-    // })
-    console.log("WABLAS", process.env.WABLAS_TOKEN);
-
-// const TOKEN_WA_BLAS='hIcQxtpRplbVVvY46d0GsMDWSCNYpIcbs95SucC6DNS3E5rUn1osPECHuiL1jJRI'
-
-    const { tanggal, isi_pesan } = req.body;
-
-    const buat = await notificationModel.create({
-      tanggal : new Date(),
-      isi_pesan: isi_pesan,
-    });
-
-    const response = await axios.get('https://jogja.wablas.com/api/send-message', {
-      headers: {
-        'Authorization': `Bearer ${process.env.WABLAS_TOKEN}`,
-        'Accept' : 'application/json, text/plain, */*',
-        'Content-Type': 'application/json',
-        'Accept-Encoding': 'gzip, compress, deflate, br'
-      },
-      params: {
-        phone:'6281311295106',
-        message: isi_pesan
+    const walsan = await parentModel.findOne({
+      where: {
+        id: id
       }
     })
-    console.log('Notification sent:', response.data);
+    console.log("WABLAS", process.env.WABLAS_TOKEN);
+
+    const token = `${process.env.WABLAS_TOKEN}`
+
+    const { tanggal, isi_pesan } = req.body; 
+
+    const data =  {
+      phone: `62${walsan.no_hp}`,
+      message: isi_pesan
+    }
+
+
+    const response = await axios.post('https://jogja.wablas.com/api/send-message', data, {
+      headers: {
+                'Authorization': token,
+                'Content-Type': 'application/json',
+      }
+    })
+
+    const tambah = notificationModel.create({
+      isi_pesan: isi_pesan,
+      tanggal: new Date()
+    })
+    // console.log('Notification sent:', response.data);
 
     return res.status(201).json({
       status: "Success",
       msg: "Berhasil Menambahkan Pesan",
-      data: buat,
+      data: tambah
     });
   } catch (error) {
     console.log(error.response ? error.response.data : error.message);
@@ -444,33 +468,6 @@ async function daftarSiswa(req, res) {
           angkatan: {[Op.like]: "%angkatan%"}
         })
       },
-      include: [
-        {
-          model: models.student,
-          as: "siswa",
-          require: true,
-          where: {
-            ...(checkQuery(nama_siswa) && {
-            nama_siswa:{
-            [Op.substring] : nama_siswa
-            }
-            })
-          }
-        },
-        {
-          model : models.ta,
-          require: true,
-          attributes: ["id", "nama_tahun_ajaran"],
-          as: "tahun_ajaran",
-          where: {
-            ...(checkQuery(tahun_ajaran) && {
-              nama_tahun_ajaran: {
-                [Op.substring] : tahun_ajaran
-              }
-            })
-          }
-        }
-      ]
     })
 
 

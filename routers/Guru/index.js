@@ -149,9 +149,9 @@ const { ListPembayaran, createKartuSpp, updateAprroval, detailPembayaran, delete
 
 
 
+
 const {
   remidial,
-
   refreshCount,
   getSoal,
   updateLastExam,
@@ -315,7 +315,6 @@ guru.get("/laporan-harian-pkl/detail/:id", detailLaporanPkl);
 guru.get("/walisantri/list", getListWali);
 guru.put("/walisantri/update/:id", updateWali);
 guru.get("/walisantri/detail/:id", detailWali);
-guru.post("/walisantri/create", createBulkWali);
 
 
 // Pembayaran
