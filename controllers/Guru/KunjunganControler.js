@@ -1,6 +1,9 @@
 const KunjunganModel = require("../../models").penjengukan;
 const { Op } = require("sequelize");
 const models = require("../../models");
+const { default: axios } = require("axios");
+const dotenv = require("dotenv");
+dotenv.config();
 const { checkQuery } = require("../../utils/format");
 
 async function listKunjungan(req, res) {
@@ -86,6 +89,29 @@ async function responseKunjungan(req, res) {
         }
       })
     );
+
+    // const urlAPI = process.env.URL_WA;
+    // const token = process.env.WA_TOKEN;
+    // const pesan = `⚠ *SMK MQ NOTIF* ⚠
+    
+    // Bismillah, Tiket kunjungan untuk tanggal 31-02-2025 sudah di proses oleh pihak kesantrian dengan hasil *DISETUJUI*
+    
+    // Jika ada pertanyaan seputar Tiket Kunjungan silahkan hubungi pihak CS atau Kesantrian SMK MQ
+    // 0895320050324 (CS aplikasi : Ustadz Ihsan)
+    // 085216143544 (Kesantrian : Ustadz Hamzah)`;
+
+    // const data = {
+    //   "phone": , //nomor wali santri
+    //   "message": pesan,
+    //   "isGroup": true
+    // };
+
+    // const response = await axios.post(urlAPI, data, {
+    //   headers: {
+    //     'Authorization': token,
+    //     'Content-Type': 'application/json'
+    //   }
+    // });
 
     return res.json({
       status: "Success",

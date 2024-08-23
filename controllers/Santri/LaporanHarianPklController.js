@@ -92,8 +92,12 @@ const laporanPklList = response.requestResponse(async (req, res) => {
   return {
     message: "Berhasil",
     data: rows,
-    page: req.page,
-    pageSize: pageSize,
+
+    pagination: {
+      page: req.page,
+      pageSize: pageSize,
+      total: count,
+    },
   };
 });
 
