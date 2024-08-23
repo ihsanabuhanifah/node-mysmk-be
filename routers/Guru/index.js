@@ -144,19 +144,18 @@ const {
   submitByAdmin,
 } = require("../../controllers/Guru/KehadiranGuruController");
 const adminAccessMiddleware = require("../../middleware/adminAccessMiddleware");
+const { listPenilaianByTeacher, remidial } = require("../../controllers/Guru/NilaiController");
 const { getListWali, updateWali, detailWali, createBulkWali } = require("../../controllers/Guru/WaliController");
 const { ListPembayaran, createKartuSpp, updateAprroval, detailPembayaran, deleteKartu, daftarSiswa, detailPembayaranSiswa, createNotification, updateResponse } = require("../../controllers/Wali/PembayaranController");
 
 
 
-const {
-  remidial,
 
+const {
   refreshCount,
   getSoal,
   updateLastExam,
   submitExamResult,
-  listPenilaianByTeacher,
   listNotificationExam
 } = require("../../controllers/Guru/NilaiController");
 
@@ -315,7 +314,6 @@ guru.get("/laporan-harian-pkl/detail/:id", detailLaporanPkl);
 guru.get("/walisantri/list", getListWali);
 guru.put("/walisantri/update/:id", updateWali);
 guru.get("/walisantri/detail/:id", detailWali);
-guru.post("/walisantri/create", createBulkWali);
 
 
 // Pembayaran
