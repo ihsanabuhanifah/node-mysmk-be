@@ -144,24 +144,38 @@ const {
   submitByAdmin,
 } = require("../../controllers/Guru/KehadiranGuruController");
 const adminAccessMiddleware = require("../../middleware/adminAccessMiddleware");
-const { listPenilaianByTeacher, remidial } = require("../../controllers/Guru/NilaiController");
-const { getListWali, updateWali, detailWali, createBulkWali } = require("../../controllers/Guru/WaliController");
-const { ListPembayaran, createKartuSpp, updateAprroval, detailPembayaran, deleteKartu, daftarSiswa, detailPembayaranSiswa, createNotification, updateResponse } = require("../../controllers/Wali/PembayaranController");
-
-
-
+const {
+  getListWali,
+  updateWali,
+  detailWali,
+  createBulkWali,
+} = require("../../controllers/Guru/WaliController");
+const {
+  ListPembayaran,
+  createKartuSpp,
+  updateAprroval,
+  detailPembayaran,
+  deleteKartu,
+  daftarSiswa,
+  detailPembayaranSiswa,
+  createNotification,
+  updateResponse,
+} = require("../../controllers/Wali/PembayaranController");
 
 const {
+  remidial,
   refreshCount,
   getSoal,
   updateLastExam,
   submitExamResult,
   listPenilaianByTeacher,
-  listNotificationExam
+  listNotificationExam,
 } = require("../../controllers/Guru/NilaiController");
 
-const { listReport, generateReport } = require("../../controllers/Guru/RaportController");
-
+const {
+  listReport,
+  generateReport,
+} = require("../../controllers/Guru/RaportController");
 
 guru.use(guruAccessMiddleware);
 
@@ -316,17 +330,15 @@ guru.get("/walisantri/list", getListWali);
 guru.put("/walisantri/update/:id", updateWali);
 guru.get("/walisantri/detail/:id", detailWali);
 
-
 // Pembayaran
 guru.get("/pembayaran/list", ListPembayaran);
 guru.post("/pembayaran/createKartu", createKartuSpp);
 guru.get("/pembayaran/detail/:id", detailPembayaran);
 guru.put("/pembayaran/update", updateResponse);
 
-
 // siswa
 guru.get("/siswa/daftarSpp", daftarSiswa);
 guru.get("/siswa/listPembayaran/:student_id", detailPembayaranSiswa);
-guru.post("/pesan/create", createNotification)
+guru.post("/pesan/create", createNotification);
 
 module.exports = guru;
