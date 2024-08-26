@@ -16,12 +16,12 @@ async function buatIzin(req, res) {
         const token = process.env.TOKEN_WA;
         const pesan = `*SMK MQ NOTIF PERMINTAAN KUNJUNGAN*
 
-    Bismillah, ada wali santri yang mengisi data Tiket Kunjungan berikut data detailnya:
-    Nama santri : ${req.nama_siswa}
-    Tanggal Kunjungan : ${payload.tanggal}
-    Kepentinggan : ${payload.kepentingan}
+Bismillah, ada wali santri yang mengisi data Tiket Kunjungan berikut data detailnya:
+Nama santri : ${req.nama_siswa}
+Tanggal Kunjungan : ${payload.tanggal}
+Kepentinggan : ${payload.kepentingan}
 
-    Untuk mengkonfirmasi silahkan buka website https://mysmk.smkmadinatulquran.sch.id/guru/perizinan-kunjungan`;
+Untuk mengkonfirmasi silahkan buka website https://mysmk.smkmadinatulquran.sch.id/guru/perizinan-kunjungan`;
 
         const dt = {
           "phone": "120363225259421052",
