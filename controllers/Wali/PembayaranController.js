@@ -15,9 +15,9 @@ const axios = require("axios");
 require("dotenv").config();
 
 let snap = new midtrans.Snap({
-  isProduction: process.env.MIDTRANS_PRODUCTION,
-  serverKey: `${process.env.MIDTRANS_SERVER_KEY}`,
-});
+  isProduction: process.env.MIDTRANS_PRDOUCITON,
+  serverKey: process.env.MIDTRANS_SERVER_KEY
+})
 
 const Monthmap = {
   Juli: 1,
@@ -355,9 +355,19 @@ async function createPembayaran(req, res) {
 }
 
 async function createPembayaranOtomatis(req, res) {
-  try {
+  
 
     const {id} = req.params;
+
+    const { nominal, walsan_id, bulan, tahun, } = req.body;
+
+    console.log('ID from req.params:', id);
+    console.log('req.id:', req.id);
+    console.log('req.walsan_id:', req.walsan_id);
+
+    if (!id) {
+      return res.status(400).json({ error: "ID parameter is required" });
+    }
 
     const timestamp = new Date();
 
@@ -367,24 +377,36 @@ async function createPembayaranOtomatis(req, res) {
       },
     });
 
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
     const dataUpdate = await PembayaranController.findOne({
       where: {
         id: id,
       },
     });
 
+    if (!dataUpdate) {
+      return res.status(404).json({ error: "Pembayaran not found" });
+    }
+
     const walsan = await parentModel.findOne({
       where: {
-        id: req.walsan_id,
+        id: walsan_id,
       },
     });
 
-    const { nominal, walsan_id, bulan, tahun } = req.body;
+    if (!walsan) {
+      return res.status(404).json({ error: "Walsan not found" });
+    }
+
+    
 
     let parameter = {
       transaction_details: {
-        order_id: `SPP-${user}-${bulan}-${tahun}-${timestamp}`,
-        gross_amount: nominal,
+        order_id: `SPP${bulan}`,
+        gross_amount: dataUpdate.nominal,
       },
       credit_card: {
         secure: true,
@@ -400,30 +422,32 @@ async function createPembayaranOtomatis(req, res) {
     snap.createTransaction(parameter).then((transaksi) => {
       let tokenTransaksi = transaksi.token;
       console.log("Transaksi Token: ", tokenTransaksi);
-    });
 
-    await PembayaranController.update(
-      {
-        walsan_id: walsan_id,
-        no_telepon: walsan.no_hp,
-      },
-      {
-        where: {
-          id: id,
+      PembayaranController.update(
+        {
+          walsan_id: walsan_id,
+          no_telepon: walsan.no_hp,
         },
-      }
-    );
+        {
+          where: {
+            id: id,
+          },
+        }
+      );
 
-    return res.status(201).json({
-      status: "Success",
-      msg: "Berhail Membayar SPP",
-      token: tokenTransaksi,
-      data: dataUpdate,
+      return res.status(201).json({
+        status: "Success",
+        msg: "Berhail Membayar SPP",
+        token: tokenTransaksi,
+        data: dataUpdate,
+      });
+    }).catch((error) => {
+      console.error("Error Dalam Transaksi:", error)
+      res.json({
+        msg: "Terjadi Kesalahan"
+      })
     });
-  } catch (error) {
-    console.log(error);
-    return res.status(403).send("Terjadi Kesalahan");
-  }
+  
 }
 
 async function createNotification(req, res) {

@@ -56,5 +56,5 @@ wali.get("/notice/list", getNotice);
 wali.get("/pembayaran/list", ListPembayaran);
 wali.get("/pembayaran/detail/:id", detailPembayaran);
 wali.put("/pembayaran/bayar/:id", createPembayaran);
-wali.post("/pembayaran/otomatis/:id", createPembayaranOtomatis)
+wali.put("/pembayaran/otomatis/:id", createPembayaranOtomatis)
 module.exports = wali;
