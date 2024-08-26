@@ -24,7 +24,7 @@ Kepentinggan : ${payload.kepentingan}
 Untuk mengkonfirmasi silahkan buka website https://mysmk.smkmadinatulquran.sch.id/guru/perizinan-pulang`;
 
     const data = {
-      "phone": '120363225259421052',
+      "phone": '120363327204823634',
       "message": pesan,
       "isGroup": true
     };
