@@ -28,6 +28,28 @@ const createPembayaran = response.requestResponse(async (req, res) => {
     });
   }
 });
+const getDetailPembayaran = response.requestResponse(async (req, res) => {
+  try {
+    const { id } = req.params;
+    const pembayaran = await pembayaranPpdb.findOne({ where: { id } });
+    if (!pembayaran) {
+      return res.status(404).json({
+        message: "Pembayaran tidak ditemukan.",
+      });
+    }
+    return res.status(200).json({
+      message: "Detail Pembayaran",
+      data: pembayaran,
+    });
+  } catch (error) {
+    console.error("Error retrieving pembayaran PPDB detail:", error);
+    return res.status(500).json({
+      message: "An error occurred while retrieving pembayaran PPDB detail",
+      error: error.message,
+    });
+  }
+});
 module.exports = {
   createPembayaran,
+  getDetailPembayaran,
 };
