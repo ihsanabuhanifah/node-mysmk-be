@@ -111,28 +111,34 @@ const updateInfoCalsan = async (req, res) => {
     }
 
     const fieldsToUpdate = {};
-    if (nama_siswa) fieldsToUpdate.nama_siswa = nama_siswa;
-    if (nis) fieldsToUpdate.nis = nis;
-    if (nisn) fieldsToUpdate.nisn = nisn;
-    if (nik) fieldsToUpdate.nik = nik;
-    if (tempat_lahir) fieldsToUpdate.tempat_lahir = tempat_lahir;
-    if (tanggal_lahir) fieldsToUpdate.tanggal_lahir = tanggal_lahir;
-    if (alamat) fieldsToUpdate.alamat = alamat;
-    if (sekolah_asal) fieldsToUpdate.sekolah_asal = sekolah_asal;
-    if (jenis_kelamin) fieldsToUpdate.jenis_kelamin = jenis_kelamin;
-    if (anak_ke) fieldsToUpdate.anak_ke = anak_ke;
-    if (nama_ayah) fieldsToUpdate.nama_ayah = nama_ayah;
-    if (nama_ibu) fieldsToUpdate.nama_ibu = nama_ibu;
-    if (pekerjaan_ayah) fieldsToUpdate.pekerjaan_ayah = pekerjaan_ayah;
-    if (pekerjaan_ibu) fieldsToUpdate.pekerjaan_ibu = pekerjaan_ibu;
-    if (nama_wali) fieldsToUpdate.nama_wali = nama_wali;
-    if (pekerjaan_wali) fieldsToUpdate.pekerjaan_wali = pekerjaan_wali;
-    if (hubungan) fieldsToUpdate.hubungan = hubungan;
-    if (kk) fieldsToUpdate.kk = kk;
-    if (ijazah) fieldsToUpdate.ijazah = ijazah;
-    if (akte) fieldsToUpdate.akte = akte;
-    if (skb) fieldsToUpdate.skb = skb;
-    if (surat_pernyataan) fieldsToUpdate.surat_pernyataan = surat_pernyataan;
+    if (nama_siswa !== undefined) fieldsToUpdate.nama_siswa = nama_siswa;
+    if (nis !== undefined) fieldsToUpdate.nis = nis;
+    if (nisn !== undefined) fieldsToUpdate.nisn = nisn;
+    if (nik !== undefined) fieldsToUpdate.nik = nik;
+    if (tempat_lahir !== undefined) fieldsToUpdate.tempat_lahir = tempat_lahir;
+    if (tanggal_lahir !== undefined)
+      fieldsToUpdate.tanggal_lahir = tanggal_lahir;
+    if (alamat !== undefined) fieldsToUpdate.alamat = alamat;
+    if (sekolah_asal !== undefined) fieldsToUpdate.sekolah_asal = sekolah_asal;
+    if (jenis_kelamin !== undefined)
+      fieldsToUpdate.jenis_kelamin = jenis_kelamin;
+    if (anak_ke !== undefined) fieldsToUpdate.anak_ke = anak_ke;
+    if (nama_ayah !== undefined) fieldsToUpdate.nama_ayah = nama_ayah;
+    if (nama_ibu !== undefined) fieldsToUpdate.nama_ibu = nama_ibu;
+    if (pekerjaan_ayah !== undefined)
+      fieldsToUpdate.pekerjaan_ayah = pekerjaan_ayah;
+    if (pekerjaan_ibu !== undefined)
+      fieldsToUpdate.pekerjaan_ibu = pekerjaan_ibu;
+    if (nama_wali !== undefined) fieldsToUpdate.nama_wali = nama_wali;
+    if (pekerjaan_wali !== undefined)
+      fieldsToUpdate.pekerjaan_wali = pekerjaan_wali;
+    if (hubungan !== undefined) fieldsToUpdate.hubungan = hubungan;
+    if (kk !== undefined) fieldsToUpdate.kk = kk;
+    if (ijazah !== undefined) fieldsToUpdate.ijazah = ijazah;
+    if (akte !== undefined) fieldsToUpdate.akte = akte;
+    if (skb !== undefined) fieldsToUpdate.skb = skb;
+    if (surat_pernyataan !== undefined)
+      fieldsToUpdate.surat_pernyataan = surat_pernyataan;
 
     if (Object.keys(fieldsToUpdate).length > 0) {
       await info_calsan.update(fieldsToUpdate, {
@@ -142,6 +148,24 @@ const updateInfoCalsan = async (req, res) => {
       return res.json({
         status: "Success",
         msg: "Data berhasil di update",
+        data: fieldsToUpdate,
+      });
+    } else {
+      return res.json({
+        status: "No Change",
+        msg: "Tidak ada data yang diperbarui",
+      });
+    }
+
+    if (Object.keys(fieldsToUpdate).length > 0) {
+      await info_calsan.update(fieldsToUpdate, {
+        where: { id },
+      });
+
+      return res.json({
+        status: "Success",
+        msg: "Data berhasil di update",
+        data: fieldsToUpdate,
       });
     } else {
       return res.json({
