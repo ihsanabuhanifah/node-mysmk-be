@@ -12,6 +12,7 @@ const studentModel = require("../../models").student;
 const parentModel = require("../../models").parent;
 const { Op } = require("sequelize");
 const axios = require("axios");
+const { tanggal } = require("../../utils/tanggal");
 require("dotenv").config();
 
 let snap = new midtrans.Snap({
@@ -405,7 +406,7 @@ async function createPembayaranOtomatis(req, res) {
 
     let parameter = {
       transaction_details: {
-        order_id: `SPP${bulan}`,
+        order_id: `SPP${user.id}${dataUpdate.tahun}${dataUpdate.bulan}`,
         gross_amount: dataUpdate.nominal,
       },
       credit_card: {
@@ -415,8 +416,34 @@ async function createPembayaranOtomatis(req, res) {
         email: user.email,
         first_name: walsan.nama_wali,
         last_name: "MQ",
-        phone: walsan.no_hp,
+        phone: `+62${walsan.no_hp}`,
+        biling_address: {
+          first_name: walsan.nama_wali,
+          last_name: "MQ",
+          email: user.email,
+          phone: walsan.no_hp,
+          address: "Desa Singasari",
+          city: "Bogor",
+          postal_code: "16830",
+          country_code: "IDN"
+        }
       },
+      shipping_address: {
+        first_name: walsan.nama_wali,
+        last_name: "MQ",
+        email: user.email,
+        phone: walsan.no_hp,
+        address: "Desa Singasari",
+        city: "Bogor",
+        postal_code: "16830",
+        country_code: "IDN"
+      },
+      item_details: [{
+        id: dataUpdate.id,
+        price: dataUpdate.nominal,
+        quantity: 1,
+        name: `SPP Bulan ${dataUpdate.bulan}`
+      }]
     };
 
     snap.createTransaction(parameter).then((transaksi) => {
@@ -450,6 +477,27 @@ async function createPembayaranOtomatis(req, res) {
   
 }
 
+async function createPesan (req, res) {
+  try {
+    const {isi_pesan} = req.body;
+
+    const create = await notificationModel.create({
+      isi_pesan: isi_pesan,
+      tanggal: new Date()
+    })
+
+    return res.json({
+      status: "Success",
+      msg: "Berhasil Menambahkan Pesan",
+      data: create
+    })
+
+  } catch (error) {
+    console.log(error);
+    return res.status(403).send("Terjadi Kesalahan")
+  }
+}
+
 async function createNotification(req, res) {
   try {
     const walsan = await parentModel.findAll();
@@ -472,12 +520,9 @@ async function createNotification(req, res) {
 
     await Promise.all(
       walsan.map(async (item) => {
-
-        
-
         const data = {
           phone: `62${item.no_hp}`,
-          message: "Test",
+          message: "Assalamualaikum, Para Wali Santri, Dimohon Untuk Setiap Tanggal 5 Setiap Bulan Diingatkan Untuk Membayar SPP Anak Anda, Terimakasih Atas Perhatiannya. Jazzamukhairan Khasiran",
         };
 
         try {
@@ -658,4 +703,5 @@ module.exports = {
   daftarSiswa,
   detailPembayaranSiswa,
   createPembayaranOtomatis,
+  createPesan
 };
