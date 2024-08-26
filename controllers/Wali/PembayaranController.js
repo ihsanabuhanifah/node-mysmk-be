@@ -356,6 +356,9 @@ async function createPembayaran(req, res) {
 
 async function createPembayaranOtomatis(req, res) {
   try {
+
+    const {id} = req.params;
+
     const timestamp = new Date();
 
     const user = await userModel.findOne({
@@ -372,7 +375,7 @@ async function createPembayaranOtomatis(req, res) {
 
     const walsan = await parentModel.findOne({
       where: {
-        id: req.id,
+        id: req.walsan_id,
       },
     });
 
@@ -431,8 +434,23 @@ async function createNotification(req, res) {
 
     const token = `${process.env.WABLAS_TOKEN}`;
 
+    //       const data = {
+    //       phone: `6281775490737`,
+    //       message: "Test",
+    //     };
+
+    // await axios.post("https://jogja.wablas.com/api/send-message", data, {
+    //           headers: {
+    //             Authorization: token,
+    //             "Content-Type": "application/json",
+    //           },
+    //         });
+
     await Promise.all(
       walsan.map(async (item) => {
+
+        
+
         const data = {
           phone: `62${item.no_hp}`,
           message: "Test",
@@ -484,6 +502,11 @@ async function daftarSiswa(req, res) {
       where: {
         ...(checkQuery(angkatan) && {
           angkatan: { [Op.like]: "%angkatan%" },
+          ...(checkQuery(nama_siswa) && {
+            nama_siswa: {
+              [Op.substring] : nama_siswa
+            }
+          })
         }),
       },
     });

@@ -29,7 +29,7 @@ const {
 const {
   getNotice
 } = require("../../controllers/noticeController");
-const { createPembayaran, ListPembayaran, detailPembayaran, updatePembayaran, createKartuSpp } = require("../../controllers/Wali/PembayaranController");
+const { createPembayaran, ListPembayaran, detailPembayaran, updatePembayaran, createKartuSpp, createPembayaranOtomatis } = require("../../controllers/Wali/PembayaranController");
 
 wali.use(waliAccessMiddleware);
 wali.get("/absensi/kelas/list", list);
@@ -56,4 +56,5 @@ wali.get("/notice/list", getNotice);
 wali.get("/pembayaran/list", ListPembayaran);
 wali.get("/pembayaran/detail/:id", detailPembayaran);
 wali.put("/pembayaran/bayar/:id", createPembayaran);
+wali.post("/pembayaran/otomatis/:id", createPembayaranOtomatis)
 module.exports = wali;
