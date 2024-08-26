@@ -13,6 +13,7 @@ async function buatIzinPulang(req, res) {
 
     const urlAPI = process.env.URL_WA;
     const token = process.env.TOKEN_WA;
+    const nomer = process.env.GROUP_WA;
     const pesan = `*SMK MQ NOTIF IZIN KEPULANGAN*
     
 Bismillah, ada wali santri yang mengisi data Tiket Izin Kepulangan berikut data detailnya:
@@ -24,7 +25,7 @@ Kepentinggan : ${payload.kepentingan}
 Untuk mengkonfirmasi silahkan buka website https://mysmk.smkmadinatulquran.sch.id/guru/perizinan-pulang`;
 
     const data = {
-      "phone": '120363327204823634',
+      "phone": nomer,
       "message": pesan,
       "isGroup": true
     };
