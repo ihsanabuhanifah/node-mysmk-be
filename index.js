@@ -32,6 +32,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static("public/data/uploads"));
 app.use(cookieParser());
+app.use(express.urlencoded({extended: true}))
 
 
 app.use(router);
