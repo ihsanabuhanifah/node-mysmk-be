@@ -80,6 +80,9 @@ module.exports = {
       skb: {
         type: Sequelize.STRING,
       },
+      surat_pernyataan: {
+        type:Sequelize.STRING
+      },
       created_at: {
         allowNull: false,
         type: Sequelize.DATE,

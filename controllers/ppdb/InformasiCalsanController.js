@@ -145,32 +145,15 @@ const updateInfoCalsan = async (req, res) => {
         where: { id },
       });
 
-      return res.json({
-        status: "Success",
-        msg: "Data berhasil di update",
+      res.status(200).send({
+        status: "success",
+        msg: "Informasi calon santri berhasil diupdate",
         data: fieldsToUpdate,
       });
     } else {
-      return res.json({
-        status: "No Change",
-        msg: "Tidak ada data yang diperbarui",
-      });
-    }
-
-    if (Object.keys(fieldsToUpdate).length > 0) {
-      await info_calsan.update(fieldsToUpdate, {
-        where: { id },
-      });
-
-      return res.json({
-        status: "Success",
-        msg: "Data berhasil di update",
-        data: fieldsToUpdate,
-      });
-    } else {
-      return res.json({
-        status: "No Change",
-        msg: "Tidak ada data yang diperbarui",
+      res.status(200).send({
+        status: "success",
+        msg: "Tidak ada data yang di update",
       });
     }
   } catch (error) {
@@ -197,8 +180,8 @@ const getDetailCalsan = async (req, res) => {
       });
     }
 
-    return res.json({
-      status: "Success",
+    res.status(200).send({
+      status: "success",
       data: detail,
     });
   } catch (error) {
@@ -224,7 +207,12 @@ const detailCalsan = async (req, res) => {
       status: "success",
       data: detail,
     });
-  } catch {}
+  } catch {
+    return res.status(500).send({
+      status: "fail",
+      message: "Terjadi kesalahan",
+    });
+  }
 };
 
 module.exports = {

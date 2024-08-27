@@ -41,6 +41,7 @@ const {
 } = require("../../controllers/ppdb/fasilitas");
 const {
   createPembayaran,
+  getDetailPembayaran,
 } = require("../../controllers/ppdb/pembayaranController");
 
 const validation = [
@@ -158,4 +159,5 @@ ppdb.delete("/fasilitas/delete/:id", deleteFasilitas);
 
 //pembayaran
 ppdb.post("/pembayaran-ppdb", createPembayaran);
+ppdb.get("/pembayaran-ppdb/detail/:id", getDetailPembayaran);
 module.exports = ppdb;

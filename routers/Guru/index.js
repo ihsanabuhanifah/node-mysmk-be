@@ -144,9 +144,17 @@ const {
   submitByAdmin,
 } = require("../../controllers/Guru/KehadiranGuruController");
 const adminAccessMiddleware = require("../../middleware/adminAccessMiddleware");
-const { getListWali, createBulkWali, updateWali, detailWali } = require("../../controllers/Guru/WaliController");
-const { ListPembayaran, createKartuSpp, updateAprroval } = require("../../controllers/Wali/PembayaranController");
-
+const {
+  getListWali,
+  createBulkWali,
+  updateWali,
+  detailWali,
+} = require("../../controllers/Guru/WaliController");
+const {
+  ListPembayaran,
+  createKartuSpp,
+  updateAprroval,
+} = require("../../controllers/Wali/PembayaranController");
 
 const {
   remidial,
@@ -155,14 +163,18 @@ const {
   updateLastExam,
   submitExamResult,
   listPenilaianByTeacher,
-  listNotificationExam
+  listNotificationExam,
 } = require("../../controllers/Guru/NilaiController");
-
 
 const {
   listReport,
   generateReport,
 } = require("../../controllers/Guru/RaportController");
+
+//Pembayaran ppdb
+const {
+  updatePembayaranPpdb,
+} = require("../../controllers/Guru/PembayaranPpdbController");
 
 guru.use(guruAccessMiddleware);
 
@@ -322,5 +334,8 @@ guru.post("/walisantri/create", createBulkWali);
 guru.get("/pembayaran/list", ListPembayaran);
 guru.post("/pembayaran/createKartu", createKartuSpp);
 guru.put("/pembayaran/persetujuan/:id", updateAprroval);
+
+//Pembayaran PPDB
+guru.put("/pembayaran-ppdb/update/:id", updatePembayaranPpdb);
 
 module.exports = guru;
