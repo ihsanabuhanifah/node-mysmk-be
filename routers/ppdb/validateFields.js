@@ -17,6 +17,11 @@ const validFields = [
   "nama_wali",
   "pekerjaan_wali",
   "hubungan",
+  "kk",
+  "ijazah",
+  "akte",
+  "skb",
+  "surat_pernyataan"
 ];
 
 const validateFields = (req, res, next) => {

@@ -1,6 +1,6 @@
 const { RESPONSE_API } = require("../../utils/response");
 const response = new RESPONSE_API();
-
+const models = require("../../models");
 const pembayaranPpdb = require("../../models").pembayaran_ppdb;
 
 const createPembayaran = response.requestResponse(async (req, res) => {
@@ -31,7 +31,18 @@ const createPembayaran = response.requestResponse(async (req, res) => {
 const getDetailPembayaran = response.requestResponse(async (req, res) => {
   try {
     const { id } = req.params;
-    const pembayaran = await pembayaranPpdb.findOne({ where: { id } });
+    const pembayaran = await pembayaranPpdb.findOne({
+      where: { id },
+      include: [
+        {
+          model: models.teacher,
+          require: true,
+          as: "guru",
+          attributes: ["id", "nama_guru"],
+        },
+      ],
+      order: ["id"],
+    });
     if (!pembayaran) {
       return res.status(404).json({
         message: "Pembayaran tidak ditemukan.",
