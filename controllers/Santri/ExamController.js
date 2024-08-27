@@ -1,5 +1,5 @@
 const studentModel = require("../../models").student;
-const Sequelize = require('sequelize');
+const Sequelize = require("sequelize");
 const models = require("../../models");
 const UjianController = require("../../models").ujian;
 const { Op, where } = require("sequelize");
@@ -32,7 +32,7 @@ const getExam = response.requestResponse(async (req, res) => {
     ...(page !== undefined && { offset: page }),
     where: {
       ...(checkQuery(status) && {
-        status: status
+        status: status,
       }),
       student_id: req.student_id,
     },
@@ -58,7 +58,8 @@ const getExam = response.requestResponse(async (req, res) => {
           "waktu_selesai",
           "status",
           "durasi",
-          "judul_ujian"
+          "judul_ujian",
+
         ],
         include: [
           {
@@ -113,6 +114,25 @@ const takeExam = response.requestResponse(async (req, res) => {
     ],
   });
 
+  if (exam.urutan > 1) {
+    const cek = await NilaiController.findOne({
+      where: {
+        mapel_id: exam.mapel_id,
+        kelas_id: exam.kelas_id,
+        ta_id: exam.ta_id,
+        student_id: req.student_id,
+        urutan: exam.urutan - 1,
+      },
+    });
+
+    if (!!cek?.is_lulus === false || !!cek.is_lulus === 0) {
+      return {
+        statusCode: 422,
+        msg: `Anda belum lulus pada exam ke ${exam.urutan - 1} di mata pelajaran ini`,
+      };
+    }
+  }
+
   let soal = await BankSoalController.findAll({
     where: {
       id: {
@@ -121,47 +141,33 @@ const takeExam = response.requestResponse(async (req, res) => {
     },
   });
 
-  // if (!exam) {
-  //   return {
-  //     statusCode: 422,
-  //     msg: "Ujian tidak ditemukan",
-  //   };
-  // }
+  // Mengacak urutan soal
+  soal = soal.sort(() => Math.random() - 0.5);
 
-  // if (exam.status === "finish") {
-  //   return {
-  //     statusCode: 422,
-  //     msg: "Ujian telah berakhir",
-  //   };
-  // }
+  if (!exam) {
+    return {
+      statusCode: 422,
+      msg: "Ujian tidak ditemukan",
+    };
+  }
 
-  // if (
-  //   exam.refresh_count <= 0 &&
-  //   exam.status === "progress" &&
-  //   exam.ujian.tipe_ujian === "closed"
-  // ) {
-  //   return {
-  //     statusCode: 422,
-  //     msg: "Anda tidak dapat mengambil ujian ini , Silahkan  menghubungi pengawas",
-  //   };
-  // }
+  if (exam.status === "finish") {
+    return {
+      statusCode: 422,
+      msg: "Ujian telah berakhir",
+    };
+  }
 
-  // if (exam.waktu_tersisa <= 0 && exam.status === "progress") {
-  //   await NilaiController.update(
-  //     {
-  //       status: "finish",
-  //     },
-  //     {
-  //       where: {
-  //         id: exam.id,
-  //       },
-  //     }
-  //   );
-  //   return {
-  //     statusCode: 422,
-  //     msg: "Waktu Telah habis, Ujian berakhir",
-  //   };
-  // }
+  if (
+    exam.refresh_count <= 0 &&
+    exam.status === "progress" &&
+    exam.ujian.tipe_ujian === "closed"
+  ) {
+    return {
+      statusCode: 422,
+      msg: "Anda tidak dapat mengambil ujian ini , Silahkan  menghubungi pengawas",
+    };
+  }
 
   const now = new Date();
   const startTime = new Date(exam.ujian.waktu_mulai);
@@ -251,6 +257,7 @@ const takeExam = response.requestResponse(async (req, res) => {
   }
 });
 
+
 const submitExam = response.requestResponse(async (req, res) => {
   const jawaban = req.body.data;
   const id = req.body.id;
@@ -334,8 +341,8 @@ const submitExam = response.requestResponse(async (req, res) => {
 
         return {
           ...jawab,
-          point : jawab.id === item.id ? item.point : 0
-        }
+          point: jawab.id === item.id ? item.point : 0,
+        };
       });
     } else {
       keterangan = "terdapat essay belum diberikan point";
@@ -426,6 +433,5 @@ const progressExam = response.requestResponse(async (req, res) => {
     msg: "Progress Ujian tersimpan",
   };
 });
-
 
 module.exports = { getExam, takeExam, submitExam, progressExam };
