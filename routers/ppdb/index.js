@@ -101,6 +101,11 @@ const validation = [
     .notEmpty()
     .isString()
     .withMessage("Hubungan harus berupa string"),
+  check("kk").notEmpty().isString().withMessage("upload file!"),
+  check("ijazah").notEmpty().isString().withMessage("upload file!"),
+  check("akte").notEmpty().isString().withMessage("upload file!"),
+  check("skb").notEmpty().isString().withMessage("upload file!"),
+  check("surat_pernyataan").notEmpty().isString().withMessage("upload file!"),
   // (req, res, next) => {
   //   const errors = validationResult(req);
   //   if (!errors.isEmpty()) {
