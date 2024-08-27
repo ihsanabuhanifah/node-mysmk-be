@@ -10,9 +10,7 @@ module.exports = {
      * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
      */
 
-    await queryInterface.addColumn("mapels", "alias", {
-      type: Sequelize.STRING,
-    });
+   
     await queryInterface.addColumn("hasil_belajars", "rata_nilai_projek", {
       type: Sequelize.STRING,
     });
@@ -28,7 +26,7 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.removeColumn("mapels", "alias", {});
+   
     await queryInterface.removeColumn("hasil_belajars", "rata_nilai_projek", {});
     await queryInterface.removeColumn("nilais", "urutan", {});
     await queryInterface.removeColumn("ujians", "urutan", {});
