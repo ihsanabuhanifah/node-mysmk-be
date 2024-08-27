@@ -27,7 +27,6 @@ const createLaporanPkl = response.requestResponse(async (req, res) => {
     ...payload,
     student_id: req.student_id,
     tanggal: today,
-    is_absen: true,
   });
 
   return {
