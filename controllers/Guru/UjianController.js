@@ -8,6 +8,9 @@ const {
   checkQuery,
   calculateMinutesDifference,
 } = require("../../utils/format");
+const { RESPONSE_API } = require("../../utils/response");
+
+const response = new RESPONSE_API();
 
 const createPenilaian = async (req, res) => {
   try {
@@ -43,6 +46,7 @@ const createPenilaian = async (req, res) => {
           mapel_id: req.body.mapel_id,
           kelas_id: req.body.kelas_id,
           jenis_ujian: req.body.jenis_ujian,
+          urutan: req.body.urutan,
 
           exam_result: 0,
           teacher_id: req.teacher_id,
@@ -54,8 +58,6 @@ const createPenilaian = async (req, res) => {
         });
       })
     );
-
-    console.log("pay", student);
 
     return res.status(201).json({
       status: "Success",
@@ -206,9 +208,22 @@ const updateUjian = async (req, res) => {
     }
 
     if (ujian.status === "open") {
-      return res.status(422).json({
-        status: "Fail",
-        msg: "ujian sudah dimulai, tidak bisa memperbaharui",
+      await UjianController.update(
+        {
+          jenis_ujian: payload.jenis_ujian,
+          waktu_mulai: payload.waktu_mulai,
+          waktu_selesai: payload.waktu_selesai,
+        },
+        {
+          where: {
+            id,
+          },
+        }
+      );
+
+      return res.status(200).json({
+        status: "success",
+        msg: "Perbaharui Berhasil",
       });
     }
     if (ujian.teacher_id !== req.teacher_id) {
@@ -340,6 +355,21 @@ const AnalisislUjian = async (req, res) => {
   }
 };
 
+const cekUrutan = response.requestResponse(async (req, res) => {
+  const nilai = await UjianController.max("urutan", {
+    where: {
+      mapel_id: req.body.mapel_id,
+      kelas_id: req.body.kelas_id,
+      ta_id: req.body.ta_id,
+    },
+  });
+
+  return {
+    msg: "Urutan ujian ditemukan",
+    data: nilai,
+  };
+});
+
 module.exports = {
   createUjian,
   listUjian,
@@ -348,6 +378,7 @@ module.exports = {
   deleteUjian,
   createPenilaian,
   AnalisislUjian,
+  cekUrutan,
 };
 
 const analyzeAnswers = (data) => {
