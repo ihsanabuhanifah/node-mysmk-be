@@ -392,11 +392,11 @@ async function createPembayaranOtomatis(req, res) {
       return res.status(404).json({ error: "Pembayaran not found" });
     }
 
-    const walsan = await parentModel.findOne({
-      where: {
-        id: walsan_id,
-      },
-    });
+    // const walsan = await parentModel.findOne({
+    //   where: {
+    //     id: ,
+    //   },
+    // });
 
     if (!walsan) {
       return res.status(404).json({ error: "Walsan not found" });
@@ -406,7 +406,7 @@ async function createPembayaranOtomatis(req, res) {
 
     let parameter = {
       transaction_details: {
-        order_id: `SPP${user.id}${dataUpdate.tahun}${dataUpdate.bulan}`,
+        order_id: `SPP${user.id}`,
         gross_amount: dataUpdate.nominal,
       },
       credit_card: {
@@ -452,7 +452,7 @@ async function createPembayaranOtomatis(req, res) {
 
       PembayaranController.update(
         {
-          walsan_id: walsan_id,
+          walsan_id: req.id,
           no_telepon: walsan.no_hp,
         },
         {
