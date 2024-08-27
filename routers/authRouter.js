@@ -23,6 +23,11 @@ authRouter.post(
 
   authController.registerWali
 );
+authRouter.post(
+  "/nisn/cek",
+
+  authController.nisnCek
+);
 
 authRouter.get("/authme", jwtValidateMiddleware, authController.authme);
 authRouter.post("/google-register", authController.googleRegister);

@@ -68,7 +68,14 @@ async function login(req, res) {
 
     if (loginAs === 8) {
       parent = await ParentModel.findOne({
-        attributes: ["id", "nama_wali", "user_id", "student_id", "hubungan", "nama_siswa"],
+        attributes: [
+          "id",
+          "nama_wali",
+          "user_id",
+          "student_id",
+          "hubungan",
+          "nama_siswa",
+        ],
         where: {
           user_id: user.id,
         },
@@ -136,6 +143,7 @@ async function login(req, res) {
         nama_siswa: parent?.nama_siswa,
         student_id: siswa?.id,
         teacher_id: guru?.id,
+        walsan_id : parent?.id,
         allRole: allRole,
         semesterAktif:
           parent?.student_id !== undefined ? KelasStudent[0]?.semester : "",
@@ -149,9 +157,7 @@ async function login(req, res) {
     );
 
     if (loginAs === 8) {
-
-
-      if(!!parent?.student_id === false ){
+      if (!!parent?.student_id === false) {
         return res.status(422).json({
           status: "Fail",
           msg: `Akun dalam proses mapping antara Wali dan Siswa`,
@@ -279,7 +285,6 @@ async function registerWali(req, res) {
       return res.status(422).json({
         status: "Gagal",
         msg: "Email sudah terdaftar",
-       
       });
     }
 
@@ -293,13 +298,23 @@ async function registerWali(req, res) {
 
     const myRoles = await RolesModel.findByPk(userRole.id);
 
+    const student = await StudentModel.findOne({
+      where: {
+        nisn: payload.nisn,
+      },
+    });
+
+    if (student) {
+      payload.nisn = student.nisn;
+    }
+
     await ParentModel.create({
       user_id: user.id,
       nama_wali: payload.name,
       hubungan: payload.hubungan,
       no_hp: payload.no_hp,
       nisn: payload.nisn,
-      nama_siswa : payload.nama_siswa
+      nama_siswa: payload.nama_siswa,
     });
 
     // const token = {
@@ -333,6 +348,33 @@ async function registerWali(req, res) {
   }
 }
 
+async function nisnCek(req, res) {
+  const payload = req.body;
+  try {
+    const nisn = await StudentModel.findOne({
+      where: {
+        nisn: payload.nisn,
+      },
+    });
+
+    if (nisn) {
+      return res.status(200).json({
+        status: "Success",
+        msg: "NISN Ditemukan",
+        
+      });
+    } else {
+      return res.status(422).json({
+        status: "Warning",
+        msg: "NISN tidak ada pada daftar siswa",
+        
+      });
+    }
+  } catch (err)  {
+    console.log(err);
+  }
+}
+
 async function authme(req, res) {
   let email = req.email;
 
@@ -349,6 +391,7 @@ async function authme(req, res) {
         teacher_id: req?.teacher_id,
         semesterAktif: req?.semesterAktif,
         tahunAjaranAktif: req?.tahunAjaranAktif,
+        walsan_id : req?.walsan_id,
         allRole: req.allRole,
       },
       process.env.JWT_SECRET_ACCESS_TOKEN,
@@ -639,4 +682,5 @@ module.exports = {
   forgotPassword,
   resetPasswordEmail,
   registerWali,
+  nisnCek
 };

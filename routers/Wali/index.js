@@ -31,6 +31,9 @@ const {
 } = require("../../controllers/noticeController");
 const { createPembayaran, ListPembayaran, detailPembayaran, updatePembayaran, createKartuSpp, createPembayaranOtomatis } = require("../../controllers/Wali/PembayaranController");
 
+const { listRaport, listRaportDetail, listExam } = require("../../controllers/Wali/NilaiController");
+
+
 wali.use(waliAccessMiddleware);
 wali.get("/absensi/kelas/list", list);
 wali.get("/absensi/halaqoh/list", listHalaqoh);
@@ -57,4 +60,10 @@ wali.get("/pembayaran/list", ListPembayaran);
 wali.get("/pembayaran/detail/:id", detailPembayaran);
 wali.put("/pembayaran/bayar/:id", createPembayaran);
 wali.put("/pembayaran/otomatis/:id", createPembayaranOtomatis)
+
+
+wali.get("/raport/list", listRaport);
+wali.get("/exam/list", listExam);
+wali.get("/raport/detail/:mapel_id/:kelas_id/:ta_id", listRaportDetail);
+
 module.exports = wali;
