@@ -361,6 +361,7 @@ const cekUrutan = response.requestResponse(async (req, res) => {
       mapel_id: req.body.mapel_id,
       kelas_id: req.body.kelas_id,
       ta_id: req.body.ta_id,
+      is_hirarki : 1
     },
   });
 
