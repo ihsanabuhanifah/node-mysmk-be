@@ -143,6 +143,7 @@ async function login(req, res) {
         nama_siswa: parent?.nama_siswa,
         student_id: siswa?.id,
         teacher_id: guru?.id,
+        walsan_id : parent?.id,
         allRole: allRole,
         semesterAktif:
           parent?.student_id !== undefined ? KelasStudent[0]?.semester : "",
@@ -390,6 +391,7 @@ async function authme(req, res) {
         teacher_id: req?.teacher_id,
         semesterAktif: req?.semesterAktif,
         tahunAjaranAktif: req?.tahunAjaranAktif,
+        walsan_id : req?.walsan_id,
         allRole: req.allRole,
       },
       process.env.JWT_SECRET_ACCESS_TOKEN,
