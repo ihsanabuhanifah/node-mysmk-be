@@ -61,7 +61,8 @@ module.exports = (sequelize, DataTypes) => {
       upload_file: DataTypes.STRING,
       remidial_count : DataTypes.INTEGER,
       exam: DataTypes.STRING,
-      
+      urutan : DataTypes.INTEGER,
+      is_lulus : DataTypes.INTEGER,
       exam_result: DataTypes.DECIMAL(5, 2),
       refresh_count: DataTypes.INTEGER,
       status: DataTypes.ENUM('finish', 'open', 'progress', 'locked'),

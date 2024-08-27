@@ -140,6 +140,7 @@ const {
   deleteUjian,
   createPenilaian,
   AnalisislUjian,
+  cekUrutan,
 } = require("../../controllers/Guru/UjianController");
 const {
   createKehadiran,
@@ -291,6 +292,7 @@ guru.post("/ujian/create", createUjian);
 guru.get("/ujian/list", listUjian);
 guru.get("/ujian/detail/:id", detailUjian);
 guru.get("/ujian/analisa/:id", AnalisislUjian);
+guru.post("/ujian/cek-urutan", cekUrutan);
 guru.put("/ujian/update/:id", updateUjian);
 guru.delete("/ujian/delete/:id", deleteUjian);
 guru.post("/nilai/create", createPenilaian);
