@@ -10,31 +10,30 @@ const userModel = require("../../models").user;
 const notificationModel = require("../../models").notification;
 const studentModel = require("../../models").student;
 const parentModel = require("../../models").parent;
-const {Op} = require("sequelize");
-const axios = require('axios');
+const { Op } = require("sequelize");
+const axios = require("axios");
+const { tanggal } = require("../../utils/tanggal");
 require("dotenv").config();
 
-
-
 let snap = new midtrans.Snap({
-  isProduction: false,
-  serverKey: "",
-});
+  isProduction: process.env.MIDTRANS_PRDOUCITON,
+  serverKey: process.env.MIDTRANS_SERVER_KEY
+})
 
 const Monthmap = {
-  'Juli': 1,
-    'Agustus': 2,
-    'September': 3,
-    'Oktober': 4,
-    'November': 5,
-    'Desemeber': 6,
-    'Januari': 7,
-    'Februari': 8,
-    'Maret': 9,
-    'April': 10,
-    'Mei': 11,
-    'Juni': 12,
-    };
+  Juli: 1,
+  Agustus: 2,
+  September: 3,
+  Oktober: 4,
+  November: 5,
+  Desemeber: 6,
+  Januari: 7,
+  Februari: 8,
+  Maret: 9,
+  April: 10,
+  Mei: 11,
+  Juni: 12,
+};
 
 const createKartuSpp = async (req, res) => {
   try {
@@ -52,7 +51,18 @@ const createKartuSpp = async (req, res) => {
     }
 
     const months = [
-      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni'
+      "Juli",
+      "Agustus",
+      "September",
+      "Oktober",
+      "November",
+      "Desember",
+      "Januari",
+      "Februari",
+      "Maret",
+      "April",
+      "Mei",
+      "Juni",
     ];
 
     let newRecords = [];
@@ -61,41 +71,42 @@ const createKartuSpp = async (req, res) => {
     await Promise.all(
       payload.map(async (item) => {
         try {
-         if (item.student_id === null && item.ta_id === null) {
-          console.log("Barang ID_siswa Dan ID_TA Tidak Ada")
-          gagal += 1
-          return;
-         }
-
-         const cari = await pembayaranModel.findOne({
-          where: {
-            student_id: item.student_id,
-            ta_id: item.ta_id
+          if (item.student_id === null && item.ta_id === null) {
+            console.log("Barang ID_siswa Dan ID_TA Tidak Ada");
+            gagal += 1;
+            return;
           }
-         })
 
-         if (cari) {
-          console.log(`Data Yang Sudah Ada: id_siswa:${item.student_id} dan id_ta: ${item.ta_id}`);
-          gagal +=1;
-         } else {
-          const recordsForMonths = months.map((month, index) => {
-            const year = index < 6 ? 2024 : 2025;
-
-            return {
+          const cari = await pembayaranModel.findOne({
+            where: {
               student_id: item.student_id,
               ta_id: item.ta_id,
-              nominal: item.nominal,
-              status: "Belum",
-              bulan: month,
-              tahun: year,
-
-            };
+            },
           });
 
-          newRecords = newRecords.concat(recordsForMonths);
-          berhasil += 1;
-         }
+          if (cari) {
+            console.log(
+              `Data Yang Sudah Ada: id_siswa:${item.student_id} dan id_ta: ${item.ta_id}`
+            );
+            gagal += 1;
+          } else {
+            const recordsForMonths = months.map((month, index) => {
+              const year = index < 6 ? 2024 : 2025;
 
+              return {
+                student_id: item.student_id,
+                ta_id: item.ta_id,
+                nominal: item.nominal,
+                status: "Belum",
+                bulan: month,
+                tahun: year,
+                teacher_id: req.id,
+              };
+            });
+
+            newRecords = newRecords.concat(recordsForMonths);
+            berhasil += 1;
+          }
         } catch (error) {
           console.log(item, "Error:", error);
           gagal += 1;
@@ -108,7 +119,6 @@ const createKartuSpp = async (req, res) => {
     }
 
     console.log("Barang Baru:", newRecords);
-
 
     return res.status(201).json({
       status: "Success",
@@ -123,10 +133,6 @@ const createKartuSpp = async (req, res) => {
   }
 };
 
-
-
-
-
 const detailPembayaran = async (req, res) => {
   try {
     const { id } = req.params;
@@ -134,7 +140,6 @@ const detailPembayaran = async (req, res) => {
     const pembayaran = await PembayaranController.findOne({
       where: {
         id: id,
-
       },
       include: [
         {
@@ -148,7 +153,6 @@ const detailPembayaran = async (req, res) => {
           require: true,
           as: "murid",
           attributes: ["id", "nama_siswa"],
-          
         },
         {
           model: models.ta,
@@ -162,7 +166,6 @@ const detailPembayaran = async (req, res) => {
           as: "guru",
           attributes: ["id", "nama_guru", "status"],
         },
-      
       ],
 
       order: ["id"],
@@ -180,81 +183,83 @@ const detailPembayaran = async (req, res) => {
 };
 
 const ListPembayaran = async (req, res) => {
-
-
-
-
   try {
-    const { page, pageSize, nama_siswa, dari_tahun, ke_tahun, dari_bulan, ke_bulan, tahun, bulan} = req.query;
+    const {
+      page,
+      pageSize,
+      nama_siswa,
+      dari_tahun,
+      ke_tahun,
+      dari_bulan,
+      ke_bulan,
+      tahun,
+      bulan,
+    } = req.query;
 
     let Result = {};
 
-
-
     const dariBulan = dari_bulan ? Monthmap[dari_bulan] : null;
-    
+
     const keBulan = ke_bulan ? Monthmap[ke_bulan] : null;
-  
+
     console.log("Dari Bulan :", dariBulan);
-    console.log("Ke Bulan:", keBulan)
-    
-  
+    console.log("Ke Bulan:", keBulan);
+
     if (dari_bulan && ke_bulan) {
-    Result = {
-      bulan: {
-        [Op.or] : [
-          {[Op.eq]: dari_bulan},
-          {[Op.eq] : ke_bulan},
-          {
-            [Op.and] : [
-              {[Op.gte] : dari_bulan},
-              {
-              [Op.lte] : ke_bulan
-              }
-            ]
-          }
-        ]
-      }
-    }
+      Result = {
+        bulan: {
+          [Op.or]: [
+            { [Op.eq]: dari_bulan },
+            { [Op.eq]: ke_bulan },
+            {
+              [Op.and]: [
+                { [Op.gte]: dari_bulan },
+                {
+                  [Op.lte]: ke_bulan,
+                },
+              ],
+            },
+          ],
+        },
+      };
     } else if (dari_bulan) {
       Result = {
         bulan: {
-          [Op.substring] : dari_bulan
-        }
-      }
+          [Op.substring]: dari_bulan,
+        },
+      };
     } else if (ke_bulan) {
       Result = {
-        bulan : {
-          [Op.substring] : ke_bulan
-        }
-      }
-      
+        bulan: {
+          [Op.substring]: ke_bulan,
+        },
+      };
     }
-  
+
     if (dari_tahun && ke_tahun) {
       Result = {
-        tahun : {
-          [Op.between] : [dari_tahun, ke_tahun]
-        }
-      }
+        tahun: {
+          [Op.between]: [dari_tahun, ke_tahun],
+        },
+      };
     }
 
     if (bulan) {
       Result.bulan = {
-        [Op.substring] : bulan
-      }
+        [Op.substring]: bulan,
+      };
     }
 
     if (tahun) {
       Result.tahun = {
-        [Op.substring] : tahun 
-      }
+        [Op.substring]: tahun,
+      };
     }
 
     const list = await PembayaranController.findAndCountAll({
-  limit: pageSize,
-  offset: page,
-  where: Result,
+      limit: pageSize,
+      offset: page,
+      where: Result,
       include: [
         {
           model: models.parent,
@@ -268,10 +273,10 @@ const ListPembayaran = async (req, res) => {
           as: "murid",
           attributes: ["id", "nama_siswa"],
           where: {
-            ...(checkQuery(nama_siswa)) && {
-              nama_siswa: {[Op.substring] : nama_siswa}
-            }
-          }
+            ...(checkQuery(nama_siswa) && {
+              nama_siswa: { [Op.substring]: nama_siswa },
+            }),
+          },
         },
         {
           model: models.ta,
@@ -284,7 +289,7 @@ const ListPembayaran = async (req, res) => {
           require: true,
           as: "guru",
           attributes: ["id", "nama_guru", "status"],
-        }
+        },
       ],
       order: ["id", "student_id"],
     });
@@ -350,14 +355,32 @@ async function createPembayaran(req, res) {
   }
 }
 
-
 async function createPembayaranOtomatis(req, res) {
-  try {
+  
+
+    const {id} = req.params;
+
+    const { nominal, walsan_id, bulan, tahun, } = req.body;
+
+    console.log('ID from req.params:', id);
+    console.log('req.id:', req.id);
+    console.log('req.walsan_id:', req.walsan_id);
+
+    if (!id) {
+      return res.status(400).json({ error: "ID parameter is required" });
+    }
+
+    const timestamp = new Date();
+
     const user = await userModel.findOne({
       where: {
         id: req.id,
       },
     });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
 
     const dataUpdate = await PembayaranController.findOne({
       where: {
@@ -365,46 +388,256 @@ async function createPembayaranOtomatis(req, res) {
       },
     });
 
-    const { nominal, walsan_id, no_telepon } = req.body;
+    if (!dataUpdate) {
+      return res.status(404).json({ error: "Pembayaran not found" });
+    }
+
+    // const walsan = await parentModel.findOne({
+    //   where: {
+    //     id: ,
+    //   },
+    // });
+
+    if (!walsan) {
+      return res.status(404).json({ error: "Walsan not found" });
+    }
+
+    
 
     let parameter = {
       transaction_details: {
-        order_id: "PCX-123",
-        gross_amount: nominal,
+        order_id: `SPP${user.id}`,
+        gross_amount: dataUpdate.nominal,
       },
       credit_card: {
         secure: true,
       },
       customer_details: {
         email: user.email,
-        first_name: "Santri",
+        first_name: walsan.nama_wali,
         last_name: "MQ",
-        phone: no_telepon,
+        phone: `+62${walsan.no_hp}`,
+        biling_address: {
+          first_name: walsan.nama_wali,
+          last_name: "MQ",
+          email: user.email,
+          phone: walsan.no_hp,
+          address: "Desa Singasari",
+          city: "Bogor",
+          postal_code: "16830",
+          country_code: "IDN"
+        }
       },
+      shipping_address: {
+        first_name: walsan.nama_wali,
+        last_name: "MQ",
+        email: user.email,
+        phone: walsan.no_hp,
+        address: "Desa Singasari",
+        city: "Bogor",
+        postal_code: "16830",
+        country_code: "IDN"
+      },
+      item_details: [{
+        id: dataUpdate.id,
+        price: dataUpdate.nominal,
+        quantity: 1,
+        name: `SPP Bulan ${dataUpdate.bulan}`
+      }]
     };
 
     snap.createTransaction(parameter).then((transaksi) => {
       let tokenTransaksi = transaksi.token;
       console.log("Transaksi Token: ", tokenTransaksi);
-    });
 
-    await PembayaranController.update(
-      {
-        walsan_id: walsan_id,
-        no_telepon: no_telepon,
-      },
-      {
-        where: {
-          id: id,
+      PembayaranController.update(
+        {
+          walsan_id: req.id,
+          no_telepon: walsan.no_hp,
         },
-      }
+        {
+          where: {
+            id: id,
+          },
+        }
+      );
+
+      return res.status(201).json({
+        status: "Success",
+        msg: "Berhail Membayar SPP",
+        token: tokenTransaksi,
+        data: dataUpdate,
+      });
+    }).catch((error) => {
+      console.error("Error Dalam Transaksi:", error)
+      res.json({
+        msg: "Terjadi Kesalahan"
+      })
+    });
+  
+}
+
+async function createPesan (req, res) {
+  try {
+    const {isi_pesan} = req.body;
+
+    const create = await notificationModel.create({
+      isi_pesan: isi_pesan,
+      tanggal: new Date()
+    })
+
+    return res.json({
+      status: "Success",
+      msg: "Berhasil Menambahkan Pesan",
+      data: create
+    })
+
+  } catch (error) {
+    console.log(error);
+    return res.status(403).send("Terjadi Kesalahan")
+  }
+}
+
+async function createNotification(req, res) {
+  try {
+    const walsan = await parentModel.findAll();
+
+    console.log("WABLAS", process.env.WABLAS_TOKEN);
+
+    const token = `${process.env.WABLAS_TOKEN}`;
+
+    //       const data = {
+    //       phone: `6281775490737`,
+    //       message: "Test",
+    //     };
+
+    // await axios.post("https://jogja.wablas.com/api/send-message", data, {
+    //           headers: {
+    //             Authorization: token,
+    //             "Content-Type": "application/json",
+    //           },
+    //         });
+
+    await Promise.all(
+      walsan.map(async (item) => {
+        const data = {
+          phone: `62${item.no_hp}`,
+          message: "Assalamualaikum, Para Wali Santri, Dimohon Untuk Setiap Tanggal 5 Setiap Bulan Diingatkan Untuk Membayar SPP Anak Anda, Terimakasih Atas Perhatiannya. Jazzamukhairan Khasiran",
+        };
+
+        try {
+          await axios.post("https://jogja.wablas.com/api/send-message", data, {
+            headers: {
+              Authorization: token,
+              "Content-Type": "application/json",
+            },
+          });
+        } catch (error) {
+          if (error.response) {
+            // Log detailed error information
+            console.error(
+              "Error sending notification:",
+              error.response.status,
+              error.response.data
+            );
+          } else if (error.request) {
+            // Request was made but no response received
+            console.error("No response received:", error.request);
+          } else {
+            // Something else caused the error
+            console.error("Error setting up the request:", error.message);
+          }
+        }
+      })
     );
 
     return res.status(201).json({
       status: "Success",
-      msg: "Berhail Membayar SPP",
-      token: tokenTransaksi,
-      data: dataUpdate,
+      msg: "Berhasil Menambahkan Pesan",
+    });
+  } catch (error) {
+    console.log(error.message);
+    return res.status(403).send("Terjadi Kesalahan");
+  }
+}
+
+async function daftarSiswa(req, res) {
+  const { page, pageSize, angkatan, tahun_ajaran, status, nama_siswa } =
+    req.query;
+  try {
+    const cari = await studentModel.findAndCountAll({
+      limit: pageSize,
+      offset: page,
+      where: {
+        ...(checkQuery(angkatan) && {
+          angkatan: { [Op.like]: "%angkatan%" },
+          ...(checkQuery(nama_siswa) && {
+            nama_siswa: {
+              [Op.substring] : nama_siswa
+            }
+          })
+        }),
+      },
+    });
+
+    return res.status(201).json({
+      status: "Success",
+      msg: "Berhasil Menampilkan Siswa",
+      data: cari,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(403).json({
+      status: "Failed",
+      msg: "Terjadi Kesalahan",
+    });
+  }
+}
+
+async function detailPembayaranSiswa(req, res) {
+  try {
+    const { student_id } = req.params;
+    const { page, pageSize } = req.query;
+
+    const cari = await PembayaranController.findAndCountAll({
+      where: {
+        student_id: student_id,
+      },
+      limit: pageSize,
+      offset: page,
+      include: [
+        {
+          model: models.parent,
+          require: true,
+          as: "walsan",
+          attributes: ["id", "nama_wali"],
+        },
+        {
+          model: models.student,
+          require: true,
+          as: "murid",
+          attributes: ["id", "nama_siswa"],
+        },
+        {
+          model: models.ta,
+          require: true,
+          as: "ta",
+          attributes: ["id", "nama_tahun_ajaran"],
+        },
+        {
+          model: models.teacher,
+          require: true,
+          as: "guru",
+          attributes: ["id", "nama_guru", "status"],
+        },
+      ],
+      order: ["id", ["bulan", "ASC"]],
+    });
+
+    return res.status(201).json({
+      status: "Success",
+      msg: "Berhasil Menampilkan Data Pembayaran Siswa",
+      data: cari,
     });
   } catch (error) {
     console.log(error);
@@ -412,111 +645,9 @@ async function createPembayaranOtomatis(req, res) {
   }
 }
 
-async function createNotification(req, res) {
+async function updateResponse(req, res) {
   try {
-    const walsan = await parentModel.findOne({
-      where: {
-        id: id
-      }
-    })
-    console.log("WABLAS", process.env.WABLAS_TOKEN);
-
-    const token = `${process.env.WABLAS_TOKEN}`
-
-    const { tanggal, isi_pesan } = req.body; 
-
-    const data =  {
-      phone: `62${walsan.no_hp}`,
-      message: isi_pesan
-    }
-
-
-    const response = await axios.post('https://jogja.wablas.com/api/send-message', data, {
-      headers: {
-                'Authorization': token,
-                'Content-Type': 'application/json',
-      }
-    })
-
-    const tambah = notificationModel.create({
-      isi_pesan: isi_pesan,
-      tanggal: new Date()
-    })
-    // console.log('Notification sent:', response.data);
-
-    return res.status(201).json({
-      status: "Success",
-      msg: "Berhasil Menambahkan Pesan",
-      data: tambah
-    });
-  } catch (error) {
-    console.log(error.response ? error.response.data : error.message);
-    return res.status(403).send("Terjadi Kesalahan");
-  }
-}
-
-
-
-async function daftarSiswa(req, res) {
-  const {page, pageSize, angkatan, tahun_ajaran, status, nama_siswa} = req.query;
-  try {
-    const cari = await studentModel.findAndCountAll({
-      limit: pageSize,
-      offset: page,
-      where: {
-        ...(checkQuery(angkatan) && {
-          angkatan: {[Op.like]: "%angkatan%"}
-        })
-      },
-    })
-
-
-    return res.status(201).json({
-      status: "Success",
-      msg: "Berhasil Menampilkan Siswa",
-      data: cari
-    })
-
-  } catch (error) {
-    console.log(error)
-    return res.status(403).json({
-      status: "Failed",
-      msg: "Terjadi Kesalahan"
-    })
-  }
-}
-
-async function detailPembayaranSiswa (req, res) {
-  try {
-    const {student_id} = req.params;
-    const {page, pageSize} = req.query;
-
-    const cari = await PembayaranController.findAndCountAll({
-      where: {
-        student_id: student_id
-      },
-      limit: pageSize,
-      offset: page,
-      order: ["id",
-        ["bulan", "ASC"]
-      ]
-    })
-
-    return res.status(201).json({
-      status: "Success",
-      msg: "Berhasil Menampilkan Data Pembayaran Siswa",
-      data: cari
-    })
-
-  } catch (error) {
-    console.log(error)
-    return res.status(403).send("Terjadi Kesalahan")
-  }
-}
-
-async function updateResponse (req, res) {
-  try {
-    const {payload} = req.body;
+    const { payload } = req.body;
 
     let berhasil = 0;
     let gagal = 0;
@@ -531,18 +662,19 @@ async function updateResponse (req, res) {
     await Promise.all(
       payload.map(async (data) => {
         try {
-          await pembayaranModel.update({
-            status: data.status,
-            tanggal_konfirmasi: new Date(),
-            teacher_id: req.teacher_id
-          },
-          {
-            where: {
-              id: data.id
+          await pembayaranModel.update(
+            {
+              status: data.status,
+              tanggal_konfirmasi: new Date(),
+              teacher_id: req.teacher_id,
+            },
+            {
+              where: {
+                id: data.id,
+              },
             }
-          }
-        )
-        berhasil += 1;
+          );
+          berhasil += 1;
         } catch (error) {
           console.log(error);
           gagal += 1;
@@ -550,15 +682,14 @@ async function updateResponse (req, res) {
       })
     );
 
-    
     return res.status(201).json({
       status: "Success",
       msg: "Berhasil Menguhah Status Approval",
-      data: payload
+      data: payload,
     });
   } catch (error) {
     console.log(error);
-    return res.status(403).send("Terjadi Kesalahan")
+    return res.status(403).send("Terjadi Kesalahan");
   }
 }
 
@@ -570,5 +701,7 @@ module.exports = {
   updateResponse,
   createNotification,
   daftarSiswa,
-  detailPembayaranSiswa
+  detailPembayaranSiswa,
+  createPembayaranOtomatis,
+  createPesan
 };
