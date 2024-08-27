@@ -59,7 +59,6 @@ const getExam = response.requestResponse(async (req, res) => {
           "status",
           "durasi",
           "judul_ujian",
-
         ],
         include: [
           {
@@ -121,14 +120,32 @@ const takeExam = response.requestResponse(async (req, res) => {
         kelas_id: exam.kelas_id,
         ta_id: exam.ta_id,
         student_id: req.student_id,
-        urutan: exam.urutan - 1,
+        urutan: {
+          [Op.lt]: exam.urutan, // Mencari urutan yang lebih kecil dari exam.urutan
+        },
       },
+
+      include: [
+        {
+          model: models.ujian,
+          require: true,
+          as: "ujian",
+          attributes: [
+            
+            "judul_ujian",
+           
+          ],
+        },
+      ],
+      order: [
+        ["urutan", "DESC"], // Mengambil urutan terbesar dari yang lebih kecil
+      ],
     });
 
     if (!!cek?.is_lulus === false || !!cek.is_lulus === 0) {
       return {
         statusCode: 422,
-        msg: `Anda belum lulus pada exam ke ${exam.urutan - 1} di mata pelajaran ini`,
+        msg: `Anda belum lulus pada exam  ${cek.ujian.judul_ujian} di mata pelajaran ini`,
       };
     }
   }
@@ -256,7 +273,6 @@ const takeExam = response.requestResponse(async (req, res) => {
     }
   }
 });
-
 
 const submitExam = response.requestResponse(async (req, res) => {
   const jawaban = req.body.data;
