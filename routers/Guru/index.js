@@ -174,6 +174,7 @@ const {
 //Pembayaran ppdb
 const {
   updatePembayaranPpdb,
+  listPembayaran,
 } = require("../../controllers/Guru/PembayaranPpdbController");
 
 guru.use(guruAccessMiddleware);
@@ -337,5 +338,6 @@ guru.put("/pembayaran/persetujuan/:id", updateAprroval);
 
 //Pembayaran PPDB
 guru.put("/pembayaran-ppdb/update/:id", updatePembayaranPpdb);
+guru.get("/pembayaran-ppdb/list", listPembayaran);
 
 module.exports = guru;

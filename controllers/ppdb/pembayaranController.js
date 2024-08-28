@@ -21,9 +21,9 @@ const createPembayaran = response.requestResponse(async (req, res) => {
       data: bayar,
     });
   } catch (error) {
-    console.error("Error creating pembayaran PPDB:", error);
+    console.error("Error create pembayaran PPDB:", error);
     return res.status(500).json({
-      message: "An error occurred while creating pembayaran PPDB",
+      message: "Ada kesalahan",
       error: error.message,
     });
   }
@@ -53,14 +53,52 @@ const getDetailPembayaran = response.requestResponse(async (req, res) => {
       data: pembayaran,
     });
   } catch (error) {
-    console.error("Error retrieving pembayaran PPDB detail:", error);
+    console.error("Error mendapatkan pembayaran PPDB detail:", error);
     return res.status(500).json({
-      message: "An error occurred while retrieving pembayaran PPDB detail",
+      message: "ada kesalahan",
       error: error.message,
     });
   }
 });
+
+const listPembayaran = async (req, res) => {
+  const { page, pageSize } = req.query;
+  try {
+    const list = await pembayaranPpdb.findAndCountAll({
+      ...(pageSize !== undefined && { limit: pageSize }),
+      ...(page !== undefined && { offset: page }),
+      include: [
+        {
+          model: models.teacher,
+          require: true,
+          as: "guru",
+          attributes: ["id", "nama_guru"],
+        },
+      ],
+      order: ["id"],
+    });
+    if (list.length === 0) {
+      return res.json({
+        status: "Success",
+        msg: "Tidak ditemukan perizinan",
+        data: list,
+      });
+    }
+    return res.json({
+      status: "Success",
+      msg: "Berhasil Menemukan pembayaran!",
+      data: list,
+      offset: page,
+      limit: pageSize,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(403).send("Terjadi Kesalahan");
+  }
+};
+
 module.exports = {
   createPembayaran,
   getDetailPembayaran,
+  listPembayaran,
 };
