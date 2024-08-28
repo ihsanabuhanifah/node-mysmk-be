@@ -63,13 +63,15 @@ const updateLaporanPkl = response.requestResponse(async (req, res) => {
 });
 
 const laporanPklList = response.requestResponse(async (req, res) => {
-  const { page, pageSize, dariTanggal, sampaiTanggal } = req.query;
+  const { page, pageSize, dariTanggal, sampaiTanggal, status_kehadiran } =
+    req.query;
   const { count, rows } = await LaporanHarianPklModel.findAndCountAll({
     where: {
       student_id: req.student_id,
       ...(checkQuery(dariTanggal) && {
         tanggal: { [Op.between]: [dariTanggal, sampaiTanggal] },
       }),
+      status: status_kehadiran,
     },
     order: [["tanggal", "desc"]],
     limit: pageSize,
