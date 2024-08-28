@@ -102,8 +102,8 @@ function calculateAveragesForAllStudents(data) {
 }
 
 const listReport = response.requestResponse(async (req, res) => {
-  const { ta_id, mapel_id, kelas_id, student_id } = req.query;
-  const report = await ReportController.findAll({
+  const { ta_id, mapel_id, kelas_id, student_id, page , pageSize } = req.query;
+  const report = await ReportController.findAndCountAll({
     where: {
       ...(checkQuery(kelas_id) && {
         kelas_id: kelas_id,
@@ -119,6 +119,10 @@ const listReport = response.requestResponse(async (req, res) => {
         student_id: student_id.value,
       }),
     },
+
+    order: [["id", "desc"]],
+    limit: pageSize,
+    offset: page,
     include: [
       {
         model: models.kelas,
