@@ -2,9 +2,8 @@ const express = require("express");
 const guruAccessMiddleware = require("../../middleware/guruAccessMiddleware");
 //upload middleware mysmk mobile
 const { upload } = require("../../middleware/uploadNoticeMiddleware");
-
 const guru = express.Router();
-
+const excelUpload = require("../../middleware/multerExcelMiddleware");
 const {
   getRole,
   saveToken,
@@ -82,6 +81,7 @@ const {
   deteleTempatPkl,
   detailTempatPkl,
   listTempatPkl,
+  createBulkExcel,
 } = require("../../controllers/Guru/TempatPklController");
 
 // Laporan harian pkl
@@ -310,6 +310,11 @@ guru.put("/tempat-pkl/update/:id", updateTempatPkl);
 guru.delete("/tempat-pkl/delete/:id", deteleTempatPkl);
 guru.get("/tempat-pkl/detail/:id", detailTempatPkl);
 guru.get("/tempat-pkl/list", listTempatPkl);
+guru.post(
+  "/tempat-pkl/createBulk",
+  excelUpload.single("file"),
+  createBulkExcel
+);
 
 // Walisantri
 
