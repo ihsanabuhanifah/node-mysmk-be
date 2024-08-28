@@ -46,8 +46,7 @@ const createPenilaian = async (req, res) => {
           mapel_id: req.body.mapel_id,
           kelas_id: req.body.kelas_id,
           jenis_ujian: req.body.jenis_ujian,
-          urutan: req.body.urutan,
-
+          urutan: req.body.is_hirarki === 1 ? req.body.urutan : 0,
           exam_result: 0,
           teacher_id: req.teacher_id,
           student_id: data.student_id,

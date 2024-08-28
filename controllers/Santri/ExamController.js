@@ -120,7 +120,6 @@ const takeExam = response.requestResponse(async (req, res) => {
         kelas_id: exam.kelas_id,
         ta_id: exam.ta_id,
         student_id: req.student_id,
-        is_hirarki : 1,
         urutan: {
           [Op.lt]: exam.urutan, // Mencari urutan yang lebih kecil dari exam.urutan
         },
@@ -131,11 +130,7 @@ const takeExam = response.requestResponse(async (req, res) => {
           model: models.ujian,
           require: true,
           as: "ujian",
-          attributes: [
-            
-            "judul_ujian",
-           
-          ],
+          attributes: ["judul_ujian"],
         },
       ],
       order: [
