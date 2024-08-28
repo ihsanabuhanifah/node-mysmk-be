@@ -38,6 +38,7 @@ const {
   deletePelanggaran,
   createPelanggaran,
   updatePelanggaran,
+  pelanggaran,
 } = require("../../controllers/Guru/PelanggaranController");
 
 //kunjungan
@@ -207,9 +208,10 @@ guru.get("/halaqoh/belum-absensi", belumAbsensitHalaqoh);
 guru.get("/halaqoh/absensi/rekap", RekapHalaqoh);
 guru.post("/halaqoh/student/create", createHalaqohStudent);
 guru.get("/halaqoh/student/list", halaqohGroup);
-//pelanggaran
 
+//pelanggaran
 guru.get("/pelanggaran/list", listPelanggaran);
+guru.get("/pelanggaran/list/:id", pelanggaran);
 guru.get("/pelanggaran/detail/:id", detailPelanggaran);
 guru.post("/pelanggaran/create", createPelanggaran);
 guru.put("/pelanggaran/update", updatePelanggaran);
