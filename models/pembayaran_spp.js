@@ -55,7 +55,11 @@ module.exports = (sequelize, DataTypes) => {
     nominal: DataTypes.DECIMAL(10, 2),
     tanggal_konfirmasi: DataTypes.DATE,
     teacher_id: DataTypes.INTEGER,
-    no_telepon: DataTypes.STRING
+    no_telepon: DataTypes.STRING,
+    token_bayar: DataTypes.STRING,
+    keterangan: DataTypes.STRING,
+    transaksi_id: DataTypes.STRING,
+    status_midtrans: DataTypes.STRING
   }, {
     sequelize,
     modelName: 'pembayaran_spp',
