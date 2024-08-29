@@ -32,7 +32,10 @@ module.exports = (sequelize, DataTypes) => {
         as: "tahun_ajaran",
         foreignKey: "ta_id",
       });
-     
+      nilai.belongsTo(models.kelas, {
+        as: "kelas",
+        foreignKey: "kelas_id",
+      });
     }
   }
   nilai.init(

@@ -118,7 +118,7 @@ const pelanggaran = async (req, res) => {
     return res.json({
       status: "Success",
       data: pelanggaran,
-      page: req.page,
+      page: page,
       pageSize: pageSize,
     });
   } catch (err) {

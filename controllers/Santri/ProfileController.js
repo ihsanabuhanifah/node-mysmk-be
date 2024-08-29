@@ -1,5 +1,26 @@
 const studentModel = require('../../models').student
-const models = require('../../models')
+const userModel = require('../../models').user
+
+const updateImage = async (req, res) => {
+	const user = await userModel.findOne({
+		where: {
+			id: req.id
+		}
+	});
+
+	if(!user) {
+		res.status(403).json({
+			msg: 'Ada kesalahan!'
+		});
+	}
+
+	await user.update({ image: req.body.url })
+
+	return res.json({
+		status: 'Berhasil Update Data',
+		data: user
+	});
+}
 
 const profile = async (req, res) => {
   console.log(req.student_id)
@@ -8,6 +29,11 @@ const profile = async (req, res) => {
 		where: {
 			user_id: req.id,
 		},
+		include: [
+			{
+				model: userModel
+			}
+		]
 	})
 
 	if (!siswa) {
@@ -71,4 +97,4 @@ const updateSiswa = async (req, res) => {
 	}
 }
 
-module.exports = { profile, updateSiswa }
+module.exports = { profile, updateSiswa, updateImage }

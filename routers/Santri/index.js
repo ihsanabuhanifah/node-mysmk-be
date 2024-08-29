@@ -4,9 +4,10 @@ const { check, validationResult } = require("express-validator");
 const validateFields = require('./validateFields')
 
 const santri = express.Router();
-const { profile, updateSiswa } = require('../../controllers/Santri/ProfileController');
+const { profile, updateSiswa, updateImage } = require('../../controllers/Santri/ProfileController');
 const { getHasilBelajar, detailHasilBelajar } = require('../../controllers/Santri/HasilBelajarController');
 const { getExam, takeExam, submitExam, progressExam } = require("../../controllers/Santri/ExamController");
+const { listHasilUjain } = require("../../controllers/Santri/HasilUjian");
 
 const validateUpdate = [
   check("nama_siswa").optional().isString().withMessage("Nama harus berupa string"),
@@ -29,12 +30,14 @@ const validateUpdate = [
 santri.use(santriAccessMiddleware);
 santri.get('/profile', profile);
 santri.put('/profile/update', validateFields, validateUpdate, updateSiswa);
+santri.post('/profile/update/image', updateImage)
 santri.get("/exam/list", getExam )
 santri.put("/exam/take/:id", takeExam )
 santri.put("/exam/progress", progressExam)
 santri.put("/exam/submit", submitExam)
 santri.get('/hasil-belajar', getHasilBelajar)
-santri.get('/hasil-belajar-detail/:id', detailHasilBelajar)
+santri.get('/hasil-belajar-detail/:id/:ta_id', detailHasilBelajar)
+santri.get('/hasil-ujian', listHasilUjain)
 
 
 module.exports = santri;
