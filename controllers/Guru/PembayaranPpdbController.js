@@ -1,8 +1,9 @@
 const { RESPONSE_API } = require("../../utils/response");
 const response = new RESPONSE_API();
 const pembayaranPpdb = require("../../models").pembayaran_ppdb;
+const models = require("../../models");
 
-const updatePembayaranPpdb = response.requestResponse(async (req, res) => {
+const updatePembayaranPpdb = async (req, res) => {
   try {
     const { id } = req.params;
     const { nominal, teacher_id, keterangan } = req.body;
@@ -26,14 +27,50 @@ const updatePembayaranPpdb = response.requestResponse(async (req, res) => {
       data: pembayaran,
     });
   } catch (error) {
-    console.error("Error updating pembayaran PPDB:", error);
+    console.error("Error update pembayaran PPDB:", error);
     return res.status(500).json({
-      message: "An error occurred while updating pembayaran PPDB",
+      message: "Ada kesalahan",
       error: error.message,
     });
   }
-});
+};
 
+const listPembayaran = async (req, res) => {
+  const { page, pageSize } = req.query;
+  try {
+    const list = await pembayaranPpdb.findAndCountAll({
+      ...(pageSize !== undefined && { limit: pageSize }),
+      ...(page !== undefined && { offset: page }),
+      include: [
+        {
+          model: models.teacher,
+          require: true,
+          as: "guru",
+          attributes: ["id", "nama_guru"],
+        },
+      ],
+      order: ["id"],
+    });
+    if (list.length === 0) {
+      return res.json({
+        status: "Success",
+        msg: "Tidak ditemukan perizinan",
+        data: list,
+      });
+    }
+    return res.json({
+      status: "Success",
+      msg: "Berhasil Menemukan pembayaran!",
+      data: list,
+      offset: page,
+      limit: pageSize,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(403).send("Terjadi Kesalahan");
+  }
+};
 module.exports = {
   updatePembayaranPpdb,
+  listPembayaran,
 };

@@ -42,6 +42,7 @@ const {
 const {
   createPembayaran,
   getDetailPembayaran,
+  listPembayaran,
 } = require("../../controllers/ppdb/pembayaranController");
 
 const validation = [
@@ -116,9 +117,10 @@ const validation = [
 ];
 
 ppdb.use(calonSantriAccessMiddleware);
+
 //Info calon santri
 ppdb.post("/create", validation, validateFields, createInfoCalsan);
-ppdb.put("/update/:id", validation, validateFields, updateInfoCalsan);
+ppdb.put("/update/:id", validation, validateFields, updateInfoCalsan,);
 ppdb.get("/detail", getDetailCalsan);
 ppdb.get("/detail-calsan/:id", detailCalsan);
 
@@ -165,4 +167,5 @@ ppdb.delete("/fasilitas/delete/:id", deleteFasilitas);
 //pembayaran
 ppdb.post("/pembayaran-ppdb", createPembayaran);
 ppdb.get("/pembayaran-ppdb/detail/:id", getDetailPembayaran);
+ppdb.get("/pembayaran-ppdb/list", listPembayaran);
 module.exports = ppdb;
