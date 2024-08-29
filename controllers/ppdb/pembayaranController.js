@@ -3,10 +3,9 @@ const response = new RESPONSE_API();
 const models = require("../../models");
 const pembayaranPpdb = require("../../models").pembayaran_ppdb;
 
-const createPembayaran = response.requestResponse(async (req, res) => {
+const createPembayaran = async (req, res) => {
   try {
     const { bukti_tf, nominal, teacher_id, keterangan } = req.body;
-
     const user_id = req.id;
 
     const bayar = await pembayaranPpdb.create({
@@ -16,6 +15,7 @@ const createPembayaran = response.requestResponse(async (req, res) => {
       teacher_id,
       keterangan,
     });
+
     return res.status(201).json({
       message: "Berhasil Bayar!",
       data: bayar,
@@ -27,27 +27,31 @@ const createPembayaran = response.requestResponse(async (req, res) => {
       error: error.message,
     });
   }
-});
-const getDetailPembayaran = response.requestResponse(async (req, res) => {
+};
+
+const getDetailPembayaran = async (req, res) => {
   try {
     const { id } = req.params;
+
     const pembayaran = await pembayaranPpdb.findOne({
       where: { id },
       include: [
         {
           model: models.teacher,
-          require: true,
+          required: true,
           as: "guru",
           attributes: ["id", "nama_guru"],
         },
       ],
-      order: ["id"],
+      order: [["id", "ASC"]],
     });
+
     if (!pembayaran) {
       return res.status(404).json({
         message: "Pembayaran tidak ditemukan.",
       });
     }
+
     return res.status(200).json({
       message: "Detail Pembayaran",
       data: pembayaran,
@@ -55,11 +59,11 @@ const getDetailPembayaran = response.requestResponse(async (req, res) => {
   } catch (error) {
     console.error("Error mendapatkan pembayaran PPDB detail:", error);
     return res.status(500).json({
-      message: "ada kesalahan",
+      message: "Ada kesalahan",
       error: error.message,
     });
   }
-});
+};
 
 const listPembayaran = async (req, res) => {
   const { page, pageSize } = req.query;

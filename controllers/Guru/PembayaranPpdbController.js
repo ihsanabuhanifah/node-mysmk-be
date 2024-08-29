@@ -3,7 +3,7 @@ const response = new RESPONSE_API();
 const pembayaranPpdb = require("../../models").pembayaran_ppdb;
 const models = require("../../models");
 
-const updatePembayaranPpdb = response.requestResponse(async (req, res) => {
+const updatePembayaranPpdb = async (req, res) => {
   try {
     const { id } = req.params;
     const { nominal, teacher_id, keterangan } = req.body;
@@ -29,11 +29,12 @@ const updatePembayaranPpdb = response.requestResponse(async (req, res) => {
   } catch (error) {
     console.error("Error update pembayaran PPDB:", error);
     return res.status(500).json({
-      message: "ada kesalahan",
+      message: "Ada kesalahan",
       error: error.message,
     });
   }
-});
+};
+
 const listPembayaran = async (req, res) => {
   const { page, pageSize } = req.query;
   try {
