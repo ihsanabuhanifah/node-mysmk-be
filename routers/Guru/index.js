@@ -152,6 +152,7 @@ const { ListPembayaran, createKartuSpp, detailPembayaran, daftarSiswa, detailPem
 
 
 
+
 const {
   remidial,
   refreshCount,
@@ -166,6 +167,12 @@ const {
   listReport,
   generateReport,
 } = require("../../controllers/Guru/RaportController");
+
+//Pembayaran ppdb
+const {
+  updatePembayaranPpdb,
+  listPembayaran,
+} = require("../../controllers/Guru/PembayaranPpdbController");
 
 guru.use(guruAccessMiddleware);
 
@@ -341,5 +348,9 @@ guru.get("/siswa/listPembayaran/:student_id", detailPembayaranSiswa);
 guru.post("/pesan/create", createNotification);
 
 
+
+//Pembayaran PPDB
+guru.put("/pembayaran-ppdb/update/:id", updatePembayaranPpdb);
+guru.get("/pembayaran-ppdb/list", listPembayaran);
 
 module.exports = guru;
