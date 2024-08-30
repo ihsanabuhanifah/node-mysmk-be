@@ -10,4 +10,5 @@ const {
 
 daftar.get("/jadwal/schedule", scheduleKelas);
 daftar.get("/jadwal/halaqoh/schedule", scheduleHalaqoh);
+
 module.exports = daftar;

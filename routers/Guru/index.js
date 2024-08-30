@@ -2,9 +2,8 @@ const express = require("express");
 const guruAccessMiddleware = require("../../middleware/guruAccessMiddleware");
 //upload middleware mysmk mobile
 const { upload } = require("../../middleware/uploadNoticeMiddleware");
-
 const guru = express.Router();
-
+const excelUpload = require("../../middleware/multerExcelMiddleware");
 const {
   getRole,
   saveToken,
@@ -39,6 +38,7 @@ const {
   deletePelanggaran,
   createPelanggaran,
   updatePelanggaran,
+  pelanggaran,
 } = require("../../controllers/Guru/PelanggaranController");
 
 //kunjungan
@@ -82,6 +82,7 @@ const {
   deteleTempatPkl,
   detailTempatPkl,
   listTempatPkl,
+  createBulkExcel,
 } = require("../../controllers/Guru/TempatPklController");
 
 // Laporan harian pkl
@@ -134,6 +135,7 @@ const {
   deleteUjian,
   createPenilaian,
   AnalisislUjian,
+  cekUrutan,
 } = require("../../controllers/Guru/UjianController");
 const {
   createKehadiran,
@@ -144,17 +146,12 @@ const {
   submitByAdmin,
 } = require("../../controllers/Guru/KehadiranGuruController");
 const adminAccessMiddleware = require("../../middleware/adminAccessMiddleware");
-const {
-  getListWali,
-  createBulkWali,
-  updateWali,
-  detailWali,
-} = require("../../controllers/Guru/WaliController");
-const {
-  ListPembayaran,
-  createKartuSpp,
-  updateAprroval,
-} = require("../../controllers/Wali/PembayaranController");
+const { getListWali, updateWali, detailWali, createBulkWali } = require("../../controllers/Guru/WaliController");
+const { ListPembayaran, createKartuSpp, detailPembayaran, daftarSiswa, detailPembayaranSiswa, createNotification, updateResponse, createPesan } = require("../../controllers/Wali/PembayaranController");
+
+
+
+
 
 const {
   remidial,
@@ -218,9 +215,10 @@ guru.get("/halaqoh/belum-absensi", belumAbsensitHalaqoh);
 guru.get("/halaqoh/absensi/rekap", RekapHalaqoh);
 guru.post("/halaqoh/student/create", createHalaqohStudent);
 guru.get("/halaqoh/student/list", halaqohGroup);
-//pelanggaran
 
+//pelanggaran
 guru.get("/pelanggaran/list", listPelanggaran);
+guru.get("/pelanggaran/list/:id", pelanggaran);
 guru.get("/pelanggaran/detail/:id", detailPelanggaran);
 guru.post("/pelanggaran/create", createPelanggaran);
 guru.put("/pelanggaran/update", updatePelanggaran);
@@ -295,6 +293,7 @@ guru.post("/ujian/create", createUjian);
 guru.get("/ujian/list", listUjian);
 guru.get("/ujian/detail/:id", detailUjian);
 guru.get("/ujian/analisa/:id", AnalisislUjian);
+guru.post("/ujian/cek-urutan", cekUrutan);
 guru.put("/ujian/update/:id", updateUjian);
 guru.delete("/ujian/delete/:id", deleteUjian);
 guru.post("/nilai/create", createPenilaian);
@@ -320,6 +319,11 @@ guru.put("/tempat-pkl/update/:id", updateTempatPkl);
 guru.delete("/tempat-pkl/delete/:id", deteleTempatPkl);
 guru.get("/tempat-pkl/detail/:id", detailTempatPkl);
 guru.get("/tempat-pkl/list", listTempatPkl);
+guru.post(
+  "/tempat-pkl/createBulk",
+  excelUpload.single("file"),
+  createBulkExcel
+);
 
 // Walisantri
 
@@ -329,12 +333,21 @@ guru.get("/laporan-harian-pkl/detail/:id", detailLaporanPkl);
 guru.get("/walisantri/list", getListWali);
 guru.put("/walisantri/update/:id", updateWali);
 guru.get("/walisantri/detail/:id", detailWali);
-guru.post("/walisantri/create", createBulkWali);
 
 // Pembayaran
 guru.get("/pembayaran/list", ListPembayaran);
 guru.post("/pembayaran/createKartu", createKartuSpp);
-guru.put("/pembayaran/persetujuan/:id", updateAprroval);
+guru.get("/pembayaran/detail/:id", detailPembayaran);
+guru.put("/pembayaran/update", updateResponse);
+
+// siswa
+guru.get("/siswa/daftarSpp", daftarSiswa);
+guru.get("/siswa/listPembayaran/:student_id", detailPembayaranSiswa);
+
+// Notification
+guru.post("/pesan/create", createNotification);
+
+
 
 //Pembayaran PPDB
 guru.put("/pembayaran-ppdb/update/:id", updatePembayaranPpdb);

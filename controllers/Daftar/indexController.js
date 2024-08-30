@@ -111,6 +111,9 @@ const listMapel = async (req, res) => {
   try {
     const mapel = await MapelModel.findAll({
       attributes: ["id", "nama_mapel", "kategori"],
+      where : {
+        is_active : 1
+      }
     });
 
     return res.json({

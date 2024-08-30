@@ -22,6 +22,17 @@ authRouter.post("/register-ppdb", registerValidation, ppdbController.register);
 
 authRouter.post("/register", registerValidation, authController.register);
 
+authRouter.post(
+  "/register/wali",
+
+  authController.registerWali
+);
+authRouter.post(
+  "/nisn/cek",
+
+  authController.nisnCek
+);
+
 authRouter.get("/authme", jwtValidateMiddleware, authController.authme);
 authRouter.post("/google-register", authController.googleRegister);
 authRouter.post("/google-login", authController.googleLogin);

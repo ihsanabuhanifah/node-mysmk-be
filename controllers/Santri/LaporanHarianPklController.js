@@ -27,7 +27,6 @@ const createLaporanPkl = response.requestResponse(async (req, res) => {
     ...payload,
     student_id: req.student_id,
     tanggal: today,
-    is_absen: true,
   });
 
   return {
@@ -64,13 +63,17 @@ const updateLaporanPkl = response.requestResponse(async (req, res) => {
 });
 
 const laporanPklList = response.requestResponse(async (req, res) => {
-  const { page, pageSize, dariTanggal, sampaiTanggal } = req.query;
+  const { page, pageSize, dariTanggal, sampaiTanggal, status_kehadiran } =
+    req.query;
   const { count, rows } = await LaporanHarianPklModel.findAndCountAll({
     where: {
       student_id: req.student_id,
       ...(checkQuery(dariTanggal) && {
         tanggal: { [Op.between]: [dariTanggal, sampaiTanggal] },
       }),
+      ...(checkQuery(status_kehadiran) && {
+        status : status_kehadiran
+      })
     },
     order: [["tanggal", "desc"]],
     limit: pageSize,
@@ -92,8 +95,12 @@ const laporanPklList = response.requestResponse(async (req, res) => {
   return {
     message: "Berhasil",
     data: rows,
-    page: req.page,
-    pageSize: pageSize,
+
+    pagination: {
+      page: req.page,
+      pageSize: pageSize,
+      total: count,
+    },
   };
 });
 

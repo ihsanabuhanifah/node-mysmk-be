@@ -33,7 +33,7 @@ const getListWali = response.requestResponse(async (req, res) => {
         ],
       },
     ],
-    order: [["tanggal", "bulan"]],
+    order: [["id"]],
     limit: pageSize,
     offset: page,
   });
@@ -129,7 +129,7 @@ const detailWali = async (req, res) => {
 const updateWali = async (req, res) => {
   try {
     const {id} = req.params;
-    const {nama_wali, student_id, hubungan, image} = req.body;
+    const {nama_wali, student_id, hubungan, image, nisn, nama_siswa} = req.body;
 
     const cari = await ParentController.findOne({
       where: {id: id}
@@ -145,7 +145,7 @@ const updateWali = async (req, res) => {
       nama_wali,
       student_id,
       hubungan,
-      image
+      image, nisn, nama_siswa
     }, {
       where: {
         id: id
