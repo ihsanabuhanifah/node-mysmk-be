@@ -136,7 +136,6 @@ const listUjian = async (req, res) => {
       ],
       limit: pageSize,
       offset: page,
-      order: [["id", "desc"]],
     });
     return res.json({
       status: "Success",
@@ -354,22 +353,6 @@ const AnalisislUjian = async (req, res) => {
   }
 };
 
-const cekUrutan = response.requestResponse(async (req, res) => {
-  const nilai = await UjianController.max("urutan", {
-    where: {
-      mapel_id: req.body.mapel_id,
-      kelas_id: req.body.kelas_id,
-      ta_id: req.body.ta_id,
-      is_hirarki : 1
-    },
-  });
-
-  return {
-    msg: "Urutan ujian ditemukan",
-    data: nilai,
-  };
-});
-
 module.exports = {
   createUjian,
   listUjian,
@@ -378,7 +361,6 @@ module.exports = {
   deleteUjian,
   createPenilaian,
   AnalisislUjian,
-  cekUrutan,
 };
 
 const analyzeAnswers = (data) => {

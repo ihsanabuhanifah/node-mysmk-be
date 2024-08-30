@@ -1,38 +1,28 @@
 const studentModel = require("../../models").student;
-const Sequelize = require("sequelize");
+const Sequelize = require('sequelize');
 const models = require("../../models");
 const UjianController = require("../../models").ujian;
 const { Op, where } = require("sequelize");
 const { RESPONSE_API } = require("../../utils/response");
-
 const {
   calculateMinutesDifference,
   calculateWaktuSelesai,
-  checkQuery,
 } = require("../../utils/format");
 const NilaiController = require("../../models").nilai;
 const BankSoalController = require("../../models").bank_soal;
 const StudentModel = require("../../models").kelas_student;
 
+
 const response = new RESPONSE_API();
 
-const orderStatus = Sequelize.literal(`
-  CASE 
-    WHEN nilai.status = 'progress' THEN 1 
-    WHEN nilai.status = 'open' THEN 2 
-    WHEN nilai.status = 'finish' THEN 3 
-    ELSE 4 
-  END
-`);
-
 const getExam = response.requestResponse(async (req, res) => {
-  const { page, pageSize, status } = req.query;
+  const { page, pageSize } = req.query;
   const exam = await NilaiController.findAndCountAll({
     ...(pageSize !== undefined && { limit: pageSize }),
     ...(page !== undefined && { offset: page }),
     where: {
       ...(checkQuery(status) && {
-        status: status,
+        status: status
       }),
       student_id: req.student_id,
     },
@@ -58,7 +48,7 @@ const getExam = response.requestResponse(async (req, res) => {
           "waktu_selesai",
           "status",
           "durasi",
-          "judul_ujian",
+          "judul_ujian"
         ],
         include: [
           {
@@ -70,7 +60,7 @@ const getExam = response.requestResponse(async (req, res) => {
         ],
       },
     ],
-    order: [orderStatus, ["id", "desc"]],
+    order: [["id", "desc"]],
     limit: pageSize,
     offset: page,
   });

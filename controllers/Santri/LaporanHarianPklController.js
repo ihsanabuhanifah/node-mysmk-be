@@ -8,32 +8,29 @@ const { Op } = require("sequelize");
 const dayjs = require("dayjs");
 const { createLaporanDiniyyah } = require("./LaporanDiniyyahHarianController");
 const createLaporanPkl = response.requestResponse(async (req, res) => {
-  let payload = req.body;
-  let today = dayjs(new Date()).format("YYYY-MM-DD");
-  const existingLaporan = await LaporanHarianPklModel.findOne({
-    where: {
-      student_id: req.student_id,
-      tanggal: today,
-    },
-  });
-  if (existingLaporan) {
-    return {
-      statusCode: 400,
-      status: "fail",
-      message: "Anda hanya dapat membuat satu laporan per hari.",
-    };
-  }
+  let { laporanDiniyyah, ...payload } = req.body;
   const laporanHarianPkl = await LaporanHarianPklModel.create({
     ...payload,
     student_id: req.student_id,
     tanggal: today,
+    is_absen: true,
   });
+
+  const laporanDiniyyahResult = await createLaporanDiniyyah(
+    req,
+    res,
+    laporanHarianPkl.id,
+    req.student_id
+  );
 
   return {
     statusCode: 201,
     status: "success",
     message: "Data Berhasil Diupload",
-    data: laporanHarianPkl,
+    data: {
+      laporanHarianPkl,
+      laporanDiniyyah: laporanDiniyyahResult,
+    },
   };
 });
 const updateLaporanPkl = response.requestResponse(async (req, res) => {

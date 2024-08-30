@@ -210,7 +210,7 @@ const listPenilaianByTeacher = response.requestResponse(async (req, res) => {
   const soals = await NilaiController.findAll({
     // attributes: ["id", "materi", "soal", "tipe", "jawaban", "point"],
     where: {
-      // teacher_id: req.teacher_id,
+      teacher_id: req.teacher_id,
       ujian_id: ujian_id,
       ...(checkQuery(mapel_id) && {
         mapel_id: mapel_id,
@@ -249,45 +249,6 @@ const listPenilaianByTeacher = response.requestResponse(async (req, res) => {
   };
 });
 
-
-
-const listNotificationExam = response.requestResponse(async (req, res) => {
-  let = { mapel_id, ujian_id, page, pageSize } = req.query;
-
-  const soals = await NilaiController.findAll({
-    // attributes: ["id", "materi", "soal", "tipe", "jawaban", "point"],
-    where: {
-      teacher_id: req.teacher_id,
-      exam_result : ""
-      
-    },
-    include: [
-      {
-        model: models.mapel,
-        require: true,
-        as: "mapel",
-        attributes: ["id", "nama_mapel"],
-      },
-      {
-        model: models.kelas,
-        require: true,
-        as: "kelas",
-        attributes: ["id", "nama_kelas"],
-      },
-     
-    ],
-    limit: pageSize,
-    offset: page,
-    group: ["teacher_id", "mapel_id", "ta_id", "kelas_id"],
-  });
-  return {
-    msg: "Berhasil ditemukan",
-    page: req.page,
-    pageSize: pageSize,
-    data: soals,
-  };
-});
-
 module.exports = {
   listPenilaianByTeacher,
   remidial,
@@ -295,5 +256,4 @@ module.exports = {
   getSoal,
   updateLastExam,
   submitExamResult,
-  listNotificationExam
 };

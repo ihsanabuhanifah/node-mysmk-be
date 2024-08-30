@@ -86,10 +86,7 @@ const {
 } = require("../../controllers/Guru/TempatPklController");
 
 // Laporan harian pkl
-const {
-  laporanPklList,
-  detailLaporanPkl,
-} = require("../../controllers/Guru/LaporanHarianPklController");
+const { laporanPklList, detailLaporanPkl } = require("../../controllers/Guru/LaporanHarianPklController")
 
 //jadwal
 
@@ -105,8 +102,6 @@ const {
   createSiswaKelas,
   detailSiswa,
   updateSiswa,
-  getHasilBelajar,
-  detailHasilBelajar,
 } = require("../../controllers/Guru/SiswaController");
 const {
   listHalaqohGroup,
@@ -135,7 +130,6 @@ const {
   deleteUjian,
   createPenilaian,
   AnalisislUjian,
-  cekUrutan,
 } = require("../../controllers/Guru/UjianController");
 const {
   createKehadiran,
@@ -146,33 +140,26 @@ const {
   submitByAdmin,
 } = require("../../controllers/Guru/KehadiranGuruController");
 const adminAccessMiddleware = require("../../middleware/adminAccessMiddleware");
-const { getListWali, updateWali, detailWali, createBulkWali } = require("../../controllers/Guru/WaliController");
-const { ListPembayaran, createKartuSpp, detailPembayaran, daftarSiswa, detailPembayaranSiswa, createNotification, updateResponse, createPesan } = require("../../controllers/Wali/PembayaranController");
-
-
-
+const { getListWali, createBulkWali, updateWali, detailWali } = require("../../controllers/Guru/WaliController");
+const { ListPembayaran, createKartuSpp, updateAprroval } = require("../../controllers/Wali/PembayaranController");
 
 
 const {
+  listPenilaianByTeacher,
   remidial,
   refreshCount,
   getSoal,
   updateLastExam,
   submitExamResult,
   listPenilaianByTeacher,
-  listNotificationExam,
+  listNotificationExam
 } = require("../../controllers/Guru/NilaiController");
+
 
 const {
   listReport,
   generateReport,
 } = require("../../controllers/Guru/RaportController");
-
-//Pembayaran ppdb
-const {
-  updatePembayaranPpdb,
-  listPembayaran,
-} = require("../../controllers/Guru/PembayaranPpdbController");
 
 guru.use(guruAccessMiddleware);
 
@@ -263,9 +250,6 @@ guru.put("/siswa/update/:id", updateSiswa);
 guru.put("/siswa/kelas/delete/:id", deleteSiswaKelas);
 guru.post("/siswa/kelas/create", createSiswaKelas);
 guru.delete("/siswa/kelas/delete/:id", deleteSiswaKelas);
-// task rizky
-guru.get("/siswa/hasil-belajar/:id", getHasilBelajar);
-guru.get("/siswa/detail-hasil-belajar/:id/:id_siswa", detailHasilBelajar);
 
 //list
 
@@ -293,13 +277,11 @@ guru.post("/ujian/create", createUjian);
 guru.get("/ujian/list", listUjian);
 guru.get("/ujian/detail/:id", detailUjian);
 guru.get("/ujian/analisa/:id", AnalisislUjian);
-guru.post("/ujian/cek-urutan", cekUrutan);
 guru.put("/ujian/update/:id", updateUjian);
 guru.delete("/ujian/delete/:id", deleteUjian);
 guru.post("/nilai/create", createPenilaian);
 guru.put("/nilai/update-last-exam", updateLastExam);
 guru.put("/nilai/exam-result", submitExamResult);
-guru.get("/nilai/notifikasi", listNotificationExam);
 
 //nilai
 
@@ -310,8 +292,8 @@ guru.get("/nilai/soal/teacher/:id", getSoal);
 
 //report
 
-guru.get("/report/list", listReport);
-guru.post("/report/generate", generateReport);
+guru.get("/report/list", listReport)
+guru.post("/report/generate", generateReport)
 
 //tempat_pkl
 guru.post("/tempat-pkl/create", createTempatPkl);
@@ -327,30 +309,19 @@ guru.post(
 
 // Walisantri
 
+
 // Laporan harian pkl
-guru.get("/laporan-harian-pkl/list", laporanPklList);
-guru.get("/laporan-harian-pkl/detail/:id", detailLaporanPkl);
+guru.get("/laporan-harian-pkl/list", laporanPklList)
+guru.get("/laporan-harian-pkl/detail/:id", detailLaporanPkl)
+
 guru.get("/walisantri/list", getListWali);
 guru.put("/walisantri/update/:id", updateWali);
 guru.get("/walisantri/detail/:id", detailWali);
+guru.post("/walisantri/create", createBulkWali);
 
 // Pembayaran
 guru.get("/pembayaran/list", ListPembayaran);
 guru.post("/pembayaran/createKartu", createKartuSpp);
-guru.get("/pembayaran/detail/:id", detailPembayaran);
-guru.put("/pembayaran/update", updateResponse);
-
-// siswa
-guru.get("/siswa/daftarSpp", daftarSiswa);
-guru.get("/siswa/listPembayaran/:student_id", detailPembayaranSiswa);
-
-// Notification
-guru.post("/pesan/create", createNotification);
-
-
-
-//Pembayaran PPDB
-guru.put("/pembayaran-ppdb/update/:id", updatePembayaranPpdb);
-guru.get("/pembayaran-ppdb/list", listPembayaran);
+guru.put("/pembayaran/persetujuan/:id", updateAprroval);
 
 module.exports = guru;
