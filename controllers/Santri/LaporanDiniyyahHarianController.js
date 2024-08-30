@@ -19,7 +19,7 @@ const createLaporanDiniyyah = response.requestResponse(async (req, res) => {
     message: "Data Berhasil Diupload",
     data: laporanDiniyyahHarian,
   };
-};
+});
 const laporanDiniyyahList = response.requestResponse(async (req, res) => {
   const { page, pageSize, dariTanggal, sampaiTanggal } = req.query;
   const { count, rows } = await LaporanDiniyyahModel.findAndCountAll({
