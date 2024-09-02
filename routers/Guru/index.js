@@ -20,6 +20,7 @@ const {
   rekapAgenda,
   listJadwalAll,
   createJadwal,
+  agendaHarian,
 } = require("../../controllers/Guru/AbsensiController");
 const {
   listHalaqoh,
@@ -201,6 +202,8 @@ guru.get("/absensi/guru-belum-absen", guruBelumAbsen);
 guru.get("/absensi/rekap", rekapAbsensi);
 guru.get("/absensi/rekap/download", downloadExcelrekapAbsensi);
 guru.get("/agenda/rekap", rekapAgenda);
+
+guru.get("/agenda/harian", agendaHarian);
 
 guru.get("/jadwal/list", listJadwal);
 guru.get("/jadwal/list-all", listJadwalAll);
