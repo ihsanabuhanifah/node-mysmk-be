@@ -1,14 +1,23 @@
 const mapelModel = require('../../models').mapel;
 const nilaiModel = require('../../models').nilai;
-const tahunAjaranModel = require('../../models').ta;
 const hasilBelajarModel = require('../../models').hasil_belajar;
 const ujianModel = require('../../models').ujian;
 const models = require("../../models");
+const { checkQuery } = require('../../utils/format');
+const { Op } = require('sequelize')
 
 const getHasilBelajar = async (req, res) => {
+  let { nama_mapel, ta_id, tanggal } = req.query;
+
   console.log(req.student_id)
   const result = await mapelModel.findAll({
-    // attributes: ['id', 'nama_mapel']
+    where: {
+      ...(checkQuery(nama_mapel) && {
+        nama_mapel: {
+          [Op.substring]: nama_mapel
+        }
+      }),
+    },
     attributes: {
       exclude: 'mapel_id',
       include: ['id']
@@ -50,11 +59,6 @@ const detailHasilBelajar = async (req, res) => {
       {
         model: ujianModel,
         as: 'ujian'
-      },
-      {
-        model: tahunAjaranModel,
-        require: true,
-        as: 'tahun_ajaran'
       }
     ]
   })

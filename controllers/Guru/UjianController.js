@@ -8,6 +8,9 @@ const {
   checkQuery,
   calculateMinutesDifference,
 } = require("../../utils/format");
+const { RESPONSE_API } = require("../../utils/response");
+
+const response = new RESPONSE_API();
 
 const createPenilaian = async (req, res) => {
   try {
@@ -43,7 +46,7 @@ const createPenilaian = async (req, res) => {
           mapel_id: req.body.mapel_id,
           kelas_id: req.body.kelas_id,
           jenis_ujian: req.body.jenis_ujian,
-
+          urutan: req.body.is_hirarki === 1 ? req.body.urutan : 0,
           exam_result: 0,
           teacher_id: req.teacher_id,
           student_id: data.student_id,
@@ -54,8 +57,6 @@ const createPenilaian = async (req, res) => {
         });
       })
     );
-
-    console.log("pay", student);
 
     return res.status(201).json({
       status: "Success",
@@ -135,7 +136,6 @@ const listUjian = async (req, res) => {
       ],
       limit: pageSize,
       offset: page,
-      order: [["id", "desc"]],
     });
     return res.json({
       status: "Success",
@@ -206,9 +206,22 @@ const updateUjian = async (req, res) => {
     }
 
     if (ujian.status === "open") {
-      return res.status(422).json({
-        status: "Fail",
-        msg: "ujian sudah dimulai, tidak bisa memperbaharui",
+      await UjianController.update(
+        {
+          jenis_ujian: payload.jenis_ujian,
+          waktu_mulai: payload.waktu_mulai,
+          waktu_selesai: payload.waktu_selesai,
+        },
+        {
+          where: {
+            id,
+          },
+        }
+      );
+
+      return res.status(200).json({
+        status: "success",
+        msg: "Perbaharui Berhasil",
       });
     }
     if (ujian.teacher_id !== req.teacher_id) {

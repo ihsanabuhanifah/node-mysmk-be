@@ -75,8 +75,28 @@ const updateLaporanDiniyyah = response.requestResponse(async (req, res) => {
     data: req.body,
   };
 });
+const getDetailByPklId = response.requestResponse(async (req, res) => {
+  const { id } = req.params;
+  const laporanDiniyyah = await LaporanDiniyyahModel.findOne({
+    where: {
+      laporan_harian_pkl_id: id,
+    },
+  });
+  if (laporanDiniyyah === null) {
+    return {
+      status: "Fail",
+      msg: `Laporan Pkl dengan id ${id} tidak dapat Ditemukan`,
+      data: null,
+    };
+  }
+  return {
+    message: `Berhasil Menemukan data dengan id ${id}`,
+    data: laporanDiniyyah,
+  };
+});
 module.exports = {
   createLaporanDiniyyah,
   laporanDiniyyahList,
   updateLaporanDiniyyah,
+  getDetailByPklId,
 };

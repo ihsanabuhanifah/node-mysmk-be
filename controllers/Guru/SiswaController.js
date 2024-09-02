@@ -70,147 +70,163 @@ async function listSiswa(req, res) {
 					},
 				},
 
-				{
-					model: models.ta,
-					require: true,
-					as: 'tahun_ajaran',
-					attributes: ['id', 'nama_tahun_ajaran'],
+        {
+          model: models.ta,
+          require: true,
+          as: "tahun_ajaran",
+          attributes: ["id", "nama_tahun_ajaran"],
 
-					where: {
-						...(checkQuery(tahun_ajaran) && {
-							nama_tahun_ajaran: {
-								[Op.substring]: tahun_ajaran,
-							},
-						}),
-					},
-				},
-			],
-		})
+          where: {
+            ...(checkQuery(tahun_ajaran) && {
+              nama_tahun_ajaran: {
+                [Op.substring]: tahun_ajaran,
+              },
+            }),
+          },
+        },
+      ],
+    });
 
-		return res.json({
-			status: 'Success',
-			msg: 'Daftar Siswa ditemukan',
-			page: req.page,
-			pageSize: pageSize,
-			data: siswa,
-		})
-	} catch (err) {
-		console.log(err)
-		return res.status(403).json({
-			status: 'Fail',
-			msg: 'Terjadi Kesalahan',
-		})
-	}
+    return res.json({
+      status: "Success",
+      msg: "Daftar Siswa ditemukan",
+      page: req.page,
+      pageSize: pageSize,
+      data: siswa,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(403).json({
+      status: "Fail",
+      msg: "Terjadi Kesalahan",
+    });
+  }
 }
 
 async function createSiswaKelas(req, res) {
-	let { data } = req.body
-	try {
-		await KelasStudentModel.bulkCreate(data)
-		return res.json({
-			status: 'Success',
-			msg: 'Jadwal Berhasil ditambahkan',
-		})
-	} catch (err) {
-		console.log(err)
-		return res.status(403).json({
-			status: 'Fail',
-			msg: 'Terjadi Kesalahan',
-		})
-	}
+  let { data } = req.body;
+  try {
+    await KelasStudentModel.bulkCreate(data);
+    return res.json({
+      status: "Success",
+      msg: "Jadwal Berhasil ditambahkan",
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(403).json({
+      status: "Fail",
+      msg: "Terjadi Kesalahan",
+    });
+  }
 }
 
 const deleteSiswaKelas = async (req, res) => {
-	try {
-		const { id } = req.params
-		await KelasStudentModel.destroy({
-			where: {
-				id: id,
-			},
-		})
+  try {
+    const { id } = req.params;
+    await KelasStudentModel.destroy({
+      where: {
+        id: id,
+      },
+    });
 
-		return res.json({
-			status: 'Success',
-			msg: `data berhasil terhapus`,
-		})
-	} catch (err) {
-		console.log(err)
-		return res.status(403).json({
-			status: 'Fail',
-			msg: 'Terjadi Kesalahan',
-		})
-	}
-}
+    return res.json({
+      status: "Success",
+      msg: `data berhasil terhapus`,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(403).json({
+      status: "Fail",
+      msg: "Terjadi Kesalahan",
+    });
+  }
+};
 
 const detailSiswa = response.requestResponse(async (req, res) => {
-	const { id } = req.params
-	const siswa = await StudentModel.findOne({
-		where: {
-			id,
-		},
+  const { id } = req.params;
+  const siswa = await StudentModel.findOne({
+    where: {
+      id,
+    },
 
-		include: [
-			{
-				model: models.user,
-				require: true,
-				as: 'user',
-				attributes: ['email'],
-			},
-		],
-	})
+    include: [
+      {
+        model: models.user,
+        require: true,
+        as: "user",
+        attributes: ["email"],
+      },
+    ],
+  });
 
-	if (!siswa) {
-		return {
-			statusCode: 422,
-			msg: 'Siswa tidak ditemukan',
-		}
-	}
+  if (!siswa) {
+    return {
+      statusCode: 422,
+      msg: "Siswa tidak ditemukan",
+    };
+  }
 
-	return {
-		msg: 'Berhasil',
-		siswa,
-	}
-})
+  return {
+    msg: "Berhasil",
+    siswa,
+  };
+});
 
 const updateSiswa = response.requestResponse(async (req, res) => {
-	const { id } = req.params
+  const { id } = req.params;
 
-	const { nama_siswa, nis, nisn, nik, tempat_lahir, tanggal_lahir, alamat, sekolah_asal, anak_ke, status, angkatan, tahub_ajaran, keterangan, user_id, email } = req.body
+  const {
+    nama_siswa,
+    nis,
+    nisn,
+    nik,
+    tempat_lahir,
+    tanggal_lahir,
+    alamat,
+    sekolah_asal,
+    anak_ke,
+    status,
+    angkatan,
+    tahub_ajaran,
+    keterangan,
+    user_id,
+    email,
+  } = req.body;
 
-	await UserModel.update(
-		{
-			name: nama_siswa,
-			email: email,
-		},
-		{
-			where: {
-				id: user_id,
-			},
-		}
-	)
+  await UserModel.update(
+    {
+      name: nama_siswa,
+      email: email,
+    },
+    {
+      where: {
+        id: user_id,
+      },
+    }
+  );
 
-	await StudentModel.update(
-		{
-			nama_siswa,
-			nis,
-			nisn,
-			nik,
-			tempat_lahir,
-			tanggal_lahir,
-			alamat,
-			sekolah_asal,
-			anak_ke,
-			status,
-			angkatan,
-			tahub_ajaran,
-			keterangan,
-		},
-		{
-			where: {
-				id: id,
-			},
-		}
-	)
+  await StudentModel.update(
+    {
+      nama_siswa,
+      nis,
+      nisn,
+      nik,
+      tempat_lahir,
+      tanggal_lahir,
+      alamat,
+      sekolah_asal,
+      anak_ke,
+      status,
+      angkatan,
+      tahub_ajaran,
+      keterangan,
+    },
+    {
+      where: {
+        id: id,
+      },
+    }
+  );
 
 	return {
 		msg: 'Perbaharui data siswa berhasil',

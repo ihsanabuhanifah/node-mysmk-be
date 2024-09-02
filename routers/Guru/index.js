@@ -2,9 +2,8 @@ const express = require("express");
 const guruAccessMiddleware = require("../../middleware/guruAccessMiddleware");
 //upload middleware mysmk mobile
 const { upload } = require("../../middleware/uploadNoticeMiddleware");
-
 const guru = express.Router();
-
+const excelUpload = require("../../middleware/multerExcelMiddleware");
 const {
   getRole,
   saveToken,
@@ -39,6 +38,7 @@ const {
   deletePelanggaran,
   createPelanggaran,
   updatePelanggaran,
+  pelanggaran,
 } = require("../../controllers/Guru/PelanggaranController");
 
 //kunjungan
@@ -82,6 +82,7 @@ const {
   deteleTempatPkl,
   detailTempatPkl,
   listTempatPkl,
+  createBulkExcel,
 } = require("../../controllers/Guru/TempatPklController");
 
 // Laporan harian pkl
@@ -104,8 +105,6 @@ const {
   createSiswaKelas,
   detailSiswa,
   updateSiswa,
-  getHasilBelajar,
-  detailHasilBelajar,
 } = require("../../controllers/Guru/SiswaController");
 const {
   listHalaqohGroup,
@@ -157,12 +156,12 @@ const {
 } = require("../../controllers/Wali/PembayaranController");
 
 const {
+  listPenilaianByTeacher,
   remidial,
   refreshCount,
   getSoal,
   updateLastExam,
   submitExamResult,
-  listPenilaianByTeacher,
   listNotificationExam,
 } = require("../../controllers/Guru/NilaiController");
 
@@ -170,12 +169,6 @@ const {
   listReport,
   generateReport,
 } = require("../../controllers/Guru/RaportController");
-
-//Pembayaran ppdb
-const {
-  updatePembayaranPpdb,
-  listPembayaran,
-} = require("../../controllers/Guru/PembayaranPpdbController");
 
 guru.use(guruAccessMiddleware);
 
@@ -218,9 +211,10 @@ guru.get("/halaqoh/belum-absensi", belumAbsensitHalaqoh);
 guru.get("/halaqoh/absensi/rekap", RekapHalaqoh);
 guru.post("/halaqoh/student/create", createHalaqohStudent);
 guru.get("/halaqoh/student/list", halaqohGroup);
-//pelanggaran
 
+//pelanggaran
 guru.get("/pelanggaran/list", listPelanggaran);
+guru.get("/pelanggaran/list/:id", pelanggaran);
 guru.get("/pelanggaran/detail/:id", detailPelanggaran);
 guru.post("/pelanggaran/create", createPelanggaran);
 guru.put("/pelanggaran/update", updatePelanggaran);
@@ -265,9 +259,6 @@ guru.put("/siswa/update/:id", updateSiswa);
 guru.put("/siswa/kelas/delete/:id", deleteSiswaKelas);
 guru.post("/siswa/kelas/create", createSiswaKelas);
 guru.delete("/siswa/kelas/delete/:id", deleteSiswaKelas);
-// task rizky
-guru.get("/siswa/hasil-belajar/:id", getHasilBelajar);
-guru.get("/siswa/detail-hasil-belajar/:id/:id_siswa", detailHasilBelajar);
 
 //list
 
@@ -300,7 +291,6 @@ guru.delete("/ujian/delete/:id", deleteUjian);
 guru.post("/nilai/create", createPenilaian);
 guru.put("/nilai/update-last-exam", updateLastExam);
 guru.put("/nilai/exam-result", submitExamResult);
-guru.get("/nilai/notifikasi", listNotificationExam);
 
 //nilai
 
@@ -320,12 +310,18 @@ guru.put("/tempat-pkl/update/:id", updateTempatPkl);
 guru.delete("/tempat-pkl/delete/:id", deteleTempatPkl);
 guru.get("/tempat-pkl/detail/:id", detailTempatPkl);
 guru.get("/tempat-pkl/list", listTempatPkl);
+guru.post(
+  "/tempat-pkl/createBulk",
+  excelUpload.single("file"),
+  createBulkExcel
+);
 
 // Walisantri
 
 // Laporan harian pkl
 guru.get("/laporan-harian-pkl/list", laporanPklList);
 guru.get("/laporan-harian-pkl/detail/:id", detailLaporanPkl);
+
 guru.get("/walisantri/list", getListWali);
 guru.put("/walisantri/update/:id", updateWali);
 guru.get("/walisantri/detail/:id", detailWali);
@@ -335,9 +331,5 @@ guru.post("/walisantri/create", createBulkWali);
 guru.get("/pembayaran/list", ListPembayaran);
 guru.post("/pembayaran/createKartu", createKartuSpp);
 guru.put("/pembayaran/persetujuan/:id", updateAprroval);
-
-//Pembayaran PPDB
-guru.put("/pembayaran-ppdb/update/:id", updatePembayaranPpdb);
-guru.get("/pembayaran-ppdb/list", listPembayaran);
 
 module.exports = guru;

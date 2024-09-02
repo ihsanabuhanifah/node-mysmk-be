@@ -8,11 +8,14 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER,
       },
+      dzikir_pagi: {
+        type: Sequelize.BOOLEAN,
+      },
       created_at: {
         allowNull: false,
         type: Sequelize.DATE,
       },
-      updated_at: {
+     updated_at: {
         allowNull: false,
         type: Sequelize.DATE,
       },
@@ -44,7 +47,7 @@ module.exports = {
         type: Sequelize.BOOLEAN,
       },
       dzikir_petang: {
-        allowNull: false,
+        allowNull: true,
         type: Sequelize.BOOLEAN,
       },
       dari_surat: {
@@ -83,6 +86,7 @@ module.exports = {
         allowNull: false,
         type: Sequelize.ENUM("berjamaah", "sendirian", "tidak solat"),
       },
+      
     });
   },
   down: async (queryInterface, Sequelize) => {

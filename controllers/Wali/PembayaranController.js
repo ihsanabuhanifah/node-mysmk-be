@@ -76,13 +76,13 @@ const createKartuSpp = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    return res.status(403).send("Terjadi Kesalahan Dalam Pembayaran");
-  }
-};
+    return res.status(403).send("Terjadi Kesalahan Dalam Pembayaran")
+}
+}
 
 const detailPembayaran = async (req, res) => {
-  try {
-    const { id } = req.params;
+    try {
+        const {id} = req.params;
 
     const pembayaran = await PembayaranController.findOne({
       where: {

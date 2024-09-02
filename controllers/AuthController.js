@@ -68,7 +68,14 @@ async function login(req, res) {
 
     if (loginAs === 8) {
       parent = await ParentModel.findOne({
-        attributes: ["id", "nama_wali", "user_id", "student_id", "hubungan"],
+        attributes: [
+          "id",
+          "nama_wali",
+          "user_id",
+          "student_id",
+          "hubungan",
+          "nama_siswa",
+        ],
         where: {
           user_id: user.id,
         },
@@ -133,8 +140,10 @@ async function login(req, res) {
         role: roleName.role_name,
         roleId: loginAs,
         StudentId: parent?.student_id,
+        nama_siswa: parent?.nama_siswa,
         student_id: siswa?.id,
         teacher_id: guru?.id,
+        walsan_id : parent?.id,
         allRole: allRole,
         semesterAktif:
           parent?.student_id !== undefined ? KelasStudent[0]?.semester : "",
@@ -148,6 +157,13 @@ async function login(req, res) {
     );
 
     if (loginAs === 8) {
+      if (!!parent?.student_id === false) {
+        return res.status(422).json({
+          status: "Fail",
+          msg: `Akun dalam proses mapping antara Wali dan Siswa`,
+        });
+      }
+
       return res.status(200).json({
         status: "Success",
         msg: "Berhasil Login",
@@ -199,8 +215,8 @@ async function register(req, res) {
     });
 
     const userRole = await userRoleModel.create({
-      userId: user.id,
-      roleId: 1,
+      user_id: user.id,
+      role_id: 1,
     });
 
     const myRoles = await RolesModel.findByPk(userRole.id);
@@ -251,6 +267,114 @@ async function register(req, res) {
   }
 }
 
+async function registerWali(req, res) {
+  const payload = req.body;
+  const { email } = payload;
+
+  payload.password = await bcrypt.hashSync(req.body.password, 10);
+
+  try {
+    const cek = await userModel.findOne({
+      where: {
+        email: email,
+      },
+      attributes: ["id", "name", "email"],
+    });
+
+    if (cek) {
+      return res.status(422).json({
+        status: "Gagal",
+        msg: "Email sudah terdaftar",
+      });
+    }
+
+    const user = await userModel.create(payload);
+
+    const userRole = await userRoleModel.create({
+      user_id: user.id,
+      role_id: 8,
+      status: "noactive",
+    });
+
+    const myRoles = await RolesModel.findByPk(userRole.id);
+
+    const student = await StudentModel.findOne({
+      where: {
+        nisn: payload.nisn,
+      },
+    });
+
+    if (student) {
+      payload.nisn = student.nisn;
+    }
+
+    await ParentModel.create({
+      user_id: user.id,
+      nama_wali: payload.name,
+      hubungan: payload.hubungan,
+      no_hp: payload.no_hp,
+      nisn: payload.nisn,
+      nama_siswa: payload.nama_siswa,
+    });
+
+    // const token = {
+    //   UserId: user.id,
+    //   token: generator.generate({
+    //     length: 100,
+    //     numbers: true,
+    //   }),
+    // };
+    // const message = `http://localhost:8000/users/verify/${user.id}/${token.token}`;
+    // const kirim = await sendEmail(email, "Verify Email", message);
+    // if (kirim === "email not sent")
+    //   return res.json({
+    //     status: "fail",
+    //     message: "Gunaka email valid",
+    //   });
+
+    // await EmailVerifiedModel.create(token);
+    // console.log(morgan("user-agent"))
+    // await LoginHistory.create({
+    //   UserId: user.id,
+    //   device: morgan(":user-agent"),
+    // });
+    return res.status(201).json({
+      status: "Success",
+      msg: "Registrasi Berhasil",
+      user: user,
+    });
+  } catch (err) {
+    console.log(err);
+  }
+}
+
+async function nisnCek(req, res) {
+  const payload = req.body;
+  try {
+    const nisn = await StudentModel.findOne({
+      where: {
+        nisn: payload.nisn,
+      },
+    });
+
+    if (nisn) {
+      return res.status(200).json({
+        status: "Success",
+        msg: "NISN Ditemukan",
+        
+      });
+    } else {
+      return res.status(422).json({
+        status: "Warning",
+        msg: "NISN tidak ada pada daftar siswa",
+        
+      });
+    }
+  } catch (err)  {
+    console.log(err);
+  }
+}
+
 async function authme(req, res) {
   let email = req.email;
   try {
@@ -266,6 +390,7 @@ async function authme(req, res) {
         teacher_id: req?.teacher_id,
         semesterAktif: req?.semesterAktif,
         tahunAjaranAktif: req?.tahunAjaranAktif,
+        walsan_id : req?.walsan_id,
         allRole: req.allRole,
       },
       process.env.JWT_SECRET_ACCESS_TOKEN,
@@ -555,4 +680,6 @@ module.exports = {
   resetPassword,
   forgotPassword,
   resetPasswordEmail,
+  registerWali,
+  nisnCek
 };

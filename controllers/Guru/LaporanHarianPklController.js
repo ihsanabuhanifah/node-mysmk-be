@@ -4,15 +4,22 @@ const response = new RESPONSE_API();
 const { Op } = require("sequelize");
 const { checkQuery } = require("../../utils/format");
 const StudentModel = require("../../models").student;
-const TempatPklModel = require("../../models").tempat_pkl;
 
 const laporanPklList = response.requestResponse(async (req, res) => {
-  const { page, pageSize, dariTanggal, sampaiTanggal, nama_siswa } = req.query;
+  const {
+    page,
+    pageSize,
+    dariTanggal,
+    sampaiTanggal,
+    nama_siswa,
+    status_kehadiran,
+  } = req.query;
   const { count, rows } = await LaporanHarianPklModel.findAndCountAll({
     where: {
       ...(checkQuery(dariTanggal) && {
         tanggal: { [Op.between]: [dariTanggal, sampaiTanggal] },
       }),
+      status: status_kehadiran,
     },
     order: [["tanggal", "desc"]],
     limit: pageSize,
@@ -41,7 +48,6 @@ const laporanPklList = response.requestResponse(async (req, res) => {
     pageSize: pageSize,
   };
 });
-
 const laporanPklListForPembimbing = response.requestResponse(
   async (req, res) => {
     const tempatPklRecords = await tempat_pkl.findAll({
@@ -88,7 +94,6 @@ const laporanPklListForPembimbing = response.requestResponse(
     };
   }
 );
-
 const detailLaporanPkl = response.requestResponse(async (req, res) => {
   const { id } = req.params;
   const laporanPkl = await LaporanHarianPklModel.findOne({
@@ -113,5 +118,5 @@ const detailLaporanPkl = response.requestResponse(async (req, res) => {
 module.exports = {
   laporanPklList,
   detailLaporanPkl,
-  laporanPklListForPembimbing
+  laporanPklListForPembimbing,
 };
