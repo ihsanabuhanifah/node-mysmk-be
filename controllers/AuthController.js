@@ -377,7 +377,6 @@ async function nisnCek(req, res) {
 
 async function authme(req, res) {
   let email = req.email;
-
   try {
     const token = JWT.sign(
       {

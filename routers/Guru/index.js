@@ -20,6 +20,7 @@ const {
   rekapAgenda,
   listJadwalAll,
   createJadwal,
+  agendaHarian,
 } = require("../../controllers/Guru/AbsensiController");
 const {
   listHalaqoh,
@@ -38,6 +39,7 @@ const {
   deletePelanggaran,
   createPelanggaran,
   updatePelanggaran,
+  pelanggaran,
 } = require("../../controllers/Guru/PelanggaranController");
 
 //kunjungan
@@ -146,7 +148,8 @@ const {
 } = require("../../controllers/Guru/KehadiranGuruController");
 const adminAccessMiddleware = require("../../middleware/adminAccessMiddleware");
 const { getListWali, updateWali, detailWali, createBulkWali } = require("../../controllers/Guru/WaliController");
-const { ListPembayaran, createKartuSpp, updateAprroval, detailPembayaran, deleteKartu, daftarSiswa, detailPembayaranSiswa, createNotification, updateResponse, createPesan } = require("../../controllers/Wali/PembayaranController");
+const { ListPembayaran, createKartuSpp, detailPembayaran, daftarSiswa, detailPembayaranSiswa, createNotification, updateResponse, createPesan } = require("../../controllers/Wali/PembayaranController");
+
 
 
 
@@ -165,6 +168,12 @@ const {
   listReport,
   generateReport,
 } = require("../../controllers/Guru/RaportController");
+
+//Pembayaran ppdb
+const {
+  updatePembayaranPpdb,
+  listPembayaran,
+} = require("../../controllers/Guru/PembayaranPpdbController");
 
 guru.use(guruAccessMiddleware);
 
@@ -194,6 +203,8 @@ guru.get("/absensi/rekap", rekapAbsensi);
 guru.get("/absensi/rekap/download", downloadExcelrekapAbsensi);
 guru.get("/agenda/rekap", rekapAgenda);
 
+guru.get("/agenda/harian", agendaHarian);
+
 guru.get("/jadwal/list", listJadwal);
 guru.get("/jadwal/list-all", listJadwalAll);
 guru.post("/jadwal/create", createJadwal);
@@ -207,9 +218,10 @@ guru.get("/halaqoh/belum-absensi", belumAbsensitHalaqoh);
 guru.get("/halaqoh/absensi/rekap", RekapHalaqoh);
 guru.post("/halaqoh/student/create", createHalaqohStudent);
 guru.get("/halaqoh/student/list", halaqohGroup);
-//pelanggaran
 
+//pelanggaran
 guru.get("/pelanggaran/list", listPelanggaran);
+guru.get("/pelanggaran/list/:id", pelanggaran);
 guru.get("/pelanggaran/detail/:id", detailPelanggaran);
 guru.post("/pelanggaran/create", createPelanggaran);
 guru.put("/pelanggaran/update", updatePelanggaran);
@@ -339,5 +351,9 @@ guru.get("/siswa/listPembayaran/:student_id", detailPembayaranSiswa);
 guru.post("/pesan/create", createNotification);
 
 
+
+//Pembayaran PPDB
+guru.put("/pembayaran-ppdb/update/:id", updatePembayaranPpdb);
+guru.get("/pembayaran-ppdb/list", listPembayaran);
 
 module.exports = guru;

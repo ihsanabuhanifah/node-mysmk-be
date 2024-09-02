@@ -61,6 +61,7 @@ const updateLaporanPkl = response.requestResponse(async (req, res) => {
     data: req.body,
   };
 });
+// tes
 
 const laporanPklList = response.requestResponse(async (req, res) => {
   const { page, pageSize, dariTanggal, sampaiTanggal, status_kehadiran } =
@@ -71,7 +72,9 @@ const laporanPklList = response.requestResponse(async (req, res) => {
       ...(checkQuery(dariTanggal) && {
         tanggal: { [Op.between]: [dariTanggal, sampaiTanggal] },
       }),
-      status: status_kehadiran,
+      ...(checkQuery(status_kehadiran) && {
+        status : status_kehadiran
+      })
     },
     order: [["tanggal", "desc"]],
     limit: pageSize,

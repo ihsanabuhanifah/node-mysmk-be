@@ -7,12 +7,22 @@ const StudentModel = require("../../models").student;
 const TempatPklModel = require("../../models").tempat_pkl;
 
 const laporanPklList = response.requestResponse(async (req, res) => {
-  const { page, pageSize, dariTanggal, sampaiTanggal, nama_siswa } = req.query;
+  const {
+    page,
+    pageSize,
+    dariTanggal,
+    sampaiTanggal,
+    nama_siswa,
+    status_kehadiran,
+  } = req.query;
   const { count, rows } = await LaporanHarianPklModel.findAndCountAll({
     where: {
       ...(checkQuery(dariTanggal) && {
         tanggal: { [Op.between]: [dariTanggal, sampaiTanggal] },
       }),
+      ...(checkQuery(status_kehadiran) && {
+        status : status_kehadiran
+      })
     },
     order: [["tanggal", "desc"]],
     limit: pageSize,
@@ -113,5 +123,5 @@ const detailLaporanPkl = response.requestResponse(async (req, res) => {
 module.exports = {
   laporanPklList,
   detailLaporanPkl,
-  laporanPklListForPembimbing
+  laporanPklListForPembimbing,
 };
