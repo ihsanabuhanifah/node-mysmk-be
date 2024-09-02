@@ -196,6 +196,8 @@ const ListPembayaran = async (req, res) => {
       ke_bulan,
       tahun,
       bulan,
+      nama_tahun_ajaran,
+      status
     } = req.query;
 
     let Result = {};
@@ -257,6 +259,13 @@ const ListPembayaran = async (req, res) => {
         [Op.substring]: tahun,
       };
     }
+    if (status) {
+      Result.status = {
+        [Op.like] : status
+      }
+    }
+  
+    
 
     const list = await PembayaranController.findAndCountAll({
       limit: pageSize,
@@ -285,6 +294,13 @@ const ListPembayaran = async (req, res) => {
           require: true,
           as: "ta",
           attributes: ["id", "nama_tahun_ajaran"],
+          where: {
+            ...(checkQuery(nama_tahun_ajaran) && {
+              nama_tahun_ajaran: {
+                [Op.substring] : nama_tahun_ajaran
+              }
+            })
+          }
         },
         {
           model: models.teacher,
@@ -501,47 +517,52 @@ async function createPembayaranOtomatis(req, res) {
 // }
 
 async function createNotifPembayaran(req, res) {
-  const data = req.body;
 
-  // pembayaranModel.detailPembayaran({id_transaksi: data.order_id}).then((
-  //   transaksi
-  //  ) => {
-  //   if (transaksi) {
-  //     if (transactionStatus == 'capture'){
-  //       if (fraudStatus == 'accept'){
-  //               PembayaranController.update()
-  //             }
-  //         } else if (transactionStatus == 'settlement'){
-  //             // TODO set transaction status on your database to 'success'
-  //             // and response with 200 OK
-  //         } else if (transactionStatus == 'cancel' ||
-  //           transactionStatus == 'deny' ||
-  //           transactionStatus == 'expire'){
-  //           // TODO set transaction status on your database to 'failure'
-  //           // and response with 200 OK
-  //         } else if (transactionStatus == 'pending'){
-  //           // TODO set transaction status on your database to 'pending' / waiting payment
-  //           // and response with 200 OK
-  //         }
-  //   }
-  // })
+  try {
+    const data = req.body;
 
-  // console.log("Isi Data:", data);
+    snap.transaction.notification(data).then((statusResponse) => {
+      let orderId = statusResponse.order_id;
+      let transactionStatus = statusResponse.transaction_status;
+      let fraudStatus = statusResponse.fraud_status;
+
+      if (transactionStatus == 'capture'){
+        if (fraudStatus == 'accept'){
+                  // TODO set transaction status on your database to 'success'
+                  // and response with 200 OK
+                  const pembayaran = PembayaranController.update({
+                    id_transaksi: orderId,
+                    status: "Berhasil"
+                  })
+
+                  responseData = pembayaran
+              }
+          } else if (transactionStatus == 'settlement'){
+              // TODO set transaction status on your database to 'success'
+              // and response with 200 OK
+          } else if (transactionStatus == 'cancel' ||
+            transactionStatus == 'deny' ||
+            transactionStatus == 'expire'){
+            // TODO set transaction status on your database to 'failure'
+            // and response with 200 OK
+          } else if (transactionStatus == 'pending'){
+            // TODO set transaction status on your database to 'pending' / waiting payment
+            // and response with 200 OK
+          }
+    }) 
 
 
-
-  snap.transaction.notification(data).then((statusResponse) => {
-    let IdOrder = statusResponse.order_id;
-    let transactionStatus = statusResponse.transaction_status;
-    let fraudStatus = statusResponse.fraud_status;
-
-    console.log(`Transaction notification received. Order ID: ${orderId}. Transaction status: ${transactionStatus}. Fraud status: ${fraudStatus}`);
-  })
 
   return res.status(201).json({
     status: "Success",
     msg: "Berhasil Mengirim Notif Pembayaran",
+    data: Status
   });
+  } catch (error) {
+    console.error('Error processing notification:', error);
+    return res.status(500).send('Internal Server Error');
+  }
+  
 }
 
 // Wablas
@@ -644,6 +665,8 @@ async function daftarSiswa(req, res) {
       status: "Success",
       msg: "Berhasil Menampilkan Siswa",
       data: cari,
+      page,
+      pageSize
     });
   } catch (error) {
     console.log(error);
