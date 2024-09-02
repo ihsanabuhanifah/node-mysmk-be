@@ -735,16 +735,77 @@ async function updateResponse(req, res) {
     let berhasil = 0;
     let gagal = 0;
 
-    if (!Array.isArray(payload)) {
-      return res.status(400).json({
-        status: "Error",
-        msg: "Invalid payload format. Payload must be an array.",
-      });
-    }
-
     await Promise.all(
       payload.map(async (data) => {
+
+        const token = process.env.WABLAS_TOKEN;
+
+        const pembayaran = await pembayaranModel.findOne({
+          where: {
+            status: data.status,
+          },
+          include: [
+            {
+              model: models.parent,
+              require: true,
+              as: "walsan",
+              attributes: ["id", "nama_wali", "no_hp"],
+            }
+          ]
+        });
+
+
+
+        const hp = `62${pembayaran.walsan.no_hp}`;
+
+        if (pembayaran && pembayaran.walsan.no_hp) {
+          
+          console.log("Phone number:", hp);
+          // Now use `phone` in your pesanData
+        }
+        const pesanData = {
+          phone : hp,
+          message: "Assalamualaikum, Para Wali Santri, Terima Kasih Sudah Membayar SPP Sekolah Ke Pihak Guru. Jazzamukhairan Khasiran"
+        }
+       
+       
+
+        
+        console.log(token);
+        console.log(data);
+
         try {
+         
+
+          if (pembayaran && pembayaran.status === "Sudah") {
+            try {
+              const response = await axios.post(
+                "https://jogja.wablas.com/api/send-message",
+                pesanData,
+                {
+                  headers: {
+                    Authorization: token,
+                    "Content-Type": "application/json",
+                  },
+                }
+              );
+
+              // Check the response from the Wablas API
+              if (response.data.status && response.data.status === "success") {
+                console.log(`Message sent successfully to ${pesanData.phone}`);
+              } else {
+                console.error("Failed to send message:", response.data);
+                gagal += 1;
+                return;
+              }
+            } catch (error) {
+              console.error("Error sending notification:", error);
+              gagal += 1;
+              return;
+            }
+          }
+
+
           await pembayaranModel.update(
             {
               status: data.status,
