@@ -91,10 +91,6 @@ const {
   detailLaporanPkl,
   laporanPklListForPembimbing,
 } = require("../../controllers/Guru/LaporanHarianPklController");
-const {
-  laporanPklList,
-  detailLaporanPkl,
-} = require("../../controllers/Guru/LaporanHarianPklController");
 
 //jadwal
 
@@ -154,18 +150,14 @@ const adminAccessMiddleware = require("../../middleware/adminAccessMiddleware");
 const { getListWali, updateWali, detailWali, createBulkWali } = require("../../controllers/Guru/WaliController");
 const { ListPembayaran, createKartuSpp, detailPembayaran, daftarSiswa, detailPembayaranSiswa, createNotification, updateResponse } = require("../../controllers/Wali/PembayaranController");
 
-
-
-
 const {
-  remidial,
   remidial,
   refreshCount,
   getSoal,
   updateLastExam,
   submitExamResult,
   listNotificationExam,
-  listNotificationExam,
+  listPenilaianByTeacher
 } = require("../../controllers/Guru/NilaiController");
 
 const {

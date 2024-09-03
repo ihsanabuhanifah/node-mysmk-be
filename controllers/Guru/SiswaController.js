@@ -36,6 +36,7 @@ async function listSiswa(req, res) {
     page,
     pageSize,
   } = req.query;
+  
   try {
     const siswa = await KelasStudentModel.findAndCountAll({
       where: {

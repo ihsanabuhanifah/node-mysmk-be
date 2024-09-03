@@ -7,10 +7,15 @@ const ujianModel = require('../../models').ujian;
 
 
 const listHasilUjain = async (req, res) => {
-  const result = await nilaiModel.findAll({
+  let { page, pageSize } = req.query
+
+  const { rows, count } = await nilaiModel.findAndCountAll({
     where: {
-      student_id: req.student_id
+      student_id: req.student_id,
+      status: 'finish'
     },
+    limit: pageSize,
+    offset: page,
     include: [
       {
         model: mapelModel,
@@ -31,13 +36,19 @@ const listHasilUjain = async (req, res) => {
       {
         model: ujianModel,
         as: 'ujian',
+        atrributes: {
+          include: ['judul_ujian']
+        },
       },
     ]
   })
 
   return res.json({
     status: 'Success',
-    data: result
+    data: rows,
+    page: page,
+    pageSize: pageSize,
+    totalPage: Math.ceil(count / pageSize)
   })
 }
 

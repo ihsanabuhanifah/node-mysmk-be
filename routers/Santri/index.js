@@ -14,8 +14,10 @@ const {
   takeExam,
   submitExam,
   progressExam,
+  notifExam,
 } = require("../../controllers/Santri/ExamController");
 const { listHasilUjain } = require("../../controllers/Santri/HasilUjian");
+
 // Laporan harian Pkl
 const {
   createLaporanPkl,
@@ -23,21 +25,6 @@ const {
   laporanPklList,
   detailLaporanPkl,
 } = require("../../controllers/Santri/LaporanHarianPklController");
-
-const {
-  profile,
-  updateSiswa,
-} = require("../../controllers/Santri/ProfileController");
-const {
-  getHasilBelajar,
-  detailHasilBelajar,
-} = require("../../controllers/Santri/HasilBelajarController");
-const {
-  getExam,
-  takeExam,
-  submitExam,
-  progressExam,
-} = require("../../controllers/Santri/ExamController");
 
 const validateUpdate = [
   check("nama_siswa")
@@ -87,6 +74,7 @@ const {
 const {
   lokasiTempatPkl,
 } = require("../../controllers/Santri/TempatPklController");
+const { listTidakHadir } = require("../../controllers/Santri/Absensi");
 
 santri.use(santriAccessMiddleware);
 santri.get('/profile', profile);
@@ -95,12 +83,14 @@ santri.get("/exam/list", getExam )
 santri.put("/exam/take/:id", takeExam )
 santri.put("/exam/progress", progressExam)
 santri.put("/exam/submit", submitExam)
+santri.get("/exam/notif", notifExam)
 santri.get('/hasil-belajar', getHasilBelajar)
 santri.get('/hasil-belajar-detail/:id', detailHasilBelajar)
-
+santri.get('/hasil-belajar-detail/:id/:ta_id', detailHasilBelajar)
+santri.get('/hasil-ujian', listHasilUjain)
+santri.get('/tidakhadir', listTidakHadir)
 
 // Laporan Harian pkl
-
 santri.post("/laporan-harian-pkl/create", createLaporanPkl);
 santri.put("/laporan-harian-pkl/update/:id", updateLaporanPkl);
 santri.get("/laporan-harian-pkl/list", laporanPklList);
@@ -108,13 +98,6 @@ santri.get("/laporan-harian-pkl/detail/:id", detailLaporanPkl);
 santri.get('/profile', profile);
 santri.put('/profile/update', validateFields, validateUpdate, updateSiswa);
 santri.post('/profile/update/image', updateImage)
-santri.get("/exam/list", getExam )
-santri.put("/exam/take/:id", takeExam )
-santri.put("/exam/progress", progressExam)
-santri.put("/exam/submit", submitExam)
-santri.get('/hasil-belajar', getHasilBelajar)
-santri.get('/hasil-belajar-detail/:id/:ta_id', detailHasilBelajar)
-santri.get('/hasil-ujian', listHasilUjain)
 
 
 // Laporan Diniyyah

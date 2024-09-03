@@ -31,7 +31,8 @@ const profile = async (req, res) => {
 		},
 		include: [
 			{
-				model: userModel
+				model: userModel,
+				as: 'user'
 			}
 		]
 	})
