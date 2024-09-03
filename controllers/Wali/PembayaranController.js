@@ -196,6 +196,8 @@ const ListPembayaran = async (req, res) => {
       ke_bulan,
       tahun,
       bulan,
+      nama_tahun_ajaran,
+      status
     } = req.query;
 
     let Result = {};
@@ -257,6 +259,13 @@ const ListPembayaran = async (req, res) => {
         [Op.substring]: tahun,
       };
     }
+    if (status) {
+      Result.status = {
+        [Op.like] : status
+      }
+    }
+  
+    
 
     const list = await PembayaranController.findAndCountAll({
       limit: pageSize,
@@ -285,6 +294,13 @@ const ListPembayaran = async (req, res) => {
           require: true,
           as: "ta",
           attributes: ["id", "nama_tahun_ajaran"],
+          where: {
+            ...(checkQuery(nama_tahun_ajaran) && {
+              nama_tahun_ajaran: {
+                [Op.substring] : nama_tahun_ajaran
+              }
+            })
+          }
         },
         {
           model: models.teacher,
@@ -501,47 +517,64 @@ async function createPembayaranOtomatis(req, res) {
 // }
 
 async function createNotifPembayaran(req, res) {
-  const data = req.body;
 
-  // pembayaranModel.detailPembayaran({id_transaksi: data.order_id}).then((
-  //   transaksi
-  //  ) => {
-  //   if (transaksi) {
-  //     if (transactionStatus == 'capture'){
-  //       if (fraudStatus == 'accept'){
-  //               PembayaranController.update()
-  //             }
-  //         } else if (transactionStatus == 'settlement'){
-  //             // TODO set transaction status on your database to 'success'
-  //             // and response with 200 OK
-  //         } else if (transactionStatus == 'cancel' ||
-  //           transactionStatus == 'deny' ||
-  //           transactionStatus == 'expire'){
-  //           // TODO set transaction status on your database to 'failure'
-  //           // and response with 200 OK
-  //         } else if (transactionStatus == 'pending'){
-  //           // TODO set transaction status on your database to 'pending' / waiting payment
-  //           // and response with 200 OK
-  //         }
-  //   }
-  // })
+  try {
+    const data = req.body;
 
-  // console.log("Isi Data:", data);
+    snap.transaction.notification(data).then((statusResponse) => {
+      let responData = null;
+      let orderId = statusResponse.order_id;
+      let transactionStatus = statusResponse.transaction_status;
+      let fraudStatus = statusResponse.fraud_status;
+
+      if (transactionStatus == 'capture'){
+        if (fraudStatus == 'accept'){
+                  const pembayaran = pembayaranModel.update({
+                    id_transaksi: orderId,
+                    status: "Sudah"
+                  })
+
+                  responData = pembayaran;
+              }
+          } else if (transactionStatus == 'settlement'){
+            const pembayaran = pembayaranModel.update({
+              id_transaksi: orderId,
+              status: "Sudah"
+            })
+
+            responData = pembayaran;
+          } else if (transactionStatus == 'cancel' ||
+            transactionStatus == 'deny' ||
+            transactionStatus == 'expire'){
+              const pembayaran = pembayaranModel.update({
+                id_transaksi: orderId,
+                status: "Belum"
+              })
+  
+              responData = pembayaran;
+          } else if (transactionStatus == 'pending'){
+            const pembayaran = pembayaranModel.update({
+              id_transaksi: orderId,
+              status: "Belum"
+            })
+
+            responData = pembayaran;
+          }
+    });
+
+    console.log("Isi Data:", data);
 
 
-
-  snap.transaction.notification(data).then((statusResponse) => {
-    let IdOrder = statusResponse.order_id;
-    let transactionStatus = statusResponse.transaction_status;
-    let fraudStatus = statusResponse.fraud_status;
-
-    console.log(`Transaction notification received. Order ID: ${orderId}. Transaction status: ${transactionStatus}. Fraud status: ${fraudStatus}`);
-  })
 
   return res.status(201).json({
     status: "Success",
     msg: "Berhasil Mengirim Notif Pembayaran",
   });
+  } catch (error) {
+    console.error('Error processing notification:', error);
+    return res.status(500).send('Internal Server Error');
+  }
+  
 }
 
 // Wablas
@@ -644,6 +677,8 @@ async function daftarSiswa(req, res) {
       status: "Success",
       msg: "Berhasil Menampilkan Siswa",
       data: cari,
+      page,
+      pageSize
     });
   } catch (error) {
     console.log(error);
@@ -712,16 +747,77 @@ async function updateResponse(req, res) {
     let berhasil = 0;
     let gagal = 0;
 
-    if (!Array.isArray(payload)) {
-      return res.status(400).json({
-        status: "Error",
-        msg: "Invalid payload format. Payload must be an array.",
-      });
-    }
-
     await Promise.all(
       payload.map(async (data) => {
+
+        const token = process.env.WABLAS_TOKEN;
+
+        const pembayaran = await pembayaranModel.findOne({
+          where: {
+            status: data.status,
+          },
+          include: [
+            {
+              model: models.parent,
+              require: true,
+              as: "walsan",
+              attributes: ["id", "nama_wali", "no_hp"],
+            }
+          ]
+        });
+
+
+
+        const hp = `62${pembayaran.walsan.no_hp}`;
+
+        if (pembayaran && pembayaran.walsan.no_hp) {
+          
+          console.log("Phone number:", hp);
+          // Now use `phone` in your pesanData
+        }
+        const pesanData = {
+          phone : hp,
+          message: "Assalamualaikum, Para Wali Santri, Terima Kasih Sudah Membayar SPP Sekolah Ke Pihak Guru. Jazzamukhairan Khasiran"
+        }
+       
+       
+
+        
+        console.log(token);
+        console.log(data);
+
         try {
+         
+
+          if (pembayaran && pembayaran.status === "Sudah") {
+            try {
+              const response = await axios.post(
+                "https://jogja.wablas.com/api/send-message",
+                pesanData,
+                {
+                  headers: {
+                    Authorization: token,
+                    "Content-Type": "application/json",
+                  },
+                }
+              );
+
+              // Check the response from the Wablas API
+              if (response.data.status && response.data.status === "success") {
+                console.log(`Message sent successfully to ${pesanData.phone}`);
+              } else {
+                console.error("Failed to send message:", response.data);
+                gagal += 1;
+                return;
+              }
+            } catch (error) {
+              console.error("Error sending notification:", error);
+              gagal += 1;
+              return;
+            }
+          }
+
+
           await pembayaranModel.update(
             {
               status: data.status,
