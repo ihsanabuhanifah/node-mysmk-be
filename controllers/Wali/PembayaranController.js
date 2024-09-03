@@ -522,41 +522,53 @@ async function createNotifPembayaran(req, res) {
     const data = req.body;
 
     snap.transaction.notification(data).then((statusResponse) => {
+      let responData = null;
       let orderId = statusResponse.order_id;
       let transactionStatus = statusResponse.transaction_status;
       let fraudStatus = statusResponse.fraud_status;
 
       if (transactionStatus == 'capture'){
         if (fraudStatus == 'accept'){
-                  // TODO set transaction status on your database to 'success'
-                  // and response with 200 OK
-                  const pembayaran = PembayaranController.update({
+                  const pembayaran = pembayaranModel.update({
                     id_transaksi: orderId,
-                    status: "Berhasil"
+                    status: "Sudah"
                   })
 
-                  responseData = pembayaran
+                  responData = pembayaran;
               }
           } else if (transactionStatus == 'settlement'){
-              // TODO set transaction status on your database to 'success'
-              // and response with 200 OK
+            const pembayaran = pembayaranModel.update({
+              id_transaksi: orderId,
+              status: "Sudah"
+            })
+
+            responData = pembayaran;
           } else if (transactionStatus == 'cancel' ||
             transactionStatus == 'deny' ||
             transactionStatus == 'expire'){
-            // TODO set transaction status on your database to 'failure'
-            // and response with 200 OK
+              const pembayaran = pembayaranModel.update({
+                id_transaksi: orderId,
+                status: "Belum"
+              })
+  
+              responData = pembayaran;
           } else if (transactionStatus == 'pending'){
-            // TODO set transaction status on your database to 'pending' / waiting payment
-            // and response with 200 OK
+            const pembayaran = pembayaranModel.update({
+              id_transaksi: orderId,
+              status: "Belum"
+            })
+
+            responData = pembayaran;
           }
-    }) 
+    });
+
+    console.log("Isi Data:", data);
 
 
 
   return res.status(201).json({
     status: "Success",
     msg: "Berhasil Mengirim Notif Pembayaran",
-    data: Status
   });
   } catch (error) {
     console.error('Error processing notification:', error);
