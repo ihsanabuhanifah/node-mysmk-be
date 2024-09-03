@@ -29,7 +29,7 @@ const {
 const {
   getNotice
 } = require("../../controllers/noticeController");
-const { createPembayaran, ListPembayaran, detailPembayaran, createPembayaranOtomatis, createNotifPembayaran} = require("../../controllers/Wali/PembayaranController");
+const { createPembayaran, ListPembayaran, detailPembayaran, createPembayaranOtomatis, createNotifPembayaran, daftarSiswa, detailPembayaranSiswa} = require("../../controllers/Wali/PembayaranController");
 
 const { listRaport, listRaportDetail, listExam } = require("../../controllers/Wali/NilaiController");
 
@@ -56,6 +56,8 @@ wali.put("/pulang/update/:id", updateIzinPulang);
 //notice
 wali.get("/notice/list", getNotice);
 //Pembayaran
+wali.get("/pembayaran/listsiswa", daftarSiswa);
+wali.get("/pembayaran/detailSiswa/:student_id", detailPembayaranSiswa);
 wali.get("/pembayaran/list", ListPembayaran);
 wali.get("/pembayaran/detail/:id", detailPembayaran);
 wali.put("/pembayaran/bayar/:id", createPembayaran);
