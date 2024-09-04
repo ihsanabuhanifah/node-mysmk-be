@@ -5,6 +5,7 @@ const validationMiddleware = require("../middleware/validationMiddleware");
 const jwtValidateMiddleware = require("../middleware/jwtValidateMiddleware");
 const { loginValidation, registerValidation } = require("../validator/auth");
 
+
 authRouter.post(
   "/login",
   loginValidation,
@@ -12,11 +13,7 @@ authRouter.post(
   authController.login
 );
 
-authRouter.post(
-  "/register",
-  registerValidation,
-  authController.register
-);
+authRouter.post("/register", registerValidation, authController.register);
 
 authRouter.post(
   "/register/wali",

@@ -11,6 +11,7 @@ const {
   updateLaporanPkl,
   laporanPklList,
   detailLaporanPkl,
+  downloadPdf,
 } = require("../../controllers/Santri/LaporanHarianPklController");
 
 const {
@@ -93,6 +94,7 @@ santri.post("/laporan-harian-pkl/create", createLaporanPkl);
 santri.put("/laporan-harian-pkl/update/:id", updateLaporanPkl);
 santri.get("/laporan-harian-pkl/list", laporanPklList);
 santri.get("/laporan-harian-pkl/detail/:id", detailLaporanPkl);
+santri.get("/laporan-harian-pkl/downdload-laporan-bulanan", downloadPdf);
 
 // Laporan Diniyyah
 santri.post("/laporan-diniyyah/create", createLaporanDiniyyah);
