@@ -387,7 +387,7 @@ async function createPembayaranOtomatis(req, res) {
   }
 
   try {
-    const timestamp = new Date();
+    const timestamp = Date.now();
 
     const user = await userModel.findOne({
       where: {
@@ -465,8 +465,14 @@ async function createPembayaranOtomatis(req, res) {
       ],
     };
 
+    // Log after transaction creation
+    console.log("Transaction created successfully, updating database...");
+
     const transaksi = await snap.createTransaction(parameter);
     let tokenTransaksi = transaksi.token;
+
+    console.log("Database updated successfully.");
+
     const pembayaran = await PembayaranController.update(
       {
         walsan_id: req.walsan_id,
