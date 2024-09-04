@@ -5,6 +5,7 @@ const jwtValidateMiddleware = (req, res, next) => {
   const bearerHeader = req.headers["x-authorization"];
   if (!bearerHeader) return res.sendStatus(401);
   const bearerToken = bearerHeader.split(" ")[1];
+  console.log("Bearer Token:", bearerToken);
   JWT.verify(
     bearerToken,
     process.env.JWT_SECRET_ACCESS_TOKEN,
@@ -16,9 +17,11 @@ const jwtValidateMiddleware = (req, res, next) => {
           data: err,
         });
       } else {
+
         req.id = decoded.id;
         req.email = decoded.email;
         req.name = decoded.name;
+        req.walsan_id = decoded.walsan_id,
         req.role = decoded.role;
         req.roleId = decoded.roleId;
         req.nama_siswa = decoded?.nama_siswa;
@@ -32,6 +35,11 @@ const jwtValidateMiddleware = (req, res, next) => {
         req.student_id = decoded.student_id;
 
         next();
+        console.log("Token:", req.headers["x-authorization"]);
+        console.log("User ID di middleware:", req.id);
+        console.log("Bearer Header:", bearerHeader);
+        console.log("Bearer Token:", bearerToken);
+        console.log("Decoded:", decoded);
       }
     }
   );

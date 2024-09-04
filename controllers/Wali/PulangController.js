@@ -12,21 +12,20 @@ async function buatIzinPulang(req, res) {
     await IzinModel.create(payload);
 
     const urlAPI = process.env.URL_WA;
-    const token = process.env.WA_TOKEN;
-    const pesan = `⚠ *SMK MQ NOTIF* ⚠
+    const token = process.env.TOKEN_WA;
+    const nomer = process.env.GROUP_WA;
+    const pesan = `*SMK MQ NOTIF IZIN KEPULANGAN*
     
-    Bismillah, ada wali santri yang mengisi data Tiket Izin Kepulangan berikut data detailnya:
-    Nama santri : Fullan
-    Kelas : XII RPL
-    Jenis : Izin Kepulangan
-    Tanggal Jemput : 30-02-2025
-    Tanggal Antar : 31-02-2025
-    Kepentinggan : Berobat ke rumah sakit
+Bismillah, ada wali santri yang mengisi data Tiket Izin Kepulangan berikut data detailnya:
+Nama santri : ${req.nama_siswa}
+Tanggal Jemput : ${payload.izin_dari}
+Tanggal Antar : ${payload.izin_sampai}
+Kepentinggan : ${payload.kepentingan}
     
-    Untuk data lebih lengkapnya & menyetujuinya silahkan buka website https://mysmk.smkmadinatulquran.sch.id/`;
+Untuk mengkonfirmasi silahkan buka website https://mysmk.smkmadinatulquran.sch.id/guru/perizinan-pulang`;
 
     const data = {
-      "phone": 120363225259421052,
+      "phone": nomer,
       "message": pesan,
       "isGroup": true
     };
