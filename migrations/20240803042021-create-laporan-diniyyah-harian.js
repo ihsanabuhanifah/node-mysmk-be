@@ -43,48 +43,32 @@ module.exports = {
       },
       dzikir_pagi: {
         allowNull: false,
-        defaultValue: false,
+        defaultValue : false,
         type: Sequelize.BOOLEAN,
       },
       dzikir_petang: {
         allowNull: true,
         type: Sequelize.BOOLEAN,
       },
-      dari_surat: {
-        allowNull: false,
-        type: Sequelize.STRING,
-      },
-      sampai_surat: {
-        allowNull: false,
-        type: Sequelize.STRING,
-      },
-      dari_ayat: {
-        allowNull: false,
-        type: Sequelize.INTEGER,
-      },
-      sampai_ayat: {
-        allowNull: false,
-        type: Sequelize.INTEGER,
-      },
       sholat_shubuh: {
         allowNull: false,
-        type: Sequelize.ENUM("berjamaah", "sendirian", "tidak solat"),
+        type: Sequelize.BOOLEAN,
       },
       sholat_dzuhur: {
         allowNull: false,
-        type: Sequelize.ENUM("berjamaah", "sendirian", "tidak solat"),
+        type: Sequelize.BOOLEAN,
       },
       sholat_ashar: {
         allowNull: false,
-        type: Sequelize.ENUM("berjamaah", "sendirian", "tidak solat"),
+        type: Sequelize.BOOLEAN,
       },
       sholat_magrib: {
         allowNull: false,
-        type: Sequelize.ENUM("berjamaah", "sendirian", "tidak solat"),
+        type: Sequelize.BOOLEAN,
       },
       sholat_isya: {
         allowNull: false,
-        type: Sequelize.ENUM("berjamaah", "sendirian", "tidak solat"),
+        type: Sequelize.BOOLEAN,
       },
       
     });

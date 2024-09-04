@@ -27,14 +27,7 @@ const getHasilBelajar = async (req, res) => {
         model: hasilBelajarModel,
         require: true,
         as: 'hasil_belajar',
-        where: { student_id: req.student_id },
-        include: [
-          {
-            model: tahunAjaranModel,
-            require: true,
-            as: 'tahun_ajaran'
-          }
-        ]
+        where: { student_id: req.student_id }
       }
     ]
   }) 

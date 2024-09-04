@@ -12,7 +12,7 @@ const createLaporanPkl = response.requestResponse(async (req, res) => {
   const laporanHarianPkl = await LaporanHarianPklModel.create({
     ...payload,
     student_id: req.student_id,
-    tanggal: today,
+    tanggal: dayjs(new Date()).format("YYYY-MM-DD"),
     is_absen: true,
   });
 

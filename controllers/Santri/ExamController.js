@@ -1,5 +1,5 @@
 const studentModel = require("../../models").student;
-const Sequelize = require('sequelize');
+
 const models = require("../../models");
 const UjianController = require("../../models").ujian;
 const { Op, where } = require("sequelize");
@@ -21,9 +21,6 @@ const getExam = response.requestResponse(async (req, res) => {
     ...(pageSize !== undefined && { limit: pageSize }),
     ...(page !== undefined && { offset: page }),
     where: {
-      ...(checkQuery(status) && {
-        status: status
-      }),
       student_id: req.student_id,
     },
     attributes: {
@@ -48,7 +45,6 @@ const getExam = response.requestResponse(async (req, res) => {
           "waktu_selesai",
           "status",
           "durasi",
-          "judul_ujian"
         ],
         include: [
           {

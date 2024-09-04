@@ -6,9 +6,6 @@ const TeacherModel = require("../../models").teacher;
 const response = new RESPONSE_API();
 const models = require("../../models");
 
-
-
-
 const createTempatPkl = response.requestResponse(async (req, res) => {
   let payload = req.body;
 
