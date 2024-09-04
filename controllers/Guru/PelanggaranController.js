@@ -70,14 +70,21 @@ const listPelanggaran = async (req, res) => {
   }
 };
 const pelanggaran = async (req, res) => {
-  let { nama_siswa, pelapor, penindakm, page, pageSize } = req.query;
+  let { page, pageSize, pelanggaran, semester, ta, kat_pelanggaran } = req.query;
   let { id: idSiswa } = req.params;
 
   try {
-    const pelanggaran = await PelanggaranSiswaModel.findAndCountAll({
+    const pelanggaranList = await PelanggaranSiswaModel.findAndCountAll({
       attributes: ["id", "tanggal", "status", "tindakan", "semester"],
       ...(pageSize !== undefined && { limit: pageSize }),
       ...(page !== undefined && { offset: page }),
+      where: {
+        ...(checkQuery(semester) && {
+          semester: {
+            [Op.eq]: semester
+          }
+        })
+      },
       include: [
         {
           model: StudentModel,
@@ -105,19 +112,38 @@ const pelanggaran = async (req, res) => {
           require: true,
           as: "pelanggaran",
           attributes: ["id", "nama_pelanggaran", "tipe", "kategori", "point"],
+          where: {
+            ...(checkQuery(pelanggaran) && {
+              nama_pelanggaran: {
+                [Op.substring]: pelanggaran
+              }
+            }),
+            ...(checkQuery(kat_pelanggaran) && {
+              kategori: {
+                [Op.substring]: kat_pelanggaran
+              }
+            })
+          }
         },
         {
           model: TaModel,
           require: true,
           as: "tahun_ajaran",
           attributes: ["id", "nama_tahun_ajaran"],
+          where: {
+            ...(checkQuery(ta) && {
+              nama_tahun_ajaran: {
+                [Op.substring]: ta
+              }
+            })
+          }
         },
       ],
       order: [["id", "desc"]],
     });
     return res.json({
       status: "Success",
-      data: pelanggaran,
+      data: pelanggaranList,
       page: page,
       pageSize: pageSize,
     });
