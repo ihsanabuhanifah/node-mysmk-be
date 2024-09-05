@@ -4,7 +4,6 @@ const response = new RESPONSE_API();
 const { Op } = require("sequelize");
 const { checkQuery } = require("../../utils/format");
 const StudentModel = require("../../models").student;
-const TempatPklModel = require("../../models").tempat_pkl;
 
 const laporanPklList = response.requestResponse(async (req, res) => {
   const {
@@ -100,28 +99,28 @@ const laporanPklListForPembimbing = response.requestResponse(
 );
 
 const detailLaporanPkl = response.requestResponse(async (req, res) => {
-  const { id } = req.params;
-  const laporanPkl = await LaporanHarianPklModel.findOne({
-    where: {
-      id: id,
-    },
-    include: [
-      {
-        require: true,
-        as: "siswa",
-        model: StudentModel,
-        attributes: ["id", "nama_siswa"],
+    const { id } = req.params;
+    const laporanPkl = await LaporanHarianPklModel.findOne({
+      where: {
+        id: id,
       },
-    ],
+      include: [
+        {
+          require: true,
+          as: "siswa",
+          model: StudentModel,
+          attributes : ['id', 'nama_siswa']
+        },
+      ],
+    });
+    return {
+      message: `Berhasil menemukan data dengan id ${id}`,
+      data: laporanPkl,
+    };
   });
-  return {
-    message: `Berhasil menemukan data dengan id ${id}`,
-    data: laporanPkl,
-  };
-});
 
 module.exports = {
   laporanPklList,
   detailLaporanPkl,
-  laporanPklListForPembimbing,
+  laporanPklListForPembimbing
 };

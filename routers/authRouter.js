@@ -13,14 +13,13 @@ authRouter.post(
   validationMiddleware,
   authController.login
 );
-
+authRouter.post("/register-ppdb", registerValidation, ppdbController.register);
 authRouter.post(
   "/login-ppdb",
   validationMiddleware,
   loginValidation,
   ppdbController.login
 );
-authRouter.post("/register-ppdb", registerValidation, ppdbController.register);
 
 
 authRouter.post("/register", registerValidation, authController.register);
