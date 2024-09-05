@@ -86,7 +86,10 @@ const {
 } = require("../../controllers/Guru/TempatPklController");
 
 // Laporan harian pkl
-const { laporanPklList, detailLaporanPkl } = require("../../controllers/Guru/LaporanHarianPklController")
+const {
+  laporanPklList,
+  detailLaporanPkl,
+} = require("../../controllers/Guru/LaporanHarianPklController");
 
 //jadwal
 
@@ -139,27 +142,36 @@ const {
   submitByAdmin,
 } = require("../../controllers/Guru/KehadiranGuruController");
 const adminAccessMiddleware = require("../../middleware/adminAccessMiddleware");
-const { getListWali, createBulkWali, updateWali, detailWali } = require("../../controllers/Guru/WaliController");
-const { ListPembayaran, createKartuSpp, updateAprroval } = require("../../controllers/Wali/PembayaranController");
-
+const {
+  getListWali,
+  createBulkWali,
+  updateWali,
+  detailWali,
+} = require("../../controllers/Guru/WaliController");
+const {
+  ListPembayaran,
+  createKartuSpp,
+  updateAprroval,
+} = require("../../controllers/Wali/PembayaranController");
 
 const {
-  listPenilaianByTeacher,
   remidial,
   refreshCount,
   getSoal,
   updateLastExam,
   submitExamResult,
   listPenilaianByTeacher,
-  listNotificationExam
+  listNotificationExam,
 } = require("../../controllers/Guru/NilaiController");
-
 
 const {
   getListWali,
   createBulkWali,
 } = require("../../controllers/Guru/WaliController");
-const { listReport, generateReport } = require("../../controllers/Guru/RaportController");
+const {
+  listReport,
+  generateReport,
+} = require("../../controllers/Guru/RaportController");
 
 guru.use(guruAccessMiddleware);
 
@@ -291,8 +303,8 @@ guru.get("/nilai/soal/teacher/:id", getSoal);
 
 //report
 
-guru.get("/report/list", listReport)
-guru.post("/report/generate", generateReport)
+guru.get("/report/list", listReport);
+guru.post("/report/generate", generateReport);
 
 //tempat_pkl
 guru.post("/tempat-pkl/create", createTempatPkl);
@@ -308,12 +320,10 @@ guru.post(
 
 // Walisantri
 
-
 // Laporan harian pkl
 guru.get("/laporan-harian-pkl/list", laporanPklList);
 guru.get("/laporan-harian-pkl/detail/:id", detailLaporanPkl);
 guru.get("/walisantri/list", getListWali);
 guru.post("/walisantri/create", createBulkWali);
-
 
 module.exports = guru;
