@@ -3,23 +3,23 @@ const AgendaKelasModel = require("../../models").agenda_kelas;
 const JadwalModel = require("../../models").jadwal;
 const LaporanGuruPiket = require("../../models").laporan_guru_piket;
 const models = require("../../models");
-const { Op } = require("sequelize");
+const { Op, where } = require("sequelize");
 const { check } = require("../../utils/paramsQuery");
 const { checkQuery } = require("../../utils/format");
 const excel = require("exceljs");
+const { RESPONSE_API } = require("../../utils/response");
+
+const response = new RESPONSE_API();
 
 async function createJadwal(req, res) {
-  let {
-   data
-  } = req.body;
-  try{
+  let { data } = req.body;
+  try {
     await JadwalModel.bulkCreate(data);
     return res.json({
       status: "Success",
       msg: "Jadwal Berhasil ditambahkan",
-
     });
-  }catch (err) {
+  } catch (err) {
     console.log(err);
     return res.status(403).json({
       status: "Fail",
@@ -110,7 +110,6 @@ async function listJadwalAll(req, res) {
         },
       ],
       where: {
-       
         status: 1,
         ...(hari !== undefined && { hari: hari }),
       },
@@ -826,6 +825,61 @@ async function rekapAgenda(req, res) {
   }
 }
 
+const agendaHarian = response.requestResponse(async (req, res) => {
+  const { tanggal } = req.query;
+
+  const agenda = await AgendaKelasModel.findAll({
+    where: {
+      tanggal: tanggal,
+    },
+    include: [
+      {
+        model: models.kelas,
+        require: true,
+        as: "kelas",
+        attributes: ["id", "nama_kelas"],
+      },
+      {
+        model: models.teacher,
+        require: true,
+        as: "teacher",
+        attributes: ["id", "nama_guru"],
+      },
+      {
+        model: models.mapel,
+        require: true,
+        as: "mapel",
+        attributes: ["id", "nama_mapel"],
+      },
+    ],
+  });
+
+  const absensi = await AbsensiKelasModel.findAll({
+    where: {
+      tanggal: tanggal,
+      status_kehadiran: {
+        [Op.between]: [2, 5],
+      },
+    },
+
+    include: [
+      {
+        model: models.student,
+        require: true,
+        as: "siswa",
+        attributes: ["id", "nama_siswa"],
+      },
+    ],
+  });
+
+  return {
+    absensi: absensi,
+    agenda: agendaGrup(agenda, absensi),
+    //
+    // absensi : absensi
+  };
+});
+
 module.exports = {
   createAbsensi,
   listAbsensi,
@@ -836,6 +890,867 @@ module.exports = {
   rekapAbsensi,
   downloadExcelrekapAbsensi,
   rekapAgenda,
-  listJadwalAll, 
-  createJadwal
+  listJadwalAll,
+  createJadwal,
+  agendaHarian,
 };
+
+function agendaGrup(agendas, absensi) {
+  const groupedByClass = agendas.reduce((acc, agenda) => {
+    const {
+      kelas_id,
+      kelas: { nama_kelas },
+    } = agenda;
+
+    if (!acc[kelas_id]) {
+      acc[kelas_id] = {
+        kelas_id,
+        nama_kelas,
+        agendas: [],
+      };
+    }
+
+    // Mencari siswa yang tidak hadir berdasarkan kriteria tertentu
+    const siswaTidakHadir = absensi.filter((item) => 
+      item.mapel_id === agenda.mapel_id &&
+      item.teacher_id === agenda.teacher_id &&
+      item.kelas_id === agenda.kelas_id
+    );
+    
+    // Menambahkan siswa yang tidak hadir ke dalam agenda
+    agenda.siswa = siswaTidakHadir;
+    
+    // Menambahkan agenda yang telah diperbarui ke grup kelas
+    acc[kelas_id].agendas.push({agenda:agenda, siswa:siswaTidakHadir});
+    
+    return acc;
+  }, {});
+
+  return Object.values(groupedByClass);
+}
+
+// [
+//   {
+//       "id": 1005,
+//       "tanggal": "2024-08-29",
+//       "mapel_id": 111,
+//       "kelas_id": 2,
+//       "teacher_id": 1,
+//       "jam_ke": 3,
+//       "materi": "Bab Mensholati Jenazah ",
+//       "semester": 3,
+//       "ta_id": 3,
+//       "createdAt": "2024-08-28T17:06:00.000Z",
+//       "updatedAt": "2024-08-29T08:18:22.000Z",
+//       "kelas": {
+//           "id": 2,
+//           "nama_kelas": "XI Rekayasa Perangkat Lunak"
+//       },
+//       "teacher": {
+//           "id": 1,
+//           "nama_guru": "Furqon Kholilulloh, S.Pd"
+//       },
+//       "mapel": {
+//           "id": 111,
+//           "nama_mapel": "Fiqih 3"
+//       }
+//   },
+//   {
+//       "id": 1006,
+//       "tanggal": "2024-08-29",
+//       "mapel_id": 103,
+//       "kelas_id": 2,
+//       "teacher_id": 13,
+//       "jam_ke": 3,
+//       "materi": null,
+//       "semester": 3,
+//       "ta_id": 3,
+//       "createdAt": "2024-08-28T17:06:00.000Z",
+//       "updatedAt": "2024-08-28T17:06:00.000Z",
+//       "kelas": {
+//           "id": 2,
+//           "nama_kelas": "XI Rekayasa Perangkat Lunak"
+//       },
+//       "teacher": {
+//           "id": 13,
+//           "nama_guru": "Rizqi Faturrakhman"
+//       },
+//       "mapel": {
+//           "id": 103,
+//           "nama_mapel": "Mobile Develoment 3"
+//       }
+//   },
+//   {
+//       "id": 1007,
+//       "tanggal": "2024-08-29",
+//       "mapel_id": 114,
+//       "kelas_id": 2,
+//       "teacher_id": 1,
+//       "jam_ke": 7,
+//       "materi": "Hukum Nun mati dan Tanwin\nQS. Al-Baqarah ayat 6 - 16",
+//       "semester": 3,
+//       "ta_id": 3,
+//       "createdAt": "2024-08-28T17:06:00.000Z",
+//       "updatedAt": "2024-08-29T08:16:58.000Z",
+//       "kelas": {
+//           "id": 2,
+//           "nama_kelas": "XI Rekayasa Perangkat Lunak"
+//       },
+//       "teacher": {
+//           "id": 1,
+//           "nama_guru": "Furqon Kholilulloh, S.Pd"
+//       },
+//       "mapel": {
+//           "id": 114,
+//           "nama_mapel": "Tajwid 3"
+//       }
+//   },
+//   {
+//       "id": 1008,
+//       "tanggal": "2024-08-29",
+//       "mapel_id": 111,
+//       "kelas_id": 3,
+//       "teacher_id": 1,
+//       "jam_ke": 1,
+//       "materi": "Bab Mensholati Jenazah ",
+//       "semester": 3,
+//       "ta_id": 3,
+//       "createdAt": "2024-08-28T17:06:00.000Z",
+//       "updatedAt": "2024-08-29T08:17:47.000Z",
+//       "kelas": {
+//           "id": 3,
+//           "nama_kelas": "XI Teknik Komputer dan Jaringan"
+//       },
+//       "teacher": {
+//           "id": 1,
+//           "nama_guru": "Furqon Kholilulloh, S.Pd"
+//       },
+//       "mapel": {
+//           "id": 111,
+//           "nama_mapel": "Fiqih 3"
+//       }
+//   },
+//   {
+//       "id": 1009,
+//       "tanggal": "2024-08-29",
+//       "mapel_id": 105,
+//       "kelas_id": 3,
+//       "teacher_id": 8,
+//       "jam_ke": 3,
+//       "materi": null,
+//       "semester": 3,
+//       "ta_id": 3,
+//       "createdAt": "2024-08-28T17:06:00.000Z",
+//       "updatedAt": "2024-08-28T17:06:00.000Z",
+//       "kelas": {
+//           "id": 3,
+//           "nama_kelas": "XI Teknik Komputer dan Jaringan"
+//       },
+//       "teacher": {
+//           "id": 8,
+//           "nama_guru": "Raihan Kamal Ibrahim, Amd.Kom"
+//       },
+//       "mapel": {
+//           "id": 105,
+//           "nama_mapel": "Server Administration 3"
+//       }
+//   },
+//   {
+//       "id": 1010,
+//       "tanggal": "2024-08-29",
+//       "mapel_id": 114,
+//       "kelas_id": 3,
+//       "teacher_id": 1,
+//       "jam_ke": 7,
+//       "materi": "Hukum Nun mati dan Tanwin\nQS. Al-Baqarah ayat 6 - 16",
+//       "semester": 3,
+//       "ta_id": 3,
+//       "createdAt": "2024-08-28T17:06:00.000Z",
+//       "updatedAt": "2024-08-29T08:19:11.000Z",
+//       "kelas": {
+//           "id": 3,
+//           "nama_kelas": "XI Teknik Komputer dan Jaringan"
+//       },
+//       "teacher": {
+//           "id": 1,
+//           "nama_guru": "Furqon Kholilulloh, S.Pd"
+//       },
+//       "mapel": {
+//           "id": 114,
+//           "nama_mapel": "Tajwid 3"
+//       }
+//   },
+//   {
+//       "id": 1011,
+//       "tanggal": "2024-08-29",
+//       "mapel_id": 154,
+//       "kelas_id": 4,
+//       "teacher_id": 19,
+//       "jam_ke": 1,
+//       "materi": null,
+//       "semester": 5,
+//       "ta_id": 3,
+//       "createdAt": "2024-08-28T17:06:00.000Z",
+//       "updatedAt": "2024-08-28T17:06:00.000Z",
+//       "kelas": {
+//           "id": 4,
+//           "nama_kelas": "XII Rekayasa Perangkat Lunak"
+//       },
+//       "teacher": {
+//           "id": 19,
+//           "nama_guru": "Dedi Hidayatullah , S.Pd"
+//       },
+//       "mapel": {
+//           "id": 154,
+//           "nama_mapel": "Bahasa Indonesia 5"
+//       }
+//   },
+//   {
+//       "id": 1012,
+//       "tanggal": "2024-08-29",
+//       "mapel_id": 161,
+//       "kelas_id": 4,
+//       "teacher_id": 5,
+//       "jam_ke": 3,
+//       "materi": "Integrasi Apache Kafka di NestJS sebagai Consumer",
+//       "semester": 5,
+//       "ta_id": 3,
+//       "createdAt": "2024-08-28T17:06:00.000Z",
+//       "updatedAt": "2024-09-01T14:01:28.000Z",
+//       "kelas": {
+//           "id": 4,
+//           "nama_kelas": "XII Rekayasa Perangkat Lunak"
+//       },
+//       "teacher": {
+//           "id": 5,
+//           "nama_guru": "Ihsan Santana Wibawa, S.Pd"
+//       },
+//       "mapel": {
+//           "id": 161,
+//           "nama_mapel": "Backend Development 5"
+//       }
+//   },
+//   {
+//       "id": 1013,
+//       "tanggal": "2024-08-29",
+//       "mapel_id": 154,
+//       "kelas_id": 5,
+//       "teacher_id": 19,
+//       "jam_ke": 1,
+//       "materi": null,
+//       "semester": 5,
+//       "ta_id": 3,
+//       "createdAt": "2024-08-28T17:06:00.000Z",
+//       "updatedAt": "2024-08-28T17:06:00.000Z",
+//       "kelas": {
+//           "id": 5,
+//           "nama_kelas": "XII Teknik Komputer dan Jaringan"
+//       },
+//       "teacher": {
+//           "id": 19,
+//           "nama_guru": "Dedi Hidayatullah , S.Pd"
+//       },
+//       "mapel": {
+//           "id": 154,
+//           "nama_mapel": "Bahasa Indonesia 5"
+//       }
+//   },
+//   {
+//       "id": 1014,
+//       "tanggal": "2024-08-29",
+//       "mapel_id": 164,
+//       "kelas_id": 5,
+//       "teacher_id": 4,
+//       "jam_ke": 3,
+//       "materi": null,
+//       "semester": 5,
+//       "ta_id": 3,
+//       "createdAt": "2024-08-28T17:06:00.000Z",
+//       "updatedAt": "2024-08-28T17:06:00.000Z",
+//       "kelas": {
+//           "id": 5,
+//           "nama_kelas": "XII Teknik Komputer dan Jaringan"
+//       },
+//       "teacher": {
+//           "id": 4,
+//           "nama_guru": "Fathi Muhammad Shalahuddin"
+//       },
+//       "mapel": {
+//           "id": 164,
+//           "nama_mapel": "Network Administration 5"
+//       }
+//   },
+//   {
+//       "id": 1015,
+//       "tanggal": "2024-08-29",
+//       "mapel_id": 165,
+//       "kelas_id": 5,
+//       "teacher_id": 8,
+//       "jam_ke": 7,
+//       "materi": null,
+//       "semester": 5,
+//       "ta_id": 3,
+//       "createdAt": "2024-08-28T17:06:00.000Z",
+//       "updatedAt": "2024-08-28T17:06:00.000Z",
+//       "kelas": {
+//           "id": 5,
+//           "nama_kelas": "XII Teknik Komputer dan Jaringan"
+//       },
+//       "teacher": {
+//           "id": 8,
+//           "nama_guru": "Raihan Kamal Ibrahim, Amd.Kom"
+//       },
+//       "mapel": {
+//           "id": 165,
+//           "nama_mapel": "Server Administration 5"
+//       }
+//   },
+//   {
+//       "id": 1016,
+//       "tanggal": "2024-08-29",
+//       "mapel_id": 111,
+//       "kelas_id": 2,
+//       "teacher_id": 1,
+//       "jam_ke": 4,
+//       "materi": "Bab Mensholati Jenazah ",
+//       "semester": 3,
+//       "ta_id": 3,
+//       "createdAt": "2024-08-28T17:06:00.000Z",
+//       "updatedAt": "2024-08-29T08:18:22.000Z",
+//       "kelas": {
+//           "id": 2,
+//           "nama_kelas": "XI Rekayasa Perangkat Lunak"
+//       },
+//       "teacher": {
+//           "id": 1,
+//           "nama_guru": "Furqon Kholilulloh, S.Pd"
+//       },
+//       "mapel": {
+//           "id": 111,
+//           "nama_mapel": "Fiqih 3"
+//       }
+//   },
+//   {
+//       "id": 1017,
+//       "tanggal": "2024-08-29",
+//       "mapel_id": 103,
+//       "kelas_id": 2,
+//       "teacher_id": 13,
+//       "jam_ke": 4,
+//       "materi": null,
+//       "semester": 3,
+//       "ta_id": 3,
+//       "createdAt": "2024-08-28T17:06:00.000Z",
+//       "updatedAt": "2024-08-28T17:06:00.000Z",
+//       "kelas": {
+//           "id": 2,
+//           "nama_kelas": "XI Rekayasa Perangkat Lunak"
+//       },
+//       "teacher": {
+//           "id": 13,
+//           "nama_guru": "Rizqi Faturrakhman"
+//       },
+//       "mapel": {
+//           "id": 103,
+//           "nama_mapel": "Mobile Develoment 3"
+//       }
+//   },
+//   {
+//       "id": 1018,
+//       "tanggal": "2024-08-29",
+//       "mapel_id": 114,
+//       "kelas_id": 2,
+//       "teacher_id": 1,
+//       "jam_ke": 8,
+//       "materi": "Hukum Nun mati dan Tanwin\nQS. Al-Baqarah ayat 6 - 16",
+//       "semester": 3,
+//       "ta_id": 3,
+//       "createdAt": "2024-08-28T17:06:00.000Z",
+//       "updatedAt": "2024-08-29T08:16:58.000Z",
+//       "kelas": {
+//           "id": 2,
+//           "nama_kelas": "XI Rekayasa Perangkat Lunak"
+//       },
+//       "teacher": {
+//           "id": 1,
+//           "nama_guru": "Furqon Kholilulloh, S.Pd"
+//       },
+//       "mapel": {
+//           "id": 114,
+//           "nama_mapel": "Tajwid 3"
+//       }
+//   },
+//   {
+//       "id": 1019,
+//       "tanggal": "2024-08-29",
+//       "mapel_id": 105,
+//       "kelas_id": 3,
+//       "teacher_id": 8,
+//       "jam_ke": 4,
+//       "materi": null,
+//       "semester": 3,
+//       "ta_id": 3,
+//       "createdAt": "2024-08-28T17:06:00.000Z",
+//       "updatedAt": "2024-08-28T17:06:00.000Z",
+//       "kelas": {
+//           "id": 3,
+//           "nama_kelas": "XI Teknik Komputer dan Jaringan"
+//       },
+//       "teacher": {
+//           "id": 8,
+//           "nama_guru": "Raihan Kamal Ibrahim, Amd.Kom"
+//       },
+//       "mapel": {
+//           "id": 105,
+//           "nama_mapel": "Server Administration 3"
+//       }
+//   },
+//   {
+//       "id": 1020,
+//       "tanggal": "2024-08-29",
+//       "mapel_id": 114,
+//       "kelas_id": 3,
+//       "teacher_id": 1,
+//       "jam_ke": 8,
+//       "materi": "Hukum Nun mati dan Tanwin\nQS. Al-Baqarah ayat 6 - 16",
+//       "semester": 3,
+//       "ta_id": 3,
+//       "createdAt": "2024-08-28T17:06:00.000Z",
+//       "updatedAt": "2024-08-29T08:19:11.000Z",
+//       "kelas": {
+//           "id": 3,
+//           "nama_kelas": "XI Teknik Komputer dan Jaringan"
+//       },
+//       "teacher": {
+//           "id": 1,
+//           "nama_guru": "Furqon Kholilulloh, S.Pd"
+//       },
+//       "mapel": {
+//           "id": 114,
+//           "nama_mapel": "Tajwid 3"
+//       }
+//   },
+//   {
+//       "id": 1021,
+//       "tanggal": "2024-08-29",
+//       "mapel_id": 154,
+//       "kelas_id": 4,
+//       "teacher_id": 19,
+//       "jam_ke": 2,
+//       "materi": null,
+//       "semester": 5,
+//       "ta_id": 3,
+//       "createdAt": "2024-08-28T17:06:00.000Z",
+//       "updatedAt": "2024-08-28T17:06:00.000Z",
+//       "kelas": {
+//           "id": 4,
+//           "nama_kelas": "XII Rekayasa Perangkat Lunak"
+//       },
+//       "teacher": {
+//           "id": 19,
+//           "nama_guru": "Dedi Hidayatullah , S.Pd"
+//       },
+//       "mapel": {
+//           "id": 154,
+//           "nama_mapel": "Bahasa Indonesia 5"
+//       }
+//   },
+//   {
+//       "id": 1022,
+//       "tanggal": "2024-08-29",
+//       "mapel_id": 161,
+//       "kelas_id": 4,
+//       "teacher_id": 5,
+//       "jam_ke": 4,
+//       "materi": "Integrasi Apache Kafka di NestJS sebagai Consumer",
+//       "semester": 5,
+//       "ta_id": 3,
+//       "createdAt": "2024-08-28T17:06:00.000Z",
+//       "updatedAt": "2024-09-01T14:01:28.000Z",
+//       "kelas": {
+//           "id": 4,
+//           "nama_kelas": "XII Rekayasa Perangkat Lunak"
+//       },
+//       "teacher": {
+//           "id": 5,
+//           "nama_guru": "Ihsan Santana Wibawa, S.Pd"
+//       },
+//       "mapel": {
+//           "id": 161,
+//           "nama_mapel": "Backend Development 5"
+//       }
+//   },
+//   {
+//       "id": 1023,
+//       "tanggal": "2024-08-29",
+//       "mapel_id": 111,
+//       "kelas_id": 3,
+//       "teacher_id": 1,
+//       "jam_ke": 2,
+//       "materi": "Bab Mensholati Jenazah ",
+//       "semester": 3,
+//       "ta_id": 3,
+//       "createdAt": "2024-08-28T17:06:00.000Z",
+//       "updatedAt": "2024-08-29T08:17:47.000Z",
+//       "kelas": {
+//           "id": 3,
+//           "nama_kelas": "XI Teknik Komputer dan Jaringan"
+//       },
+//       "teacher": {
+//           "id": 1,
+//           "nama_guru": "Furqon Kholilulloh, S.Pd"
+//       },
+//       "mapel": {
+//           "id": 111,
+//           "nama_mapel": "Fiqih 3"
+//       }
+//   },
+//   {
+//       "id": 1024,
+//       "tanggal": "2024-08-29",
+//       "mapel_id": 154,
+//       "kelas_id": 5,
+//       "teacher_id": 19,
+//       "jam_ke": 2,
+//       "materi": null,
+//       "semester": 5,
+//       "ta_id": 3,
+//       "createdAt": "2024-08-28T17:06:00.000Z",
+//       "updatedAt": "2024-08-28T17:06:00.000Z",
+//       "kelas": {
+//           "id": 5,
+//           "nama_kelas": "XII Teknik Komputer dan Jaringan"
+//       },
+//       "teacher": {
+//           "id": 19,
+//           "nama_guru": "Dedi Hidayatullah , S.Pd"
+//       },
+//       "mapel": {
+//           "id": 154,
+//           "nama_mapel": "Bahasa Indonesia 5"
+//       }
+//   },
+//   {
+//       "id": 1025,
+//       "tanggal": "2024-08-29",
+//       "mapel_id": 164,
+//       "kelas_id": 5,
+//       "teacher_id": 4,
+//       "jam_ke": 4,
+//       "materi": null,
+//       "semester": 5,
+//       "ta_id": 3,
+//       "createdAt": "2024-08-28T17:06:00.000Z",
+//       "updatedAt": "2024-08-28T17:06:00.000Z",
+//       "kelas": {
+//           "id": 5,
+//           "nama_kelas": "XII Teknik Komputer dan Jaringan"
+//       },
+//       "teacher": {
+//           "id": 4,
+//           "nama_guru": "Fathi Muhammad Shalahuddin"
+//       },
+//       "mapel": {
+//           "id": 164,
+//           "nama_mapel": "Network Administration 5"
+//       }
+//   },
+//   {
+//       "id": 1026,
+//       "tanggal": "2024-08-29",
+//       "mapel_id": 165,
+//       "kelas_id": 5,
+//       "teacher_id": 8,
+//       "jam_ke": 8,
+//       "materi": null,
+//       "semester": 5,
+//       "ta_id": 3,
+//       "createdAt": "2024-08-28T17:06:00.000Z",
+//       "updatedAt": "2024-08-28T17:06:00.000Z",
+//       "kelas": {
+//           "id": 5,
+//           "nama_kelas": "XII Teknik Komputer dan Jaringan"
+//       },
+//       "teacher": {
+//           "id": 8,
+//           "nama_guru": "Raihan Kamal Ibrahim, Amd.Kom"
+//       },
+//       "mapel": {
+//           "id": 165,
+//           "nama_mapel": "Server Administration 5"
+//       }
+//   },
+//   {
+//       "id": 1027,
+//       "tanggal": "2024-08-29",
+//       "mapel_id": 103,
+//       "kelas_id": 2,
+//       "teacher_id": 13,
+//       "jam_ke": 5,
+//       "materi": null,
+//       "semester": 3,
+//       "ta_id": 3,
+//       "createdAt": "2024-08-28T17:06:00.000Z",
+//       "updatedAt": "2024-08-28T17:06:00.000Z",
+//       "kelas": {
+//           "id": 2,
+//           "nama_kelas": "XI Rekayasa Perangkat Lunak"
+//       },
+//       "teacher": {
+//           "id": 13,
+//           "nama_guru": "Rizqi Faturrakhman"
+//       },
+//       "mapel": {
+//           "id": 103,
+//           "nama_mapel": "Mobile Develoment 3"
+//       }
+//   },
+//   {
+//       "id": 1028,
+//       "tanggal": "2024-08-29",
+//       "mapel_id": 105,
+//       "kelas_id": 3,
+//       "teacher_id": 8,
+//       "jam_ke": 5,
+//       "materi": null,
+//       "semester": 3,
+//       "ta_id": 3,
+//       "createdAt": "2024-08-28T17:06:00.000Z",
+//       "updatedAt": "2024-08-28T17:06:00.000Z",
+//       "kelas": {
+//           "id": 3,
+//           "nama_kelas": "XI Teknik Komputer dan Jaringan"
+//       },
+//       "teacher": {
+//           "id": 8,
+//           "nama_guru": "Raihan Kamal Ibrahim, Amd.Kom"
+//       },
+//       "mapel": {
+//           "id": 105,
+//           "nama_mapel": "Server Administration 3"
+//       }
+//   },
+//   {
+//       "id": 1029,
+//       "tanggal": "2024-08-29",
+//       "mapel_id": 161,
+//       "kelas_id": 4,
+//       "teacher_id": 5,
+//       "jam_ke": 5,
+//       "materi": "Integrasi Apache Kafka di NestJS sebagai Consumer",
+//       "semester": 5,
+//       "ta_id": 3,
+//       "createdAt": "2024-08-28T17:06:00.000Z",
+//       "updatedAt": "2024-09-01T14:01:28.000Z",
+//       "kelas": {
+//           "id": 4,
+//           "nama_kelas": "XII Rekayasa Perangkat Lunak"
+//       },
+//       "teacher": {
+//           "id": 5,
+//           "nama_guru": "Ihsan Santana Wibawa, S.Pd"
+//       },
+//       "mapel": {
+//           "id": 161,
+//           "nama_mapel": "Backend Development 5"
+//       }
+//   },
+//   {
+//       "id": 1030,
+//       "tanggal": "2024-08-29",
+//       "mapel_id": 164,
+//       "kelas_id": 5,
+//       "teacher_id": 4,
+//       "jam_ke": 5,
+//       "materi": null,
+//       "semester": 5,
+//       "ta_id": 3,
+//       "createdAt": "2024-08-28T17:06:00.000Z",
+//       "updatedAt": "2024-08-28T17:06:00.000Z",
+//       "kelas": {
+//           "id": 5,
+//           "nama_kelas": "XII Teknik Komputer dan Jaringan"
+//       },
+//       "teacher": {
+//           "id": 4,
+//           "nama_guru": "Fathi Muhammad Shalahuddin"
+//       },
+//       "mapel": {
+//           "id": 164,
+//           "nama_mapel": "Network Administration 5"
+//       }
+//   },
+//   {
+//       "id": 1031,
+//       "tanggal": "2024-08-29",
+//       "mapel_id": 103,
+//       "kelas_id": 2,
+//       "teacher_id": 13,
+//       "jam_ke": 6,
+//       "materi": null,
+//       "semester": 3,
+//       "ta_id": 3,
+//       "createdAt": "2024-08-28T17:06:00.000Z",
+//       "updatedAt": "2024-08-28T17:06:00.000Z",
+//       "kelas": {
+//           "id": 2,
+//           "nama_kelas": "XI Rekayasa Perangkat Lunak"
+//       },
+//       "teacher": {
+//           "id": 13,
+//           "nama_guru": "Rizqi Faturrakhman"
+//       },
+//       "mapel": {
+//           "id": 103,
+//           "nama_mapel": "Mobile Develoment 3"
+//       }
+//   },
+//   {
+//       "id": 1032,
+//       "tanggal": "2024-08-29",
+//       "mapel_id": 105,
+//       "kelas_id": 3,
+//       "teacher_id": 8,
+//       "jam_ke": 6,
+//       "materi": null,
+//       "semester": 3,
+//       "ta_id": 3,
+//       "createdAt": "2024-08-28T17:06:00.000Z",
+//       "updatedAt": "2024-08-28T17:06:00.000Z",
+//       "kelas": {
+//           "id": 3,
+//           "nama_kelas": "XI Teknik Komputer dan Jaringan"
+//       },
+//       "teacher": {
+//           "id": 8,
+//           "nama_guru": "Raihan Kamal Ibrahim, Amd.Kom"
+//       },
+//       "mapel": {
+//           "id": 105,
+//           "nama_mapel": "Server Administration 3"
+//       }
+//   },
+//   {
+//       "id": 1033,
+//       "tanggal": "2024-08-29",
+//       "mapel_id": 161,
+//       "kelas_id": 4,
+//       "teacher_id": 5,
+//       "jam_ke": 6,
+//       "materi": "Mengerjakan Project",
+//       "semester": 5,
+//       "ta_id": 3,
+//       "createdAt": "2024-08-28T17:06:00.000Z",
+//       "updatedAt": "2024-09-01T14:01:28.000Z",
+//       "kelas": {
+//           "id": 4,
+//           "nama_kelas": "XII Rekayasa Perangkat Lunak"
+//       },
+//       "teacher": {
+//           "id": 5,
+//           "nama_guru": "Ihsan Santana Wibawa, S.Pd"
+//       },
+//       "mapel": {
+//           "id": 161,
+//           "nama_mapel": "Backend Development 5"
+//       }
+//   },
+//   {
+//       "id": 1034,
+//       "tanggal": "2024-08-29",
+//       "mapel_id": 164,
+//       "kelas_id": 5,
+//       "teacher_id": 4,
+//       "jam_ke": 6,
+//       "materi": null,
+//       "semester": 5,
+//       "ta_id": 3,
+//       "createdAt": "2024-08-28T17:06:00.000Z",
+//       "updatedAt": "2024-08-28T17:06:00.000Z",
+//       "kelas": {
+//           "id": 5,
+//           "nama_kelas": "XII Teknik Komputer dan Jaringan"
+//       },
+//       "teacher": {
+//           "id": 4,
+//           "nama_guru": "Fathi Muhammad Shalahuddin"
+//       },
+//       "mapel": {
+//           "id": 164,
+//           "nama_mapel": "Network Administration 5"
+//       }
+//   },
+//   {
+//       "id": 1035,
+//       "tanggal": "2024-08-29",
+//       "mapel_id": 161,
+//       "kelas_id": 4,
+//       "teacher_id": 5,
+//       "jam_ke": 7,
+//       "materi": "Mengerjakan Project",
+//       "semester": 5,
+//       "ta_id": 3,
+//       "createdAt": "2024-08-28T17:06:00.000Z",
+//       "updatedAt": "2024-09-01T14:01:28.000Z",
+//       "kelas": {
+//           "id": 4,
+//           "nama_kelas": "XII Rekayasa Perangkat Lunak"
+//       },
+//       "teacher": {
+//           "id": 5,
+//           "nama_guru": "Ihsan Santana Wibawa, S.Pd"
+//       },
+//       "mapel": {
+//           "id": 161,
+//           "nama_mapel": "Backend Development 5"
+//       }
+//   },
+//   {
+//       "id": 1036,
+//       "tanggal": "2024-08-29",
+//       "mapel_id": 161,
+//       "kelas_id": 4,
+//       "teacher_id": 5,
+//       "jam_ke": 8,
+//       "materi": "Mengerjakan Project",
+//       "semester": 5,
+//       "ta_id": 3,
+//       "createdAt": "2024-08-28T17:06:00.000Z",
+//       "updatedAt": "2024-09-01T14:01:28.000Z",
+//       "kelas": {
+//           "id": 4,
+//           "nama_kelas": "XII Rekayasa Perangkat Lunak"
+//       },
+//       "teacher": {
+//           "id": 5,
+//           "nama_guru": "Ihsan Santana Wibawa, S.Pd"
+//       },
+//       "mapel": {
+//           "id": 161,
+//           "nama_mapel": "Backend Development 5"
+//       }
+//   }
+// ]
+
+// bagaimana membuat function untuk merubah obejct dalam aray dengan format sebagai berikut dengan nama_kelas sebagai gruping di atas menjadi
+
+// [
+//   {
+//     "nama_kelas" :
+//     "jam_ke_1" : {
+//       "mater" : ,
+//       "nama_guru" : ,
+//     },
+//     "jam_ke_2" : {
+//       "mater" : ,
+//       "nama_guru" : ,
+//     } ,
+//     "jam_ke_3" : {
+//       "mater" : ,
+//       "nama_guru" : ,
+//     }
+
+//     sampai jam ke 8
+
+//   }
+// ]

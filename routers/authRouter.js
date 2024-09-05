@@ -6,6 +6,7 @@ const jwtValidateMiddleware = require("../middleware/jwtValidateMiddleware");
 const { loginValidation, registerValidation } = require("../validator/auth");
 const ppdbController = require("../controllers/ppdb/AuthController");
 
+
 authRouter.post(
   "/login",
   loginValidation,
@@ -19,6 +20,7 @@ authRouter.post(
   loginValidation,
   ppdbController.login
 );
+
 
 authRouter.post("/register", registerValidation, authController.register);
 
