@@ -16,7 +16,7 @@ const {
   createPembayaran,
   getDetailPembayaran,
   listPembayaran,
-} = require("../../controllers/ppdb/pembayaranController");
+} = require("../../controllers/ppdb/pembayaranPpdbController")
 
 const validation = [
   check("nama_siswa")

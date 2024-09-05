@@ -14,7 +14,7 @@ const { Op } = require("sequelize");
 const axios = require("axios");
 const { tanggal } = require("../../utils/tanggal");
 const crypto = require("crypto");
-const Midtrans = require("midtrans-client");
+
 require("dotenv").config();
 
 let snap = new midtrans.Snap({

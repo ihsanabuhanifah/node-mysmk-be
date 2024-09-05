@@ -145,7 +145,7 @@ const { ListPembayaran, createKartuSpp, updateAprroval } = require("../../contro
 
 
 const {
-  listPenilaianByTeacher,
+
   remidial,
   refreshCount,
   getSoal,
@@ -155,11 +155,6 @@ const {
   listNotificationExam
 } = require("../../controllers/Guru/NilaiController");
 
-
-const {
-  getListWali,
-  createBulkWali,
-} = require("../../controllers/Guru/WaliController");
 const { listReport, generateReport } = require("../../controllers/Guru/RaportController");
 
 guru.use(guruAccessMiddleware);
