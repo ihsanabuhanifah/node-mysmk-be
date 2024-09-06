@@ -9,6 +9,10 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       informasi_calon_santri.belongsTo(models.user, { foreignKey: "user_id" });
+      informasi_calon_santri.belongsTo(models.ta, {
+        as: "tahun_ajaran",
+        foreignKey: "ta_id",
+      });
     }
   }
   informasi_calon_santri.init(
@@ -36,6 +40,8 @@ module.exports = (sequelize, DataTypes) => {
       akte: DataTypes.STRING,
       skb: DataTypes.STRING,
       surat_pernyataan: DataTypes.STRING,
+      ta_id: DataTypes.INTEGER,
+      exam: DataTypes.TEXT,
     },
     {
       sequelize,

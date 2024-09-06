@@ -166,10 +166,6 @@ const {
 } = require("../../controllers/Guru/NilaiController");
 
 const {
-  getListWali,
-  createBulkWali,
-} = require("../../controllers/Guru/WaliController");
-const {
   listReport,
   generateReport,
 } = require("../../controllers/Guru/RaportController");

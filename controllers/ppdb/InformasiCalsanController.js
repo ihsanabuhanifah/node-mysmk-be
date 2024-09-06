@@ -1,4 +1,5 @@
 const info_calsan = require("../../models").informasi_calon_santri;
+const models = require("../../models");
 
 const createInfoCalsan = async (req, res) => {
   try {
@@ -24,9 +25,12 @@ const createInfoCalsan = async (req, res) => {
       ijazah,
       akte,
       skb,
+      ta_id = 4,
+      exam,
     } = req.body;
 
     const user_id = req.id;
+    const examJson = JSON.stringify(exam);
 
     const newInfoCalsan = await info_calsan.create({
       user_id,
@@ -51,6 +55,8 @@ const createInfoCalsan = async (req, res) => {
       ijazah,
       akte,
       skb,
+      ta_id,
+      exam: examJson,
     });
 
     console.log(user_id);
@@ -94,6 +100,7 @@ const updateInfoCalsan = async (req, res) => {
       akte,
       skb,
       surat_pernyataan,
+      exam,
     } = req.body;
 
     const user_id = req.id;
@@ -139,6 +146,7 @@ const updateInfoCalsan = async (req, res) => {
     if (skb !== undefined) fieldsToUpdate.skb = skb;
     if (surat_pernyataan !== undefined)
       fieldsToUpdate.surat_pernyataan = surat_pernyataan;
+    if (exam !== undefined) fieldsToUpdate.exam = JSON.stringify(exam);
 
     if (Object.keys(fieldsToUpdate).length > 0) {
       await info_calsan.update(fieldsToUpdate, {
@@ -169,20 +177,36 @@ const getDetailCalsan = async (req, res) => {
     const user_id = req.id;
     console.log(`user_id:`, req.id);
 
-    const detail = await info_calsan.findOne({
+    const detail = await info_calsan.findAll({
       where: { user_id },
+      include: [
+        {
+          model: models.ta,
+          require: true,
+          as: "tahun_ajaran",
+          attributes: ["id", "nama_tahun_ajaran"],
+        },
+      ],
+      order: [["id", "ASC"]],
     });
 
-    if (!detail) {
+    if (!detail || detail.length === 0) {
       return res.status(404).json({
         status: "fail",
         msg: "Data tidak ditemukan",
       });
     }
 
+    const parsedDetail = detail.map((entry) => {
+      return {
+        ...entry.toJSON(),
+        exam: entry.exam ? JSON.parse(entry.exam) : null,
+      };
+    });
+
     res.status(200).send({
       status: "success",
-      data: detail,
+      data: parsedDetail,
     });
   } catch (error) {
     console.log(error);

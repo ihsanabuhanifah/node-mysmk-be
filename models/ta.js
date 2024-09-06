@@ -49,6 +49,10 @@ module.exports = (sequelize, DataTypes) => {
         as: "hasil_belajar",
         foreignKey: "kelas_id",
       });
+      ta.hasMany(models.informasi_calon_santri, {
+        foreignKey: "ta_id",
+        as: "tahun_ajaran",
+      });
     }
   }
   ta.init(

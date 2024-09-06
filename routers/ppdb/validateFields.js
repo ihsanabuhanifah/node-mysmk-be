@@ -21,7 +21,8 @@ const validFields = [
   "ijazah",
   "akte",
   "skb",
-  "surat_pernyataan"
+  "surat_pernyataan",
+  "exam",
 ];
 
 const validateFields = (req, res, next) => {
