@@ -134,13 +134,14 @@ const detailLaporanPkl = response.requestResponse(async (req, res) => {
   };
 });
 
+const formatDate = (date) => {
+  return dayjs(date).format('DD MMMM YYYY');
+};
+
 const downloadPdf = async (req, res) => {
   const { bulan, tahun } = req.query;
-  console.log("tahun", tahun);
-  console.log("bulan", bulan);
 
   try {
-    console.log("Memulai proses pembuatan PDF...");
     const reportBulanan = await LaporanHarianPklModel.findAll({
       where: {
         student_id: req.student_id,
@@ -164,33 +165,59 @@ const downloadPdf = async (req, res) => {
 
     doc.pipe(res);
 
-    doc
-      .image("path/to/logo.png", 50, 45, { width: 50 }) // Ubah path ke logo sesuai dengan direktori Anda
-      .fontSize(20)
-      .text("Nama Instansi", 110, 57)
-      .fontSize(10)
-      .text("Alamat Instansi", 110, 80)
-      .text("Telepon: 123-456-7890", 110, 95)
-      .moveDown();
+    // Kop Surat
+    doc.image("assets/kop surat laporan pkl santri api.png", {
+        fit: [500, 150],
+        align: 'center',
+        valign: 'top'
+      })
+      .moveDown(2);
 
-    doc.moveDown();
-
+    // Judul dan Bulan/Tahun
     doc.fontSize(20).text("Laporan PKL Bulanan", { align: "center" });
     doc.moveDown();
     doc
       .fontSize(14)
-      .text(`Bulan: ${bulan} Tahun: ${tahun}`, { align: "center" });
+      .text(`Bulan: ${dayjs(new Date(tahun, bulan - 1)).format('MMMM')} Tahun: ${tahun}`, { align: "center" });
     doc.moveDown(2);
 
-    const tableTop = 200;
+    const tableTop = 250;
     const itemNameX = 50;
-    const itemJudulX = 200;
-    const itemIsiX = 300;
+    const itemJudulX = 150;
+    const itemIsiX = 350;
+    const itemCreatedAtX = 450;
 
     doc.fontSize(10);
     doc.text("No.", itemNameX, tableTop, { bold: true });
     doc.text("Hari", itemJudulX, tableTop, { bold: true });
     doc.text("Judul Kegiatan", itemIsiX, tableTop, { bold: true });
+    doc.text("Tanggal Dibuat", itemCreatedAtX, tableTop, { bold: true });
+
+    // Membuat border untuk tabel
+    const tableWidth = 500;
+    const rowHeight = 20;
+    const colWidths = [itemJudulX - itemNameX, itemIsiX - itemJudulX, itemCreatedAtX - itemIsiX];
+
+    const drawTableBorders = (startX, startY, colWidths, rowCount, rowHeight) => {
+      doc.lineJoin('miter')
+         .rect(startX, startY, tableWidth, rowHeight * rowCount)
+         .stroke();
+      
+      // Vertical lines
+      colWidths.reduce((x, width) => {
+        doc.moveTo(x, startY)
+           .lineTo(x, startY + rowHeight * rowCount)
+           .stroke();
+        return x + width;
+      }, startX);
+
+      // Horizontal lines
+      for (let i = 1; i <= rowCount; i++) {
+        doc.moveTo(startX, startY + rowHeight * i)
+           .lineTo(startX + tableWidth, startY + rowHeight * i)
+           .stroke();
+      }
+    };
 
     let position = tableTop + 20;
 
@@ -198,17 +225,20 @@ const downloadPdf = async (req, res) => {
       doc.text(`${index + 1}`, itemNameX, position);
       doc.text(`Hari ${index + 1}`, itemJudulX, position);
       doc.text(`${report.judul_kegiatan}`, itemIsiX, position);
+      doc.text(formatDate(report.created_at), itemCreatedAtX, position);
 
-      position += 20; // Menambah jarak baris
+      position += rowHeight;
     });
 
+    drawTableBorders(itemNameX, tableTop, colWidths, reportBulanan.length + 1, rowHeight);
+
     doc.end();
-    console.log("PDF berhasil dibuat dan dikirim");
   } catch (error) {
     console.error("Terjadi kesalahan:", error);
     res.status(500).json({ msg: "Terjadi kesalahan pada server" });
   }
 };
+
 
 module.exports = {
   createLaporanPkl,

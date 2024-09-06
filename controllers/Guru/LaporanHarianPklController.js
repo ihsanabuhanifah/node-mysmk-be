@@ -5,6 +5,7 @@ const { Op } = require("sequelize");
 const { checkQuery } = require("../../utils/format");
 const StudentModel = require("../../models").student;
 const TempatPklModel = require("../../models").tempat_pkl;
+const laporanDiniyyahModel = require("../../models").laporan_diniyyah_harian;
 
 const laporanPklList = response.requestResponse(async (req, res) => {
   const {
@@ -111,6 +112,11 @@ const detailLaporanPkl = response.requestResponse(async (req, res) => {
         as: "siswa",
         model: StudentModel,
         attributes: ["id", "nama_siswa"],
+      },
+      {
+        require: true,
+        as: "laporan_diniyyah_harian",
+        model: laporanDiniyyahModel,
       },
     ],
   });
