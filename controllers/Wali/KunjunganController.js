@@ -12,31 +12,32 @@ async function buatIzin(req, res) {
     payload.status_approval = "menunggu";
     await KunjunganModel.create(payload);
 
-    const urlAPI = process.env.URL_WA;
-    const token = process.env.WA_TOKEN;
-    const pesan = `⚠ *SMK MQ NOTIF* ⚠
-    
-    Bismillah, ada wali santri yang mengisi data Tiket Kunjungan berikut data detailnya:
-    Nama santri : Fullan
-    Kelas : XII RPL
-    Jenis : Kunjungan
-    Tanggal Kunjungan : 31-02-2025
-    Kepentinggan : Mengantar Obat
-    
-    Untuk data lebih lengkapnya & menyetujuinya silahkan buka website https://mysmk.smkmadinatulquran.sch.id/`;
+        const urlAPI = process.env.URL_WA;
+        const token = process.env.TOKEN_WA;
+        const nomer = process.env.GROUP_WA;
+        const pesan = `*SMK MQ NOTIF PERMINTAAN KUNJUNGAN*
 
-    const data = {
-      "phone": 120363225259421052,
-      "message": pesan,
-      "isGroup": true
-    };
+Bismillah, ada wali santri yang mengisi data Tiket Kunjungan berikut data detailnya:
+Nama santri : ${req.nama_siswa}
+Tanggal Kunjungan : ${payload.tanggal}
+Kepentinggan : ${payload.kepentingan}
 
-    const response = await axios.post(urlAPI, data, {
-      headers: {
-        'Authorization': token,
-        'Content-Type': 'application/json'
-      }
-    });
+Untuk mengkonfirmasi silahkan buka website https://mysmk.smkmadinatulquran.sch.id/guru/perizinan-kunjungan`;
+
+        const dt = {
+          "phone": nomer,
+          "message": pesan,
+          "isGroup": true
+        };
+
+        console.log(dt);
+
+        const response = await axios.post(urlAPI, dt, {
+          headers: {
+            'Authorization': token,
+            'Content-Type': 'application/json'
+          }
+        });
 
     return res.json({
       status: "Success",
