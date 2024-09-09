@@ -101,6 +101,7 @@ const updateInfoCalsan = async (req, res) => {
       skb,
       surat_pernyataan,
       exam,
+      ta_id
     } = req.body;
 
     const user_id = req.id;
@@ -148,6 +149,8 @@ const updateInfoCalsan = async (req, res) => {
       fieldsToUpdate.surat_pernyataan = surat_pernyataan;
     if (exam !== undefined) fieldsToUpdate.exam = JSON.stringify(exam);
 
+    if (ta_id !== undefined)
+      fieldsToUpdate.ta_id = ta_id;
     if (Object.keys(fieldsToUpdate).length > 0) {
       await info_calsan.update(fieldsToUpdate, {
         where: { id },
@@ -177,7 +180,7 @@ const getDetailCalsan = async (req, res) => {
     const user_id = req.id;
     console.log(`user_id:`, req.id);
 
-    const detail = await info_calsan.findAll({
+    const detail = await info_calsan.findOne({
       where: { user_id },
       include: [
         {
@@ -190,19 +193,17 @@ const getDetailCalsan = async (req, res) => {
       order: [["id", "ASC"]],
     });
 
-    if (!detail || detail.length === 0) {
+    if (!detail) {
       return res.status(404).json({
         status: "fail",
         msg: "Data tidak ditemukan",
       });
     }
 
-    const parsedDetail = detail.map((entry) => {
-      return {
-        ...entry.toJSON(),
-        exam: entry.exam ? JSON.parse(entry.exam) : null,
-      };
-    });
+    const parsedDetail = {
+      ...detail.toJSON(),
+      exam: detail.exam ? JSON.parse(detail.exam) : null,
+    };
 
     res.status(200).send({
       status: "success",
@@ -216,6 +217,7 @@ const getDetailCalsan = async (req, res) => {
     });
   }
 };
+
 
 const detailCalsan = async (req, res) => {
   try {

@@ -23,6 +23,7 @@ const validFields = [
   "skb",
   "surat_pernyataan",
   "exam",
+  "ta_id"
 ];
 
 const validateFields = (req, res, next) => {
