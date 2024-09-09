@@ -31,11 +31,7 @@ module.exports = (sequelize, DataTypes) => {
     foto: DataTypes.STRING,
     status: DataTypes.STRING,
     bulan: DataTypes.STRING,
-    tahun: DataTypes.STRING,
-    nominal: DataTypes.DECIMAL(10, 2),
-    tanggal_konfirmasi: DataTypes.DATE,
-    teacher_id: DataTypes.INTEGER,
-    no_telepon: DataTypes.STRING
+    tahun: DataTypes.STRING
   }, {
     sequelize,
     modelName: 'pembayaran_spp',

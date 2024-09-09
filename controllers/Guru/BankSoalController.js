@@ -84,7 +84,6 @@ const listSoal = async (req, res) => {
       ],
       limit: pageSize,
       offset: page,
-      order :[['id', 'desc']]
     });
     return res.json({
       status: "Success",

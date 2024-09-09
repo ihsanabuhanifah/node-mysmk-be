@@ -20,6 +20,7 @@ const {
   rekapAgenda,
   listJadwalAll,
   createJadwal,
+  agendaHarian,
 } = require("../../controllers/Guru/AbsensiController");
 const {
   listHalaqoh,
@@ -132,7 +133,6 @@ const {
   updateUjian,
   deleteUjian,
   createPenilaian,
-  AnalisislUjian,
 } = require("../../controllers/Guru/UjianController");
 const {
   createKehadiran,
@@ -156,12 +156,12 @@ const {
 } = require("../../controllers/Wali/PembayaranController");
 
 const {
-  listPenilaianByTeacher,
   remidial,
   refreshCount,
   getSoal,
   updateLastExam,
   submitExamResult,
+  listPenilaianByTeacher,
   listNotificationExam,
 } = require("../../controllers/Guru/NilaiController");
 
@@ -197,6 +197,8 @@ guru.get("/absensi/guru-belum-absen", guruBelumAbsen);
 guru.get("/absensi/rekap", rekapAbsensi);
 guru.get("/absensi/rekap/download", downloadExcelrekapAbsensi);
 guru.get("/agenda/rekap", rekapAgenda);
+
+guru.get("/agenda/harian", agendaHarian);
 
 guru.get("/jadwal/list", listJadwal);
 guru.get("/jadwal/list-all", listJadwalAll);
@@ -285,7 +287,6 @@ guru.post("/bank-soal/delete", deleteSoal);
 guru.post("/ujian/create", createUjian);
 guru.get("/ujian/list", listUjian);
 guru.get("/ujian/detail/:id", detailUjian);
-guru.get("/ujian/analisa/:id", AnalisislUjian);
 guru.put("/ujian/update/:id", updateUjian);
 guru.delete("/ujian/delete/:id", deleteUjian);
 guru.post("/nilai/create", createPenilaian);
@@ -321,15 +322,7 @@ guru.post(
 // Laporan harian pkl
 guru.get("/laporan-harian-pkl/list", laporanPklList);
 guru.get("/laporan-harian-pkl/detail/:id", detailLaporanPkl);
-
 guru.get("/walisantri/list", getListWali);
-guru.put("/walisantri/update/:id", updateWali);
-guru.get("/walisantri/detail/:id", detailWali);
 guru.post("/walisantri/create", createBulkWali);
-
-// Pembayaran
-guru.get("/pembayaran/list", ListPembayaran);
-guru.post("/pembayaran/createKartu", createKartuSpp);
-guru.put("/pembayaran/persetujuan/:id", updateAprroval);
 
 module.exports = guru;

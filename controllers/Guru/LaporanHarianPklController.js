@@ -19,7 +19,9 @@ const laporanPklList = response.requestResponse(async (req, res) => {
       ...(checkQuery(dariTanggal) && {
         tanggal: { [Op.between]: [dariTanggal, sampaiTanggal] },
       }),
-      status: status_kehadiran,
+      ...(checkQuery(status_kehadiran) && {
+        status : status_kehadiran
+      })
     },
     order: [["tanggal", "desc"]],
     limit: pageSize,
@@ -48,6 +50,7 @@ const laporanPklList = response.requestResponse(async (req, res) => {
     pageSize: pageSize,
   };
 });
+
 const laporanPklListForPembimbing = response.requestResponse(
   async (req, res) => {
     const tempatPklRecords = await tempat_pkl.findAll({
@@ -94,29 +97,30 @@ const laporanPklListForPembimbing = response.requestResponse(
     };
   }
 );
+
 const detailLaporanPkl = response.requestResponse(async (req, res) => {
-  const { id } = req.params;
-  const laporanPkl = await LaporanHarianPklModel.findOne({
-    where: {
-      id: id,
-    },
-    include: [
-      {
-        require: true,
-        as: "siswa",
-        model: StudentModel,
-        attributes: ["id", "nama_siswa"],
+    const { id } = req.params;
+    const laporanPkl = await LaporanHarianPklModel.findOne({
+      where: {
+        id: id,
       },
-    ],
+      include: [
+        {
+          require: true,
+          as: "siswa",
+          model: StudentModel,
+          attributes : ['id', 'nama_siswa']
+        },
+      ],
+    });
+    return {
+      message: `Berhasil menemukan data dengan id ${id}`,
+      data: laporanPkl,
+    };
   });
-  return {
-    message: `Berhasil menemukan data dengan id ${id}`,
-    data: laporanPkl,
-  };
-});
 
 module.exports = {
   laporanPklList,
   detailLaporanPkl,
-  laporanPklListForPembimbing,
+  laporanPklListForPembimbing
 };

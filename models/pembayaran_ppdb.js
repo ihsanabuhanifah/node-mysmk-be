@@ -14,6 +14,7 @@ module.exports = (sequelize, DataTypes) => {
         as: "guru",
         foreignKey: "teacher_id",
       });
+      
     }
   }
   pembayaran_ppdb.init(
