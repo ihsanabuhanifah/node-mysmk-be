@@ -169,6 +169,11 @@ const {
   listReport,
   generateReport,
 } = require("../../controllers/Guru/RaportController");
+const {
+  updatePembayaranPpdb,
+  listPembayaran,
+  konfirmasiPembayaran,
+} = require("../../controllers/Guru/PembayaranPpdbController");
 
 guru.use(guruAccessMiddleware);
 
@@ -324,5 +329,10 @@ guru.get("/laporan-harian-pkl/list", laporanPklList);
 guru.get("/laporan-harian-pkl/detail/:id", detailLaporanPkl);
 guru.get("/walisantri/list", getListWali);
 guru.post("/walisantri/create", createBulkWali);
+
+//Pembayaran ppdb
+guru.put("/pembayaran-ppdb/update/:id", updatePembayaranPpdb);
+guru.get("/pembayaran-ppdb/list", listPembayaran);
+guru.put("/pembayaran-ppdb/konfirmasi/:id", konfirmasiPembayaran);
 
 module.exports = guru;
