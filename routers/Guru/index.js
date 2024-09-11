@@ -90,6 +90,8 @@ const {
 const {
   laporanPklList,
   detailLaporanPkl,
+  downloadLaporanBulanan,
+  downloadPdf,
 } = require("../../controllers/Guru/LaporanHarianPklController");
 
 //jadwal
@@ -147,12 +149,22 @@ const {
   submitByAdmin,
 } = require("../../controllers/Guru/KehadiranGuruController");
 const adminAccessMiddleware = require("../../middleware/adminAccessMiddleware");
-const { getListWali, updateWali, detailWali, createBulkWali } = require("../../controllers/Guru/WaliController");
-const { ListPembayaran, createKartuSpp, detailPembayaran, daftarSiswa, detailPembayaranSiswa, createNotification, updateResponse, createPesan } = require("../../controllers/Wali/PembayaranController");
-
-
-
-
+const {
+  getListWali,
+  updateWali,
+  detailWali,
+  createBulkWali,
+} = require("../../controllers/Guru/WaliController");
+const {
+  ListPembayaran,
+  createKartuSpp,
+  detailPembayaran,
+  daftarSiswa,
+  detailPembayaranSiswa,
+  createNotification,
+  updateResponse,
+  createPesan,
+} = require("../../controllers/Wali/PembayaranController");
 
 const {
   remidial,
@@ -336,6 +348,11 @@ guru.get("/laporan-harian-pkl/detail/:id", detailLaporanPkl);
 guru.get("/walisantri/list", getListWali);
 guru.put("/walisantri/update/:id", updateWali);
 guru.get("/walisantri/detail/:id", detailWali);
+guru.get("/laporan-harian-pkl/downdload-pdf/:studentId", downloadPdf);
+guru.get(
+  "/laporan-harian-pkl/downdload-pdf-bulanan/:studentId",
+  downloadLaporanBulanan
+);
 
 // Pembayaran
 guru.get("/pembayaran/list", ListPembayaran);
@@ -349,8 +366,6 @@ guru.get("/siswa/listPembayaran/:student_id", detailPembayaranSiswa);
 
 // Notification
 guru.post("/pesan/create", createNotification);
-
-
 
 //Pembayaran PPDB
 guru.put("/pembayaran-ppdb/update/:id", updatePembayaranPpdb);

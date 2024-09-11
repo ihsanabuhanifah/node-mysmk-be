@@ -3,7 +3,7 @@
 /storage/*.key
 /vendor
 /public
-/assets
+
 
 .env
 .env.prod
