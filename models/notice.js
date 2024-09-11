@@ -18,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
     tanggal_pengumuman: DataTypes.DATE,
     gambar_notice: DataTypes.STRING,
     isi_notice: DataTypes.TEXT,
-    file_notice: DataTypes.STRING
+    file_notice: DataTypes.STRING,
   }, {
     sequelize,
     modelName: 'notice',
