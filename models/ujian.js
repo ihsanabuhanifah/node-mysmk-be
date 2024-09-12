@@ -45,6 +45,8 @@ module.exports = (sequelize, DataTypes) => {
     status: DataTypes.STRING,
     student_access: DataTypes.TEXT,
     durasi:DataTypes.INTEGER,
+    urutan : DataTypes.INTEGER,
+    is_hirarki : DataTypes.INTEGER
     
   }, {
     sequelize,

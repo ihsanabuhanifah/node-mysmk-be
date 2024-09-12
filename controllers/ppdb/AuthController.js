@@ -2,78 +2,149 @@ const userModel = require("../../models").user;
 const models = require("../../models");
 const userRoleModel = require("../../models").user_role;
 const RolesModel = require("../../models").role;
-const ParentModel = require("../../models").parent;
-const TeacherModel = require("../../models").teacher;
-const StudentModel = require("../../models").student;
-const TokenModel = require("../../models").token_reset_password;
-const { sequalize } = require("../../models");
 const bcrypt = require("bcryptjs");
 const JWT = require("jsonwebtoken");
 const { Op, where } = require("sequelize");
 const { QueryTypes } = require("sequelize");
 const dotenv = require("dotenv");
 dotenv.config();
-const crypto = require("crypto");
 
 async function register(req, res) {
   const payload = req.body;
   const { email, secretKey, no_hp } = payload;
-
-  if (process.env.SECRET_KEY_REGISTER_SUPER_ADMIN !== secretKey) {
-    return res.status(422).json({
-      status: "Fail",
-      msg: "Secret Key Salah, Anda tidak bisa mendaftar sebagai Super Admin",
-    });
-  }
   payload.password = await bcrypt.hashSync(req.body.password, 10);
-  console.log(payload);
+  console.log(`user:`, payload);
 
   try {
-    await userModel.create(payload);
-    const user = await userModel.findOne({
-      where: {
-        email: email,
-      },
-      attributes: ["id", "name", "email", "no_hp"],
+    const existingUserByEmail = await userModel.findOne({
+      where: { email: email },
     });
 
-    const userRole = await userRoleModel.create({
-      userId: user.id,
-      roleId: 1,
-    });
-
-    const verify = bcrypt.compareSync(password, user.password);
-    if (!verify) {
-      return res.status(422).json({
+    if (existingUserByEmail) {
+      return res.status(400).json({
         status: "fail",
-        msg: "Email dan Pasword tidak sama",
+        msg: "Email sudah terdaftar",
       });
     }
-    const myRoles = await RolesModel.findByPk(userRole.id);
+
+    const existingUserByNoHp = await userModel.findOne({
+      where: { no_hp: no_hp },
+    });
+
+    if (existingUserByNoHp) {
+      return res.status(400).json({
+        status: "fail",
+        msg: "No HP sudah terdaftar",
+      });
+    }
+
+    const newUser = await userModel.create(payload);
+
+    await userRoleModel.create({
+      user_id: newUser.id,
+      role_id: 11, 
+    });
+
+    console.log(`User created and role assigned`);
+    return res.status(201).json({
+      status: "Success",
+      msg: "Registrasi Berhasil",
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      status: "fail",
+      msg: "Terjadi Kesalahan",
+    });
+  }
+}
+
+async function login(req, res) {
+  try {
+    let { email, no_hp, password } = req.body;
+
+    if (!email && !no_hp) {
+      return res.status(400).json({
+        status: "fail",
+        msg: "Email atau no HP harus disediakan",
+      });
+    }
+
+    console.log("email :", email);
+    console.log("no hp :", no_hp);
+
+    const user = await userModel.findOne({
+      where: {
+        [Op.or]: [email && { email: email }, no_hp && { no_hp: no_hp }].filter(
+          Boolean
+        ),
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        status: "fail",
+        msg: "User tidak ditemukan",
+      });
+    }
+
+    const isPasswordValid = bcrypt.compareSync(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(422).json({
+        status: "fail",
+        msg: "Password tidak sesuai",
+      });
+    }
+    const userRole = await userRoleModel.findOne({
+      where: { user_id: user.id },
+      include: {
+        model: RolesModel,
+        as: "role",
+        attributes: ["role_name"],
+      },
+    });
+    const roleName =
+      userRole && userRole.role
+        ? userRole.role.role_name
+        : "Role tidak ditemukan";
+
+    console.log(`role:`, roleName);
 
     const token = JWT.sign(
       {
         email: user.email,
         name: user.name,
+        no_hp: user.no_hp,
         id: user.id,
-        role: myRoles.roleName,
+        role: roleName,
       },
       process.env.JWT_SECRET_ACCESS_TOKEN,
-      {
-        expiresIn: "7d",
-      }
+      { expiresIn: "7d" }
     );
-    return res.status(201).json({
-      status: "Success",
-      msg: "Registrasi Berhasil",
-      user: user,
-      role: myRoles.roleName,
+
+    const response = {
+      status: "success",
+      msg: "Berhasil Login",
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        no_hp: user.no_hp,
+        role: roleName,
+      },
       token: token,
-    });
-  } catch(err) {
+    };
+
+    return res.status(200).json(response);
+  } catch (err) {
     console.log(err);
+    return res.status(500).json({
+      status: "fail",
+      msg: "Terjadi Kesalahan",
+    });
   }
 }
 module.exports = {
-  register
+  register,
+  login,
 };

@@ -27,19 +27,6 @@ const listRaport = response.requestResponse(async (req, res) => {
 
     include: [
       {
-        model: models.teacher,
-        require: true,
-        as: "teacher",
-        attributes: ["id", "nama_guru"],
-        where: {
-          ...(checkQuery(nama_guru) && {
-            nama_guru: {
-              [Op.substring]: nama_guru,
-            },
-          }),
-        },
-      },
-      {
         model: models.mapel,
         require: true,
         as: "mapel",

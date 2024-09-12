@@ -4,15 +4,24 @@ const response = new RESPONSE_API();
 const { Op } = require("sequelize");
 const { checkQuery } = require("../../utils/format");
 const StudentModel = require("../../models").student;
-const TempatPklModel = require("../../models").tempat_pkl;
 
 const laporanPklList = response.requestResponse(async (req, res) => {
-  const { page, pageSize, dariTanggal, sampaiTanggal, nama_siswa } = req.query;
+  const {
+    page,
+    pageSize,
+    dariTanggal,
+    sampaiTanggal,
+    nama_siswa,
+    status_kehadiran,
+  } = req.query;
   const { count, rows } = await LaporanHarianPklModel.findAndCountAll({
     where: {
       ...(checkQuery(dariTanggal) && {
         tanggal: { [Op.between]: [dariTanggal, sampaiTanggal] },
       }),
+      ...(checkQuery(status_kehadiran) && {
+        status : status_kehadiran
+      })
     },
     order: [["tanggal", "desc"]],
     limit: pageSize,
@@ -90,25 +99,25 @@ const laporanPklListForPembimbing = response.requestResponse(
 );
 
 const detailLaporanPkl = response.requestResponse(async (req, res) => {
-  const { id } = req.params;
-  const laporanPkl = await LaporanHarianPklModel.findOne({
-    where: {
-      id: id,
-    },
-    include: [
-      {
-        require: true,
-        as: "siswa",
-        model: StudentModel,
-        attributes: ["id", "nama_siswa"],
+    const { id } = req.params;
+    const laporanPkl = await LaporanHarianPklModel.findOne({
+      where: {
+        id: id,
       },
-    ],
+      include: [
+        {
+          require: true,
+          as: "siswa",
+          model: StudentModel,
+          attributes : ['id', 'nama_siswa']
+        },
+      ],
+    });
+    return {
+      message: `Berhasil menemukan data dengan id ${id}`,
+      data: laporanPkl,
+    };
   });
-  return {
-    message: `Berhasil menemukan data dengan id ${id}`,
-    data: laporanPkl,
-  };
-});
 
 module.exports = {
   laporanPklList,
