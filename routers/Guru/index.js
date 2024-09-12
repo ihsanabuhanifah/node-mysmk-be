@@ -87,7 +87,13 @@ const {
 } = require("../../controllers/Guru/TempatPklController");
 
 // Laporan harian pkl
-const { laporanPklList, detailLaporanPkl } = require("../../controllers/Guru/LaporanHarianPklController")
+const {
+  laporanPklList,
+  detailLaporanPkl,
+  downloadLaporanBulanan,
+  downloadPdf,
+} = require("../../controllers/Guru/LaporanHarianPklController");
+
 
 //jadwal
 
@@ -140,8 +146,20 @@ const {
   submitByAdmin,
 } = require("../../controllers/Guru/KehadiranGuruController");
 const adminAccessMiddleware = require("../../middleware/adminAccessMiddleware");
+
+const {
+  ListPembayaran,
+  createKartuSpp,
+  detailPembayaran,
+  daftarSiswa,
+  detailPembayaranSiswa,
+  createNotification,
+  updateResponse,
+  createPesan,
+} = require("../../controllers/Wali/PembayaranController");
+
 const { getListWali, createBulkWali, updateWali, detailWali } = require("../../controllers/Guru/WaliController");
-const { ListPembayaran, createKartuSpp, updateAprroval } = require("../../controllers/Wali/PembayaranController");
+
 
 
 const {
@@ -311,7 +329,33 @@ guru.post(
 guru.get("/laporan-harian-pkl/list", laporanPklList);
 guru.get("/laporan-harian-pkl/detail/:id", detailLaporanPkl);
 guru.get("/walisantri/list", getListWali);
+
+guru.put("/walisantri/update/:id", updateWali);
+guru.get("/walisantri/detail/:id", detailWali);
+guru.get("/laporan-harian-pkl/downdload-pdf/:studentId", downloadPdf);
+guru.get(
+  "/laporan-harian-pkl/downdload-pdf-bulanan/:studentId",
+  downloadLaporanBulanan
+);
+
+// Pembayaran
+guru.get("/pembayaran/list", ListPembayaran);
+guru.post("/pembayaran/createKartu", createKartuSpp);
+guru.get("/pembayaran/detail/:id", detailPembayaran);
+guru.put("/pembayaran/update", updateResponse);
+
+// siswa
+guru.get("/siswa/daftarSpp", daftarSiswa);
+guru.get("/siswa/listPembayaran/:student_id", detailPembayaranSiswa);
+
+// Notification
+guru.post("/pesan/create", createNotification);
+
+//Pembayaran PPDB
+guru.put("/pembayaran-ppdb/update/:id", updatePembayaranPpdb);
+guru.get("/pembayaran-ppdb/list", listPembayaran);
 guru.post("/walisantri/create", createBulkWali);
+
 
 
 module.exports = guru;
