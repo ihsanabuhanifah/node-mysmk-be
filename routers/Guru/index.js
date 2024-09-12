@@ -4,6 +4,7 @@ const guruAccessMiddleware = require("../../middleware/guruAccessMiddleware");
 const { upload } = require("../../middleware/uploadNoticeMiddleware");
 const guru = express.Router();
 const excelUpload = require("../../middleware/multerExcelMiddleware");
+
 const {
   getRole,
   saveToken,
@@ -75,24 +76,7 @@ const {
 } = require("../../controllers/Guru/LaporanController");
 //absensi
 
-//Tempat Pkl
 
-const {
-  createTempatPkl,
-  updateTempatPkl,
-  deteleTempatPkl,
-  detailTempatPkl,
-  listTempatPkl,
-  createBulkExcel,
-} = require("../../controllers/Guru/TempatPklController");
-
-// Laporan harian pkl
-const {
-  laporanPklList,
-  detailLaporanPkl,
-  downloadLaporanBulanan,
-  downloadPdf,
-} = require("../../controllers/Guru/LaporanHarianPklController");
 
 //jadwal
 
@@ -328,31 +312,11 @@ guru.get("/nilai/soal/teacher/:id", getSoal);
 guru.get("/report/list", listReport);
 guru.post("/report/generate", generateReport);
 
-//tempat_pkl
-guru.post("/tempat-pkl/create", createTempatPkl);
-guru.put("/tempat-pkl/update/:id", updateTempatPkl);
-guru.delete("/tempat-pkl/delete/:id", deteleTempatPkl);
-guru.get("/tempat-pkl/detail/:id", detailTempatPkl);
-guru.get("/tempat-pkl/list", listTempatPkl);
-guru.post(
-  "/tempat-pkl/createBulk",
-  excelUpload.single("file"),
-  createBulkExcel
-);
+
 
 // Walisantri
 
-// Laporan harian pkl
-guru.get("/laporan-harian-pkl/list", laporanPklList);
-guru.get("/laporan-harian-pkl/detail/:id", detailLaporanPkl);
-guru.get("/walisantri/list", getListWali);
-guru.put("/walisantri/update/:id", updateWali);
-guru.get("/walisantri/detail/:id", detailWali);
-guru.get("/laporan-harian-pkl/downdload-pdf/:studentId", downloadPdf);
-guru.get(
-  "/laporan-harian-pkl/downdload-pdf-bulanan/:studentId",
-  downloadLaporanBulanan
-);
+
 
 // Pembayaran
 guru.get("/pembayaran/list", ListPembayaran);
