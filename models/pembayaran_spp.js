@@ -11,55 +11,27 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      pembayaran_spp.belongsTo(models.student, {
-        as: "murid",
-        foreignKey: "student_id",
+      pembayaran_spp.belongsTo(models.user, {
+        as: "user",
+        foreignKey: "user_id",
       }
       );
       pembayaran_spp.belongsTo(models.parent, {
-        as: "walsan",
+        as: "parent",
         foreignKey: "walsan_id"
-      },
-      
+      }
 
       );
-
-      pembayaran_spp.belongsTo(models.ta, {
-        as: "ta",
-        foreignKey: "ta_id"
-      },
-      
-      
-
-      );
-
-      pembayaran_spp.belongsTo(models.teacher, {
-        as: "guru",
-        foreignKey: "teacher_id"
-      },
-      
-      
-
-      )
     }
   }
   pembayaran_spp.init({
-    student_id: DataTypes.INTEGER,
+    user_id: DataTypes.INTEGER,
     walsan_id: DataTypes.INTEGER,
-    ta_id: DataTypes.INTEGER,
     tanggal: DataTypes.DATE,
     foto: DataTypes.STRING,
-    status: DataTypes.ENUM("Sudah", "Belum"),
+    status: DataTypes.STRING,
     bulan: DataTypes.STRING,
-    tahun: DataTypes.STRING,
-    nominal: DataTypes.DECIMAL(10, 2),
-    tanggal_konfirmasi: DataTypes.DATE,
-    teacher_id: DataTypes.INTEGER,
-    no_telepon: DataTypes.STRING,
-    token_bayar: DataTypes.STRING,
-    keterangan: DataTypes.STRING,
-    transaksi_id: DataTypes.STRING,
-    status_midtrans: DataTypes.STRING
+    tahun: DataTypes.STRING
   }, {
     sequelize,
     modelName: 'pembayaran_spp',

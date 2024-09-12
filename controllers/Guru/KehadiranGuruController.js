@@ -245,7 +245,3 @@ async function createKehadiran(req, res) {
 }
 
 module.exports = { listKehadiran, createKehadiran, submitDatang, submitPulang, submitIzin, submitByAdmin };
-
-
-
-  

@@ -7,6 +7,7 @@ const StudentModel = require("../../models").student;
 const TempatPklModel = require("../../models").tempat_pkl;
 const laporanDiniyyahModel = require("../../models").laporan_diniyyah_harian;
 
+
 const laporanPklList = response.requestResponse(async (req, res) => {
   const {
     page,
@@ -101,18 +102,12 @@ const laporanPklListForPembimbing = response.requestResponse(
 );
 
 const detailLaporanPkl = response.requestResponse(async (req, res) => {
-  const { id } = req.params;
-  const laporanPkl = await LaporanHarianPklModel.findOne({
-    where: {
-      id: id,
-    },
-    include: [
-      {
-        require: true,
-        as: "siswa",
-        model: StudentModel,
-        attributes: ["id", "nama_siswa"],
+    const { id } = req.params;
+    const laporanPkl = await LaporanHarianPklModel.findOne({
+      where: {
+        id: id,
       },
+
       {
         require: true,
         as: "laporan_diniyyah_harian",
@@ -168,6 +163,21 @@ const downloadPdf = async (req, res) => {
         valign: "top",
       })
       .moveDown(12);
+      include: [
+        {
+          require: true,
+          as: "siswa",
+          model: StudentModel,
+          attributes : ['id', 'nama_siswa']
+        },
+      ],
+    });
+    return {
+      message: `Berhasil menemukan data dengan id ${id}`,
+      data: laporanPkl,
+    };
+  });
+
 
     // Judul dan Bulan/Tahun
     doc
@@ -539,7 +549,9 @@ const downloadLaporanBulanan = async (req, res) => {
 module.exports = {
   laporanPklList,
   detailLaporanPkl,
+
   laporanPklListForPembimbing,
   downloadLaporanBulanan,
   downloadPdf,
+
 };
