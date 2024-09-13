@@ -20,6 +20,7 @@ const {
   rekapAgenda,
   listJadwalAll,
   createJadwal,
+  agendaHarian,
 } = require("../../controllers/Guru/AbsensiController");
 const {
   listHalaqoh,
@@ -86,11 +87,14 @@ const {
 } = require("../../controllers/Guru/TempatPklController");
 
 // Laporan harian pkl
+
 const {
   laporanPklList,
   detailLaporanPkl,
   laporanPklListForPembimbing,
 } = require("../../controllers/Guru/LaporanHarianPklController");
+
+
 
 //jadwal
 
@@ -106,8 +110,6 @@ const {
   createSiswaKelas,
   detailSiswa,
   updateSiswa,
-  getHasilBelajar,
-  detailHasilBelajar,
 } = require("../../controllers/Guru/SiswaController");
 const {
   listHalaqohGroup,
@@ -151,6 +153,7 @@ const { getListWali, updateWali, detailWali, createBulkWali } = require("../../c
 const { ListPembayaran, createKartuSpp, detailPembayaran, daftarSiswa, detailPembayaranSiswa, createNotification, updateResponse } = require("../../controllers/Wali/PembayaranController");
 
 const {
+
   remidial,
   refreshCount,
   getSoal,
@@ -165,6 +168,7 @@ const {
   generateReport,
 } = require("../../controllers/Guru/RaportController");
 
+ 
 guru.use(guruAccessMiddleware);
 
 //absensi kehadairan
@@ -192,6 +196,8 @@ guru.get("/absensi/guru-belum-absen", guruBelumAbsen);
 guru.get("/absensi/rekap", rekapAbsensi);
 guru.get("/absensi/rekap/download", downloadExcelrekapAbsensi);
 guru.get("/agenda/rekap", rekapAgenda);
+
+guru.get("/agenda/harian", agendaHarian);
 
 guru.get("/jadwal/list", listJadwal);
 guru.get("/jadwal/list-all", listJadwalAll);
@@ -254,9 +260,6 @@ guru.put("/siswa/update/:id", updateSiswa);
 guru.put("/siswa/kelas/delete/:id", deleteSiswaKelas);
 guru.post("/siswa/kelas/create", createSiswaKelas);
 guru.delete("/siswa/kelas/delete/:id", deleteSiswaKelas);
-// task rizky
-guru.get("/siswa/hasil-belajar/:id", getHasilBelajar);
-guru.get("/siswa/detail-hasil-belajar/:id/:id_siswa", detailHasilBelajar);
 
 //list
 
@@ -318,6 +321,7 @@ guru.post(
 
 // Walisantri
 
+
 // Laporan harian pkl
 guru.get("/laporan-harian-pkl/list", laporanPklList);
 guru.get("/laporan-harian-pkl/detail/:id", detailLaporanPkl);
@@ -344,9 +348,11 @@ guru.get("/laporan-harian-pkl/list", laporanPklList);
 guru.get("/laporan-harian-pkl/detail/:id", detailLaporanPkl);
 guru.get("/laporan-harian-pkl/list/pembimbing", laporanPklListForPembimbing);
 
+
 guru.get("/walisantri/list", getListWali);
 guru.post("/walisantri/create", createBulkWali);
 guru.get("/laporan-harian-pkl/list", laporanPklList)
 guru.get("/laporan-harian-pkl/detail/:id", detailLaporanPkl)
+
 
 module.exports = guru;

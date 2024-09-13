@@ -1,10 +1,7 @@
 const PembayaranController = require("../../models").pembayaran_spp;
 const models = require("../../models");
 const pembayaranModel = require("../../models").pembayaran_spp;
-const cron = require("node-cron");
 const midtrans = require("midtrans-client");
-const { format, parse, eachMonthOfInterval } = require("date-fns");
-const { param } = require("express-validator");
 const { checkQuery } = require("../../utils/format");
 const userModel = require("../../models").user;
 const notificationModel = require("../../models").notification;
@@ -14,7 +11,8 @@ const { Op } = require("sequelize");
 const axios = require("axios");
 const { tanggal } = require("../../utils/tanggal");
 const crypto = require("crypto");
-const Midtrans = require("midtrans-client");
+
+
 require("dotenv").config();
 
 let snap = new midtrans.Snap({
@@ -196,6 +194,8 @@ const ListPembayaran = async (req, res) => {
       ke_bulan,
       tahun,
       bulan,
+      nama_tahun_ajaran,
+      status,
     } = req.query;
 
     let Result = {};
@@ -257,6 +257,11 @@ const ListPembayaran = async (req, res) => {
         [Op.substring]: tahun,
       };
     }
+    if (status) {
+      Result.status = {
+        [Op.like]: status,
+      };
+    }
 
     const list = await PembayaranController.findAndCountAll({
       limit: pageSize,
@@ -285,6 +290,13 @@ const ListPembayaran = async (req, res) => {
           require: true,
           as: "ta",
           attributes: ["id", "nama_tahun_ajaran"],
+          where: {
+            ...(checkQuery(nama_tahun_ajaran) && {
+              nama_tahun_ajaran: {
+                [Op.substring]: nama_tahun_ajaran,
+              },
+            }),
+          },
         },
         {
           model: models.teacher,
@@ -372,54 +384,66 @@ async function createPembayaranOtomatis(req, res) {
     return res.status(400).json({ error: "ID parameter is required" });
   }
 
-  const timestamp = new Date();
+  try {
+    const timestamp = Date.now();
 
-  const user = await userModel.findOne({
-    where: {
-      id: req.id,
-    },
-  });
+    const user = await userModel.findOne({
+      where: {
+        id: req.id,
+      },
+    });
 
-  if (!user) {
-    return res.status(404).json({ error: "User not found" });
-  }
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
 
-  const dataUpdate = await PembayaranController.findOne({
-    where: {
-      id: id,
-    },
-  });
+    const dataUpdate = await PembayaranController.findOne({
+      where: {
+        id: id,
+      },
+    });
 
-  if (!dataUpdate) {
-    return res.status(404).json({ error: "Pembayaran not found" });
-  }
+    if (!dataUpdate) {
+      return res.status(404).json({ error: "Pembayaran not found" });
+    }
 
-  const walsan = await parentModel.findOne({
-    where: {
-      id: req.walsan_id,
-    },
-  });
+    const walsan = await parentModel.findOne({
+      where: {
+        id: req.walsan_id,
+      },
+    });
 
-  if (!walsan) {
-    return res.status(404).json({ error: "Walsan not found" });
-  }
+    if (!walsan) {
+      return res.status(404).json({ error: "Walsan not found" });
+    }
 
-  let transaksi_id = `SPP${walsan.id}`;
+    let transaksi_id = `SPP${user.id}${walsan.id}${timestamp}`;
 
-  let parameter = {
-    transaction_details: {
-      order_id: transaksi_id,
-      gross_amount: dataUpdate.nominal,
-    },
-    credit_card: {
-      secure: true,
-    },
-    customer_details: {
-      email: user.email,
-      first_name: walsan.nama_wali,
-      last_name: "MQ",
-      phone: `+62${walsan.no_hp}`,
-      biling_address: {
+    let parameter = {
+      transaction_details: {
+        order_id: transaksi_id,
+        gross_amount: dataUpdate.nominal,
+      },
+      credit_card: {
+        secure: true,
+      },
+      customer_details: {
+        email: user.email,
+        first_name: walsan.nama_wali,
+        last_name: "MQ",
+        phone: `+62${walsan.no_hp}`,
+        biling_address: {
+          first_name: walsan.nama_wali,
+          last_name: "MQ",
+          email: user.email,
+          phone: walsan.no_hp,
+          address: "Desa Singasari",
+          city: "Bogor",
+          postal_code: "16830",
+          country_code: "IDN",
+        },
+      },
+      shipping_address: {
         first_name: walsan.nama_wali,
         last_name: "MQ",
         email: user.email,
@@ -429,60 +453,47 @@ async function createPembayaranOtomatis(req, res) {
         postal_code: "16830",
         country_code: "IDN",
       },
-    },
-    shipping_address: {
-      first_name: walsan.nama_wali,
-      last_name: "MQ",
-      email: user.email,
-      phone: walsan.no_hp,
-      address: "Desa Singasari",
-      city: "Bogor",
-      postal_code: "16830",
-      country_code: "IDN",
-    },
-    item_details: [
-      {
-        id: dataUpdate.id,
-        price: dataUpdate.nominal,
-        quantity: 1,
-        name: `SPP Bulan ${dataUpdate.bulan}`,
-      },
-    ],
-  };
-
-  snap
-    .createTransaction(parameter)
-    .then((transaksi) => {
-      let tokenTransaksi = transaksi.token;
-      console.log("Transaksi Token: ", tokenTransaksi);
-
-      PembayaranController.update(
+      item_details: [
         {
-          walsan_id: req.walsan_id,
-          no_telepon: walsan.no_hp,
-          token_bayar: tokenTransaksi,
-          transaksi_id: transaksi_id,
+          id: dataUpdate.id,
+          price: dataUpdate.nominal,
+          quantity: 1,
+          name: `SPP Bulan ${dataUpdate.bulan}`,
         },
-        {
-          where: {
-            id: id,
-          },
-        }
-      );
+      ],
+    };
 
-      return res.status(201).json({
-        status: "Success",
-        msg: "Berhail Membayar SPP",
-        token: tokenTransaksi,
-        data: dataUpdate,
-      });
-    })
-    .catch((error) => {
-      console.error("Error Dalam Transaksi:", error);
-      res.json({
-        msg: "Terjadi Kesalahan",
-      });
+    // Log after transaction creation
+    console.log("Transaction created successfully, updating database...");
+
+    const transaksi = await snap.createTransaction(parameter);
+    let tokenTransaksi = transaksi.token;
+
+    console.log("Database updated successfully.");
+
+    const pembayaran = await PembayaranController.update(
+      {
+        walsan_id: req.walsan_id,
+        no_telepon: walsan.no_hp,
+        token_bayar: tokenTransaksi,
+        transaksi_id: transaksi_id,
+      },
+      {
+        where: {
+          id: id,
+        },
+      }
+    );
+
+    return res.status(201).json({
+      status: "Success",
+      msg: "Berhasil Membayar SPP",
+      data: dataUpdate,
     });
+  } catch (error) {
+    console.log("Error Log:", error);
+    return res.status(403).send("Terjadi Kesalahan");
+  }
 }
 
 // const updateStatusDariMidtrans = async (transaction_id, data) => {
@@ -500,49 +511,134 @@ async function createPembayaranOtomatis(req, res) {
 //   let fraudStatus = data.fraud_status;
 // }
 
+// async function createNotifPembayaran(req, res) {
+//   const data = req.body;
+
+//   const { order_id, transaction_status, fraud_status } = data;
+
+//   await snap.transaction.notification(data).then((responStatus) => {
+//     let orderId = responStatus.order_id;
+//     let transactionStatus = responStatus.transaction_status;
+//     let fraudStatus = responStatus.fraud_status;
+
+//     console.log(
+//       `Transaction notification received. Order ID: ${orderId}. Transaction status: ${transactionStatus}. Fraud status: ${fraudStatus}`
+//     );
+
+//     const pembayaran = pembayaranModel.findOne({
+//       where: {
+//         transaksi_id: order_id,
+//       },
+//     });
+
+//     let updateData = {};
+
+//     if (transactionStatus == "capture") {
+//       if (fraudStatus == "accept") {
+//         updateData.status = "Sudah";
+//       }
+//     } else if (transactionStatus == "settlement") {
+     
+
+//       updateData.status = "Sudah";
+//     } else if (
+//       transactionStatus == "cancel" ||
+//       transactionStatus == "deny" ||
+//       transactionStatus == "expire"
+//     ) {
+//       updateData.status = "Belum";
+//     } else if (transactionStatus == "pending") {
+//       updateData.status = "Belum";
+//     }
+
+//     pembayaran.update(updateData);
+//   });
+
+//   return res.status(201).json({
+//     status: "Success",
+//     msg: "Berhasil Mengirim Notif Pembayaran",
+//   });
+// }
+
 async function createNotifPembayaran(req, res) {
-  const data = req.body;
+  try {
+    const data = req.body;
 
-  // pembayaranModel.detailPembayaran({id_transaksi: data.order_id}).then((
-  //   transaksi
-  //  ) => {
-  //   if (transaksi) {
-  //     if (transactionStatus == 'capture'){
-  //       if (fraudStatus == 'accept'){
-  //               PembayaranController.update()
-  //             }
-  //         } else if (transactionStatus == 'settlement'){
-  //             // TODO set transaction status on your database to 'success'
-  //             // and response with 200 OK
-  //         } else if (transactionStatus == 'cancel' ||
-  //           transactionStatus == 'deny' ||
-  //           transactionStatus == 'expire'){
-  //           // TODO set transaction status on your database to 'failure'
-  //           // and response with 200 OK
-  //         } else if (transactionStatus == 'pending'){
-  //           // TODO set transaction status on your database to 'pending' / waiting payment
-  //           // and response with 200 OK
-  //         }
-  //   }
-  // })
+    console.log("Incoming Data:", data);
 
-  // console.log("Isi Data:", data);
+    const { order_id, transaction_status, fraud_status } = data;
 
+    // Try to fetch the notification from Midtrans and log the status
+    const responStatus = await snap.transaction.notification(data);
 
+    let orderId = responStatus.order_id;
+    let transactionStatus = responStatus.transaction_status;
+    let fraudStatus = responStatus.fraud_status;
 
-  snap.transaction.notification(data).then((statusResponse) => {
-    let IdOrder = statusResponse.order_id;
-    let transactionStatus = statusResponse.transaction_status;
-    let fraudStatus = statusResponse.fraud_status;
+    console.log(
+      `Transaction notification received. Order ID: ${orderId}. Transaction status: ${transactionStatus}. Fraud status: ${fraudStatus}`
+    );
 
-    console.log(`Transaction notification received. Order ID: ${orderId}. Transaction status: ${transactionStatus}. Fraud status: ${fraudStatus}`);
-  })
+    // Find the pembayaran entry in the database
+    const pembayaran = await pembayaranModel.findOne({
+      where: {
+        transaksi_id: orderId,
+      },
+    });
 
-  return res.status(201).json({
-    status: "Success",
-    msg: "Berhasil Mengirim Notif Pembayaran",
-  });
+    if (!pembayaran) {
+      console.error("Pembayaran not found for the given order_id:", orderId);
+      return res.status(404).json({ error: "Pembayaran not found" });
+    }
+
+    // Prepare the data for updating the pembayaran status
+    let updateData = {};
+
+    if (transactionStatus === "capture" && fraudStatus === "accept") {
+      updateData.status = "Sudah";
+    } else if (transactionStatus === "settlement") {
+      updateData.status = "Sudah";
+    } else if (
+      transactionStatus === "cancel" ||
+      transactionStatus === "deny" ||
+      transactionStatus === "expire"
+    ) {
+      updateData.status = "Belum";
+    } else if (transactionStatus === "pending") {
+      updateData.status = "Belum";
+    }
+
+    // Update the pembayaran entry
+    await pembayaran.update(updateData);
+
+    // Return a successful response
+    return res.status(201).json({
+      status: "Success",
+      msg: "Berhasil Mengirim Notif Pembayaran",
+    });
+  } catch (error) {
+    console.error("Error processing notification:", error);
+
+    // Log JWT errors specifically
+    if (error.name === "JsonWebTokenError") {
+      console.error("JWT Error:", error.message);
+      return res.status(401).json({
+        status: "fail",
+        message: "Invalid Token",
+        data: error,
+      });
+    }
+
+    // Handle other errors and send a 500 response
+    return res.status(500).json({
+      status: "fail",
+      message: "Internal Server Error",
+      error: error.message,
+    });
+  }
 }
+
+
 
 // Wablas
 
@@ -620,7 +716,6 @@ async function daftarSiswa(req, res) {
       where: {
         ...(checkQuery(angkatan) && {
           angkatan: { [Op.like]: angkatan },
-         
         }),
         ...(checkQuery(nama_siswa) && {
           nama_siswa: {
@@ -629,14 +724,14 @@ async function daftarSiswa(req, res) {
         }),
         ...(checkQuery(status) && {
           status: {
-            [Op.like] : status
-          }
+            [Op.like]: status,
+          },
         }),
         ...(checkQuery(tahun_ajaran) && {
           tahun_ajaran: {
-            [Op.like] : tahun_ajaran
-          }
-        })
+            [Op.like]: tahun_ajaran,
+          },
+        }),
       },
     });
 
@@ -644,6 +739,8 @@ async function daftarSiswa(req, res) {
       status: "Success",
       msg: "Berhasil Menampilkan Siswa",
       data: cari,
+      page,
+      pageSize,
     });
   } catch (error) {
     console.log(error);
@@ -712,16 +809,70 @@ async function updateResponse(req, res) {
     let berhasil = 0;
     let gagal = 0;
 
-    if (!Array.isArray(payload)) {
-      return res.status(400).json({
-        status: "Error",
-        msg: "Invalid payload format. Payload must be an array.",
-      });
-    }
-
     await Promise.all(
       payload.map(async (data) => {
+        const token = process.env.WABLAS_TOKEN;
+
+        const pembayaran = await pembayaranModel.findOne({
+          where: {
+            status: data.status,
+          },
+          include: [
+            {
+              model: models.parent,
+              require: true,
+              as: "walsan",
+              attributes: ["id", "nama_wali", "no_hp"],
+            },
+          ],
+        });
+
+        const hp = `62${pembayaran.walsan.no_hp}`;
+
+        if (pembayaran && pembayaran.walsan.no_hp) {
+          console.log("Phone number:", hp);
+          // Now use `phone` in your pesanData
+        }
+        const pesanData = {
+          phone: hp,
+          message:
+            "Assalamualaikum, Para Wali Santri, Terima Kasih Sudah Membayar SPP Sekolah Ke Pihak Guru. Jazzamukhairan Khasiran",
+        };
+
+        console.log(token);
+        console.log(data);
+
         try {
+          if (pembayaran && pembayaran.status === "Sudah") {
+            try {
+              const response = await axios.post(
+                "https://jogja.wablas.com/api/send-message",
+                pesanData,
+                {
+                  headers: {
+                    Authorization: token,
+                    "Content-Type": "application/json",
+                  },
+                }
+              );
+
+              // Check the response from the Wablas API
+              if (response.data.status && response.data.status === "success") {
+                console.log(`Message sent successfully to ${pesanData.phone}`);
+              } else {
+                console.error("Failed to send message:", response.data);
+                gagal += 1;
+                return;
+              }
+            } catch (error) {
+              console.error("Error sending notification:", error);
+              gagal += 1;
+              return;
+            }
+          } else {
+            return res.status(403).send("Terjadi Kesalahan");
+          }
+
           await pembayaranModel.update(
             {
               status: data.status,

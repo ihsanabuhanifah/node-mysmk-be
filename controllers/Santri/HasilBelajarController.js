@@ -53,6 +53,11 @@ const getHasilBelajar = async (req, res) => {
             nama_tahun_ajaran: ta_id,
           }),
         }
+        model: hasilBelajarModel,
+        require: true,
+        as: 'hasil_belajar',
+        where: { student_id: req.student_id }
+
       }
     ],
     order: [['createdAt', 'DESC']] 
@@ -89,6 +94,7 @@ const detailHasilBelajar = async (req, res) => {
         model: tahunAjaranModel,
         require: true,
         as: 'tahun_ajaran'
+
       }
     ]
   })
