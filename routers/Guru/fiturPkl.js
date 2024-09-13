@@ -35,9 +35,7 @@ guru.post(
 // Laporan harian pkl
 guru.get("/laporan-harian-pkl/list", laporanPklList);
 guru.get("/laporan-harian-pkl/detail/:id", detailLaporanPkl);
-guru.get("/walisantri/list", getListWali);
-guru.put("/walisantri/update/:id", updateWali);
-guru.get("/walisantri/detail/:id", detailWali);
+
 guru.get("/laporan-harian-pkl/downdload-pdf/:studentId", downloadPdf);
 guru.get(
   "/laporan-harian-pkl/downdload-pdf-bulanan/:studentId",

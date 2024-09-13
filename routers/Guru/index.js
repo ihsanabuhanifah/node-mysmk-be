@@ -76,8 +76,6 @@ const {
 } = require("../../controllers/Guru/LaporanController");
 //absensi
 
-
-
 //jadwal
 
 const {
@@ -312,11 +310,7 @@ guru.get("/nilai/soal/teacher/:id", getSoal);
 guru.get("/report/list", listReport);
 guru.post("/report/generate", generateReport);
 
-
-
 // Walisantri
-
-
 
 // Pembayaran
 guru.get("/pembayaran/list", ListPembayaran);
@@ -334,5 +328,7 @@ guru.post("/pesan/create", createNotification);
 //Pembayaran PPDB
 guru.put("/pembayaran-ppdb/update/:id", updatePembayaranPpdb);
 guru.get("/pembayaran-ppdb/list", listPembayaran);
-
+guru.get("/walisantri/list", getListWali);
+guru.put("/walisantri/update/:id", updateWali);
+guru.get("/walisantri/detail/:id", detailWali);
 module.exports = guru;

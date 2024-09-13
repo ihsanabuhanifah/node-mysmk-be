@@ -7,6 +7,7 @@ const identitasRouter = require("./indentitasRouter");
 const rolesRouter = require("./rolesRouter");
 const importRouter = require("./importRouter");
 const guruRouter = require("./Guru");
+const guruRouterPkl = require("./Guru/fiturPkl");
 const waliRouter = require("./Wali");
 const santriRouter = require("./Santri");
 const ppdbRouter = require("./ppdb");
@@ -35,5 +36,6 @@ router.use("/santri", santriRouter);
 router.use("/wali", waliRouter),
   router.use("/list", daftarRouter),
   router.use("/guru", guruRouter),
+  router.use("/guru", guruRouterPkl),
   router.use("/admin", adminRouter),
   (module.exports = router);
