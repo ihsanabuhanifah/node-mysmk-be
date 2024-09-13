@@ -5,6 +5,9 @@ const { Op } = require("sequelize");
 const { checkQuery } = require("../../utils/format");
 const StudentModel = require("../../models").student;
 const TempatPklModel = require("../../models").tempat_pkl;
+const laporanPklList = response.requestResponse(async (req, res) => {
+  const { page, pageSize, dariTanggal, sampaiTanggal, nama_siswa } = req.query;
+
 const laporanDiniyyahModel = require("../../models").laporan_diniyyah_harian;
 
 const laporanPklList = response.requestResponse(async (req, res) => {
@@ -16,6 +19,7 @@ const laporanPklList = response.requestResponse(async (req, res) => {
     nama_siswa,
     status_kehadiran,
   } = req.query;
+
   const { count, rows } = await LaporanHarianPklModel.findAndCountAll({
     where: {
       ...(checkQuery(dariTanggal) && {
@@ -24,6 +28,7 @@ const laporanPklList = response.requestResponse(async (req, res) => {
       ...(checkQuery(status_kehadiran) && {
         status: status_kehadiran,
       }),
+
     },
     order: [["tanggal", "desc"]],
     limit: pageSize,
@@ -118,6 +123,7 @@ const detailLaporanPkl = response.requestResponse(async (req, res) => {
         as: "laporan_diniyyah_harian",
         model: laporanDiniyyahModel,
       },
+
     ],
   });
   return {
@@ -125,6 +131,7 @@ const detailLaporanPkl = response.requestResponse(async (req, res) => {
     data: laporanPkl,
   };
 });
+
 const downloadPdf = async (req, res) => {
   const { bulan, tahun } = req.query;
   const { studentId } = req.params;
@@ -543,3 +550,4 @@ module.exports = {
   downloadLaporanBulanan,
   downloadPdf,
 };
+

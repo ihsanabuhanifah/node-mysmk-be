@@ -6,6 +6,29 @@ const { Op } = require("sequelize");
 const dayjs = require("dayjs");
 const response = new RESPONSE_API();
 
+
+const createLaporanDiniyyah = response.requestResponse(async (req, res) => {
+  let today = dayjs(new Date()).format("YYYY-MM-DD");
+
+  let payload = req.body;
+  const existingLaporan = await LaporanDiniyyahModel.findOne({
+    where: {
+      student_id: req.student_id,
+      tanggal: today,
+    },
+  });
+  if (existingLaporan) {
+    return {
+      statusCode: 400,
+      status: "fail",
+      message: "Anda hanya dapat membuat satu laporan diniyyah per hari.",
+    };
+  }
+  const laporanDiniyyahHarian = await LaporanDiniyyahModel.create({
+    ...payload,
+    student_id: req.student_id,
+    tanggal: today,
+
 const createLaporanDiniyyah = async (
   req,
   res,
@@ -18,6 +41,7 @@ const createLaporanDiniyyah = async (
     student_id: student_idParams,
     tanggal: dayjs(new Date()).format("YYYY-MM-DD"),
     laporan_harian_pkl_id: laporanPklId,
+
   });
   return {
     statusCode: 201,
@@ -25,7 +49,8 @@ const createLaporanDiniyyah = async (
     message: "Data Berhasil Diupload",
     data: laporanDiniyyahHarian,
   };
-};
+});
+
 const laporanDiniyyahList = response.requestResponse(async (req, res) => {
   const { page, pageSize, dariTanggal, sampaiTanggal } = req.query;
   const { count, rows } = await LaporanDiniyyahModel.findAndCountAll({

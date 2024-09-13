@@ -6,6 +6,31 @@ const laporanDiniyyahModel = require("../../models").laporan_diniyyah_harian;
 const { checkQuery } = require("../../utils/format");
 const { Op } = require("sequelize");
 const dayjs = require("dayjs");
+
+const { createLaporanDiniyyah } = require("./LaporanDiniyyahHarianController");
+const createLaporanPkl = response.requestResponse(async (req, res) => {
+  let payload = req.body;
+  let today = dayjs(new Date()).format("YYYY-MM-DD");
+  const existingLaporan = await LaporanHarianPklModel.findOne({
+    where: {
+      student_id: req.student_id,
+      tanggal: today,
+    },
+  });
+  if (existingLaporan) {
+    return {
+      statusCode: 400,
+      status: "fail",
+      message: "Anda hanya dapat membuat satu laporan per hari.",
+    };
+  }
+  const laporanHarianPkl = await LaporanHarianPklModel.create({
+    ...payload,
+    student_id: req.student_id,
+    tanggal: today,
+  });
+
+
 const PDFDocument = require("pdfkit");
 const fs = require("fs");
 const path = require("path");
@@ -31,10 +56,11 @@ const createLaporanPkl = response.requestResponse(async (req, res) => {
     statusCode: 201,
     status: "success",
     message: "Data Berhasil Diupload",
+
     data: {
       laporanHarianPkl,
       laporanDiniyyah: laporanDiniyyahResult,
-    },
+
   };
 });
 const updateLaporanPkl = response.requestResponse(async (req, res) => {
@@ -62,7 +88,6 @@ const updateLaporanPkl = response.requestResponse(async (req, res) => {
     data: req.body,
   };
 });
-// tes
 
 const laporanPklList = response.requestResponse(async (req, res) => {
   const { page, pageSize, dariTanggal, sampaiTanggal, status_kehadiran } =
@@ -73,9 +98,11 @@ const laporanPklList = response.requestResponse(async (req, res) => {
       ...(checkQuery(dariTanggal) && {
         tanggal: { [Op.between]: [dariTanggal, sampaiTanggal] },
       }),
+
       ...(checkQuery(status_kehadiran) && {
         status: status_kehadiran,
       }),
+
     },
     order: [["tanggal", "desc"]],
     limit: pageSize,
@@ -131,6 +158,7 @@ const detailLaporanPkl = response.requestResponse(async (req, res) => {
     data: laporanPkl,
   };
 });
+
 
 const downloadPdf = async (req, res) => {
   const { bulan, tahun } = req.query;
@@ -707,11 +735,13 @@ const downloadLaporanBulanan = async (req, res) => {
 //   }
 // };
 
+
 module.exports = {
   createLaporanPkl,
   updateLaporanPkl,
   laporanPklList,
   detailLaporanPkl,
+
   downloadPdf,
   downloadLaporanBulanan,
 };

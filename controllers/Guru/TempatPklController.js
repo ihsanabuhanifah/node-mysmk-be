@@ -5,6 +5,8 @@ const StudentModel = require("../../models").student;
 const TeacherModel = require("../../models").teacher;
 const response = new RESPONSE_API();
 const models = require("../../models");
+const readXlsxFile = require("read-excel-file/node");
+const fs = require("fs");
 
 const createTempatPkl = response.requestResponse(async (req, res) => {
   let payload = req.body;

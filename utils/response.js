@@ -4,7 +4,7 @@ class RESPONSE_API {
       try {
         const response = await handler(req, res, next);
 
-        console.log('res', response.statusCode)
+        console.log('res', response)
 
         if (response.statusCode === 422) {
           return res.status(422).json({
