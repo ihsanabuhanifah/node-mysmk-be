@@ -10,6 +10,7 @@ const guruRouter = require("./Guru");
 const guruRouterPkl = require("./Guru/fiturPkl");
 const waliRouter = require("./Wali");
 const santriRouter = require("./Santri");
+const santriRouterPkl = require("./Santri/fiturPkl");
 const ppdbRouter = require("./ppdb");
 const daftarRouter = require("./Daftar");
 const { hari, tanggal, jam } = require("../utils/tanggal");
@@ -33,6 +34,7 @@ router.use("/info", logRouter);
 router.use("/identitas", identitasRouter);
 router.use("/admin/roles", rolesRouter);
 router.use("/santri", santriRouter);
+router.use("/santri", santriRouterPkl);
 router.use("/wali", waliRouter),
   router.use("/list", daftarRouter),
   router.use("/guru", guruRouter),
