@@ -6,7 +6,6 @@ const { Op } = require("sequelize");
 const dayjs = require("dayjs");
 const response = new RESPONSE_API();
 
-
 const createLaporanDiniyyah = response.requestResponse(async (req, res) => {
   let today = dayjs(new Date()).format("YYYY-MM-DD");
 
@@ -28,20 +27,6 @@ const createLaporanDiniyyah = response.requestResponse(async (req, res) => {
     ...payload,
     student_id: req.student_id,
     tanggal: today,
-
-const createLaporanDiniyyah = async (
-  req,
-  res,
-  laporanPklId,
-  student_idParams
-) => {
-  let payload = req.body.laporanDiniyyah;
-  const laporanDiniyyahHarian = await LaporanDiniyyahModel.create({
-    ...payload,
-    student_id: student_idParams,
-    tanggal: dayjs(new Date()).format("YYYY-MM-DD"),
-    laporan_harian_pkl_id: laporanPklId,
-
   });
   return {
     statusCode: 201,
@@ -50,7 +35,6 @@ const createLaporanDiniyyah = async (
     data: laporanDiniyyahHarian,
   };
 });
-
 const laporanDiniyyahList = response.requestResponse(async (req, res) => {
   const { page, pageSize, dariTanggal, sampaiTanggal } = req.query;
   const { count, rows } = await LaporanDiniyyahModel.findAndCountAll({

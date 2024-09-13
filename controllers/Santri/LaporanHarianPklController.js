@@ -6,7 +6,10 @@ const laporanDiniyyahModel = require("../../models").laporan_diniyyah_harian;
 const { checkQuery } = require("../../utils/format");
 const { Op } = require("sequelize");
 const dayjs = require("dayjs");
-
+const PDFDocument = require("pdfkit");
+const fs = require("fs");
+const path = require("path");
+const { PDFDocument: PDFDoc, rgb, StandardFonts } = require('pdf-lib');
 const { createLaporanDiniyyah } = require("./LaporanDiniyyahHarianController");
 const createLaporanPkl = response.requestResponse(async (req, res) => {
   let payload = req.body;
@@ -30,37 +33,11 @@ const createLaporanPkl = response.requestResponse(async (req, res) => {
     tanggal: today,
   });
 
-
-const PDFDocument = require("pdfkit");
-const fs = require("fs");
-const path = require("path");
-const { PDFDocument: PDFDoc, rgb, StandardFonts } = require('pdf-lib');
-const { createLaporanDiniyyah } = require("./LaporanDiniyyahHarianController");
-const createLaporanPkl = response.requestResponse(async (req, res) => {
-  let { laporanDiniyyah, ...payload } = req.body;
-  const laporanHarianPkl = await LaporanHarianPklModel.create({
-    ...payload,
-    student_id: req.student_id,
-    tanggal: dayjs(new Date()).format("YYYY-MM-DD"),
-    is_absen: true,
-  });
-
-  const laporanDiniyyahResult = await createLaporanDiniyyah(
-    req,
-    res,
-    laporanHarianPkl.id,
-    req.student_id
-  );
-
   return {
     statusCode: 201,
     status: "success",
     message: "Data Berhasil Diupload",
-
-    data: {
-      laporanHarianPkl,
-      laporanDiniyyah: laporanDiniyyahResult,
-
+    data: laporanHarianPkl,
   };
 });
 const updateLaporanPkl = response.requestResponse(async (req, res) => {
@@ -88,6 +65,7 @@ const updateLaporanPkl = response.requestResponse(async (req, res) => {
     data: req.body,
   };
 });
+// tes
 
 const laporanPklList = response.requestResponse(async (req, res) => {
   const { page, pageSize, dariTanggal, sampaiTanggal, status_kehadiran } =
@@ -98,11 +76,9 @@ const laporanPklList = response.requestResponse(async (req, res) => {
       ...(checkQuery(dariTanggal) && {
         tanggal: { [Op.between]: [dariTanggal, sampaiTanggal] },
       }),
-
       ...(checkQuery(status_kehadiran) && {
         status: status_kehadiran,
       }),
-
     },
     order: [["tanggal", "desc"]],
     limit: pageSize,
@@ -158,7 +134,6 @@ const detailLaporanPkl = response.requestResponse(async (req, res) => {
     data: laporanPkl,
   };
 });
-
 
 const downloadPdf = async (req, res) => {
   const { bulan, tahun } = req.query;
@@ -735,13 +710,11 @@ const downloadLaporanBulanan = async (req, res) => {
 //   }
 // };
 
-
 module.exports = {
   createLaporanPkl,
   updateLaporanPkl,
   laporanPklList,
   detailLaporanPkl,
-
   downloadPdf,
   downloadLaporanBulanan,
 };

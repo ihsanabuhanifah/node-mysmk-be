@@ -9,6 +9,7 @@ const { RESPONSE_API } = require("../../utils/response");
 const {
   calculateMinutesDifference,
   calculateWaktuSelesai,
+  checkQuery,
 } = require("../../utils/format");
 const NilaiController = require("../../models").nilai;
 const BankSoalController = require("../../models").bank_soal;
