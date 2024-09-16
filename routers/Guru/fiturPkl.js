@@ -20,6 +20,7 @@ const {
   detailLaporanPkl,
   downloadLaporanBulanan,
   downloadPdf,
+  laporanPklListForPembimbing
 } = require("../../controllers/Guru/LaporanHarianPklController");
 //tempat_pkl
 guru.post("/tempat-pkl/create", createTempatPkl);
@@ -35,6 +36,7 @@ guru.post(
 // Laporan harian pkl
 guru.get("/laporan-harian-pkl/list", laporanPklList);
 guru.get("/laporan-harian-pkl/detail/:id", detailLaporanPkl);
+guru.get("/laporan-harian-pkl/list/pembimbing", laporanPklListForPembimbing);
 
 guru.get("/laporan-harian-pkl/downdload-pdf/:studentId", downloadPdf);
 guru.get(
