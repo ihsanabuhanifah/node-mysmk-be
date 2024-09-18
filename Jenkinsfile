@@ -24,7 +24,7 @@ stage('Deploy'){
 steps{
 echo 'deploying on another server'
 sh '''
-ssh -i /var/jenkins/home/.ssh/remotekey student@devopsgeming.online <<EOF
+ssh -i /var/jenkins_home/.ssh/remotekey student@devopsgeming.online <<EOF
 docker login -u rehan26 -p dckr_pat_OqA5ij3Deu8kOUlytCHFj_WnH1U
 cd ~/be-mysmk-tes
 docker compose up --build -d
