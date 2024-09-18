@@ -17,7 +17,8 @@ const submitExamResult = response.requestResponse(async (req, res) => {
       await NilaiController.update({
       
         exam_result: item.exam_result,
-        is_lulus : item.is_lulus
+        is_lulus : item.is_lulus,
+        status : item?.status,
       },{
         where : {
           id : item.id
