@@ -26,6 +26,8 @@ echo 'deploying on another server'
 sh '''
 ssh -i /root/.ssh/remotekey student@devopsgeming.online <<EOF
 sudo docker login -u rehan26 -p dckr_pat_OqA5ij3Deu8kOUlytCHFj_WnH1U
+cd ~/be-mysmk-tes
+docker compose up --build -d
 '''
      }
     }
