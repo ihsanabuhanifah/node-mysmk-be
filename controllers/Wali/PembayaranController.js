@@ -15,6 +15,7 @@ require("dotenv").config();
 let snap = new midtrans.Snap({
   isProduction: process.env.MIDTRANS_PRDOUCITON,
   serverKey: process.env.MIDTRANS_SERVER_KEY,
+  clientKey: process.env.MIDTRANS_CLIENT_KEY
 });
 
 const Monthmap = {
@@ -559,14 +560,9 @@ async function createPembayaranOtomatis(req, res) {
 
 async function createNotifPembayaran(req, res) {
   try {
-    const data = req.body;
-
-    console.log("Incoming Data:", data);
-
-    const { order_id, transaction_status, fraud_status } = data;
 
     // Try to fetch the notification from Midtrans and log the status
-    const responStatus = await snap.transaction.notification(data);
+    const responStatus = await snap.transaction.notification(req.body);
 
     let orderId = responStatus.order_id;
     let transactionStatus = responStatus.transaction_status;
@@ -624,6 +620,13 @@ async function createNotifPembayaran(req, res) {
         message: "Invalid Token",
         data: error,
       });
+    }
+
+    if (error.status === 404) {
+      return res.status(404).json({
+        status: "Failed",
+        message: "Error 404 Dari Midtrans"
+      })
     }
 
     // Handle other errors and send a 500 response
