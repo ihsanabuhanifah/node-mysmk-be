@@ -101,6 +101,6 @@ ppdb.get("/detail-calsan/:id", detailCalsan);
 
 //pembayaran
 ppdb.post("/pembayaran-ppdb", createPembayaran);
-ppdb.get("/pembayaran-ppdb/detail/:id", getDetailPembayaran);
+ppdb.get("/pembayaran-ppdb/detail", getDetailPembayaran);
 ppdb.get("/pembayaran-ppdb/list", listPembayaran);
 module.exports = ppdb;

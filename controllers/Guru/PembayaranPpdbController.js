@@ -72,10 +72,10 @@ const listPembayaran = async (req, res) => {
 };
 const konfirmasiPembayaran = async (req, res) => {
   try {
-    const user_id = req.id;
+    const { id } = req.params;
     const { status } = req.body;
 
-    const pembayaran = await pembayaranPpdb.findOne({ where: { user_id } });
+    const pembayaran = await pembayaranPpdb.findOne({ where: { id } });
 
     if (!pembayaran) {
       return res.status(404).json({
