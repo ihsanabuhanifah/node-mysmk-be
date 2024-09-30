@@ -211,11 +211,10 @@ const takeExam = response.requestResponse(async (req, res) => {
   const endTime = new Date(exam.ujian.waktu_selesai);
 
   if (
-    // (now >= startTime && now <= endTime) ||
-    // exam.ujian.tipe_ujian === "open" ||
-    // exam.status === "progress" ||
-    // exam.remidial_count === 1
-    true
+    (now >= startTime && now <= endTime) ||
+    exam.ujian.tipe_ujian === "open" ||
+    exam.status === "progress" ||
+    exam.remidial_count === 1
   ) {
     soal = soal.map((item) => {
       return {

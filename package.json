@@ -54,6 +54,7 @@
     "read-excel-file": "^5.2.25",
     "sequelize": "^6.37.3",
     "sequelize-cli": "^6.6.2",
+    "socket.io": "^4.7.5",
     "yup": "^0.32.11"
   },
   "devDependencies": {

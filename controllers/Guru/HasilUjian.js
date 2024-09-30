@@ -12,11 +12,9 @@ const listHasilUjain = async (req, res) => {
 
 	const { rows, count } = await nilaiModel.findAndCountAll({
 		where: {
-			student_id: req.student_id,
 			status: 'finish',
+      student_id: req.params.id
 		},
-		limit: pageSize,
-		offset: page,
 		include: [
 			{
 				model: mapelModel,
