@@ -27,6 +27,7 @@ const createInfoCalsan = async (req, res) => {
       skb,
       ta_id = 4,
       exam,
+      status_ujian,
     } = req.body;
 
     const user_id = req.id;
@@ -57,6 +58,7 @@ const createInfoCalsan = async (req, res) => {
       skb,
       ta_id,
       exam: examJson,
+      status_ujian,
     });
 
     console.log(user_id);
@@ -102,6 +104,7 @@ const updateInfoCalsan = async (req, res) => {
       surat_pernyataan,
       exam,
       ta_id,
+      status_ujian,
     } = req.body;
 
     const user_id = req.id;
@@ -150,6 +153,7 @@ const updateInfoCalsan = async (req, res) => {
     if (exam !== undefined) fieldsToUpdate.exam = JSON.stringify(exam);
 
     if (ta_id !== undefined) fieldsToUpdate.ta_id = ta_id;
+    if (status_ujian !== undefined) fieldsToUpdate.status_ujian = status_ujian;
     if (Object.keys(fieldsToUpdate).length > 0) {
       await info_calsan.update(fieldsToUpdate, {
         where: { id },

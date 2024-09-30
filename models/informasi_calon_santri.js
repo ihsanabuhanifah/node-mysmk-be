@@ -42,6 +42,11 @@ module.exports = (sequelize, DataTypes) => {
       surat_pernyataan: DataTypes.STRING,
       ta_id: DataTypes.INTEGER,
       exam: DataTypes.TEXT,
+      status_ujian: {
+        type: DataTypes.ENUM('Sudah', 'Belum'),
+        allowNull: false,
+        defaultValue: 'Belum',
+      },
     },
     {
       sequelize,
