@@ -174,6 +174,7 @@ const {
   listPembayaran,
   konfirmasiPembayaran,
 } = require("../../controllers/Guru/PembayaranPpdbController");
+const { listCalonSantri } = require("../../controllers/ppdb/InformasiCalsanController");
 
 guru.use(guruAccessMiddleware);
 
@@ -334,5 +335,9 @@ guru.post("/walisantri/create", createBulkWali);
 guru.put("/pembayaran-ppdb/update/:id", updatePembayaranPpdb);
 guru.get("/pembayaran-ppdb/list", listPembayaran);
 guru.put("/pembayaran-ppdb/konfirmasi/:id", konfirmasiPembayaran);
+
+
+//Calon Santri
+guru.get("/list-calsan", listCalonSantri);
 
 module.exports = guru;

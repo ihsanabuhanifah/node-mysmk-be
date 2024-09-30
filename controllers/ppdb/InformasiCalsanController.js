@@ -101,7 +101,7 @@ const updateInfoCalsan = async (req, res) => {
       skb,
       surat_pernyataan,
       exam,
-      ta_id
+      ta_id,
     } = req.body;
 
     const user_id = req.id;
@@ -149,8 +149,7 @@ const updateInfoCalsan = async (req, res) => {
       fieldsToUpdate.surat_pernyataan = surat_pernyataan;
     if (exam !== undefined) fieldsToUpdate.exam = JSON.stringify(exam);
 
-    if (ta_id !== undefined)
-      fieldsToUpdate.ta_id = ta_id;
+    if (ta_id !== undefined) fieldsToUpdate.ta_id = ta_id;
     if (Object.keys(fieldsToUpdate).length > 0) {
       await info_calsan.update(fieldsToUpdate, {
         where: { id },
@@ -218,7 +217,6 @@ const getDetailCalsan = async (req, res) => {
   }
 };
 
-
 const detailCalsan = async (req, res) => {
   try {
     const { id } = req.params;
@@ -241,9 +239,46 @@ const detailCalsan = async (req, res) => {
   }
 };
 
+const listCalonSantri = async (req, res) => {
+  const { page, pageSize } = req.query;
+  try {
+    const list = await info_calsan.findAndCountAll({
+      ...(pageSize !== undefined && { limit: pageSize }),
+      ...(page !== undefined && { offset: page }),
+      include: [
+        {
+          model: models.ta,
+          require: true,
+          as: "tahun_ajaran",
+          attributes: ["id", "nama_tahun_ajaran"],
+        },
+      ],
+      order: ["id"],
+    });
+    if (list.length === 0) {
+      return res.json({
+        status: "Success",
+        msg: "Tidak ditemukan data",
+        data: list,
+      });
+    }
+    return res.json({
+      status: "Success",
+      msg: "Berhasil Menemukan data!",
+      data: list,
+      offset: page,
+      limit: pageSize,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(403).send("Terjadi Kesalahan");
+  }
+};
+
 module.exports = {
   createInfoCalsan,
   updateInfoCalsan,
   getDetailCalsan,
   detailCalsan,
+  listCalonSantri,
 };

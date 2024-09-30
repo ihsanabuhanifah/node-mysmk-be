@@ -7,6 +7,7 @@ const {
   updateInfoCalsan,
   getDetailCalsan,
   detailCalsan,
+  listCalonSantri,
 } = require("../../controllers/ppdb/InformasiCalsanController");
 
 const { check } = require("express-validator");
@@ -96,6 +97,7 @@ ppdb.post("/create", validation, validateFields, createInfoCalsan);
 ppdb.put("/update/:id", validation, validateFields, updateInfoCalsan);
 ppdb.get("/detail", getDetailCalsan);
 ppdb.get("/detail-calsan/:id", detailCalsan);
+
 
 //pembayaran
 ppdb.post("/pembayaran-ppdb", createPembayaran);

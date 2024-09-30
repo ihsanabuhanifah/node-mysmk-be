@@ -31,10 +31,10 @@ const createPembayaran = async (req, res) => {
 
 const getDetailPembayaran = async (req, res) => {
   try {
-    const { id } = req.params;
+    const user_id = req.id;
 
     const pembayaran = await pembayaranPpdb.findOne({
-      where: { id },
+      where: { user_id },
       include: [
         {
           model: models.teacher,
@@ -101,11 +101,8 @@ const listPembayaran = async (req, res) => {
   }
 };
 
-
-
 module.exports = {
   createPembayaran,
   getDetailPembayaran,
   listPembayaran,
-  
 };
