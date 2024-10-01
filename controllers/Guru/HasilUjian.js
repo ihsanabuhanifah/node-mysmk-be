@@ -15,6 +15,8 @@ const listHasilUjain = async (req, res) => {
 			status: 'finish',
       student_id: req.params.id
 		},
+		limit: pageSize,
+		offset: page,
 		include: [
 			{
 				model: mapelModel,
