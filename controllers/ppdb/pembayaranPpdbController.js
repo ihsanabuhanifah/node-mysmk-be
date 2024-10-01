@@ -42,6 +42,12 @@ const getDetailPembayaran = async (req, res) => {
           as: "guru",
           attributes: ["id", "nama_guru"],
         },
+        {
+          model: models.user,
+          required: true,
+          as: "user",
+          attributes: ["id", "name"],
+        },
       ],
       order: [["id", "ASC"]],
     });
@@ -78,8 +84,14 @@ const listPembayaran = async (req, res) => {
           as: "guru",
           attributes: ["id", "nama_guru"],
         },
+        {
+          model: models.user,
+          required: true,
+          as: "user",
+          attributes: ["id", "name"],
+        },
       ],
-      order: ["id"],
+      order: [["id", "ASC"]],
     });
     if (list.length === 0) {
       return res.json({

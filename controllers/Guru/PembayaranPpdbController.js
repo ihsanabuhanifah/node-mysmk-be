@@ -48,6 +48,12 @@ const listPembayaran = async (req, res) => {
           as: "guru",
           attributes: ["id", "nama_guru"],
         },
+        {
+          model: models.user,
+          required: true,
+          as: "user",
+          attributes: ["name"],
+        },
       ],
       order: ["id"],
     });
