@@ -15,10 +15,6 @@ module.exports = (sequelize, DataTypes) => {
         as: "siswa",
         foreignKey: "student_id",
       });
-      nilai.belongsTo(models.kelas, {
-        as: "kelas",
-        foreignKey: "kelas_id",
-      });
       nilai.belongsTo(models.mapel, {
         as: "mapel",
         foreignKey: "mapel_id",
@@ -31,10 +27,6 @@ module.exports = (sequelize, DataTypes) => {
       nilai.belongsTo(models.ujian, {
         as: "ujian",
         foreignKey: "ujian_id",
-      });
-      nilai.belongsTo(models.ta, {
-        as: "tahun_ajaran",
-        foreignKey: "ta_id",
       });
      
     }
@@ -58,7 +50,8 @@ module.exports = (sequelize, DataTypes) => {
       upload_file: DataTypes.STRING,
       remidial_count : DataTypes.INTEGER,
       exam: DataTypes.STRING,
-      
+      urutan : DataTypes.INTEGER,
+      is_lulus : DataTypes.INTEGER,
       exam_result: DataTypes.DECIMAL(5, 2),
       refresh_count: DataTypes.INTEGER,
       status: DataTypes.ENUM('finish', 'open', 'progress', 'locked'),

@@ -6,34 +6,34 @@ const laporanDiniyyahModel = require("../../models").laporan_diniyyah_harian;
 const { checkQuery } = require("../../utils/format");
 const { Op } = require("sequelize");
 const dayjs = require("dayjs");
+const PDFDocument = require("pdfkit");
+const fs = require("fs");
+const path = require("path");
 const { createLaporanDiniyyah } = require("./LaporanDiniyyahHarianController");
 const createLaporanPkl = response.requestResponse(async (req, res) => {
-  let payload = req.body;
-  let today = dayjs(new Date()).format("YYYY-MM-DD");
-  const existingLaporan = await LaporanHarianPklModel.findOne({
-    where: {
-      student_id: req.student_id,
-      tanggal: today,
-    },
-  });
-  if (existingLaporan) {
-    return {
-      statusCode: 400,
-      status: "fail",
-      message: "Anda hanya dapat membuat satu laporan per hari.",
-    };
-  }
+  let { laporanDiniyyah, ...payload } = req.body;
   const laporanHarianPkl = await LaporanHarianPklModel.create({
     ...payload,
     student_id: req.student_id,
-    tanggal: today,
+    tanggal: dayjs(new Date()).format("YYYY-MM-DD"),
+    is_absen: true,
   });
+
+  const laporanDiniyyahResult = await createLaporanDiniyyah(
+    req,
+    res,
+    laporanHarianPkl.id,
+    req.student_id
+  );
 
   return {
     statusCode: 201,
     status: "success",
     message: "Data Berhasil Diupload",
-    data: laporanHarianPkl,
+    data: {
+      laporanHarianPkl,
+      laporanDiniyyah: laporanDiniyyahResult,
+    },
   };
 });
 const updateLaporanPkl = response.requestResponse(async (req, res) => {
@@ -61,14 +61,19 @@ const updateLaporanPkl = response.requestResponse(async (req, res) => {
     data: req.body,
   };
 });
+// tes
 
 const laporanPklList = response.requestResponse(async (req, res) => {
-  const { page, pageSize, dariTanggal, sampaiTanggal } = req.query;
+  const { page, pageSize, dariTanggal, sampaiTanggal, status_kehadiran } =
+    req.query;
   const { count, rows } = await LaporanHarianPklModel.findAndCountAll({
     where: {
       student_id: req.student_id,
       ...(checkQuery(dariTanggal) && {
         tanggal: { [Op.between]: [dariTanggal, sampaiTanggal] },
+      }),
+      ...(checkQuery(status_kehadiran) && {
+        status: status_kehadiran,
       }),
     },
     order: [["tanggal", "desc"]],
@@ -126,9 +131,86 @@ const detailLaporanPkl = response.requestResponse(async (req, res) => {
   };
 });
 
+const downloadPdf = async (req, res) => {
+  const { bulan, tahun } = req.query;
+  console.log("tahun", tahun);
+  console.log("bulan", bulan);
+
+  try {
+    console.log("Memulai proses pembuatan PDF...");
+    const reportBulanan = await LaporanHarianPklModel.findAll({
+      where: {
+        student_id: req.student_id,
+        created_at: {
+          [Op.between]: [
+            new Date(tahun, bulan - 1, 1),
+            new Date(tahun, bulan, 0),
+          ],
+        },
+      },
+      order: [["created_at", "ASC"]],
+    });
+
+    const doc = new PDFDocument({ margin: 50 });
+
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=Laporan_PKL_${bulan}_${tahun}.pdf`
+    );
+    res.setHeader("Content-Type", "application/pdf");
+
+    doc.pipe(res);
+
+    doc
+      .image("path/to/logo.png", 50, 45, { width: 50 }) // Ubah path ke logo sesuai dengan direktori Anda
+      .fontSize(20)
+      .text("Nama Instansi", 110, 57)
+      .fontSize(10)
+      .text("Alamat Instansi", 110, 80)
+      .text("Telepon: 123-456-7890", 110, 95)
+      .moveDown();
+
+    doc.moveDown();
+
+    doc.fontSize(20).text("Laporan PKL Bulanan", { align: "center" });
+    doc.moveDown();
+    doc
+      .fontSize(14)
+      .text(`Bulan: ${bulan} Tahun: ${tahun}`, { align: "center" });
+    doc.moveDown(2);
+
+    const tableTop = 200;
+    const itemNameX = 50;
+    const itemJudulX = 200;
+    const itemIsiX = 300;
+
+    doc.fontSize(10);
+    doc.text("No.", itemNameX, tableTop, { bold: true });
+    doc.text("Hari", itemJudulX, tableTop, { bold: true });
+    doc.text("Judul Kegiatan", itemIsiX, tableTop, { bold: true });
+
+    let position = tableTop + 20;
+
+    reportBulanan.forEach((report, index) => {
+      doc.text(`${index + 1}`, itemNameX, position);
+      doc.text(`Hari ${index + 1}`, itemJudulX, position);
+      doc.text(`${report.judul_kegiatan}`, itemIsiX, position);
+
+      position += 20; // Menambah jarak baris
+    });
+
+    doc.end();
+    console.log("PDF berhasil dibuat dan dikirim");
+  } catch (error) {
+    console.error("Terjadi kesalahan:", error);
+    res.status(500).json({ msg: "Terjadi kesalahan pada server" });
+  }
+};
+
 module.exports = {
   createLaporanPkl,
   updateLaporanPkl,
   laporanPklList,
   detailLaporanPkl,
+  downloadPdf,
 };

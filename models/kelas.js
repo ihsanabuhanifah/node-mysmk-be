@@ -13,10 +13,6 @@ module.exports = (sequelize, DataTypes) => {
         as: "kelas_student",
         foreignKey: "kelas_id",
       });
-      kelas.hasMany(models.nilai, {
-        as: "nilai",
-        foreignKey: "kelas_id",
-      });
       kelas.hasMany(models.jadwal, {
         as: "jadwal",
         foreignKey: "kelas_id",
