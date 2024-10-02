@@ -31,14 +31,12 @@ module.exports = (sequelize, DataTypes) => {
     foto: DataTypes.STRING,
     status: DataTypes.STRING,
     bulan: DataTypes.STRING,
-
     tahun: DataTypes.STRING,
     nominal: DataTypes.DECIMAL(10, 2),
     tanggal_konfirmasi: DataTypes.DATE,
     teacher_id: DataTypes.INTEGER,
     no_telepon: DataTypes.STRING,
     keterangan: DataTypes.STRING,
-    
     transaction_id: DataTypes.STRING,
     redirect_url: DataTypes.STRING,
     transaction_token: DataTypes.STRING,
