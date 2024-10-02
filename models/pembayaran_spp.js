@@ -56,9 +56,11 @@ module.exports = (sequelize, DataTypes) => {
     tanggal_konfirmasi: DataTypes.DATE,
     teacher_id: DataTypes.INTEGER,
     no_telepon: DataTypes.STRING,
-    token_bayar: DataTypes.STRING,
     keterangan: DataTypes.STRING,
-    transaksi_id: DataTypes.STRING,
+    
+    transaction_id: DataTypes.STRING,
+    redirect_url: DataTypes.STRING,
+    transaction_token: DataTypes.STRING,
     status_midtrans: DataTypes.STRING
   }, {
     sequelize,

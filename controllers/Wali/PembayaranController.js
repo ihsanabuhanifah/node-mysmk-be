@@ -466,15 +466,17 @@ async function createPembayaranOtomatis(req, res) {
 
     const transaksi = await snap.createTransaction(parameter);
     let tokenTransaksi = transaksi.token;
+    let redirect = transaksi.redirect_url;
 
     console.log("Database updated successfully.");
 
-    const pembayaran = await PembayaranController.update(
+    await PembayaranController.update(
       {
         walsan_id: req.walsan_id,
         no_telepon: walsan.no_hp,
-        token_bayar: tokenTransaksi,
-        transaksi_id: transaksi_id,
+        transaction_token: tokenTransaksi,
+        transaction_id: transaksi_id,
+        redirect_url: redirect
       },
       {
         where: {
@@ -558,46 +560,49 @@ async function createPembayaranOtomatis(req, res) {
 //   });
 // }
 
-async function createNotifPembayaran(req, res) {
+const createNotifPembayaran = async (req, res) => {
   try {
+    const { order_id, transaction_status, fraud_status } = req.body;
 
-    // Try to fetch the notification from Midtrans and log the status
-    const responStatus = await snap.transaction.notification(req.body);
+    console.log(`Transaction notification received. Order ID: ${order_id}. Transaction status: ${transaction_status}. Fraud status: ${fraud_status}`);
 
-    let orderId = responStatus.order_id;
-    let transactionStatus = responStatus.transaction_status;
-    let fraudStatus = responStatus.fraud_status;
-
-    console.log(
-      `Transaction notification received. Order ID: ${orderId}. Transaction status: ${transactionStatus}. Fraud status: ${fraudStatus}`
-    );
+    // Log all transaction tokens for debugging
+    const pembayaranEntries = await pembayaranModel.findAll({
+      attributes: ['transaction_token'],
+    });
+    console.log("All transaction_tokens in database:", pembayaranEntries.map(entry => entry.transaction_token));
 
     // Find the pembayaran entry in the database
     const pembayaran = await pembayaranModel.findOne({
       where: {
-        transaksi_id: orderId,
+        transaction_token: order_id.trim(), // Ensure this matches the correct column
       },
     });
 
     if (!pembayaran) {
-      console.error("Pembayaran not found for the given order_id:", orderId);
+      console.error("Pembayaran not found for the given order_id:", order_id);
       return res.status(404).json({ error: "Pembayaran not found" });
+    }
+
+    console.log(`Found pembayaran for Order ID: ${order_id}`);
+
+    // Check if the status has already been updated to avoid duplicate updates
+    if (pembayaran.status === "Sudah" && transaction_status === "settlement") {
+      return res.status(200).json({
+        status: "Success",
+        msg: "Pembayaran sudah diupdate sebelumnya",
+      });
     }
 
     // Prepare the data for updating the pembayaran status
     let updateData = {};
 
-    if (transactionStatus === "capture" && fraudStatus === "accept") {
+    // Update logic based on transaction status
+    if (transaction_status === "capture" && fraud_status === "accept") {
       updateData.status = "Sudah";
-    } else if (transactionStatus === "settlement") {
+    } else if (transaction_status === "settlement") {
       updateData.status = "Sudah";
-    } else if (
-      transactionStatus === "cancel" ||
-      transactionStatus === "deny" ||
-      transactionStatus === "expire"
-    ) {
-      updateData.status = "Belum";
-    } else if (transactionStatus === "pending") {
+    } else if (["cancel", "deny", "expire", "pending"].includes(transaction_status)) {
       updateData.status = "Belum";
     }
 
@@ -605,38 +610,22 @@ async function createNotifPembayaran(req, res) {
     await pembayaran.update(updateData);
 
     // Return a successful response
-    return res.status(201).json({
-      status: "Success",
-      msg: "Berhasil Mengirim Notif Pembayaran",
-    });
+    return res.status(201).json({ status: "Success", msg: "Berhasil Mengupdate Status Pembayaran" });
   } catch (error) {
     console.error("Error processing notification:", error);
 
-    // Log JWT errors specifically
-    if (error.name === "JsonWebTokenError") {
-      console.error("JWT Error:", error.message);
-      return res.status(401).json({
-        status: "fail",
-        message: "Invalid Token",
-        data: error,
-      });
-    }
-
-    if (error.status === 404) {
-      return res.status(404).json({
-        status: "Failed",
-        message: "Error 404 Dari Midtrans"
-      })
+    // Handle errors, specifically check for Midtrans 404 error
+    if (error.httpStatusCode === 404) {
+      return res.status(404).json({ status: "Failed", message: "Error 404 Dari Midtrans" });
     }
 
     // Handle other errors and send a 500 response
-    return res.status(500).json({
-      status: "fail",
-      message: "Internal Server Error",
-      error: error.message,
-    });
+    return res.status(500).json({ status: "fail", message: "Internal Server Error", error: error.message });
   }
-}
+};
+
+
+
 
 
 
@@ -902,7 +891,15 @@ async function updateResponse(req, res) {
     console.log(error);
     return res.status(403).send("Terjadi Kesalahan");
   }
-}
+
+  async function pdfBulanan (req, res) {
+    try {
+      
+    } catch (error) {
+      
+    }
+  }
+} 
 
 module.exports = {
   createKartuSpp,
