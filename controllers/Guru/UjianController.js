@@ -100,14 +100,36 @@ const createUjian = async (req, res) => {
 };
 
 const listUjian = async (req, res) => {
-  let = { mapel_id, is_all, jenis_ujian, page, pageSize } = req.query;
+  let = {
+    mapel_id,
+    is_all,
+    kelas_id,
+    ta_id,
+    teacher_id,
+    jenis_ujian,
+    page,
+    pageSize,
+  } = req.query;
 
   try {
     const soals = await UjianController.findAndCountAll({
       // attributes: ["id", "materi", "soal", "tipe", "jawaban", "point"],
       where: {
+        ...(checkQuery(jenis_ujian) && {
+          jenis_ujian: jenis_ujian,
+        }),
         ...(checkQuery(mapel_id) && {
           mapel_id: mapel_id,
+        }),
+        ...(checkQuery(teacher_id) && {
+          teacher_id: teacher_id,
+        }),
+        ...(checkQuery(kelas_id) && {
+          kelas_id: kelas_id,
+        }),
+
+        ...(checkQuery(ta_id) && {
+          ta_id: ta_id,
         }),
 
         // ...(parseInt(is_all) === 1 && {
@@ -360,7 +382,7 @@ const cekUrutan = response.requestResponse(async (req, res) => {
       mapel_id: req.body.mapel_id,
       kelas_id: req.body.kelas_id,
       ta_id: req.body.ta_id,
-      is_hirarki : 1
+      is_hirarki: 1,
     },
   });
 
