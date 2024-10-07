@@ -20,9 +20,24 @@ const {
   detailLaporanPkl,
   downloadLaporanBulanan,
   downloadPdf,
-  laporanPklListForPembimbing
+  laporanPklListForPembimbing,
 } = require("../../controllers/Guru/LaporanHarianPklController");
 //tempat_pkl
+
+const { createTugasPkl, tugasPklList, deleteTugasPkl, getTugasPklById, updateTugasPkl } = require("../../controllers/Guru/TugasPklController");
+// tugas pkl
+
+const { detailJawabanSantri, getJawabanByTugasPklId, listJawabanSantri, updateStatusPesanJawaban,  } = require("../../controllers/Guru/JawabanTugasPklController")
+// jawban tugas pkl
+
+guru.get("/jawaban-tugas-pkl/detail/:id", detailJawabanSantri);
+guru.get("/jawaban-tugas-pkl/detailByTugas/:tugas_pkl_id", getJawabanByTugasPklId);
+guru.get("/jawaban-tugas-pkl/list", listJawabanSantri);
+guru.put("/jawaban-tugas-pkl/update/:id", updateStatusPesanJawaban);
+
+// jawbaan tugas pkl route
+
+// tempat pkl
 guru.post("/tempat-pkl/create", createTempatPkl);
 guru.put("/tempat-pkl/update/:id", updateTempatPkl);
 guru.delete("/tempat-pkl/delete/:id", deteleTempatPkl);
@@ -38,10 +53,16 @@ guru.get("/laporan-harian-pkl/list", laporanPklList);
 guru.get("/laporan-harian-pkl/detail/:id", detailLaporanPkl);
 guru.get("/laporan-harian-pkl/list/pembimbing", laporanPklListForPembimbing);
 
-guru.get("/laporan-harian-pkl/downdload-pdf/:studentId", downloadPdf);
+guru.get("/laporan-harian-pkl/download-pdf/:studentId", downloadPdf);
 guru.get(
   "/laporan-harian-pkl/downdload-pdf-bulanan/:studentId",
   downloadLaporanBulanan
 );
+// tugas pkl
+guru.post("/tugas-pkl/create", createTugasPkl);
+guru.get("/tugas-pkl/list", tugasPklList);
+guru.get("/tugas-pkl/detail/:id", getTugasPklById);
+guru.delete("/tugas-pkl/delete/:id", deleteTugasPkl);
+guru.put("/tugas-pkl/update/:id", updateTugasPkl);
 
 module.exports = guru;

@@ -537,7 +537,7 @@ const detailLaporanPkl = response.requestResponse(async (req, res) => {
 //   }
 // };
 const downloadLaporanBulanan = response.requestResponse(async (req, res) => {
-  const { studentId } = req.params;
+  const { studentId } = req.query;
   const report = await LaporanHarianPklModel.findAll({
     where: { student_id: studentId },
     include: [
@@ -582,13 +582,12 @@ const downloadLaporanBulanan = response.requestResponse(async (req, res) => {
   };
 });
 const downloadPdf = response.requestResponse(async (req, res) => {
-  const { bulan, tahun } = req.query;
-  const { studentId } = req.params;
+  const { bulan, tahun, studentId } = req.query;
 
   const reportBulanan = await LaporanHarianPklModel.findAll({
     where: {
       student_id: studentId,
-      created_at: {
+      tanggal: {
         [Op.between]: [
           new Date(tahun, bulan - 1, 1),
           new Date(tahun, bulan, 0),

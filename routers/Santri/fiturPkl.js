@@ -9,7 +9,7 @@ const {
   detailLaporanPkl,
   downloadPdf,
   downloadLaporanBulanan,
-  dataBulanan
+  dataBulanan,
 } = require("../../controllers/Santri/LaporanHarianPklController");
 // Laporan laporanDiniyyahHarian
 const {
@@ -23,6 +23,15 @@ const {
 const {
   lokasiTempatPkl,
 } = require("../../controllers/Santri/TempatPklController");
+
+const {
+  createJawabanTugasPkl,
+  getDetailJawabanTugasPkl,
+  updateJawabanTugasPkl,
+} = require("../../controllers/Santri/JawabanTugasPklController");
+// jawaban tugas pkl santri
+
+
 
 santri.use(santriAccessMiddleware);
 // Laporan Harian pkl
@@ -43,4 +52,13 @@ santri.put("/laporan-diniyyah/update/:id", updateLaporanDiniyyah);
 
 // Tempat pkl
 santri.get("/tempat-pkl/lokasi", lokasiTempatPkl);
+
+
+
+santri.post("/jawaban-tugas-pkl/create", createJawabanTugasPkl);
+santri.put("/jawaban-tugas-pkl/update/:id", updateJawabanTugasPkl);
+santri.get("/jawaban-tugas-pkl/detail/:id", getDetailJawabanTugasPkl);
+// jawaban tugas pkl
+
+
 module.exports = santri;
