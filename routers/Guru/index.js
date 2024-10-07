@@ -174,7 +174,7 @@ const {
   listPembayaran,
   konfirmasiPembayaran,
 } = require("../../controllers/Guru/PembayaranPpdbController");
-const { listCalonSantri } = require("../../controllers/ppdb/InformasiCalsanController");
+const {listCalonSantri} = require('../../controllers/Guru/InformasiCalsanController');
 
 guru.use(guruAccessMiddleware);
 

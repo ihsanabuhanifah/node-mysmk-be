@@ -243,46 +243,11 @@ const detailCalsan = async (req, res) => {
   }
 };
 
-const listCalonSantri = async (req, res) => {
-  const { page, pageSize } = req.query;
-  try {
-    const list = await info_calsan.findAndCountAll({
-      ...(pageSize !== undefined && { limit: pageSize }),
-      ...(page !== undefined && { offset: page }),
-      include: [
-        {
-          model: models.ta,
-          require: true,
-          as: "tahun_ajaran",
-          attributes: ["id", "nama_tahun_ajaran"],
-        },
-      ],
-      order: ["id"],
-    });
-    if (list.length === 0) {
-      return res.json({
-        status: "Success",
-        msg: "Tidak ditemukan data",
-        data: list,
-      });
-    }
-    return res.json({
-      status: "Success",
-      msg: "Berhasil Menemukan data!",
-      data: list,
-      offset: page,
-      limit: pageSize,
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(403).send("Terjadi Kesalahan");
-  }
-};
+
 
 module.exports = {
   createInfoCalsan,
   updateInfoCalsan,
   getDetailCalsan,
   detailCalsan,
-  listCalonSantri,
 };

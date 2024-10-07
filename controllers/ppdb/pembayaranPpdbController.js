@@ -80,7 +80,7 @@ const listPembayaran = async (req, res) => {
       include: [
         {
           model: models.teacher,
-          require: true,
+          required: true,
           as: "guru",
           attributes: ["id", "nama_guru"],
         },
