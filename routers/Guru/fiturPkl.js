@@ -53,9 +53,9 @@ guru.get("/laporan-harian-pkl/list", laporanPklList);
 guru.get("/laporan-harian-pkl/detail/:id", detailLaporanPkl);
 guru.get("/laporan-harian-pkl/list/pembimbing", laporanPklListForPembimbing);
 
-guru.get("/laporan-harian-pkl/download-pdf/:studentId", downloadPdf);
+guru.get("/laporan-harian-pkl/download-pdf", downloadPdf);
 guru.get(
-  "/laporan-harian-pkl/downdload-pdf-bulanan/:studentId",
+  "/laporan-harian-pkl/downdload-pdf-bulanan",
   downloadLaporanBulanan
 );
 // tugas pkl
