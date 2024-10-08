@@ -14,6 +14,10 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   messages.init({
+    id: {
+      type: DataTypes.DATE, // jika ingin menggunakan tanggal sebagai id
+      primaryKey: true,     // tandai sebagai primary key
+    },
     text: DataTypes.STRING,
     pengirim: DataTypes.STRING,
     penerima: DataTypes.STRING,
@@ -21,6 +25,8 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'messages',
+    underscored: false,
+    timestamps: true, 
   });
   return messages;
 };

@@ -1,4 +1,4 @@
-const messagesModel = require('./models/messages')
+const messagesModel = require('./models').messages
 const express = require('express')
 const app = express()
 const router = require('./routers')
@@ -58,17 +58,17 @@ io.on('connection', (socket) => {
 	socket.on('message', async (msg) => {
 		console.log('message from client:', msg)
 
+		await messagesModel.create({
+			id: Date.now(),
+			text: msg.text,
+			pengirim: socket.user.idDB,
+			penerima: msg.penerima,
+			role: socket.user.roleDB,
+		})
+
 		if (msg.penerima && msg.role == 'siswa') {
 			for (let i = 0; i < clients.length; i++) {
 				if (clients[i].user.idDB == msg.penerima && clients[i].user.roleDB == 'guru') {
-						const savedMSG = await messagesModel.create({
-							text: msg.text,
-							pengirim: socket.user.idDB,
-							penerima: msg.penerima,
-							role: socket.user.roleDB,
-						})
-						console.log('Message saved to database')
-
 					clients[i].emit('message', {
 						pengirim: socket.user.idDB,
 						role: socket.user.roleDB,
@@ -80,20 +80,8 @@ io.on('connection', (socket) => {
 			}
 		}
 		if (msg.penerima && msg.role == 'guru') {
-			for (let i = 0; i < clients.length; i++) {
+			for (let i = 0; i < clients.length; i++) {				
 				if (clients[i].user.idDB == msg.penerima && clients[i].user.roleDB == 'siswa') {
-					try {
-						await messagesModel.create({
-							text: msg.text,
-							pengirim: socket.user.idDB,
-							penerima: msg.penerima,
-							role: socket.user.roleDB,
-						})
-						console.log('Message saved to database')
-					} catch (error) {
-						console.error('Error saving message to database:', error)
-					}
-
 					clients[i].emit('message', {
 						pengirim: socket.user.idDB,
 						role: socket.user.roleDB,

@@ -5,7 +5,7 @@ module.exports = {
     await queryInterface.createTable('messages', {
       id: {
         allowNull: false,
-        primaryKey: true,
+        primaryKey: false,
         type: Sequelize.DATE,
         defaultValue: Sequelize.NOW 
       },
