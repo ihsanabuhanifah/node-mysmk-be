@@ -173,8 +173,11 @@ const {
   updatePembayaranPpdb,
   listPembayaran,
   konfirmasiPembayaran,
+  deletePembayaranPpdb,
 } = require("../../controllers/Guru/PembayaranPpdbController");
-const {listCalonSantri} = require('../../controllers/Guru/InformasiCalsanController');
+const {
+  listCalonSantri,
+} = require("../../controllers/Guru/InformasiCalsanController");
 
 guru.use(guruAccessMiddleware);
 
@@ -335,7 +338,7 @@ guru.post("/walisantri/create", createBulkWali);
 guru.put("/pembayaran-ppdb/update/:id", updatePembayaranPpdb);
 guru.get("/pembayaran-ppdb/list", listPembayaran);
 guru.put("/pembayaran-ppdb/konfirmasi/:id", konfirmasiPembayaran);
-
+guru.delete("/pembayaran-ppdb/delete/:id", deletePembayaranPpdb);
 
 //Calon Santri
 guru.get("/list-calsan", listCalonSantri);

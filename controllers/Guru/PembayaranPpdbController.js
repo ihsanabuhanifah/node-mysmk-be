@@ -35,6 +35,34 @@ const updatePembayaranPpdb = async (req, res) => {
   }
 };
 
+const deletePembayaranPpdb = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const pembayaran = await pembayaranPpdb.findOne({ where: { id } });
+    if (!pembayaran) {
+      return res.status(404).json({
+        status: "Fail",
+        message: "Pembayaran tidak ditemukan.",
+      });
+    }
+
+    await pembayaran.destroy();
+
+    return res.status(200).json({
+      status: "Success",
+      message: `Pembayaran dengan ID ${id} berhasil dihapus.`,
+    });
+  } catch (error) {
+    console.error("Error menghapus pembayaran PPDB:", error);
+    return res.status(500).json({
+      status: "Error",
+      message: "Terjadi kesalahan saat menghapus pembayaran.",
+      error: error.message,
+    });
+  }
+};
+
 const listPembayaran = async (req, res) => {
   const { page, pageSize } = req.query;
   try {
@@ -114,4 +142,5 @@ module.exports = {
   updatePembayaranPpdb,
   listPembayaran,
   konfirmasiPembayaran,
+  deletePembayaranPpdb
 };
