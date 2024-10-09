@@ -110,13 +110,8 @@ const getJawabanByTugasPklId = response.requestResponse(async (req, res) => {
   const { tugas_pkl_id } = req.params;
 
   const jawabanList = await JawabanTugasPklModel.findAll({
-    where: { tugas_pkl_id },
+    where: { tugas_pkl_id : tugas_pkl_id },
     include: [
-      {
-        model: TugasPklModel,
-        as: "tugas_pkl",
-        attributes: ["id", "tugas", "teacher_id"],
-      },
       {
         model: StudentModel,
         as: "siswa",
