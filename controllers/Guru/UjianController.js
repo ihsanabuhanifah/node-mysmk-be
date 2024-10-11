@@ -306,6 +306,12 @@ const deleteUjian = async (req, res) => {
         msg: "Soal ini milik guru lain",
       });
     }
+
+    await NilaiController.destroy({
+      where: {
+        ujian_id: ujian.id,
+      },
+    });
     await UjianController.destroy({
       where: {
         id: ujian.id,
