@@ -8,8 +8,10 @@ const rolesRouter = require("./rolesRouter");
 const importRouter = require("./importRouter");
 const guruRouter = require("./Guru");
 const waliRouter = require("./Wali");
-const santriRouter = require('./Santri');
+const santriRouter = require("./Santri");
+const ppdbRouter = require("./ppdb");
 const daftarRouter = require("./Daftar");
+const landingPageRouter = require("./landingPage");
 const { hari, tanggal, jam } = require("../utils/tanggal");
 
 const adminRouter = require("./Admin");
@@ -21,10 +23,12 @@ router.get("/", (req, res) => {
 const jwtValidateMiddleware = require("../middleware/jwtValidateMiddleware");
 const paginationMiddleware = require("../middleware/paginationMiddleware");
 
+router.use("/landingPage", landingPageRouter);
 router.use(authRouter);
 router.use(importRouter);
 router.use(jwtValidateMiddleware);
 router.use(paginationMiddleware);
+router.use("/ppdb", ppdbRouter);
 router.use("/users", userRouter);
 router.use("/info", logRouter);
 router.use("/identitas", identitasRouter);

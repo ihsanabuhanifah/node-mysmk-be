@@ -8,11 +8,14 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER,
       },
+      dzikir_pagi: {
+        type: Sequelize.BOOLEAN,
+      },
       created_at: {
         allowNull: false,
         type: Sequelize.DATE,
       },
-      updated_at: {
+     updated_at: {
         allowNull: false,
         type: Sequelize.DATE,
       },
@@ -39,50 +42,35 @@ module.exports = {
         },
       },
       dzikir_pagi: {
-        allowNull: true,
-        defaultValue: false,
+        allowNull: false,
+        defaultValue : false,
         type: Sequelize.BOOLEAN,
       },
       dzikir_petang: {
         allowNull: true,
         type: Sequelize.BOOLEAN,
       },
-      dari_surat: {
-        allowNull: true,
-        type: Sequelize.STRING,
-      },
-      sampai_surat: {
-        allowNull: true,
-        type: Sequelize.STRING,
-      },
-      dari_ayat: {
-        allowNull: true,
-        type: Sequelize.INTEGER,
-      },
-      sampai_ayat: {
-        allowNull: true,
-        type: Sequelize.INTEGER,
-      },
       sholat_shubuh: {
-        allowNull: true,
-        type: Sequelize.ENUM("berjamaah", "sendirian", "tidak solat"),
+        allowNull: false,
+        type: Sequelize.BOOLEAN,
       },
       sholat_dzuhur: {
-        allowNull: true,
-        type: Sequelize.ENUM("berjamaah", "sendirian", "tidak solat"),
+        allowNull: false,
+        type: Sequelize.BOOLEAN,
       },
       sholat_ashar: {
-        allowNull: true,
-        type: Sequelize.ENUM("berjamaah", "sendirian", "tidak solat"),
+        allowNull: false,
+        type: Sequelize.BOOLEAN,
       },
       sholat_magrib: {
-        allowNull: true,
-        type: Sequelize.ENUM("berjamaah", "sendirian", "tidak solat"),
+        allowNull: false,
+        type: Sequelize.BOOLEAN,
       },
       sholat_isya: {
-        allowNull: true,
-        type: Sequelize.ENUM("berjamaah", "sendirian", "tidak solat"),
+        allowNull: false,
+        type: Sequelize.BOOLEAN,
       },
+      
     });
   },
   down: async (queryInterface, Sequelize) => {

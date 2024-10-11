@@ -4,6 +4,7 @@
 /vendor
 /public
 
+
 .env
 .env.prod
 .env.backup

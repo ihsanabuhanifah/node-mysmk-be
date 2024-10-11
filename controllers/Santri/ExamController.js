@@ -15,19 +15,12 @@ const NilaiController = require("../../models").nilai;
 const BankSoalController = require("../../models").bank_soal;
 const StudentModel = require("../../models").kelas_student;
 
-const response = new RESPONSE_API();
 
-const orderStatus = Sequelize.literal(`
-  CASE 
-    WHEN nilai.status = 'progress' THEN 1 
-    WHEN nilai.status = 'open' THEN 2 
-    WHEN nilai.status = 'finish' THEN 3 
-    ELSE 4 
-  END
-`);
+const response = new RESPONSE_API();
 
 const getExam = response.requestResponse(async (req, res) => {
   let { page, pageSize, status, nama_mapel, judul_ujian } = req.query;
+
   const exam = await NilaiController.findAndCountAll({
     ...(pageSize !== undefined && { limit: pageSize }),
     ...(page !== undefined && { offset: page }),
@@ -35,6 +28,7 @@ const getExam = response.requestResponse(async (req, res) => {
       ...(checkQuery(status) && {
         status: status,
       }),
+
       student_id: req.student_id,
     },
     attributes: {
@@ -94,7 +88,7 @@ const getExam = response.requestResponse(async (req, res) => {
         order: [["urutan", "asc"]],
       },
     ],
-    order: [orderStatus, ["id", "desc"]],
+    order: [["id", "desc"]],
     limit: pageSize,
     offset: page,
   });
@@ -528,3 +522,4 @@ const notifExam = response.requestResponse(async (req, res) => {
 });
 
 module.exports = { getExam, takeExam, submitExam, progressExam, notifExam };
+
