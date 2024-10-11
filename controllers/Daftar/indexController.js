@@ -1,4 +1,5 @@
 const MapelModel = require("../../models").mapel;
+const UserModel = require("../../models").user;
 const KelasModel = require("../../models").kelas;
 const SiswaModel = require("../../models").student;
 const KelasSiswaModel = require("../../models").kelas_student;
@@ -133,6 +134,12 @@ const listGuru = async (req, res) => {
   try {
     const guru = await GuruModel.findAll({
       attributes: ["id", "nama_guru"],
+      include: [
+        {
+          model: UserModel,
+          as: 'user'
+        }
+      ]
     });
 
     return res.json({

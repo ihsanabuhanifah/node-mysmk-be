@@ -167,9 +167,13 @@ const {
   listReport,
   generateReport,
 } = require("../../controllers/Guru/RaportController");
+const { profile } = require("../../controllers/Guru/ProfileController");
+const { listHasilUjain } = require("../../controllers/Guru/HasilUjian");
 
  
 guru.use(guruAccessMiddleware);
+
+guru.get('/profile', profile)
 
 //absensi kehadairan
 guru.post("/create/kehadiran", createKehadiran);
@@ -260,6 +264,12 @@ guru.put("/siswa/update/:id", updateSiswa);
 guru.put("/siswa/kelas/delete/:id", deleteSiswaKelas);
 guru.post("/siswa/kelas/create", createSiswaKelas);
 guru.delete("/siswa/kelas/delete/:id", deleteSiswaKelas);
+
+// task rizky
+guru.get("/siswa/hasil-belajar/:id", getHasilBelajar);
+guru.get("/siswa/detail-hasil-belajar/:id/:id_siswa", detailHasilBelajar);
+guru.get('/siswa/hasil-ujian/:id', listHasilUjain)
+
 
 //list
 
