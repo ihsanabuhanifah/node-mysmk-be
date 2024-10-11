@@ -1,4 +1,5 @@
 const absensiModel = require('../../models').absensi_kelas;
+const statusAbsensiModel = require('../../models').status_kehadiran;
 const { Op } = require('sequelize');
 
 const listTidakHadir = async (req, res) => {
@@ -13,6 +14,12 @@ const listTidakHadir = async (req, res) => {
       },
       status_absensi: true
     },
+    include: [
+      {
+        model: statusAbsensiModel,
+        as: 'kehadiran'
+      }
+    ],
     group: ['createdAt', 'student_id', 'semester'],
     order: [['tanggal', 'ASC']]
   })
