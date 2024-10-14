@@ -7,6 +7,7 @@ const dayjs = require("dayjs");
 const TeacherModel = require("../../models").teacher;
 const StudentModel = require("../../models").student;
 const JawabanTugasPklModel = require("../../models").jawaban_tugas_pkl;
+const TempatPklModel = require("../../models").tempat_pkl;
 
 const updateStatusPesanJawaban = response.requestResponse(async (req, res) => {
   const { id } = req.params;
@@ -56,6 +57,13 @@ const listJawabanSantri = response.requestResponse(async (req, res) => {
         model: StudentModel,
         as: "tugas_pkl",
         attributes: ["id", "nama_siswa"],
+        include: [
+          {
+            model: TempatPklModel,
+            as: "tempat_pkl",
+            where: { pembimbing_id: req.teacher_id },
+          },
+        ],
 
         where: {
           ...(checkQuery(nama_siswa) && {

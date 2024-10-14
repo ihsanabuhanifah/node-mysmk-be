@@ -6,19 +6,38 @@ const { checkQuery } = require("../../utils/format");
 const dayjs = require("dayjs");
 const TeacherModel = require("../../models").teacher;
 const StudentModel = require("../../models").student;
+const TempatPklModel = require("../../models").tempat_pkl;
 
 const tugasPklList = response.requestResponse(async (req, res) => {
+  const tempatPklRecord = await TempatPklModel.findOne({
+    where: {
+      student_id: req.student_id, 
+    },
+    attributes: ["pembimbing_id"],
+  });
+  const pembimbingId = tempatPklRecord.pembimbing_id;
+  console.log('_-------------------->', pembimbingId)
   const { page, pageSize, dariTanggal, sampaiTanggal } = req.query;
   const { count, rows } = await TugasPklModel.findAndCountAll({
     where: {
       ...(checkQuery(dariTanggal) && {
         tanggal: { [Op.between]: [dariTanggal, sampaiTanggal] },
       }),
+      teacher_id: pembimbingId,
     },
+    include : [
+      {
+        require: true,
+        as: "teacher",
+        model: TeacherModel,
+      },
+    ],
+
     order: [["tanggal", "desc"]],
     limit: pageSize,
     offset: page,
   });
+  console.log("-------->", rows)
   return {
     message: "Berhasil",
     data: rows,
