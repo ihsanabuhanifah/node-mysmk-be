@@ -1,24 +1,22 @@
 const PembayaranController = require("../../models").pembayaran_spp;
 const models = require("../../models");
 const pembayaranModel = require("../../models").pembayaran_spp;
-const midtrans = require("midtrans-client");
+
 const { checkQuery } = require("../../utils/format");
 const userModel = require("../../models").user;
-const notificationModel = require("../../models").notification;
 const studentModel = require("../../models").student;
 const parentModel = require("../../models").parent;
 const { Op } = require("sequelize");
 const axios = require("axios");
-const { tanggal } = require("../../utils/tanggal");
-const crypto = require("crypto");
-
+const PDFDocument = require("pdfkit");
+const midtransClient = require("midtrans-client");
 
 require("dotenv").config();
 
-let snap = new midtrans.Snap({
-  isProduction: process.env.MIDTRANS_PRDOUCITON,
-  serverKey: process.env.MIDTRANS_SERVER_KEY,
-  clientKey: process.env.MIDTRANS_CLIENT_KEY
+let snap = new midtransClient.Snap({
+  // Set to true if you want Production Environment (accept real transaction).
+  isProduction: false,
+  serverKey: "SB-Mid-server-eNvmFDUCr_FrDMUNKw0-9-9m",
 });
 
 const Monthmap = {
@@ -268,11 +266,32 @@ const ListPembayaran = async (req, res) => {
       limit: pageSize,
       offset: page,
       where: Result,
+      attributes: [
+        "id",
+        "walsan_id",
+        "tanggal",
+        "foto",
+        "status",
+        "bulan",
+        "tahun",
+        "nominal",
+        "tanggal_konfirmasi",
+        "teacher_id",
+        "no_telepon",
+        "keterangan",
+        "transaction_id",
+        "redirect_url",
+        "transaction_token",
+        "status_midtrans",
+        "created_at",
+        "updated_at",
+        "order_id",
+      ],
       include: [
         {
           model: models.parent,
           require: true,
-          as: "walsan",
+          as: "parent",
           attributes: ["id", "nama_wali"],
         },
         {
@@ -375,8 +394,6 @@ async function createPembayaran(req, res) {
 async function createPembayaranOtomatis(req, res) {
   const { id } = req.params;
 
-  const { nominal, walsan_id, bulan, tahun } = req.body;
-
   console.log("ID from req.params:", id);
   console.log("req.id:", req.id);
   console.log("req.walsan_id:", req.walsan_id);
@@ -386,22 +403,27 @@ async function createPembayaranOtomatis(req, res) {
   }
 
   try {
+
     const timestamp = Date.now();
 
     const user = await userModel.findOne({
-      where: {
-        id: req.id,
-      },
-    });
+      where: { id: req.id }
+    })
 
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
 
-    const dataUpdate = await PembayaranController.findOne({
+        const dataUpdate = await pembayaranModel.findOne({
       where: {
         id: id,
       },
+      attributes: [
+        'id', 'walsan_id', 'tanggal', 'foto', 'status', 'bulan', 'tahun',
+        'nominal', 'tanggal_konfirmasi', 'teacher_id', 'no_telepon',
+        'keterangan', 'redirect_url', 'transaction_token',
+        'status_midtrans', 'created_at', 'updated_at', 'order_id', 'transaction_id'
+      ]
     });
 
     if (!dataUpdate) {
@@ -464,22 +486,28 @@ async function createPembayaranOtomatis(req, res) {
       ],
     };
 
-    // Log after transaction creation
-    console.log("Transaction created successfully, updating database...");
 
-    const transaksi = await snap.createTransaction(parameter);
-    let tokenTransaksi = transaksi.token;
-    let redirect = transaksi.redirect_url;
+    const response = await axios.post('https://app.sandbox.midtrans.com/snap/v1/transactions', parameter, {
+      headers: {
+        'Content-Type' : 'application/json',
+        'Authorization': `Basic ${Buffer.from(process.env.MIDTRANS_SERVER_KEY + ':').toString('base64')}`
+      }
+    });
 
-    console.log("Database updated successfully.");
+    console.log("Midtrans Response:", response.data);
+    const token = response.data.token;
+    const redirect_url = response.data.redirect_url;
+    const transactionId = response.data.transaction_id;
 
-    await PembayaranController.update(
+
+      await PembayaranController.update(
       {
         walsan_id: req.walsan_id,
         no_telepon: walsan.no_hp,
-        transaction_token: tokenTransaksi,
-        transaction_id: transaksi_id,
-        redirect_url: redirect
+        transaction_token: token,
+        redirect_url: redirect_url,
+        order_id: transaksi_id,
+        transaction_id: transactionId
       },
       {
         where: {
@@ -492,12 +520,151 @@ async function createPembayaranOtomatis(req, res) {
       status: "Success",
       msg: "Berhasil Membayar SPP",
       data: dataUpdate,
+      transaction_id: transactionId
     });
   } catch (error) {
     console.log("Error Log:", error);
     return res.status(403).send("Terjadi Kesalahan");
   }
 }
+
+// async function createPembayaranOtomatis(req, res) {
+
+//   const { id } = req.params;
+
+//   const { nominal, walsan_id, bulan, tahun, user_id } = req.body;
+
+//   console.log("ID from req.params:", id);
+//   console.log("req.id:", req.id);
+//   console.log("req.walsan_id:", req.walsan_id);
+
+//   if (!id) {
+//     return res.status(400).json({ error: "ID parameter is required" });
+//   }
+
+//   try {
+//     const timestamp = Date.now();
+
+//     const user = await userModel.findOne({
+//       where: {
+//         id: req.id,
+//       },
+//     });
+
+    // if (!user) {
+    //   return res.status(404).json({ error: "User not found" });
+    // }
+
+//     const dataUpdate = await pembayaranModel.findOne({
+//       where: {
+//         id: id,
+//       },
+//       attributes: [
+//         'id', 'walsan_id', 'tanggal', 'foto', 'status', 'bulan', 'tahun',
+//         'nominal', 'tanggal_konfirmasi', 'teacher_id', 'no_telepon',
+//         'keterangan', 'redirect_url', 'transaction_token',
+//         'status_midtrans', 'created_at', 'updated_at', 'order_id', 'transaction_id'
+//       ]
+//     });
+
+//     if (!dataUpdate) {
+//       return res.status(404).json({ error: "Pembayaran not found" });
+//     }
+
+//     const walsan = await parentModel.findOne({
+//       where: {
+//         id: req.walsan_id,
+//       },
+//     });
+
+//     if (!walsan) {
+//       return res.status(404).json({ error: "Walsan not found" });
+//     }
+
+//     let transaksi_id = `SPP${user.id}${walsan.id}${timestamp}`;
+
+//     let parameter = {
+//       transaction_details: {
+//         order_id: transaksi_id,
+//         gross_amount: dataUpdate.nominal,
+//       },
+//       credit_card: {
+//         secure: true,
+//       },
+//       customer_details: {
+//         email: user.email,
+//         first_name: walsan.nama_wali,
+//         last_name: "MQ",
+//         phone: `+62${walsan.no_hp}`,
+//         biling_address: {
+//           first_name: walsan.nama_wali,
+//           last_name: "MQ",
+//           email: user.email,
+//           phone: walsan.no_hp,
+//           address: "Desa Singasari",
+//           city: "Bogor",
+//           postal_code: "16830",
+//           country_code: "IDN",
+//         },
+//       },
+//       shipping_address: {
+//         first_name: walsan.nama_wali,
+//         last_name: "MQ",
+//         email: user.email,
+//         phone: walsan.no_hp,
+//         address: "Desa Singasari",
+//         city: "Bogor",
+//         postal_code: "16830",
+//         country_code: "IDN",
+//       },
+//       item_details: [
+//         {
+//           id: dataUpdate.id,
+//           price: dataUpdate.nominal,
+//           quantity: 1,
+//           name: `SPP Bulan ${dataUpdate.bulan}`,
+//         },
+//       ],
+//     };
+
+//     // Log after transaction creation
+//     console.log("Transaction created successfully, updating database...");
+
+//     const transaksi = await snap.createTransaction(parameter);
+//     console.log("Midtrans Response:", transaksi)
+//     let tokenTransaksi = transaksi.token;
+//     let redirect = transaksi.redirect_url;
+
+//     console.log("Updating with transaction_id:");
+
+//     console.log("Database updated successfully.");
+
+//     await PembayaranController.update(
+//       {
+//         walsan_id: req.walsan_id,
+//         no_telepon: walsan.no_hp,
+//         transaction_token: tokenTransaksi,
+//         redirect_url: redirect,
+//         order_id: transaksi_id,
+//         transaction_id: transaksi_id
+//       },
+//       {
+//         where: {
+//           id: id,
+//         },
+//       }
+//     );
+
+//     return res.status(201).json({
+//       status: "Success",
+//       msg: "Berhasil Membayar SPP",
+//       data: dataUpdate,
+//     });
+//   } catch (error) {
+//     console.log("Error Log:", error);
+//     return res.status(403).send("Terjadi Kesalahan");
+//   }
+// }
 
 // const updateStatusDariMidtrans = async (transaction_id, data) => {
 //   const hash = crypto.createHash('sha512').update(`${transaction_id}${data.gross_amount}${process.env.MIDTRANS_SERVER_KEY}`).digest('hex')
@@ -541,7 +708,6 @@ async function createPembayaranOtomatis(req, res) {
 //         updateData.status = "Sudah";
 //       }
 //     } else if (transactionStatus == "settlement") {
-     
 
 //       updateData.status = "Sudah";
 //     } else if (
@@ -565,21 +731,48 @@ async function createPembayaranOtomatis(req, res) {
 
 const createNotifPembayaran = async (req, res) => {
   try {
-    const { order_id, transaction_status, fraud_status } = req.body;
+    const { order_id, transaction_status, fraud_status } =
+      req.body;
 
-    console.log(`Transaction notification received. Order ID: ${order_id}. Transaction status: ${transaction_status}. Fraud status: ${fraud_status}`);
+    console.log(
+      `Transaction notification received. Order ID: ${order_id}. Transaction status: ${transaction_status}. Fraud status: ${fraud_status}`
+    );
 
     // Log all transaction tokens for debugging
     const pembayaranEntries = await pembayaranModel.findAll({
-      attributes: ['transaction_token'],
+      attributes: ["transaction_id"],
     });
-    console.log("All transaction_tokens in database:", pembayaranEntries.map(entry => entry.transaction_token));
+    console.log(
+      "All transaction_tokens in database:",
+      pembayaranEntries.map((entry) => entry.transaction_token)
+    );
 
     // Find the pembayaran entry in the database
     const pembayaran = await pembayaranModel.findOne({
       where: {
-        transaction_token: order_id.trim(), // Ensure this matches the correct column
+        order_id:order_id, // Ensure this matches the correct column
       },
+      attributes: [
+        "id",
+        "walsan_id",
+        "tanggal",
+        "foto",
+        "status",
+        "bulan",
+        "tahun",
+        "nominal",
+        "tanggal_konfirmasi",
+        "teacher_id",
+        "no_telepon",
+        "keterangan",
+        "transaction_id",
+        "redirect_url",
+        "transaction_token",
+        "status_midtrans",
+        "created_at",
+        "updated_at",
+        "order_id",
+      ],
     });
 
     if (!pembayaran) {
@@ -598,14 +791,19 @@ const createNotifPembayaran = async (req, res) => {
     }
 
     // Prepare the data for updating the pembayaran status
-    let updateData = {};
+    let updateData = {
+      transaction_id: transaction_id,
+      status_midtrans: transaction_status,
+    };
 
     // Update logic based on transaction status
     if (transaction_status === "capture" && fraud_status === "accept") {
       updateData.status = "Sudah";
     } else if (transaction_status === "settlement") {
       updateData.status = "Sudah";
-    } else if (["cancel", "deny", "expire", "pending"].includes(transaction_status)) {
+    } else if (
+      ["cancel", "deny", "expire", "pending"].includes(transaction_status)
+    ) {
       updateData.status = "Belum";
     }
 
@@ -613,24 +811,96 @@ const createNotifPembayaran = async (req, res) => {
     await pembayaran.update(updateData);
 
     // Return a successful response
-    return res.status(201).json({ status: "Success", msg: "Berhasil Mengupdate Status Pembayaran" });
+    return res.status(201).json({
+      status: "Success",
+      msg: "Berhasil Mengupdate Status Pembayaran",
+    });
   } catch (error) {
     console.error("Error processing notification:", error);
 
     // Handle errors, specifically check for Midtrans 404 error
     if (error.httpStatusCode === 404) {
-      return res.status(404).json({ status: "Failed", message: "Error 404 Dari Midtrans" });
+      return res
+        .status(404)
+        .json({ status: "Failed", message: "Error 404 Dari Midtrans" });
     }
 
     // Handle other errors and send a 500 response
-    return res.status(500).json({ status: "fail", message: "Internal Server Error", error: error.message });
+    return res.status(500).json({
+      status: "fail",
+      message: "Internal Server Error",
+      error: error.message,
+    });
   }
 };
 
+// const createNotifPembayaran = async (req, res) => {
+//   try {
+//     const { order_id, transaction_status, fraud_status } = req.body; // Keep all three fields
 
+//     console.log(
+//       `Transaction notification received. Order ID: ${order_id}. Transaction status: ${transaction_status}. Fraud status: ${fraud_status}`
+//     );
 
+//     // Find the pembayaran entry in the database using order_id
+//     const pembayaran = await pembayaranModel.findOne({
+//       where: { order_id: order_id },
+//       attributes: [
+//         'id', 'walsan_id', 'tanggal', 'foto', 'status', 'bulan', 'tahun',
+//         'nominal', 'tanggal_konfirmasi', 'teacher_id', 'no_telepon',
+//         'keterangan', 'redirect_url', 'transaction_token',
+//         'status_midtrans', 'created_at', 'updated_at', 'order_id', 'transaction_id'
+//       ] // Look for the entry by order_id
+//     });
 
+//     if (!pembayaran) {
+//       console.error("Pembayaran not found for the given order_id:", order_id);
+//       return res.status(404).json({ error: "Pembayaran not found" });
+//     }
 
+//     console.log(`Found pembayaran for Order ID: ${order_id}`);
+
+//     // Check if the status has already been updated to avoid duplicate updates
+//     if (pembayaran.status === "Sudah" && transaction_status === "settlement") {
+//       return res.status(200).json({
+//         status: "Success",
+//         msg: "Pembayaran sudah diupdate sebelumnya",
+//       });
+//     }
+
+//     // Prepare the data for updating the pembayaran status
+//     let updateData = {};
+
+//     // Update logic based on transaction status and fraud status
+//     if (transaction_status === "capture" && fraud_status === "accept") {
+//       updateData.status = "Sudah";
+//     } else if (transaction_status === "settlement") {
+//       updateData.status = "Sudah";
+//     } else if (
+//       ["cancel", "deny", "expire", "pending"].includes(transaction_status)
+//     ) {
+//       updateData.status = "Belum";
+//     }
+
+//     // Update the pembayaran entry
+//     await pembayaran.update(updateData);
+
+//     // Return a successful response
+//     return res.status(201).json({
+//       status: "Success",
+//       msg: "Berhasil Mengupdate Status Pembayaran",
+//     });
+//   } catch (error) {
+//     console.error("Error processing notification:", error);
+
+//     // Handle errors and send a 500 response
+//     return res.status(500).json({
+//       status: "fail",
+//       message: "Internal Server Error",
+//       error: error.message,
+//     });
+//   }
+// };
 
 // Wablas
 
@@ -754,6 +1024,27 @@ async function detailPembayaranSiswa(req, res) {
       },
       limit: pageSize,
       offset: page,
+      attributes: [
+        "id",
+        "walsan_id",
+        "tanggal",
+        "foto",
+        "status",
+        "bulan",
+        "tahun",
+        "nominal",
+        "tanggal_konfirmasi",
+        "teacher_id",
+        "no_telepon",
+        "keterangan",
+        "transaction_id",
+        "redirect_url",
+        "transaction_token",
+        "status_midtrans",
+        "created_at",
+        "updated_at",
+        "order_id",
+      ],
       include: [
         {
           model: models.parent,
@@ -894,15 +1185,185 @@ async function updateResponse(req, res) {
     console.log(error);
     return res.status(403).send("Terjadi Kesalahan");
   }
+}
+async function createpdfBulanan(req, res) {
+  const { bulan, tahun } = req.query;
+  const { student_id } = req.params;
+  try {
+    const laporan = await pembayaranModel.findAll({
+      where: {
+        student_id: student_id,
+      },
+      
+      attributes: [
+        "id",
+        "walsan_id",
+        "tanggal",
+        "foto",
+        "status",
+        "bulan",
+        "tahun",
+        "nominal",
+        "tanggal_konfirmasi",
+        "teacher_id",
+        "no_telepon",
+        "keterangan",
+        "transaction_id",
+        "redirect_url",
+        "transaction_token",
+        "status_midtrans",
+        "created_at",
+        "updated_at",
+        "order_id",
+      ],
+      include: [
+        {
+          require: true,
+          as: "murid",
+          model: models.student,
+          attributes: ["id", "nama_siswa"],
+        },
+      ],
+      order: ["id", ["bulan", "ASC"]],
+    });
 
-  async function pdfBulanan (req, res) {
-    try {
-      
-    } catch (error) {
-      
-    }
+    const doc = new PDFDocument({ margin: 50 });
+
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=Laporan_Pembayaran_${bulan}_${tahun}`
+    );
+
+    doc.pipe(res);
+
+    // Kop Surat
+    doc
+      .image("assets/kop_surat.png", {
+        fit: [500, 150],
+        align: "center",
+        valign: "top",
+      })
+      .moveDown(12);
+
+    // Judul And Periode
+    doc
+      .font("Helvetica-Bold")
+      .fontSize(14)
+      .text(`Data Pembayaran SPP ${laporan[0].murid.nama_siswa} `)
+      .moveDown(5);
+
+    // Table headers
+    const tableTop = 250;
+    const colWidths = [50, 200, 200, 100];
+    const tableWidth = colWidths.reduce((a, b) => a + b, 0);
+    const startX = 50;
+    const rowHeight = 30;
+
+    doc
+      .fontSize(12)
+      .font("Helvetica-Bold")
+      .text("No.", startX, tableTop, {
+        align: "center",
+        width: colWidths[0],
+      })
+      .text("Bulan", startX + colWidths[0] + colWidths[1], tableTop, {
+        width: colWidths[1],
+        align: "center",
+      })
+      .text("Tahun", startX + colWidths[1], tableTop, {
+        width: colWidths[2],
+        align: "center",
+      })
+      .text(
+        "Status",
+        startX + colWidths[0] + colWidths[1] + colWidths[2],
+        tableTop,
+        {
+          width: colWidths[3],
+          align: "center",
+        }
+      );
+
+    doc
+      .moveTo(startX, tableTop + rowHeight)
+      .lineTo(startX + tableWidth, tableTop + rowHeight)
+      .stroke();
+
+    const drawTableBorders = (
+      startX,
+      startY,
+      colWidths,
+      rowCount,
+      rowHeight
+    ) => {
+      doc
+        .lineJoin("miter")
+        .rect(startX, startY, tableWidth, rowHeight * rowCount)
+        .stroke();
+
+      colWidths.reduce((x, width) => {
+        doc
+          .moveTo(x, startY)
+          .lineTo(x, startY + rowHeight * rowCount)
+          .stroke();
+
+        return x + width;
+      }, startX);
+      for (let i = 1; i <= rowCount; i++) {
+        doc.moveTo(startX, startY + rowHeight * i).stroke();
+      }
+    };
+
+    let position = tableTop + rowHeight;
+
+    laporan.forEach((laporan, index) => {
+      doc
+        .font("Helvetica")
+        .fontSize(10)
+        .text(`${index + 1}`, startX, position + rowHeight / 4, {
+          width: colWidths[0],
+          align: "center",
+        })
+        .text(laporan.bulan, startX + colWidths[0], position + rowHeight / 4, {
+          width: colWidths[1],
+          align: "center",
+        })
+        .text(
+          laporan.tahun,
+          startX + colWidths[0] + colWidths[1],
+          position + rowHeight / 4,
+          {
+            width: colWidths[2],
+            align: "center",
+          }
+        )
+        .text(
+          laporan.status,
+          startX + colWidths[0] + colWidths[1] + colWidths[2],
+          position + rowHeight / 4,
+          {
+            width: colWidths[3],
+            align: "center",
+          }
+        );
+
+      position += rowHeight;
+    });
+
+    drawTableBorders(
+      startX,
+      tableTop + rowHeight,
+      colWidths,
+      laporan.length,
+      rowHeight
+    );
+
+    doc.end();
+  } catch (error) {
+    console.error("Terjadi Kesalahan:", error);
+    res.status(500).json({ msg: "Terjadi Kesalahan Di Dalam Server" });
   }
-} 
+}
 
 module.exports = {
   createKartuSpp,
@@ -915,4 +1376,5 @@ module.exports = {
   detailPembayaranSiswa,
   createPembayaranOtomatis,
   createNotifPembayaran,
+  createpdfBulanan,
 };
