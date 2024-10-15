@@ -1,32 +1,15 @@
 pipeline {
 agent any
 stages{
-stage('Checkout'){
-steps{
-git url: 'https://github.com/ihsanabuhanifah/node-mysmk-be.git', branch: 'main'
- }
-}
-
-stage('Build'){
-steps{
-sh 'docker build . -t rehan26/be-mysmk:latest'
- }
-}
-
-stage('Push'){
-steps{
-sh "docker login -u rehan26 -p dckr_pat_OqA5ij3Deu8kOUlytCHFj_WnH1U"
-sh 'docker push rehan26/be-mysmk:latest'
- }
-}
 
 stage('Deploy'){
 steps{
 echo 'deploying on another server'
 sh '''
-ssh -i /var/jenkins_home/.ssh/remotekey student@devopsgeming.online <<EOF
-docker login -u rehan26 -p dckr_pat_OqA5ij3Deu8kOUlytCHFj_WnH1U
-cd ~/be-mysmk-tes
+ssh student@devopsgeming.online <<EOF
+cd ~/node-mysmk-be/node-mysmk-be
+sudo git pull
+cd ~/node-mysmk-be
 docker compose up --build -d
 '''
      }
