@@ -740,7 +740,7 @@ const createNotifPembayaran = async (req, res) => {
 
     // Log all transaction tokens for debugging
     const pembayaranEntries = await pembayaranModel.findAll({
-      attributes: ["transaction_id"],
+      attributes: ["order_id"],
     });
     console.log(
       "All transaction_tokens in database:",
@@ -792,7 +792,6 @@ const createNotifPembayaran = async (req, res) => {
 
     // Prepare the data for updating the pembayaran status
     let updateData = {
-      transaction_id: transaction_id,
       status_midtrans: transaction_status,
     };
 
