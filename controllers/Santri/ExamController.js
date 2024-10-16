@@ -15,12 +15,20 @@ const NilaiController = require("../../models").nilai;
 const BankSoalController = require("../../models").bank_soal;
 const StudentModel = require("../../models").kelas_student;
 
-
 const response = new RESPONSE_API();
+
+const orderStatus = Sequelize.literal(`
+  CASE 
+    WHEN nilai.status = 'progress' THEN 1 
+    WHEN nilai.status = 'open' THEN 2 
+    WHEN nilai.status = 'finish' THEN 3 
+    ELSE 4 
+  END
+`);
 
 const getExam = response.requestResponse(async (req, res) => {
   let { page, pageSize, status, nama_mapel, judul_ujian } = req.query;
-
+  console.log(page, pageSize)
   const exam = await NilaiController.findAndCountAll({
     ...(pageSize !== undefined && { limit: pageSize }),
     ...(page !== undefined && { offset: page }),
@@ -28,7 +36,6 @@ const getExam = response.requestResponse(async (req, res) => {
       ...(checkQuery(status) && {
         status: status,
       }),
-
       student_id: req.student_id,
     },
     attributes: {
@@ -88,7 +95,7 @@ const getExam = response.requestResponse(async (req, res) => {
         order: [["urutan", "asc"]],
       },
     ],
-    order: [["id", "desc"]],
+    order: [orderStatus, ["id", "desc"]],
     limit: pageSize,
     offset: page,
   });
@@ -96,11 +103,9 @@ const getExam = response.requestResponse(async (req, res) => {
   return {
     msg: "Data Ujian berhasil ditemukan",
     data: exam,
-    limit: pageSize,
-    offset: page,
-
     page: req.page,
     pageSize: pageSize,
+		totalPage: Math.ceil(exam.count / pageSize),
   };
 });
 
@@ -522,4 +527,3 @@ const notifExam = response.requestResponse(async (req, res) => {
 });
 
 module.exports = { getExam, takeExam, submitExam, progressExam, notifExam };
-

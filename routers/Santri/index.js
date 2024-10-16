@@ -28,6 +28,7 @@ const {
   takeExam,
   submitExam,
   progressExam,
+  notifExam,
 } = require("../../controllers/Santri/ExamController");
 const { listHasilUjain } = require("../../controllers/Santri/HasilUjian");
 const { listTidakHadir } = require("../../controllers/Santri/Absensi");
@@ -90,6 +91,7 @@ santri.get("/exam/list", getExam);
 santri.put("/exam/take/:id", takeExam);
 santri.put("/exam/progress", progressExam);
 santri.put("/exam/submit", submitExam);
+santri.get("/exam/notif", notifExam)
 santri.get("/hasil-belajar", getHasilBelajar);
 santri.get("/hasil-belajar-detail/:id", detailHasilBelajar);
 santri.get('/hasil-belajar-detail/:id/:ta_id', detailHasilBelajar)
