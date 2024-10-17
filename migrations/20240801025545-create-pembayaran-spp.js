@@ -9,6 +9,7 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
+
       student_id: {
         type: Sequelize.INTEGER,
         onDelete: "RESTRICT",
@@ -18,6 +19,7 @@ module.exports = {
           as: "student_id"
         }
       },
+
       walsan_id: {
         type: Sequelize.INTEGER,
         onDelete: "RESTRICT",
