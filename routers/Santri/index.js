@@ -12,6 +12,7 @@ const {
   laporanPklList,
   detailLaporanPkl,
   downloadPdf,
+  downloadLaporanBulanan
 } = require("../../controllers/Santri/LaporanHarianPklController");
 
 const {
@@ -28,6 +29,10 @@ const {
   submitExam,
   progressExam,
 } = require("../../controllers/Santri/ExamController");
+const { listHasilUjain } = require("../../controllers/Santri/HasilUjian");
+const { listTidakHadir } = require("../../controllers/Santri/Absensi");
+
+
 
 const validateUpdate = [
   check("nama_siswa")
@@ -87,6 +92,9 @@ santri.put("/exam/progress", progressExam);
 santri.put("/exam/submit", submitExam);
 santri.get("/hasil-belajar", getHasilBelajar);
 santri.get("/hasil-belajar-detail/:id", detailHasilBelajar);
+santri.get('/hasil-belajar-detail/:id/:ta_id', detailHasilBelajar)
+santri.get('/hasil-ujian', listHasilUjain)
+santri.get('/tidakhadir', listTidakHadir)
 
 // Laporan Harian pkl
 
@@ -95,6 +103,7 @@ santri.put("/laporan-harian-pkl/update/:id", updateLaporanPkl);
 santri.get("/laporan-harian-pkl/list", laporanPklList);
 santri.get("/laporan-harian-pkl/detail/:id", detailLaporanPkl);
 santri.get("/laporan-harian-pkl/downdload-pdf", downloadPdf);
+santri.get("/laporan-harian-pkl/downdload-pdf-bulanan", downloadLaporanBulanan);
 
 // Laporan Diniyyah
 santri.post("/laporan-diniyyah/create", createLaporanDiniyyah);

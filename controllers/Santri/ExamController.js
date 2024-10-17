@@ -1,12 +1,15 @@
 const studentModel = require("../../models").student;
-
+const mapelModel = require("../../models").mapel;
+const Sequelize = require("sequelize");
 const models = require("../../models");
 const UjianController = require("../../models").ujian;
 const { Op, where } = require("sequelize");
 const { RESPONSE_API } = require("../../utils/response");
+
 const {
   calculateMinutesDifference,
   calculateWaktuSelesai,
+  checkQuery,
 } = require("../../utils/format");
 const NilaiController = require("../../models").nilai;
 const BankSoalController = require("../../models").bank_soal;
@@ -16,15 +19,20 @@ const StudentModel = require("../../models").kelas_student;
 const response = new RESPONSE_API();
 
 const getExam = response.requestResponse(async (req, res) => {
-  const { page, pageSize } = req.query;
+  let { page, pageSize, status, nama_mapel, judul_ujian } = req.query;
+
   const exam = await NilaiController.findAndCountAll({
     ...(pageSize !== undefined && { limit: pageSize }),
     ...(page !== undefined && { offset: page }),
     where: {
+      ...(checkQuery(status) && {
+        status: status,
+      }),
+
       student_id: req.student_id,
     },
     attributes: {
-      exclude: "jawaban",
+      exclude: ["jawaban", "urutan"],
     },
     include: [
       {
@@ -34,7 +42,27 @@ const getExam = response.requestResponse(async (req, res) => {
         attributes: ["id", "nama_guru"],
       },
       {
+        model: mapelModel,
+        as: 'mapel',
+        where: {
+          ...(checkQuery(nama_mapel) && {
+            nama_mapel: nama_mapel
+          }) 
+        },
+        attributes: {
+          exclude: 'mapel_id',
+          include: 'id'
+        }
+      },
+      {
         model: models.ujian,
+        where: {
+          ...(checkQuery(judul_ujian) && {
+            judul_ujian: {
+              [Op.substring]: judul_ujian
+            }
+          }),
+        },
         require: true,
         as: "ujian",
         attributes: [
@@ -45,6 +73,9 @@ const getExam = response.requestResponse(async (req, res) => {
           "waktu_selesai",
           "status",
           "durasi",
+          "judul_ujian",
+          "is_hirarki",
+          "urutan"
         ],
         include: [
           {
@@ -54,6 +85,7 @@ const getExam = response.requestResponse(async (req, res) => {
             attributes: ["id", "nama_mapel"],
           },
         ],
+        order: [["urutan", "asc"]],
       },
     ],
     order: [["id", "desc"]],
@@ -432,4 +464,62 @@ const progressExam = response.requestResponse(async (req, res) => {
   };
 });
 
-module.exports = { getExam, takeExam, submitExam, progressExam };
+const notifExam = response.requestResponse(async (req, res) => {
+  const exam = await NilaiController.findAndCountAll({
+    where: {
+      student_id: req.student_id,
+      status: 'open'
+    },
+    attributes: {
+      exclude: ["jawaban", "urutan"],
+    },
+    include: [
+      {
+        model: models.teacher,
+        require: true,
+        as: "teacher",
+        attributes: ["id", "nama_guru"],
+      },
+      {
+        model: mapelModel,
+        as: 'mapel',
+        attributes: {
+          exclude: 'mapel_id',
+          include: 'id'
+        }
+      },
+      {
+        model: models.ujian,
+        require: true,
+        as: "ujian",
+        attributes: [
+          "id",
+          "jenis_ujian",
+          "tipe_ujian",
+          "waktu_mulai",
+          "waktu_selesai",
+          "status",
+          "durasi",
+          "judul_ujian",
+          "is_hirarki",
+          "urutan"
+        ],
+        include: [
+          {
+            model: models.mapel,
+            require: true,
+            as: "mapel",
+            attributes: ["id", "nama_mapel"],
+          },
+        ],
+      },
+    ],
+  });
+
+  return {
+    list: exam
+  }
+});
+
+module.exports = { getExam, takeExam, submitExam, progressExam, notifExam };
+
