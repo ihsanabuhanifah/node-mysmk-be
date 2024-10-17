@@ -373,8 +373,7 @@ guru.get("/pembayaran/detail/:id", detailPembayaran);
 guru.put("/pembayaran/update", updateResponse);
 
 // siswa
-guru.get("/siswa/daftarSpp", daftarSiswa);
-guru.get("/siswa/listPembayaran/:student_id", detailPembayaranSiswa);
+
 
 // Notification
 guru.post("/pesan/create", createNotification);
