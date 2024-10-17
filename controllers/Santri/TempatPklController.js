@@ -8,6 +8,7 @@ const lokasiTempatPkl = response.requestResponse(async (req, res) => {
     where: {
       student_id: req.student_id,
     },
+
     attributes: [
       "id",
       "nama_siswa",
@@ -23,6 +24,7 @@ const lokasiTempatPkl = response.requestResponse(async (req, res) => {
       "rw",
       "kode_pos",
     ],
+
     include: [
       {
         require: true,
@@ -38,7 +40,7 @@ const lokasiTempatPkl = response.requestResponse(async (req, res) => {
   };
 });
 
-
 module.exports = {
-    lokasiTempatPkl
-}
+  lokasiTempatPkl,
+};
+

@@ -9,14 +9,33 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      
+
+      student_id: {
+        type: Sequelize.INTEGER,
+        onDelete: "RESTRICT",
+        references: {
+          model: "students",
+          key: "id",
+          as: "student_id"
+        }
+      },
+
       walsan_id: {
         type: Sequelize.INTEGER,
-        onDelete: "CASCADE",
+        onDelete: "RESTRICT",
         references: {
           model: "parents",
           key: "id",
           as: "walsan_id"
+        }
+      },
+      ta_id: {
+        type:Sequelize.INTEGER,
+        onDelete: "RESTRICT",
+        references: {
+          model: "ta",
+          key: "id",
+          as: "ta_id"
         }
       },
       tanggal: {
@@ -26,12 +45,31 @@ module.exports = {
         type: Sequelize.STRING
       },
       status: {
-        type: Sequelize.STRING
+        type: Sequelize.ENUM("Sudah", "Belum")
       },
       bulan: {
         type: Sequelize.STRING
       },
       tahun: {
+        type: Sequelize.STRING
+      },
+      nominal : {
+        type: Sequelize.DECIMAL(10, 2)
+      },
+      tanggal_konfirmasi:{
+        allowNull: false,
+        type: Sequelize.DATE
+      },
+      teacher_id: {
+        type: Sequelize.INTEGER,
+        onDelete: "RESTRICT",
+        references: {
+          model: 'teachers',
+          key: "id",
+          as: "teacher_id"
+        }
+      },
+      no_telepon: {
         type: Sequelize.STRING
       },
       created_at: {

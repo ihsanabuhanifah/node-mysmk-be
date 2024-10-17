@@ -394,7 +394,7 @@ async function uploadImage(req, res) {
     }
 
     console.log("req", req.file);
-    url = `${req.protocol}://${req.get("host")}/${req.file.filename}`;
+    url = `${process.env.BASE_FILE_URL}/${req.file.filename}`;
     res.json({
       status: "Success",
       msg: "Rombel Berhasil dibuat",
