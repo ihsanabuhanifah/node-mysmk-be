@@ -149,6 +149,9 @@ const {
   submitByAdmin,
 } = require("../../controllers/Guru/KehadiranGuruController");
 const adminAccessMiddleware = require("../../middleware/adminAccessMiddleware");
+const { getListWali, createBulkWali, updateWali, detailWali } = require("../../controllers/Guru/WaliController");
+const { ListPembayaran, createKartuSpp, updateAprroval, createpdfBulanan, detailPembayaranSiswa, daftarSiswa, updateResponse, detailPembayaran, createNotification } = require("../../controllers/Wali/PembayaranController");
+
 const {
   getListWali,
   updateWali,
@@ -339,6 +342,20 @@ guru.post(
   createBulkExcel
 );
 
+// Pembayaran
+guru.get("/pembayaran/list", ListPembayaran);
+guru.post("/pembayaran/createKartu", createKartuSpp);
+guru.get("/pembayaran/detail/:id", detailPembayaran);
+guru.put("/pembayaran/update", updateResponse);
+
+// siswa
+guru.get("/siswa/daftarSpp", daftarSiswa);
+guru.get("/siswa/listPembayaran/:student_id", detailPembayaranSiswa);
+guru.post("/laporan/:student_id", createpdfBulanan);
+
+// Notification
+guru.post("/pesan/create", createNotification);
+
 // Walisantri
 
 // Laporan harian pkl
@@ -371,5 +388,6 @@ guru.get("/walisantri/list", getListWali);
 guru.post("/walisantri/create", createBulkWali);
 guru.get("/laporan-harian-pkl/list", laporanPklList);
 guru.get("/laporan-harian-pkl/detail/:id", detailLaporanPkl);
+
 
 module.exports = guru;
