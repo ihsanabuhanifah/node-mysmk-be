@@ -98,8 +98,7 @@ const createKartuSpp = async (req, res) => {
                 nominal: item.nominal,
                 status: "Belum",
                 bulan: month,
-                tahun: year,
-                teacher_id: req.id,
+                tahun: year
               };
             });
 
