@@ -62,7 +62,7 @@ santri.post("/jawaban-tugas-pkl/create", createJawabanTugasPkl);
 santri.put("/jawaban-tugas-pkl/update/:id", updateJawabanTugasPkl);
 santri.get("/jawaban-tugas-pkl/detail/:id", getDetailJawabanTugasPkl);
 // jawaban tugas pkl
-
+  
 santri.get("/tugas-pkl/list", tugasPklList),
 santri.get("/tugas-pkl/detail/:id", getTugasPklById),
 

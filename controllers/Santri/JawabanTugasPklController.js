@@ -54,7 +54,7 @@ const getDetailJawabanTugasPkl = response.requestResponse(async (req, res) => {
   const { id } = req.params;
 
   const jawabanTugas = await JawabanTugasPklModel.findOne({
-    where: { id },
+    where: { tugas_pkl_id: id },
     include: [
       {
         model: StudentModel,

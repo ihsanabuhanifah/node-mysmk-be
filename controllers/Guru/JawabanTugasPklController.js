@@ -125,7 +125,7 @@ const getJawabanByTugasPklId = response.requestResponse(async (req, res) => {
         as: "siswa",
         attributes: ["id", "nama_siswa"],
       },
-    ],
+    ],  
   });
 
   if (jawabanList.length === 0) {

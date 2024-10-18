@@ -43,6 +43,11 @@ const tugasPklList = response.requestResponse(async (req, res) => {
     data: rows,
     page: req.page,
     pageSize: pageSize,
+    pagination: {
+      page: req.page,
+      pageSize: pageSize,
+      total: count,
+    },
   };
 });
 const getTugasPklById = response.requestResponse(async (req, res) => {
