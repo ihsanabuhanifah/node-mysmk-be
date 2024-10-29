@@ -750,28 +750,7 @@ const createNotifPembayaran = async (req, res) => {
     const pembayaran = await pembayaranModel.findOne({
       where: {
         order_id:order_id, // Ensure this matches the correct column
-      },
-      attributes: [
-        "id",
-        "walsan_id",
-        "tanggal",
-        "foto",
-        "status",
-        "bulan",
-        "tahun",
-        "nominal",
-        "tanggal_konfirmasi",
-        "teacher_id",
-        "no_telepon",
-        "keterangan",
-        "transaction_id",
-        "redirect_url",
-        "transaction_token",
-        "status_midtrans",
-        "created_at",
-        "updated_at",
-        "order_id",
-      ],
+      }
     });
 
     if (!pembayaran) {

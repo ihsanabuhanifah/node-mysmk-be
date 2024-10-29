@@ -23,10 +23,10 @@ router.get("/", (req, res) => {
 });
 const jwtValidateMiddleware = require("../middleware/jwtValidateMiddleware");
 const paginationMiddleware = require("../middleware/paginationMiddleware");
-const { createPembayaranOtomatis } = require("../controllers/Wali/PembayaranController");
+const {createNotifPembayaran } = require("../controllers/Wali/PembayaranController");
 
 router.use("/landingPage", landingPageRouter);
-router.post("/pembayaran/notification", createPembayaranOtomatis)
+router.post("/pembayaran/notification", createNotifPembayaran)
 router.use(authRouter);
 router.use(importRouter);
 router.use(jwtValidateMiddleware);
