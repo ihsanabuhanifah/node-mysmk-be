@@ -198,7 +198,6 @@ guru.put("/submit-izin/kehadiran", submitIzin);
 guru.put("/submit-by-Admin/kehadiran", adminAccessMiddleware, submitByAdmin);
 
 //role
-
 guru.get("/get-role-guru", getRole);
 guru.put("/token/save", saveToken);
 //jadwal
