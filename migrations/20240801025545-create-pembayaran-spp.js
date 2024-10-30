@@ -86,3 +86,5 @@ module.exports = {
     await queryInterface.dropTable('pembayaran_spps');
   }
 };
+
+// 

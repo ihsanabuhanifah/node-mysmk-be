@@ -99,6 +99,7 @@ const createKartuSpp = async (req, res) => {
                 status: "Belum",
                 bulan: month,
                 tahun: year,
+
               };
             });
 
