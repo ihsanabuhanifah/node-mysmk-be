@@ -98,7 +98,8 @@ const createKartuSpp = async (req, res) => {
                 nominal: item.nominal,
                 status: "Belum",
                 bulan: month,
-                tahun: year
+                tahun: year,
+
               };
             });
 
@@ -1341,6 +1342,8 @@ async function createpdfBulanan(req, res) {
     res.status(500).json({ msg: "Terjadi Kesalahan Di Dalam Server" });
   }
 }
+
+
 
 module.exports = {
   createKartuSpp,
