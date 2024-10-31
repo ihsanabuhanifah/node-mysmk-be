@@ -17,6 +17,10 @@ const {
   createPembayaran,
   getDetailPembayaran,
   listPembayaran,
+  createPembayaranPendaftaran,
+  createBayarUlang,
+  listBayarUlang,
+  getDetailBayarUlang,
 } = require("../../controllers/ppdb/pembayaranPpdbController");
 const { listMapel } = require("../../controllers/ppdb/ujianPPDBController");
 const {
@@ -104,9 +108,13 @@ ppdb.get("/detail", getDetailCalsan);
 ppdb.get("/detail-calsan/:id", detailCalsan);
 
 //pembayaran
-ppdb.post("/pembayaran-ppdb", createPembayaran);
+ppdb.post("/pembayaran-ppdb", createPembayaranPendaftaran);
 ppdb.get("/pembayaran-ppdb/detail", getDetailPembayaran);
 ppdb.get("/pembayaran-ppdb/list", listPembayaran);
+//Bayar ulang
+ppdb.post("/bayar-ulang", createBayarUlang);
+ppdb.get("/bayar-ulang/detail", getDetailBayarUlang);
+ppdb.get("/bayar-ulang/list", listBayarUlang);
 
 //List ujian ppdb
 ppdb.get("/mapel", listMapel);

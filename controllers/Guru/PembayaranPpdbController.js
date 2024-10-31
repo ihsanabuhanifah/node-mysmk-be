@@ -138,9 +138,47 @@ const konfirmasiPembayaran = async (req, res) => {
     });
   }
 };
+const konfirmasiPembayaranUlang = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    const pembayaran = await pembayaranPpdb.findOne({
+      where: { id, keterangan: "bayar ulang" },
+    });
+
+    if (!pembayaran) {
+      return res.status(404).json({
+        message: "Pembayaran ulang tidak ditemukan.",
+      });
+    }
+
+    if (status !== undefined && (status === 0 || status === 1)) {
+      pembayaran.status = status;
+      await pembayaran.save();
+
+      return res.status(200).json({
+        message: "Pembayaran ulang berhasil dikonfirmasi.",
+        data: pembayaran,
+      });
+    } else {
+      return res.status(400).json({
+        message: "Status yang diberikan tidak valid. Gunakan 0 atau 1.",
+      });
+    }
+  } catch (error) {
+    console.error("Error konfirmasi pembayaran ulang:", error);
+    return res.status(500).json({
+      message: "Ada kesalahan",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   updatePembayaranPpdb,
   listPembayaran,
   konfirmasiPembayaran,
-  deletePembayaranPpdb
+  deletePembayaranPpdb,
+  konfirmasiPembayaranUlang
 };

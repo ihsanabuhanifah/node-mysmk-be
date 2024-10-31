@@ -174,6 +174,7 @@ const {
   listPembayaran,
   konfirmasiPembayaran,
   deletePembayaranPpdb,
+  konfirmasiPembayaranUlang,
 } = require("../../controllers/Guru/PembayaranPpdbController");
 const {
   listCalonSantri,
@@ -339,6 +340,7 @@ guru.put("/pembayaran-ppdb/update/:id", updatePembayaranPpdb);
 guru.get("/pembayaran-ppdb/list", listPembayaran);
 guru.put("/pembayaran-ppdb/konfirmasi/:id", konfirmasiPembayaran);
 guru.delete("/pembayaran-ppdb/delete/:id", deletePembayaranPpdb);
+guru.put('/bayar-ulang/konfirmasi/:id',konfirmasiPembayaranUlang)
 
 //Calon Santri
 guru.get("/list-calsan", listCalonSantri);
