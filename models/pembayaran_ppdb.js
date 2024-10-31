@@ -9,7 +9,10 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      pembayaran_ppdb.belongsTo(models.user, { as:'user', foreignKey: "user_id" });
+      pembayaran_ppdb.belongsTo(models.user, {
+        as: "user",
+        foreignKey: "user_id",
+      });
       pembayaran_ppdb.belongsTo(models.teacher, {
         as: "guru",
         foreignKey: "teacher_id",
@@ -23,7 +26,10 @@ module.exports = (sequelize, DataTypes) => {
       nominal: DataTypes.DECIMAL(12, 2),
       teacher_id: DataTypes.INTEGER,
       bukti_tf: DataTypes.STRING,
-      keterangan: DataTypes.STRING,
+      keterangan: {
+        type: DataTypes.ENUM,
+        values: ["biaya pendaftaran", "bayar ulang"],
+      },
       status: {
         type: DataTypes.TINYINT,
         defaultValue: 0,

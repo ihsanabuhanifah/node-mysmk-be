@@ -8,6 +8,29 @@ const createPembayaran = async (req, res) => {
     const { bukti_tf, nominal, teacher_id, keterangan } = req.body;
     const user_id = req.id;
 
+    const wawancara = await models.wawancara.findOne({
+      where: { user_id },
+    });
+
+    if (!wawancara) {
+      return res.status(404).json({
+        message: "Wawancara tidak ditemukan.",
+      });
+    }
+
+    if (!wawancara.is_lulus) {
+      return res.status(400).json({
+        message: "Pembayaran ulang hanya dapat dilakukan jika wawancara lulus.",
+      });
+    }
+
+    if (wawancara.status_tes !== "sudah") {
+      return res.status(400).json({
+        message:
+          "Pembayaran Ulang hanya dapat dilakukan jika sudah melaksanan tes",
+      });
+    }
+
     const bayar = await pembayaranPpdb.create({
       user_id,
       bukti_tf,

@@ -18,6 +18,11 @@ const {
   getDetailPembayaran,
   listPembayaran,
 } = require("../../controllers/ppdb/pembayaranPpdbController");
+const { listMapel } = require("../../controllers/ppdb/ujianPPDBController");
+const {
+  createWawancara,
+  detailWawancara,
+} = require("../../controllers/ppdb/wawancaraController");
 
 const validation = [
   check("nama_siswa")
@@ -98,9 +103,16 @@ ppdb.put("/update/:id", validation, validateFields, updateInfoCalsan);
 ppdb.get("/detail", getDetailCalsan);
 ppdb.get("/detail-calsan/:id", detailCalsan);
 
-
 //pembayaran
 ppdb.post("/pembayaran-ppdb", createPembayaran);
 ppdb.get("/pembayaran-ppdb/detail", getDetailPembayaran);
 ppdb.get("/pembayaran-ppdb/list", listPembayaran);
+
+//List ujian ppdb
+ppdb.get("/mapel", listMapel);
+
+//Wawancara
+ppdb.post("/wawancara/create", createWawancara);
+ppdb.get("/wawancara/detail", detailWawancara);
+
 module.exports = ppdb;
