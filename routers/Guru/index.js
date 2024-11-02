@@ -181,6 +181,7 @@ const {
 } = require("../../controllers/Guru/RaportController");
 const { profile } = require("../../controllers/Guru/ProfileController");
 const { listHasilUjain } = require("../../controllers/Guru/HasilUjian");
+const { createWaktuSholat, cekWaktuSholat, listWaktuSholat } = require("../../controllers/Guru/KehadiranSholats");
 
 guru.use(guruAccessMiddleware);
 
@@ -280,6 +281,9 @@ guru.delete("/siswa/kelas/delete/:id", deleteSiswaKelas);
 guru.get("/siswa/hasil-belajar/:id", getHasilBelajar);
 guru.get("/siswa/detail-hasil-belajar/:id/:id_siswa", detailHasilBelajar);
 guru.get("/siswa/hasil-ujian/:id", listHasilUjain);
+guru.post("/createwaktusholat", createWaktuSholat);
+guru.get("/cekwaktusholat/:waktu", cekWaktuSholat);
+guru.get("/listwaktusholat", listWaktuSholat);
 
 //list
 
