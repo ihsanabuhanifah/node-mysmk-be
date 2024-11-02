@@ -160,53 +160,7 @@ const listPembayaran = async (req, res) => {
     res.status(403).send("Terjadi Kesalahan");
   }
 };
-const listBayarUlang = async (req, res) => {
-  const { page, pageSize } = req.query;
-  try {
-    const list = await pembayaranPpdb.findAndCountAll({
-      where: { keterangan: "bayar ulang" }, // Filter untuk keterangan "bayar ulang"
-      ...(pageSize !== undefined && { limit: pageSize }),
-      ...(page !== undefined && { offset: page }),
-      include: [
-        {
-          model: models.teacher,
-          required: true,
-          as: "guru",
-          attributes: ["id", "nama_guru"],
-        },
-        {
-          model: models.user,
-          required: true,
-          as: "user",
-          attributes: ["id", "name"],
-        },
-      ],
-      order: [["id", "ASC"]],
-    });
 
-    if (list.count === 0) {
-      return res.json({
-        status: "Success",
-        msg: "Tidak ditemukan pembayaran ulang.",
-        data: [],
-      });
-    }
-
-    return res.json({
-      status: "Success",
-      msg: "Berhasil menemukan pembayaran ulang!",
-      data: list,
-      offset: page,
-      limit: pageSize,
-    });
-  } catch (error) {
-    console.error("Error mendapatkan list pembayaran ulang:", error);
-    return res.status(500).json({
-      message: "Ada kesalahan",
-      error: error.message,
-    });
-  }
-};
 const getDetailBayarUlang = async (req, res) => {
   try {
     const user_id = req.id;
@@ -251,6 +205,5 @@ module.exports = {
   getDetailPembayaran,
   listPembayaran,
   createBayarUlang,
-  listBayarUlang,
   getDetailBayarUlang,
 };

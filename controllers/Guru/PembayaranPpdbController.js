@@ -77,10 +77,10 @@ const listPembayaran = async (req, res) => {
           attributes: ["id", "nama_guru"],
         },
         {
-          model: models.user,
+          model: models.informasi_calon_santri,
           required: true,
-          as: "user",
-          attributes: ["name"],
+          as: "calon_santri",
+          attributes: ["nama_siswa"],
         },
       ],
       order: ["id"],
@@ -102,6 +102,53 @@ const listPembayaran = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(403).send("Terjadi Kesalahan");
+  }
+};
+const listBayarUlang = async (req, res) => {
+  const { page, pageSize } = req.query;
+  try {
+    const list = await pembayaranPpdb.findAndCountAll({
+      where: { keterangan: "bayar ulang" }, // Filter untuk keterangan "bayar ulang"
+      ...(pageSize !== undefined && { limit: pageSize }),
+      ...(page !== undefined && { offset: page }),
+      include: [
+        {
+          model: models.teacher,
+          required: true,
+          as: "guru",
+          attributes: ["id", "nama_guru"],
+        },
+        {
+          model: models.informasi_calon_santri,
+          required: true,
+          as: "calon_santri",
+          attributes: ["nama_siswa"],
+        },
+      ],
+      order: [["id", "ASC"]],
+    });
+
+    if (list.count === 0) {
+      return res.json({
+        status: "Success",
+        msg: "Tidak ditemukan pembayaran ulang.",
+        data: [],
+      });
+    }
+
+    return res.json({
+      status: "Success",
+      msg: "Berhasil menemukan pembayaran ulang!",
+      data: list,
+      offset: page,
+      limit: pageSize,
+    });
+  } catch (error) {
+    console.error("Error mendapatkan list pembayaran ulang:", error);
+    return res.status(500).json({
+      message: "Ada kesalahan",
+      error: error.message,
+    });
   }
 };
 const konfirmasiPembayaran = async (req, res) => {
@@ -180,5 +227,6 @@ module.exports = {
   listPembayaran,
   konfirmasiPembayaran,
   deletePembayaranPpdb,
-  konfirmasiPembayaranUlang
+  konfirmasiPembayaranUlang,
+  listBayarUlang
 };

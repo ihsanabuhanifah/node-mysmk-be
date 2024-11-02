@@ -114,7 +114,7 @@ ppdb.get("/pembayaran-ppdb/list", listPembayaran);
 //Bayar ulang
 ppdb.post("/bayar-ulang", createBayarUlang);
 ppdb.get("/bayar-ulang/detail", getDetailBayarUlang);
-ppdb.get("/bayar-ulang/list", listBayarUlang);
+// ppdb.get("/bayar-ulang/list", listBayarUlang);
 
 //List ujian ppdb
 ppdb.get("/mapel", listMapel);
