@@ -16,6 +16,10 @@ module.exports = (sequelize, DataTypes) => {
         as: "guruWawancara",
         onDelete: "CASCADE",
       });
+      wawancara.belongsTo(models.informasi_calon_santri, {
+        foreignKey: "informasi_calon_santri_id",
+        as: "informasi_calon_santri",
+      });
     }
   }
 

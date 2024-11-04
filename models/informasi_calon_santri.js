@@ -13,6 +13,10 @@ module.exports = (sequelize, DataTypes) => {
         as: "tahun_ajaran",
         foreignKey: "ta_id",
       });
+      informasi_calon_santri.hasOne(models.wawancara, {
+        as: "wawancara",
+        foreignKey: "id",
+      });
     }
   }
   informasi_calon_santri.init(
@@ -43,9 +47,9 @@ module.exports = (sequelize, DataTypes) => {
       ta_id: DataTypes.INTEGER,
       exam: DataTypes.TEXT,
       status_ujian: {
-        type: DataTypes.ENUM('Sudah', 'Belum'),
+        type: DataTypes.ENUM("Sudah", "Belum"),
         allowNull: false,
-        defaultValue: 'Belum',
+        defaultValue: "Belum",
       },
     },
     {

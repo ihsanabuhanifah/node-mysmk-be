@@ -4,10 +4,6 @@ const models = require("../../models");
 const listCalonSantri = async (req, res) => {
   const { page, pageSize, nama_siswa, tahun_ajaran, sekolah_asal } = req.query;
   try {
-
-    
-
-
     const list = await info_calsan.findAndCountAll({
       ...(pageSize !== undefined && { limit: pageSize }),
       ...(page !== undefined && { offset: page }),
@@ -32,6 +28,12 @@ const listCalonSantri = async (req, res) => {
               },
             }),
           },
+        },
+        {
+          model: models.wawancara,
+          required: true,
+          as: "wawancara",
+          attributes: ["id", "status_tes", "is_lulus", "is_batal"],
         },
       ],
       order: [["id", "ASC"]],
