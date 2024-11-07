@@ -4,7 +4,7 @@ module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable("jawaban_tugas_pkls", {
       id: {
-        allowNull: false,
+        allowNull: true,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER,
@@ -13,23 +13,23 @@ module.exports = {
         type: Sequelize.STRING,
       },
       created_at: {
-        allowNull: false,
+        allowNull: true,
         type: Sequelize.DATE,
       },
       updated_at: {
-        allowNull: false,
+        allowNull: true,
         type: Sequelize.DATE,
       },
       tanggal: {
-        allowNull: false,
+        allowNull: true,
         type: Sequelize.DATEONLY,
       },
       pesan: {
-        allowNull: false,
+        allowNull: true,
         type: Sequelize.STRING,
       },
       status: {
-        allowNull: false,
+        allowNull: true,
         type: Sequelize.ENUM("selesai", "revisi", "gagal"),
       },
 

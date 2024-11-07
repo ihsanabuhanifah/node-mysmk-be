@@ -26,6 +26,7 @@ const createTugasPkl = response.requestResponse(async (req, res) => {
 
 const tugasPklList = response.requestResponse(async (req, res) => {
   const { page, pageSize, dariTanggal, sampaiTanggal, nama_siswa } = req.query;
+  
   const { count, rows } = await TugasPklModel.findAndCountAll({
     where: {
       ...(checkQuery(dariTanggal) && {
@@ -72,7 +73,6 @@ const getTugasPklById = response.requestResponse(async (req, res) => {
         model: TeacherModel,
         attributes: ["id", "nama_guru"],
       },
-     
     ],
   });
   if (!tugasPkl) {
@@ -125,6 +125,8 @@ const deleteTugasPkl = response.requestResponse(async (req, res) => {
     message: "Data Tugas Berhasil Dihapus",
   };
 });
+
+
 
 module.exports = {
   createTugasPkl,

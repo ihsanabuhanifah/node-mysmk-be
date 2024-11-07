@@ -118,14 +118,14 @@ const getJawabanByTugasPklId = response.requestResponse(async (req, res) => {
   const { tugas_pkl_id } = req.params;
 
   const jawabanList = await JawabanTugasPklModel.findAll({
-    where: { tugas_pkl_id : tugas_pkl_id },
+    where: { tugas_pkl_id: tugas_pkl_id },
     include: [
       {
         model: StudentModel,
         as: "siswa",
         attributes: ["id", "nama_siswa"],
       },
-    ],  
+    ],
   });
 
   if (jawabanList.length === 0) {
@@ -143,10 +143,71 @@ const getJawabanByTugasPklId = response.requestResponse(async (req, res) => {
     data: jawabanList,
   };
 });
+const getJawabanByTugasId = response.requestResponse(async (req, res) => {
+  const { tugas_pkl_id } = req.params;
+
+  try {
+    // Ambil semua siswa yang dibimbing oleh teacher_id tertentu menggunakan asosiasi dari model tempat_pkl
+    const students = await StudentModel.findAll({
+      include: [
+        {
+          model: TempatPklModel,
+          as: "tempat_pkl",
+          where: { pembimbing_id: req.teacher_id },
+        },
+      ],
+    });
+
+    const jawabanTugas = await JawabanTugasPklModel.findAll({
+      where: { tugas_pkl_id },
+      include: [{ model: StudentModel, as: "siswa" }],
+    });
+
+    const totalSiswa = students.length;
+    const sudahDikerjakan = jawabanTugas.length;
+
+    const result = students.map((student) => {
+      const jawaban = jawabanTugas.find(j => j.student_id === student.id);
+      return {
+        student_id: student.id,
+        nama: student.nama_siswa,
+        status: jawaban ? jawaban.status : "belum dikerjakan",
+        pesan: jawaban ? jawaban.pesan : null,
+        jawaban: jawaban ? {
+          jawaban_id: jawaban.id,
+          tugas_pkl_id: jawaban.tugas_pkl_id,
+          isi_jawaban: jawaban.link_jawaban,
+          createdAt: jawaban.createdAt,
+          updatedAt: jawaban.updatedAt,
+        } : null,
+      };
+    });
+
+    return {
+      statusCode: 200,
+      status: "success",
+      message: "Data jawaban tugas berhasil diambil",
+      data: {
+        totalSiswa,
+        sudahDikerjakan,
+        belumDikerjakan: totalSiswa - sudahDikerjakan,
+        detailJawaban: result,
+      },
+    };
+  } catch (error) {
+    console.error("Error fetching jawaban by tugas ID:", error);
+    return {
+      statusCode: 500,
+      status: "error",
+      message: "Terjadi kesalahan saat mengambil data jawaban tugas",
+    };
+  }
+});
 
 module.exports = {
   updateStatusPesanJawaban,
   listJawabanSantri,
   detailJawabanSantri,
   getJawabanByTugasPklId,
+  getJawabanByTugasId
 };

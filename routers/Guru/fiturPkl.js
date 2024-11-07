@@ -27,11 +27,12 @@ const {
 const { createTugasPkl, tugasPklList, deleteTugasPkl, getTugasPklById, updateTugasPkl } = require("../../controllers/Guru/TugasPklController");
 // tugas pkl
 
-const { detailJawabanSantri, getJawabanByTugasPklId, listJawabanSantri, updateStatusPesanJawaban,  } = require("../../controllers/Guru/JawabanTugasPklController")
+const { detailJawabanSantri, getJawabanByTugasPklId, listJawabanSantri, updateStatusPesanJawaban, getJawabanByTugasId } = require("../../controllers/Guru/JawabanTugasPklController")
 // jawban tugas pkl
 
 guru.get("/jawaban-tugas-pkl/detail/:id", detailJawabanSantri);
 guru.get("/jawaban-tugas-pkl/detailByTugas/:tugas_pkl_id", getJawabanByTugasPklId);
+guru.get("/jawaban-tugas-pkl/detailByTugasId/:tugas_pkl_id", getJawabanByTugasId);
 guru.get("/jawaban-tugas-pkl/list", listJawabanSantri);
 guru.put("/jawaban-tugas-pkl/update/:id", updateStatusPesanJawaban);
 
@@ -40,9 +41,7 @@ guru.put("/jawaban-tugas-pkl/update/:id", updateStatusPesanJawaban);
 // tempat pkl
 guru.post("/tempat-pkl/create", createTempatPkl);
 guru.put("/tempat-pkl/update/:id", updateTempatPkl);
-guru.delete("/tempat-pkl/delete/:id", deteleTempatPkl);
-guru.get("/tempat-pkl/detail/:id", detailTempatPkl);
-guru.get("/tempat-pkl/list", listTempatPkl);
+
 guru.post(
   "/tempat-pkl/createBulk",
   excelUpload.single("file"),
