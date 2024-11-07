@@ -13,6 +13,7 @@ async function register(req, res) {
   const payload = req.body;
   const { email, secretKey, no_hp } = payload;
   payload.password = await bcrypt.hashSync(req.body.password, 10);
+  payload.role = payload.role || "Calon Santri";
   console.log(`user:`, payload);
 
   try {
@@ -42,7 +43,7 @@ async function register(req, res) {
 
     await userRoleModel.create({
       user_id: newUser.id,
-      role_id: 11, 
+      role_id: 11,
     });
 
     console.log(`User created and role assigned`);

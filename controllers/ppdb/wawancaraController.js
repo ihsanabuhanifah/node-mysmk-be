@@ -1,5 +1,6 @@
 const WawancaraModel = require("../../models").wawancara;
 const models = require("../../models");
+const info_calsan = require("../../models").informasi_calon_santri;
 
 const createWawancara = async (req, res) => {
   const {
@@ -12,6 +13,15 @@ const createWawancara = async (req, res) => {
     pewawancara,
   } = req.body;
   const user_id = req.id;
+  const calonSantri = await info_calsan.findOne({
+    where: { user_id },
+  });
+
+  if (!calonSantri) {
+    return res.status(404).json({
+      message: "Calon Santri tidak ditemukan!",
+    });
+  }
   try {
     const newWawancara = await WawancaraModel.create({
       user_id,
@@ -22,6 +32,7 @@ const createWawancara = async (req, res) => {
       is_lulus,
       is_batal,
       pewawancara,
+      informasi_calon_santri_id: calonSantri.id,
     });
 
     return res.status(201).json({
@@ -49,6 +60,12 @@ const detailWawancara = async (req, res) => {
           required: true,
           as: "guruWawancara",
           attributes: ["id", "nama_guru"],
+        },
+        {
+          model: models.informasi_calon_santri,
+          require: true,
+          as: "calon_santri",
+          attributes: ["id", "nama_siswa"],
         },
       ],
     });

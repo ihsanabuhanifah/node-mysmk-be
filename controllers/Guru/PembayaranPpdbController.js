@@ -78,9 +78,9 @@ const listPembayaran = async (req, res) => {
         },
         {
           model: models.informasi_calon_santri,
-          required: true,
+          require: true,
           as: "calon_santri",
-          attributes: ["nama_siswa"],
+          attributes: ["id", "nama_siswa"],
         },
       ],
       order: ["id"],
@@ -228,5 +228,5 @@ module.exports = {
   konfirmasiPembayaran,
   deletePembayaranPpdb,
   konfirmasiPembayaranUlang,
-  listBayarUlang
+  listBayarUlang,
 };

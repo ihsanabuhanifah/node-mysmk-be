@@ -10,7 +10,6 @@ module.exports = (sequelize, DataTypes) => {
         as: "user",
         onDelete: "CASCADE",
       });
-      // Menghubungkan wawancara ke Teacher sebagai pewawancara
       wawancara.belongsTo(models.teacher, {
         foreignKey: "pewawancara",
         as: "guruWawancara",
@@ -18,7 +17,7 @@ module.exports = (sequelize, DataTypes) => {
       });
       wawancara.belongsTo(models.informasi_calon_santri, {
         foreignKey: "informasi_calon_santri_id",
-        as: "informasi_calon_santri",
+        as: "calon_santri",
       });
     }
   }

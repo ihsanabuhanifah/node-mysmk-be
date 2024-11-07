@@ -17,6 +17,10 @@ module.exports = (sequelize, DataTypes) => {
         as: "guru",
         foreignKey: "teacher_id",
       });
+      pembayaran_ppdb.belongsTo(models.informasi_calon_santri, {
+        as: "calon_santri",
+        foreignKey: "informasi_calon_santri_id",
+      });
     }
   }
   pembayaran_ppdb.init(
@@ -34,6 +38,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.TINYINT,
         defaultValue: 0,
       },
+      
     },
     {
       sequelize,

@@ -17,6 +17,10 @@ module.exports = (sequelize, DataTypes) => {
         as: "wawancara",
         foreignKey: "id",
       });
+      informasi_calon_santri.hasMany(models.pembayaran_ppdb, {
+        foreignKey: "id",
+        as: "pembayaran_ppdb",
+      });
     }
   }
   informasi_calon_santri.init(

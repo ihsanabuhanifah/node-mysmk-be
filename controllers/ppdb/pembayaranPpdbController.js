@@ -2,18 +2,28 @@ const { RESPONSE_API } = require("../../utils/response");
 const response = new RESPONSE_API();
 const models = require("../../models");
 const pembayaranPpdb = require("../../models").pembayaran_ppdb;
+const info_calsan = require("../../models").informasi_calon_santri;
 
 const createPembayaranPendaftaran = async (req, res) => {
   try {
-    const { bukti_tf, nominal, teacher_id } = req.body;
+    const { bukti_tf, nominal, teacher_id, } = req.body;
     const user_id = req.id;
+    const calonSantri = await info_calsan.findOne({
+      where: { user_id },
+    });
 
+    if (!calonSantri) {
+      return res.status(404).json({
+        message: "Calon Santri tidak ditemukan!",
+      });
+    }
     const bayar = await pembayaranPpdb.create({
       user_id,
       bukti_tf,
       nominal,
       teacher_id,
       keterangan: "biaya pendaftaran",
+      informasi_calon_santri_id: calonSantri.id,
     });
 
     return res.status(201).json({
@@ -32,7 +42,15 @@ const createBayarUlang = async (req, res) => {
   try {
     const { bukti_tf, nominal, teacher_id } = req.body;
     const user_id = req.id;
+    const calonSantri = await info_calsan.findOne({
+      where: { user_id },
+    });
 
+    if (!calonSantri) {
+      return res.status(404).json({
+        message: "Calon Santri tidak ditemukan!",
+      });
+    }
     const wawancara = await models.wawancara.findOne({
       where: { user_id },
     });
@@ -62,6 +80,7 @@ const createBayarUlang = async (req, res) => {
       nominal,
       teacher_id,
       keterangan: "bayar ulang",
+      informasi_calon_santri_id: calonSantri.id,
     });
 
     return res.status(201).json({
@@ -91,10 +110,10 @@ const getDetailPembayaran = async (req, res) => {
           attributes: ["id", "nama_guru"],
         },
         {
-          model: models.user,
-          required: true,
-          as: "user",
-          attributes: ["id", "name"],
+          model: models.informasi_calon_santri,
+          require: true,
+          as: "calon_santri",
+          attributes: ["id", "nama_siswa"],
         },
       ],
       order: [["id", "ASC"]],
