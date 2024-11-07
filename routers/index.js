@@ -22,6 +22,7 @@ router.get("/", (req, res) => {
 });
 const jwtValidateMiddleware = require("../middleware/jwtValidateMiddleware");
 const paginationMiddleware = require("../middleware/paginationMiddleware");
+const chat = require("./Chat");
 
 router.use("/landingPage", landingPageRouter);
 router.use(authRouter);
@@ -38,4 +39,5 @@ router.use("/wali", waliRouter),
   router.use("/list", daftarRouter),
   router.use("/guru", guruRouter),
   router.use("/admin", adminRouter),
+  router.use("/chat", chat),
   (module.exports = router);

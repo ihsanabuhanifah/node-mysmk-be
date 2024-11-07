@@ -58,36 +58,53 @@ io.on('connection', (socket) => {
 	socket.on('message', async (msg) => {
 		console.log('message from client:', msg)
 
-		await messagesModel.create({
-			id: Date.now(),
-			text: msg.text,
-			pengirim: socket.user.idDB,
-			penerima: msg.penerima,
-			role: socket.user.roleDB,
+		const isExistMsg = await messagesModel.findOne({
+			where: {
+				student_id: msg.student_id,
+				teacher_id: msg.teacher_id
+			}
 		})
 
-		if (msg.penerima && msg.role == 'siswa') {
+		if(!isExistMsg) {
+			let msgData = JSON.stringify([msg])
+			await messagesModel.create({
+				teacher_id: msg.teacher_id,
+				student_id: msg.student_id,
+				message: msgData
+			})
+		} else {
+			let prevMsg = JSON.parse(isExistMsg.message)
+			let newMsgData = [...prevMsg, msg]
+			console.log('nih', newMsgData)
+			await isExistMsg.update({
+				message: JSON.stringify(newMsgData)
+			})
+		}
+
+		console.log('nnih makan', isExistMsg)
+
+		if (msg.teacher_id && msg.role == 'siswa') {
 			for (let i = 0; i < clients.length; i++) {
-				if (clients[i].user.idDB == msg.penerima && clients[i].user.roleDB == 'guru') {
+				if (clients[i].user.idDB == msg.teacher_id && clients[i].user.roleDB == 'guru') {
 					clients[i].emit('message', {
-						pengirim: socket.user.idDB,
+						student_id: socket.user.idDB,
 						role: socket.user.roleDB,
 						text: msg.text,
 						id: Date.now(),
-						penerima: msg.penerima,
+						teacher_id: msg.teacher_id,
 					})
 				}
 			}
 		}
-		if (msg.penerima && msg.role == 'guru') {
+		if (msg.student_id && msg.role == 'guru') {
 			for (let i = 0; i < clients.length; i++) {				
-				if (clients[i].user.idDB == msg.penerima && clients[i].user.roleDB == 'siswa') {
+				if (clients[i].user.idDB == msg.student_id && clients[i].user.roleDB == 'siswa') {
 					clients[i].emit('message', {
-						pengirim: socket.user.idDB,
+						teacher_id: socket.user.idDB,
 						role: socket.user.roleDB,
 						text: msg.text,
 						id: Date.now(),
-						penerima: msg.penerima,
+						student_id: msg.student_id,
 					})
 				}
 			}
