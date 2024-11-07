@@ -14,11 +14,11 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "ta_id",
       });
       informasi_calon_santri.hasOne(models.wawancara, {
+        foreignKey: "informasi_calon_santri_id",
         as: "wawancara",
-        foreignKey: "id",
       });
       informasi_calon_santri.hasMany(models.pembayaran_ppdb, {
-        foreignKey: "id",
+        foreignKey: "informasi_calon_santri_id",
         as: "pembayaran_ppdb",
       });
     }

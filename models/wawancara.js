@@ -17,7 +17,7 @@ module.exports = (sequelize, DataTypes) => {
       });
       wawancara.belongsTo(models.informasi_calon_santri, {
         foreignKey: "informasi_calon_santri_id",
-        as: "calon_santri",
+        onDelete: "CASCADE",
       });
     }
   }
@@ -53,6 +53,10 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: false,
       },
       pewawancara: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
+      informasi_calon_santri_id: {
         type: DataTypes.INTEGER,
         allowNull: true,
       },

@@ -18,8 +18,8 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "teacher_id",
       });
       pembayaran_ppdb.belongsTo(models.informasi_calon_santri, {
-        as: "calon_santri",
         foreignKey: "informasi_calon_santri_id",
+        onDelete: "CASCADE",
       });
     }
   }
@@ -38,7 +38,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.TINYINT,
         defaultValue: 0,
       },
-      
+      informasi_calon_santri_id: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
     },
     {
       sequelize,

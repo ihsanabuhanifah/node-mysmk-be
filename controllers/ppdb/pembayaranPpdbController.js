@@ -6,7 +6,7 @@ const info_calsan = require("../../models").informasi_calon_santri;
 
 const createPembayaranPendaftaran = async (req, res) => {
   try {
-    const { bukti_tf, nominal, teacher_id, } = req.body;
+    const { bukti_tf, nominal, teacher_id } = req.body;
     const user_id = req.id;
     const calonSantri = await info_calsan.findOne({
       where: { user_id },
@@ -42,15 +42,6 @@ const createBayarUlang = async (req, res) => {
   try {
     const { bukti_tf, nominal, teacher_id } = req.body;
     const user_id = req.id;
-    const calonSantri = await info_calsan.findOne({
-      where: { user_id },
-    });
-
-    if (!calonSantri) {
-      return res.status(404).json({
-        message: "Calon Santri tidak ditemukan!",
-      });
-    }
     const wawancara = await models.wawancara.findOne({
       where: { user_id },
     });
@@ -80,7 +71,6 @@ const createBayarUlang = async (req, res) => {
       nominal,
       teacher_id,
       keterangan: "bayar ulang",
-      informasi_calon_santri_id: calonSantri.id,
     });
 
     return res.status(201).json({
@@ -99,7 +89,6 @@ const createBayarUlang = async (req, res) => {
 const getDetailPembayaran = async (req, res) => {
   try {
     const user_id = req.id;
-
     const pembayaran = await pembayaranPpdb.findOne({
       where: { user_id },
       include: [
