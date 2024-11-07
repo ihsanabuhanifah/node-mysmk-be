@@ -54,6 +54,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
+      sequelize,
       modelName: "informasi_calon_santri",
     }
   );
