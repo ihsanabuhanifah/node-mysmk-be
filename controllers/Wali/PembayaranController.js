@@ -6,7 +6,7 @@ const { checkQuery } = require("../../utils/format");
 const userModel = require("../../models").user;
 const studentModel = require("../../models").student;
 const parentModel = require("../../models").parent;
-const { Op } = require("sequelize");
+const { Op, where } = require("sequelize");
 const axios = require("axios");
 const PDFDocument = require("pdfkit");
 const midtransClient = require("midtrans-client");
@@ -369,6 +369,7 @@ async function createPembayaran(req, res) {
       {
         foto: foto,
         tanggal: new Date(),
+        walsan_id: req.walsan_id
       },
       {
         where: {
@@ -380,7 +381,7 @@ async function createPembayaran(req, res) {
     return res.json({
       status: "Success",
       msg: "Berhasil Memperbarui Pembayaran",
-      data: proses,
+      data: detail,
     });
   } catch (error) {
     console.log(error);
@@ -882,8 +883,33 @@ const createNotifPembayaran = async (req, res) => {
 // Wablas
 
 async function createNotification(req, res) {
+  const {bulan_pilihan, ta_id} = req.body
+
   try {
     const walsan = await parentModel.findAll();
+
+    
+  const pembayaran = await pembayaranModel.findAll({
+    where: {
+      bulan: bulan_pilihan,
+      ta_id: ta_id
+    },
+    include: [
+  {
+    model: models.student,
+    as: "murid",
+    require: true,
+    attributes: ["id", "nama_siswa"]
+  },
+  {
+    model: models.ta,
+    as: "ta",
+    require:true,
+    attributes: ["id", "nama_tahun_ajaran"]
+  }
+    ]
+  })
+
 
     console.log("WABLAS", process.env.WABLAS_TOKEN);
 
@@ -902,37 +928,46 @@ async function createNotification(req, res) {
     //         });
 
     await Promise.all(
-      walsan.map(async (item) => {
-        const data = {
-          phone: `62${item.no_hp}`,
-          message:
-            "Assalamualaikum, Para Wali Santri, Dimohon Untuk Setiap Tanggal 5 Setiap Bulan Diingatkan Untuk Membayar SPP Anak Anda, Terimakasih Atas Perhatiannya. Jazzamukhairan Khasiran",
-        };
+      pembayaran.map( async (payment) => {
+        const namaSiswa = payment.murid?.nama_siswa || "siswa";
+        const tahunAjaran = payment.ta?.nama_tahun_ajaran;
+        const namaBulan = payment.bulan;
 
-        try {
-          await axios.post("https://jogja.wablas.com/api/send-message", data, {
-            headers: {
-              Authorization: token,
-              "Content-Type": "application/json",
-            },
-          });
-        } catch (error) {
-          if (error.response) {
-            // Log detailed error information
-            console.error(
-              "Error sending notification:",
-              error.response.status,
-              error.response.data
-            );
-          } else if (error.request) {
-            // Request was made but no response received
-            console.error("No response received:", error.request);
-          } else {
-            // Something else caused the error
-            console.error("Error setting up the request:", error.message);
+        walsan.map(async (item) => {
+          const data = {
+            phone: `62${item.no_hp}`,
+            message:
+              `Assalamu'alaikum Wr. Wb. Yth. Bapak/Ibu Wali Murid, Kami ingin menginformasikan bahwa pembayaran SPP untuk ${namaSiswa} pada bulan ${namaBulan} tahun ajaran ${tahunAjaran} belum kami terima. Kami harap Bapak/Ibu dapat segera menyelesaikan pembayaran agar proses pembelajaran putra/putri Bapak/Ibu dapat terus berjalan lancar. Silakan melakukan pembayaran melalui metode yang telah tersedia. Jika Bapak Atau Ibu memiliki pertanyaan atau membutuhkan bantuan, jangan ragu untuk menghubungi kami. Terima kasih atas perhatian dan kerjasamanya.`,
+          };
+  
+          try {
+            await axios.post("https://jogja.wablas.com/api/send-message", data, {
+              headers: {
+                Authorization: token,
+                "Content-Type": "application/json",
+              },
+            });
+          } catch (error) {
+            if (error.response) {
+              // Log detailed error information
+              console.error(
+                "Error sending notification:",
+                error.response.status,
+                error.response.data
+              );
+            } else if (error.request) {
+              // Request was made but no response received
+              console.error("No response received:", error.request);
+            } else {
+              // Something else caused the error
+              console.error("Error setting up the request:", error.message);
+            }
           }
-        }
-      })
+        })
+      }
+        
+      )
+      
     );
 
     return res.status(201).json({
