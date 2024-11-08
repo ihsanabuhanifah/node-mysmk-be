@@ -180,6 +180,7 @@ const {
 const {
   listCalonSantri,
 } = require("../../controllers/Guru/InformasiCalsanController");
+const { listWawancara } = require("../../controllers/Guru/wawancaraController");
 
 guru.use(guruAccessMiddleware);
 
@@ -346,5 +347,8 @@ guru.get("/bayar-ulang/list", listBayarUlang);
 
 //Calon Santri
 guru.get("/list-calsan", listCalonSantri);
+
+//wawancara
+guru.get("/wawancara/list", listWawancara);
 
 module.exports = guru;
