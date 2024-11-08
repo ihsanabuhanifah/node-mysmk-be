@@ -290,7 +290,7 @@ const ListPembayaran = async (req, res) => {
         {
           model: models.parent,
           require: true,
-          as: "parent",
+          as: "walsan",
           attributes: ["id", "nama_wali"],
         },
         {
