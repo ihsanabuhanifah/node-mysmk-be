@@ -41,6 +41,9 @@ guru.put("/jawaban-tugas-pkl/update/:id", updateStatusPesanJawaban);
 // tempat pkl
 guru.post("/tempat-pkl/create", createTempatPkl);
 guru.put("/tempat-pkl/update/:id", updateTempatPkl);
+guru.get("/tempat-pkl/list", listTempatPkl);
+guru.get("/tempat-pkl/detail/:id", detailTempatPkl);
+guru.delete("/tempat-pkl/delete/:id", deteleTempatPkl);
 
 guru.post(
   "/tempat-pkl/createBulk",
