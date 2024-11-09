@@ -55,29 +55,46 @@ io.on('connection', (socket) => {
 	socket.user = user
 	clients.push(socket)
 
-	socket.on('message', async (msg) => {
-		console.log('message from client:', msg)
+	console.log('konek', user)
 
+	socket.on('joinRoom', (roomId) => {
+		socket.join(roomId)
+		io.emit('isExistRoom', true)
+		console.log('nih join', socket.id, `join room ${roomId}`)
+		socket.to(roomId).emit('userJoined', `${socket.id} has joined the room.`)
+	})
+
+	socket.on('leaveRoom', (roomId) => {
+    socket.leave(roomId);
+		io.emit('isExistRoom', false)
+    socket.to(roomId).emit('userLeft', `${socket.id} has left the room.`);
+  });
+
+	socket.on('kehadiran', (data) => {
+		io.emit('newKehadiran', data)
+	})
+
+	socket.on('message', async (msg) => {
 		const isExistMsg = await messagesModel.findOne({
 			where: {
 				student_id: msg.student_id,
-				teacher_id: msg.teacher_id
-			}
+				teacher_id: msg.teacher_id,
+			},
 		})
 
-		if(!isExistMsg) {
+		if (!isExistMsg) {
 			let msgData = JSON.stringify([msg])
 			await messagesModel.create({
 				teacher_id: msg.teacher_id,
 				student_id: msg.student_id,
-				message: msgData
+				message: msgData,
 			})
 		} else {
 			let prevMsg = JSON.parse(isExistMsg.message)
 			let newMsgData = [...prevMsg, msg]
 			console.log('nih', newMsgData)
 			await isExistMsg.update({
-				message: JSON.stringify(newMsgData)
+				message: JSON.stringify(newMsgData),
 			})
 		}
 
@@ -97,7 +114,7 @@ io.on('connection', (socket) => {
 			}
 		}
 		if (msg.student_id && msg.role == 'guru') {
-			for (let i = 0; i < clients.length; i++) {				
+			for (let i = 0; i < clients.length; i++) {
 				if (clients[i].user.idDB == msg.student_id && clients[i].user.roleDB == 'siswa') {
 					clients[i].emit('message', {
 						teacher_id: socket.user.idDB,
