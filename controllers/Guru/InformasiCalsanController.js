@@ -57,6 +57,47 @@ const listCalonSantri = async (req, res) => {
     res.status(403).send("Terjadi Kesalahan");
   }
 };
+const detailCalonSantri = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const calonSantri = await info_calsan.findOne({
+      where: {
+        id: id,
+      },
+      include: [
+        {
+          model: models.ta,
+          required: true,
+          as: "tahun_ajaran",
+          attributes: ["id", "nama_tahun_ajaran"],
+        },
+        {
+          model: models.wawancara,
+          required: true,
+          as: "wawancara",
+          attributes: ["id", "status_tes", "is_lulus", "is_batal"],
+        },
+      ],
+    });
+
+    if (!calonSantri) {
+      return res.status(404).json({
+        status: "Error",
+        msg: "Data calon santri tidak ditemukan",
+      });
+    }
+
+    return res.json({
+      status: "Success",
+      msg: "Berhasil menemukan data calon santri",
+      data: calonSantri,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(403).send("Terjadi Kesalahan");
+  }
+};
 module.exports = {
   listCalonSantri,
+  detailCalonSantri
 };

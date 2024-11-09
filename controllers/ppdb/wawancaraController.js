@@ -64,7 +64,6 @@ const detailWawancara = async (req, res) => {
         {
           model: models.informasi_calon_santri,
           require: true,
-          as: "calon_santri",
           attributes: ["id", "nama_siswa"],
         },
       ],

@@ -179,6 +179,7 @@ const {
 } = require("../../controllers/Guru/PembayaranPpdbController");
 const {
   listCalonSantri,
+  detailCalonSantri,
 } = require("../../controllers/Guru/InformasiCalsanController");
 const { listWawancara } = require("../../controllers/Guru/wawancaraController");
 
@@ -347,6 +348,7 @@ guru.get("/bayar-ulang/list", listBayarUlang);
 
 //Calon Santri
 guru.get("/list-calsan", listCalonSantri);
+guru.get("/detail-calsan/:id", detailCalonSantri);
 
 //wawancara
 guru.get("/wawancara/list", listWawancara);
