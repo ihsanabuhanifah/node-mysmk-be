@@ -1176,6 +1176,7 @@ async function detailPembayaranSiswa(req, res) {
 async function updateResponse(req, res) {
   try {
     const { payload } = req.body;
+    const {id, status} = payload;
 
     let berhasil = 0;
     let gagal = 0;
@@ -1184,37 +1185,44 @@ async function updateResponse(req, res) {
       payload.map(async (data) => {
         const token = process.env.WABLAS_TOKEN;
 
-        const pembayaran = await pembayaranModel.findOne({
-          where: {
-            status: data.status,
-          },
-          include: [
-            {
-              model: models.parent,
-              require: true,
-              as: "walsan",
-              attributes: ["id", "nama_wali", "no_hp"],
-            },
-          ],
-        });
-
-        const hp = `62${pembayaran.walsan.no_hp}`;
-
-        if (pembayaran && pembayaran.walsan.no_hp) {
-          console.log("Phone number:", hp);
-          // Now use `phone` in your pesanData
-        }
-        const pesanData = {
-          phone: hp,
-          message:
-            "Assalamualaikum, Para Wali Santri, Terima Kasih Sudah Membayar SPP Sekolah Ke Pihak Guru. Jazzamukhairan Khasiran",
-        };
-
-        console.log(token);
-        console.log(data);
-
         try {
-          if (pembayaran && pembayaran.status === "Sudah") {
+          // Fetch `pembayaran` and `walsan` information
+          const pembayaran = await pembayaranModel.findOne({
+            where: {
+              id: data.id,
+              status: data.status,
+            },
+            include: [
+              {
+                model: models.parent,
+                required: true,
+                as: "walsan",
+                attributes: ["id", "nama_wali", "no_hp"],
+              },
+            ],
+          });
+
+          // Check if `pembayaran` and `walsan` exist before proceeding
+          if (!pembayaran || !pembayaran.walsan) {
+            console.error("Payment or parent information not found for data:", data);
+            gagal += 1;
+            return;
+          }
+
+          const hp = `62${pembayaran.walsan.no_hp}`;
+          console.log("Phone number:", hp);
+
+          const pesanData = {
+            phone: hp,
+            message:
+              "Assalamualaikum, Para Wali Santri, Terima Kasih Sudah Membayar SPP Sekolah Ke Pihak Guru. Jazzamukhairan Khasiran",
+          };
+
+          console.log("Token:", token);
+          console.log("Data:", data);
+
+          // Send notification only if status is 'Sudah'
+          if (pembayaran.status === "Sudah") {
             try {
               const response = await axios.post(
                 "https://jogja.wablas.com/api/send-message",
@@ -1227,9 +1235,9 @@ async function updateResponse(req, res) {
                 }
               );
 
-              // Check the response from the Wablas API
               if (response.data.status && response.data.status === "success") {
                 console.log(`Message sent successfully to ${pesanData.phone}`);
+                berhasil += 1;
               } else {
                 console.error("Failed to send message:", response.data);
                 gagal += 1;
@@ -1241,24 +1249,30 @@ async function updateResponse(req, res) {
               return;
             }
           } else {
-            return res.status(403).send("Terjadi Kesalahan");
+            console.log("Status not 'Sudah', skipping message sending.");
           }
 
-          await pembayaranModel.update(
-            {
-              status: data.status,
-              tanggal_konfirmasi: new Date(),
-              teacher_id: req.teacher_id,
-            },
-            {
-              where: {
-                id: data.id,
+          // Update payment status
+          try {
+            await pembayaranModel.update(
+              {
+                status: data.status,
+                tanggal_konfirmasi: new Date(),
+                teacher_id: req.teacher_id,
               },
-            }
-          );
-          berhasil += 1;
+              {
+                where: {
+                  id: data.id,
+                },
+              }
+            );
+            berhasil += 1;
+          } catch (error) {
+            console.error("Error updating payment status:", error);
+            gagal += 1;
+          }
         } catch (error) {
-          console.log(error);
+          console.error("Error processing data entry:", data, error);
           gagal += 1;
         }
       })
@@ -1266,14 +1280,17 @@ async function updateResponse(req, res) {
 
     return res.status(201).json({
       status: "Success",
-      msg: "Berhasil Menguhah Status Approval",
-      data: payload,
+      msg: "Berhasil Mengubah Status Approval",
+      data: { berhasil, gagal },
     });
   } catch (error) {
-    console.log(error);
+    console.error("Unexpected error:", error);
     return res.status(403).send("Terjadi Kesalahan");
   }
 }
+
+
+
 async function createpdfBulanan(req, res) {
   const { bulan, tahun } = req.query;
   const { student_id } = req.params;
