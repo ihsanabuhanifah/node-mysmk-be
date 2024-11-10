@@ -1027,12 +1027,89 @@ async function daftarSiswa(req, res) {
 async function detailPembayaranSiswa(req, res) {
   try {
     const { student_id } = req.params;
-    const { page, pageSize } = req.query;
+    const {
+      page,
+      pageSize,
+      nama_siswa,
+      dari_tahun,
+      ke_tahun,
+      dari_bulan,
+      ke_bulan,
+      tahun,
+      bulan,
+      nama_tahun_ajaran,
+      status,
+    } = req.query;
+
+    let Result = {
+      student_id: student_id
+    };
+
+    const dariBulan = dari_bulan ? Monthmap[dari_bulan] : null;
+
+    const keBulan = ke_bulan ? Monthmap[ke_bulan] : null;
+
+    console.log("Dari Bulan :", dariBulan);
+    console.log("Ke Bulan:", keBulan);
+
+    if (dari_bulan && ke_bulan) {
+      Result = {
+        bulan: {
+          [Op.or]: [
+            { [Op.eq]: dari_bulan },
+            { [Op.eq]: ke_bulan },
+            {
+              [Op.and]: [
+                { [Op.gte]: dari_bulan },
+                {
+                  [Op.lte]: ke_bulan,
+                },
+              ],
+            },
+          ],
+        },
+      };
+    } else if (dari_bulan) {
+      Result = {
+        bulan: {
+          [Op.substring]: dari_bulan,
+        },
+      };
+    } else if (ke_bulan) {
+      Result = {
+        bulan: {
+          [Op.substring]: ke_bulan,
+        },
+      };
+    }
+
+    if (dari_tahun && ke_tahun) {
+      Result = {
+        tahun: {
+          [Op.between]: [dari_tahun, ke_tahun],
+        },
+      };
+    }
+
+    if (bulan) {
+      Result.bulan = {
+        [Op.substring]: bulan,
+      };
+    }
+
+    if (tahun) {
+      Result.tahun = {
+        [Op.substring]: tahun,
+      };
+    }
+    if (status) {
+      Result.status = {
+        [Op.like]: status,
+      };
+    }
 
     const cari = await PembayaranController.findAndCountAll({
-      where: {
-        student_id: student_id,
-      },
+      where: Result,
       limit: pageSize,
       offset: page,
       attributes: [
