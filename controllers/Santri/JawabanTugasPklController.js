@@ -13,6 +13,7 @@ const createJawabanTugasPkl = response.requestResponse(async (req, res) => {
     ...payload,
     student_id: req.student_id,
     tanggal: dayjs(new Date()).format("YYYY-MM-DD"),
+    
   });
 
   return {
