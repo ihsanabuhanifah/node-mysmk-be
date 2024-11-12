@@ -45,8 +45,8 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: true,
       },
       is_lulus: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: false,
+        type: DataTypes.ENUM("belum diumumkan", "tidak lulus", "lulus"),
+        defaultValue: "belum diumumkan",
       },
       is_batal: {
         type: DataTypes.BOOLEAN,
