@@ -99,6 +99,7 @@ const createKartuSpp = async (req, res) => {
                 status: "Belum",
                 bulan: month,
                 tahun: year,
+                tanggal_konfirmasi: null
               };
             });
 
@@ -1176,7 +1177,6 @@ async function detailPembayaranSiswa(req, res) {
 async function updateResponse(req, res) {
   try {
     const { payload } = req.body;
-    const {id, status} = payload;
 
     let berhasil = 0;
     let gagal = 0;
@@ -1186,11 +1186,9 @@ async function updateResponse(req, res) {
         const token = process.env.WABLAS_TOKEN;
 
         try {
-          // Fetch `pembayaran` and `walsan` information
           const pembayaran = await pembayaranModel.findOne({
             where: {
               id: data.id,
-              status: data.status,
             },
             include: [
               {
@@ -1202,26 +1200,26 @@ async function updateResponse(req, res) {
             ],
           });
 
-          // Check if `pembayaran` and `walsan` exist before proceeding
           if (!pembayaran || !pembayaran.walsan) {
             console.error("Payment or parent information not found for data:", data);
             gagal += 1;
             return;
           }
 
-          const hp = `62${pembayaran.walsan.no_hp}`;
-          console.log("Phone number:", hp);
+          // Check if the phone number is null
+          if (!pembayaran.walsan.no_hp) {
+            console.error(`Phone number is missing for parent ID ${pembayaran.walsan.id}`);
+            gagal += 1;
+            return;  // Prevent sending the message
+          }
 
+          const hp = `62${pembayaran.walsan.no_hp.substring(1, 12)}`;
           const pesanData = {
             phone: hp,
             message:
               "Assalamualaikum, Para Wali Santri, Terima Kasih Sudah Membayar SPP Sekolah Ke Pihak Guru. Jazzamukhairan Khasiran",
           };
 
-          console.log("Token:", token);
-          console.log("Data:", data);
-
-          // Send notification only if status is 'Sudah'
           if (pembayaran.status === "Sudah") {
             try {
               const response = await axios.post(
@@ -1235,24 +1233,16 @@ async function updateResponse(req, res) {
                 }
               );
 
-              if (response.data.status && response.data.status === "success") {
-                console.log(`Message sent successfully to ${pesanData.phone}`);
-                berhasil += 1;
-              } else {
-                console.error("Failed to send message:", response.data);
-                gagal += 1;
-                return;
-              }
+              console.log(`Pesan Sudah Dikirim Ke Nomor ${pesanData.phone}`, token, pesanData, response.data);
             } catch (error) {
               console.error("Error sending notification:", error);
               gagal += 1;
               return;
             }
-          } else {
+          } else if (pembayaran.status === "Belum") {
             console.log("Status not 'Sudah', skipping message sending.");
           }
 
-          // Update payment status
           try {
             await pembayaranModel.update(
               {
@@ -1266,9 +1256,10 @@ async function updateResponse(req, res) {
                 },
               }
             );
+            console.log(`Successfully updated status for payment ID ${data.id} to ${data.status}`);
             berhasil += 1;
           } catch (error) {
-            console.error("Error updating payment status:", error);
+            console.error(`Error updating status for payment ID ${data.id}:`, error);
             gagal += 1;
           }
         } catch (error) {
