@@ -886,7 +886,19 @@ async function createNotification(req, res) {
   const {bulan_pilihan, ta_id} = req.body
 
   try {
-    const walsan = await parentModel.findAll();
+    const walsan = await parentModel.findAll(
+      {
+      include: [
+        {
+          model: models.student,
+          as: "siswa",
+          require: true,
+          attributes: ["id", "nama_siswa"]
+        }
+      ]
+    });
+
+    
 
     
   const pembayaran = await pembayaranModel.findAll({
@@ -911,7 +923,7 @@ async function createNotification(req, res) {
   })
 
 
-    console.log("WABLAS", process.env.WABLAS_TOKEN);
+    
 
     const token = `${process.env.WABLAS_TOKEN}`;
 
@@ -927,15 +939,32 @@ async function createNotification(req, res) {
     //           },
     //         });
 
+    function delay(ms) {
+      return new Promise((resolve) => setTimeout(resolve, ms))
+    }
+
     await Promise.all(
       pembayaran.map( async (payment) => {
         const namaSiswa = payment.murid?.nama_siswa || "siswa";
         const tahunAjaran = payment.ta?.nama_tahun_ajaran;
         const namaBulan = payment.bulan;
 
-        walsan.map(async (item) => {
+        const filterSiswa = walsan.filter(
+          (item) => item.siswa?.id === payment.murid?.id
+        )
+
+        console.log("WABLAS", process.env.WABLAS_TOKEN);
+        console.log("Gabungan Nama Siswa Di Pembayaran Dan Nama Siswa Di Filter", filterSiswa, payment.murid.nama_siswa)
+
+        if (filterSiswa.length === 0) {
+          console.log("Tidak Ada Nama Yang Sama Dalam Filter Siswa")
+          return res.status(403).json("Terjadi Kesalahan")
+        }
+
+        filterSiswa.map(async (item, idx) => {
+          await delay(idx * 200)
           const data = {
-            phone: `62${item.no_hp}`,
+            phone: `62${item.no_hp.substring(1,12)}`,
             message:
               `Assalamu'alaikum Wr. Wb. Yth. Bapak/Ibu Wali Murid, Kami ingin menginformasikan bahwa pembayaran SPP untuk ${namaSiswa} pada bulan ${namaBulan} tahun ajaran ${tahunAjaran} belum kami terima. Kami harap Bapak/Ibu dapat segera menyelesaikan pembayaran agar proses pembelajaran putra/putri Bapak/Ibu dapat terus berjalan lancar. Silakan melakukan pembayaran melalui metode yang telah tersedia. Jika Bapak Atau Ibu memiliki pertanyaan atau membutuhkan bantuan, jangan ragu untuk menghubungi kami. Terima kasih atas perhatian dan kerjasamanya.`,
           };
