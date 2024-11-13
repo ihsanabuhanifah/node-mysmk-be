@@ -62,7 +62,6 @@ wali.get("/pembayaran/list", ListPembayaran);
 wali.get("/pembayaran/detail/:id", detailPembayaran);
 wali.put("/pembayaran/bayar/:id", createPembayaran);
 wali.put("/pembayaran/otomatis/:id", createPembayaranOtomatis);
-wali.post("/pembayaran/notification", createNotifPembayaran)
 
 
 

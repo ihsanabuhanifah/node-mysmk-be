@@ -100,6 +100,7 @@ const createKartuSpp = async (req, res) => {
                 bulan: month,
                 tahun: year,
                 tanggal_konfirmasi: null
+
               };
             });
 
