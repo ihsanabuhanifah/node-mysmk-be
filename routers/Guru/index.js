@@ -181,7 +181,10 @@ const {
   listCalonSantri,
   detailCalonSantri,
 } = require("../../controllers/Guru/InformasiCalsanController");
-const { listWawancara } = require("../../controllers/Guru/wawancaraController");
+const {
+  listWawancara,
+  updateWawancara,
+} = require("../../controllers/Guru/wawancaraController");
 
 guru.use(guruAccessMiddleware);
 
@@ -352,5 +355,6 @@ guru.get("/detail-calsan/:id", detailCalonSantri);
 
 //wawancara
 guru.get("/wawancara/list", listWawancara);
+guru.put("/wawancara/update/:id", updateWawancara);
 
 module.exports = guru;

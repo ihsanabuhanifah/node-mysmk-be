@@ -45,6 +45,52 @@ const listWawancara = async (req, res) => {
     });
   }
 };
+
+const updateWawancara = async (req, res) => {
+  const { id } = req.params;
+  const {
+    method,
+    tanggal,
+    status_tes,
+    catatan,
+    is_lulus,
+    is_batal,
+    pewawancara,
+  } = req.body;
+
+  try {
+    const wawancara = await WawancaraModel.findByPk(id);
+
+    if (!wawancara) {
+      return res.status(404).json({
+        status: "fail",
+        message: "Data wawancara tidak ditemukan",
+      });
+    }
+    await wawancara.update({
+      ...(method && { method }),
+      ...(tanggal && { tanggal }),
+      ...(status_tes && { status_tes }),
+      ...(catatan && { catatan }),
+      ...(is_lulus && { is_lulus }),
+      ...(is_batal !== undefined && { is_batal }),
+      ...(pewawancara && { pewawancara }),
+    });
+
+    return res.status(200).json({
+      status: "success",
+      message: "Data wawancara berhasil diperbarui",
+      data: wawancara,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: "fail",
+      message: "Terjadi kesalahan saat memperbarui data wawancara",
+      error: error.message,
+    });
+  }
+};
 module.exports = {
   listWawancara,
+  updateWawancara
 };
