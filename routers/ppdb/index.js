@@ -22,11 +22,18 @@ const {
   listBayarUlang,
   getDetailBayarUlang,
 } = require("../../controllers/ppdb/pembayaranPpdbController");
-const { listMapel } = require("../../controllers/ppdb/ujianPPDBController");
+const {
+  listMapel,
+  listUjian,
+} = require("../../controllers/ppdb/ujianPPDBController");
 const {
   createWawancara,
   detailWawancara,
 } = require("../../controllers/ppdb/wawancaraController");
+const {
+  createNilai,
+  updateNilai,
+} = require("../../controllers/ppdb/nilaiPpdbController");
 
 const validation = [
   check("nama_siswa")
@@ -117,10 +124,14 @@ ppdb.get("/bayar-ulang/detail", getDetailBayarUlang);
 // ppdb.get("/bayar-ulang/list", listBayarUlang);
 
 //List ujian ppdb
-ppdb.get("/mapel", listMapel);
+ppdb.get("/ujian/list", listUjian);
 
 //Wawancara
 ppdb.post("/wawancara/create", createWawancara);
 ppdb.get("/wawancara/detail", detailWawancara);
+
+//Nilai
+ppdb.post("/nilai/create", createNilai);
+ppdb.put("/nilai/update/:id", updateNilai);
 
 module.exports = ppdb;

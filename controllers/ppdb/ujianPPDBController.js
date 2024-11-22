@@ -1,28 +1,41 @@
-const MapelModel = require("../../models").mapel;
+const ujianModel = require("../../models").ujian;
 
-const listMapel = async (req, res) => {
+const listUjian = async (req, res) => {
   try {
-    const mapel = await MapelModel.findAll({
-      attributes: ["id", "nama_mapel", "kategori"],
-      where : {
-        is_active : 1,
-        nama_mapel: 'Ujian PPDB'
-      }
+    const idUjian = process.env.ID_UJIAN_PPDB;
+
+    if (!idUjian) {
+      return res.status(400).json({
+        success: false,
+        message: "ID_UJIAN tidak ditemukan di environment variables",
+      });
+    }
+
+    const ujian = await ujianModel.findAll({
+      where: {
+        id: idUjian,
+      },
     });
 
-    return res.json({
-      status: "Success",
-      totalMapel: mapel.length,
+    if (!ujian.length) {
+      return res.status(404).json({
+        success: false,
+        message: "Ujian tidak ditemukan",
+      });
+    }
 
-      data: mapel,
+    return res.status(200).json({
+      success: true,
+      data: ujian,
     });
-  } catch (err) {
-    return res.status(403).json({
-      status: "fail",
-      msg: "Terjadi Kesalahan",
+  } catch (error) {
+    console.error("Error fetching ujian:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Terjadi kesalahan saat mengambil data ujian",
     });
   }
 };
 module.exports = {
-  listMapel,
+  listUjian,
 };

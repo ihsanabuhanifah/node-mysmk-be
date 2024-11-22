@@ -185,6 +185,7 @@ const {
   listWawancara,
   updateWawancara,
 } = require("../../controllers/Guru/wawancaraController");
+const { listNilai } = require("../../controllers/Guru/nilaiPpdbController");
 
 guru.use(guruAccessMiddleware);
 
@@ -356,5 +357,8 @@ guru.get("/detail-calsan/:id", detailCalonSantri);
 //wawancara
 guru.get("/wawancara/list", listWawancara);
 guru.put("/wawancara/update/:id", updateWawancara);
+
+//nilai ppdb
+guru.get("/nilai-ppdb/list", listNilai);
 
 module.exports = guru;
