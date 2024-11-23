@@ -34,6 +34,11 @@ const {
   createNilai,
   updateNilai,
 } = require("../../controllers/ppdb/nilaiPpdbController");
+const {
+  getExamPpdb,
+  takeExamPpdb,
+  submitExamPpdb,
+} = require("../../controllers/ppdb/examController");
 
 const validation = [
   check("nama_siswa")
@@ -133,5 +138,10 @@ ppdb.get("/wawancara/detail", detailWawancara);
 //Nilai
 ppdb.post("/nilai/create", createNilai);
 ppdb.put("/nilai/update/:id", updateNilai);
+
+//exam
+ppdb.get("/exam/list", getExamPpdb);
+ppdb.put("/exam/take/:id", takeExamPpdb);
+ppdb.put("/exam/submit", submitExamPpdb);
 
 module.exports = ppdb;
