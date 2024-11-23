@@ -1,4 +1,4 @@
-const { where } = require("sequelize");
+const { Op, where } = require("sequelize");
 const models = require("../../models");
 const {
   calculateMinutesDifference,
@@ -26,15 +26,7 @@ const getExamPpdb = response.requestResponse(async (req, res) => {
       {
         model: models.ujian,
         require: true,
-        attributes: [
-          "id",
-          "jenis_ujian",
-          "tipe_ujian",
-          "waktu_mulai",
-          "waktu_selesai",
-          "status",
-          "durasi",
-        ],
+        attributes: ["id", "jenis_ujian", "tipe_ujian", "status"],
       },
     ],
     order: [["id", "desc"]],
@@ -60,16 +52,7 @@ const takeExamPpdb = response.requestResponse(async (req, res) => {
       {
         model: models.ujian,
         require: true,
-        attributes: [
-          "id",
-          "judul_ujian",
-          "jenis_ujian",
-          "waktu_mulai",
-          "waktu_selesai",
-          "status",
-          "durasi",
-          "soal",
-        ],
+        attributes: ["id", "judul_ujian", "jenis_ujian", "soal"],
       },
     ],
   });
@@ -109,11 +92,12 @@ const takeExamPpdb = response.requestResponse(async (req, res) => {
 });
 
 const submitExamPpdb = response.requestResponse(async (req, res) => {
-  const { id } = req.body;
-  const jawaban = req.body.jawaban;
-
+  const { id, data: jawaban } = req.body;
   const exam = await nilaiPPdbController.findOne({
-    where: { id: id, user_id: req.id },
+    where: {
+      id: id,
+      user_id: req.id,
+    },
     include: [
       {
         model: models.ujian,
@@ -123,47 +107,97 @@ const submitExamPpdb = response.requestResponse(async (req, res) => {
   });
 
   if (!exam) {
-    return { statusCode: 422, msg: "Ujian tidak ditemukan" };
+    return {
+      statusCode: 422,
+      msg: "Ujian tidak ditemukan",
+    };
   }
 
   if (exam.status === "finish") {
-    return { statusCode: 422, msg: "Ujian telah selesai" };
+    return {
+      statusCode: 422,
+      msg: "Ujian telah selesai",
+    };
   }
 
-  const soal = JSON.parse(exam.ujian.soal);
+  if (exam.status === "open") {
+    return {
+      statusCode: 422,
+      msg: "Ujian belum dimulai",
+    };
+  }
+  let soal = await BankSoalController.findAll({
+    where: {
+      id: {
+        [Op.in]: JSON.parse(exam.ujian.soal),
+      },
+    },
+  });
+  if (soal.length === 0) {
+    console.log("Tidak ada soal ditemukan.");
+  } else {
+    soal.forEach((item) => {
+      console.log(`Soal ID: ${item.id}, Poin: ${item.point}`);
+    });
+  }
   let totalPoint = 0;
   let achievedPoint = 0;
-
   soal.forEach((item) => {
-    totalPoint += item.point;
-    const userAnswer = jawaban.find((ans) => ans.id === item.id);
-    console.log("Item soal:", item);
-    console.log("Jawaban pengguna untuk item ini:", userAnswer);
-    if (userAnswer && userAnswer.jawaban === item.jawaban) {
-      achievedPoint += item.point;
-      console.log("Jawaban benar, point bertambah:", achievedPoint);
+    if (item.point) {
+      totalPoint += item.point;
+    } else {
+      console.log(`Soal ID: ${item.id} tidak memiliki poin.`);
     }
+    console.log(`Memeriksa soal ID: ${item.id}, Jawaban Soal: ${item.jawaban}`);
+    jawaban.forEach((jawab) => {
+      console.log(
+        `Jawaban ID: ${jawab.id}, Jawaban Pengguna: ${jawab.jawaban}`
+      );
+      if (jawab.id === item.id) {
+        console.log("ID cocok, memeriksa jawaban");
+        if (jawab.jawaban.toLowerCase() === item.jawaban.toLowerCase()) {
+          achievedPoint += item.point;
+          console.log(
+            `Jawaban benar! Poin ditambahkan: ${item.point}, Total Achieved Point: ${achievedPoint}`
+          );
+        } else {
+          console.log("Jawaban tidak cocok");
+        }
+      }
+    });
   });
+  let nilai = 0;
+  if (totalPoint === 0) {
+    console.log("Error: Total Point is 0!");
+  } else {
+    nilai = (achievedPoint / totalPoint) * 100;
+    nilai = Math.ceil(nilai);
+    console.log("Nilai:", nilai);
+  }
 
-  const nilai = Math.ceil((achievedPoint / totalPoint) * 100);
-
-  const result = await nilaiPPdbController.update(
+  await nilaiPPdbController.update(
     {
       status: "finish",
       jawaban: JSON.stringify(jawaban),
       is_lulus: nilai >= 75 ? 1 : 0,
     },
-    { where: { id: exam.id } }
+    {
+      where: {
+        id: exam.id,
+      },
+    }
   );
-  console.log("Total point:", totalPoint);
-  console.log("Achieved point:", achievedPoint);
-  console.log("Soal dari ujian:", exam.ujian.soal);
-  console.log("Jawaban pengguna:", jawaban);
-  console.log("Hasil update:", result);
+  console.log("soal", soal);
+  console.log("Jawaban Pengguna:", JSON.stringify(jawaban, null, 2));
+  console.log("Soal yang diambil:", JSON.stringify(soal, null, 2));
+  console.log(`Achieved Point sebelum perhitungan: ${achievedPoint}`);
+  console.log(`Total Point: ${totalPoint}`);
   return {
-    msg: "Jawaban berhasil disimpan",
-    nilai: nilai,
+    msg: "Jawaban berhasil tersimpan",
+    nilai,
     lulus: nilai >= 75 ? "Ya" : "Tidak",
+    totalPoint,
+    achievedPoint,
   };
 });
 
