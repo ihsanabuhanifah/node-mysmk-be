@@ -44,10 +44,10 @@ const getExamPpdb = response.requestResponse(async (req, res) => {
 });
 
 const takeExamPpdb = response.requestResponse(async (req, res) => {
-  const { id } = req.params;
+  // const { id } = req.params;
 
   const exam = await nilaiPPdbController.findOne({
-    where: { id: id, user_id: req.id },
+    where: { user_id: req.id },
     include: [
       {
         model: models.ujian,

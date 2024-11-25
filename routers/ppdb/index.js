@@ -141,7 +141,7 @@ ppdb.put("/nilai/update/:id", updateNilai);
 
 //exam
 ppdb.get("/exam/list", getExamPpdb);
-ppdb.put("/exam/take/:id", takeExamPpdb);
+ppdb.put("/exam/take", takeExamPpdb);
 ppdb.put("/exam/submit", submitExamPpdb);
 
 module.exports = ppdb;
