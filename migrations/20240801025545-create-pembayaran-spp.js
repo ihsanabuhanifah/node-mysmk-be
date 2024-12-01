@@ -9,6 +9,7 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
+
       student_id: {
         type: Sequelize.INTEGER,
         onDelete: "RESTRICT",
@@ -18,6 +19,7 @@ module.exports = {
           as: "student_id"
         }
       },
+
       walsan_id: {
         type: Sequelize.INTEGER,
         onDelete: "RESTRICT",
@@ -55,7 +57,8 @@ module.exports = {
         type: Sequelize.DECIMAL(10, 2)
       },
       tanggal_konfirmasi:{
-        allowNull: false,
+        allowNull: true,
+        defaultValue: null,
         type: Sequelize.DATE
       },
       teacher_id: {
@@ -84,3 +87,5 @@ module.exports = {
     await queryInterface.dropTable('pembayaran_spps');
   }
 };
+
+// 

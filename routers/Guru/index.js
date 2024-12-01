@@ -151,19 +151,22 @@ const {
 const adminAccessMiddleware = require("../../middleware/adminAccessMiddleware");
 const {
   getListWali,
+  createBulkWali,
   updateWali,
   detailWali,
-  createBulkWali,
 } = require("../../controllers/Guru/WaliController");
 const {
   ListPembayaran,
   createKartuSpp,
-  detailPembayaran,
-  daftarSiswa,
+  updateAprroval,
+  createpdfBulanan,
   detailPembayaranSiswa,
-  createNotification,
+  daftarSiswa,
   updateResponse,
+  detailPembayaran,
+  createNotification,
 } = require("../../controllers/Wali/PembayaranController");
+
 
 const {
   remidial,
@@ -195,7 +198,6 @@ guru.put("/submit-izin/kehadiran", submitIzin);
 guru.put("/submit-by-Admin/kehadiran", adminAccessMiddleware, submitByAdmin);
 
 //role
-
 guru.get("/get-role-guru", getRole);
 guru.put("/token/save", saveToken);
 //jadwal
@@ -339,6 +341,20 @@ guru.post(
   createBulkExcel
 );
 
+// Pembayaran
+guru.get("/pembayaran/list", ListPembayaran);
+guru.post("/pembayaran/createKartu", createKartuSpp);
+guru.get("/pembayaran/detail/:id", detailPembayaran);
+guru.put("/pembayaran/update", updateResponse);
+
+// siswa
+guru.get("/siswa/daftarSpp", daftarSiswa);
+guru.get("/siswa/listPembayaran/:student_id", detailPembayaranSiswa);
+guru.post("/laporan/:student_id", createpdfBulanan);
+
+// Notification
+guru.post("/pesan/create", createNotification);
+
 // Walisantri
 
 // Laporan harian pkl
@@ -356,8 +372,7 @@ guru.get("/pembayaran/detail/:id", detailPembayaran);
 guru.put("/pembayaran/update", updateResponse);
 
 // siswa
-guru.get("/siswa/daftarSpp", daftarSiswa);
-guru.get("/siswa/listPembayaran/:student_id", detailPembayaranSiswa);
+
 
 // Notification
 guru.post("/pesan/create", createNotification);

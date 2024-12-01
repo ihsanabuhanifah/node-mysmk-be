@@ -14,8 +14,7 @@ module.exports = (sequelize, DataTypes) => {
       });
       parent.belongsTo(models.student , {
         as : "siswa",
-        foreignKey : 'student_id'
-      });
+        foreignKey : 'student_id'});
 
       
     }

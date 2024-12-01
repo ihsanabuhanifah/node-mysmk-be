@@ -152,7 +152,7 @@ async function login(req, res) {
       },
       process.env.JWT_SECRET_ACCESS_TOKEN,
       {
-        expiresIn: "7d",
+        expiresIn: "360d",
       }
     );
 
@@ -230,7 +230,7 @@ async function register(req, res) {
       },
       process.env.JWT_SECRET_ACCESS_TOKEN,
       {
-        expiresIn: "7d",
+        expiresIn: "360d",
       }
     );
 
@@ -395,7 +395,7 @@ async function authme(req, res) {
       },
       process.env.JWT_SECRET_ACCESS_TOKEN,
       {
-        expiresIn: "7d",
+        expiresIn: "360d",
       }
     );
 
@@ -477,7 +477,7 @@ async function googleRegister(req, res) {
     },
     process.env.JWT_SECRET_ACCESS_TOKEN,
     {
-      expiresIn: "7d",
+      expiresIn: "360d",
     }
   );
 
@@ -521,7 +521,7 @@ async function googleLogin(req, res) {
     },
     process.env.JWT_SECRET_ACCESS_TOKEN,
     {
-      expiresIn: "7d",
+      expiresIn: "360d",
     }
   );
 

@@ -15,6 +15,7 @@ const landingPageRouter = require("./landingPage");
 const { hari, tanggal, jam } = require("../utils/tanggal");
 
 const adminRouter = require("./Admin");
+
 router.get("/", (req, res) => {
   res.send(
     `Backend MySMK di akses hari ${hari} tanggal ${tanggal} di jam ${jam}  `
@@ -22,8 +23,14 @@ router.get("/", (req, res) => {
 });
 const jwtValidateMiddleware = require("../middleware/jwtValidateMiddleware");
 const paginationMiddleware = require("../middleware/paginationMiddleware");
+const { createNotifPembayaran, detailPembayaranSiswa, ListPembayaran, createPembayaran } = require("../controllers/Wali/PembayaranController");
+
 
 router.use("/landingPage", landingPageRouter);
+router.post("/pembayaran/notification", createNotifPembayaran);
+router.get("/pembayaran/detailSiswa/:student_id", detailPembayaranSiswa);
+router.get("/pembayaran/list", ListPembayaran);
+router.post("/pembayaran/purchase/:id", createPembayaran);
 router.use(authRouter);
 router.use(importRouter);
 router.use(jwtValidateMiddleware);
