@@ -11,10 +11,12 @@ const createNilai = async (req, res) => {
     }
     const { jawaban, is_lulus, status } = req.body;
 
+    const serializedJawaban = JSON.stringify(jawaban);
+
     const nilai = await nilaiModel.create({
       user_id,
       ujian_id,
-      jawaban,
+      jawaban: serializedJawaban,
       is_lulus: is_lulus || 0,
       status: status || "open",
     });
@@ -40,8 +42,15 @@ const updateNilai = async (req, res) => {
     if (!nilai) {
       return res.status(404).json({ message: "Nilai tidak ditemukan" });
     }
+    if (jawaban) {
+      if (!Array.isArray(jawaban)) {
+        return res
+          .status(400)
+          .json({ message: "Jawaban harus berupa array objek" });
+      }
+      nilai.jawaban = JSON.stringify(jawaban);
+    }
 
-    nilai.jawaban = jawaban || nilai.jawaban;
     nilai.is_lulus = is_lulus !== undefined ? is_lulus : nilai.is_lulus;
     nilai.status = status || nilai.status;
 
