@@ -18,7 +18,7 @@ const createNilai = async (req, res) => {
       ujian_id,
       jawaban: serializedJawaban,
       is_lulus: is_lulus || 0,
-      status: status || "open",
+      status: status || "progress",
     });
 
     return res

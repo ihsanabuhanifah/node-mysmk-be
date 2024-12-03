@@ -57,6 +57,16 @@ const takeExamPpdb = response.requestResponse(async (req, res) => {
     ],
   });
 
+  let soal = await BankSoalController.findAll({
+    exclude: {
+      jawaban: false,
+    },
+    where: {
+      id: {
+        [Op.in]: JSON.parse(exam.ujian.soal),
+      },
+    },
+  });
   if (!exam) {
     return { statusCode: 422, msg: "Ujian tidak ditemukan" };
   }
@@ -77,8 +87,6 @@ const takeExamPpdb = response.requestResponse(async (req, res) => {
   //   return { statusCode: 422, msg: "Waktu ujian telah berakhir" };
   // }
 
-  const soal = JSON.parse(exam.ujian.soal).sort(() => Math.random() - 0.5);
-
   await nilaiPPdbController.update(
     { status: "progress", jawaban: JSON.stringify([]) },
     { where: { id: exam.id } }
@@ -86,7 +94,11 @@ const takeExamPpdb = response.requestResponse(async (req, res) => {
 
   return {
     msg: "Ujian dimulai",
+    
     soal: soal,
+    status_ujian: "progress",
+    jawaban: JSON.stringify([]),
+    soal: JSON.stringify(soal),
     // waktu_tersisa: calculateMinutesDifference(now, endTime) * 60,
   };
 });
