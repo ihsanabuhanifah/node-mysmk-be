@@ -52,55 +52,116 @@ const takeExamPpdb = response.requestResponse(async (req, res) => {
       {
         model: models.ujian,
         require: true,
-        attributes: ["id", "judul_ujian", "jenis_ujian", "soal"],
+        attributes: [
+          "id",
+          "jenis_ujian",
+          "tipe_ujian",
+          "waktu_mulai",
+          "waktu_selesai",
+          "status",
+          "soal",
+          "durasi",
+        ],
       },
     ],
   });
 
   let soal = await BankSoalController.findAll({
-    exclude: {
-      jawaban: false,
-    },
     where: {
       id: {
         [Op.in]: JSON.parse(exam.ujian.soal),
       },
     },
+    attributes: ["soal"],
   });
   if (!exam) {
     return { statusCode: 422, msg: "Ujian tidak ditemukan" };
   }
+  if (exam.status === "finish") {
+    return {
+      statusCode: 422,
+      msg: "Ujian telah berakhir",
+    };
+  }
 
   const now = new Date();
-  const startTime = new Date(exam.ujian.waktu_mulai);
-  const endTime = new Date(exam.ujian.waktu_selesai);
+  const startTime = new Date(exam.ujian.jam_mulai);
+  const endTime = new Date(exam.ujian.jam_selesai);
 
-  // if (exam.status === "finish") {
-  //   return { statusCode: 422, msg: "Ujian telah selesai" };
-  // }
+  if (
+    (now >= startTime && now <= endTime) ||
+    exam.ujian.tipe_ujian === "open" ||
+    exam.status === "progress"
+  ) {
+    soal = soal.map((item) => {
+      return {
+        id: item.id,
+        soal: item.soal,
+        point: item.point,
+      };
+    });
 
-  // if (now < startTime) {
-  //   return { statusCode: 422, msg: "Ujian belum dimulai" };
-  // }
+    if (exam.status === "open") {
+      await nilaiPPdbController.update(
+        {
+          status: "progress",
+          jawaban: JSON.stringify([]),
+          jam_mulai: new Date(),
+          waktu_tersisa: exam.ujian.durasi,
+          jam_selesai: calculateWaktuSelesai(exam.ujian.durasi),
+        },
+        { where: { id: exam.id } }
+      );
+      return {
+        msg: "Selamat melakukan Ujian",
+        waktu_tersisa: Number(exam.ujian.durasi) * 60,
+        status_ujian: "progress",
+        jawaban: JSON.stringify([]),
+        soal: JSON.stringify(soal),
+      };
+    }
 
-  // if (now > endTime) {
-  //   return { statusCode: 422, msg: "Waktu ujian telah berakhir" };
-  // }
+    if (exam.status === "progress") {
+      await nilaiPPdbController.update(
+        {
+          waktu_tersisa:
+            calculateMinutesDifference(new Date(), exam.jam_selesai) * 60,
+        },
+        {
+          where: {
+            id: exam.id,
+          },
+        }
+      );
+      return {
+        msg: "Selamat melanjutkan Ujian",
+        waktu_tersisa:
+          calculateMinutesDifference(new Date(), exam.jam_selesai) * 60,
+        jam_mulai: exam.jam_mulai,
+        jam_selesai: exam.jam_selesai,
+        status_ujian: exam.status,
+        jawaban: exam.jawaban,
+        soal: JSON.stringify(soal),
+      };
+    }
+  } else {
+    // if (now < startTime) {
+    //   return {
+    //     statusCode: 422,
+    //     msg: "Waktu Ujian belum dimulai",
+    //   };
+    // }
+    console.log("waktu selesai", calculateMinutesDifference(now, endTime) * 60);
+  }
 
-  await nilaiPPdbController.update(
-    { status: "progress", jawaban: JSON.stringify([]) },
-    { where: { id: exam.id } }
-  );
-
-  return {
-    msg: "Ujian dimulai",
-    
-    soal: soal,
-    status_ujian: "progress",
-    jawaban: JSON.stringify([]),
-    soal: JSON.stringify(soal),
-    // waktu_tersisa: calculateMinutesDifference(now, endTime) * 60,
-  };
+  // return {
+  //   msg: "Ujian dimulai",
+  //   soal: soal,
+  //   status_ujian: "progress",
+  //   jawaban: JSON.stringify([]),
+  //   soal: JSON.stringify(soal),
+  //   // waktu_tersisa: calculateMinutesDifference(now, endTime) * 60,
+  // };
 });
 
 const submitExamPpdb = response.requestResponse(async (req, res) => {

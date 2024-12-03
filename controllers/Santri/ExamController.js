@@ -12,7 +12,6 @@ const NilaiController = require("../../models").nilai;
 const BankSoalController = require("../../models").bank_soal;
 const StudentModel = require("../../models").kelas_student;
 
-
 const response = new RESPONSE_API();
 
 const getExam = response.requestResponse(async (req, res) => {

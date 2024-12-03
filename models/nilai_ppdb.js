@@ -43,6 +43,26 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         defaultValue: "open",
       },
+      jam_mulai: {
+        type: DataTypes.DATE,
+        allowNull: true,
+      },
+      jam_selesai: {
+        type: DataTypes.DATE,
+        allowNull: true,
+      },
+      jam_submit: {
+        type: DataTypes.DATE,
+        allowNull: true,
+      },
+      jam_progress: {
+        type: DataTypes.DATE,
+        allowNull: true,
+      },
+      waktu_tersisa: {
+        type: DataTypes.DATE,
+        allowNull: true,
+      },
     },
     {
       sequelize,
