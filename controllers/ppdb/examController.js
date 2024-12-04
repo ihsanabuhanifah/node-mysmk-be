@@ -274,8 +274,55 @@ const submitExamPpdb = response.requestResponse(async (req, res) => {
   };
 });
 
+const progressExamPpdb = response.requestResponse(async (req, res) => {
+  const jawaban = req.body.data;
+  const id = req.body.id;
+
+  const exam = await nilaiPPdbController.findOne({
+    where: {
+      id: id,
+      user_id: req.id,
+    },
+  });
+
+  if (exam.status === "open") {
+    return {
+      statusCode: 422,
+      msg: "Ujian belum dimulai",
+    };
+  }
+
+  if (
+    calculateMinutesDifference(new Date(), exam.jam_selesai) < -1 ||
+    exam.status === "finish"
+  ) {
+    return {
+      statusCode: 422,
+      msg: "Ujian telah selesai",
+    };
+  }
+
+  await nilaiPPdbController.update(
+    {
+      jam_progress: new Date(),
+      jawaban: JSON.stringify(jawaban),
+    },
+    {
+      where: {
+        id: id,
+      },
+    }
+  );
+
+  return {
+    statusCode: 200,
+    msg: "Progress ujian berhasil tersimpan",
+  };
+});
+
 module.exports = {
   getExamPpdb,
   takeExamPpdb,
   submitExamPpdb,
+  progressExamPpdb,
 };

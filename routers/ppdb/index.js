@@ -38,6 +38,7 @@ const {
   getExamPpdb,
   takeExamPpdb,
   submitExamPpdb,
+  progressExamPpdb,
 } = require("../../controllers/ppdb/examController");
 
 const validation = [
@@ -141,7 +142,8 @@ ppdb.put("/nilai/update/:id", updateNilai);
 
 //exam
 ppdb.get("/exam/list", getExamPpdb);
-ppdb.put("/exam/take/:ujian_id", takeExamPpdb);
+ppdb.get("/exam/take/:ujian_id", takeExamPpdb);
 ppdb.put("/exam/submit", submitExamPpdb);
+ppdb.put("/exam/progress", progressExamPpdb);
 
 module.exports = ppdb;
