@@ -65,23 +65,24 @@ module.exports = {
       },
       sholat_shubuh: {
         allowNull: true,
-        type: Sequelize.ENUM("berjamaah", "sendirian", "tidak solat"),
+        type: Sequelize.STRING,
       },
       sholat_dzuhur: {
         allowNull: true,
-        type: Sequelize.ENUM("berjamaah", "sendirian", "tidak solat"),
+        type: Sequelize.STRING,
       },
       sholat_ashar: {
         allowNull: true,
-        type: Sequelize.ENUM("berjamaah", "sendirian", "tidak solat"),
+        
+        type: Sequelize.STRING,
       },
       sholat_magrib: {
         allowNull: true,
-        type: Sequelize.ENUM("berjamaah", "sendirian", "tidak solat"),
+        type: Sequelize.STRING,
       },
       sholat_isya: {
         allowNull: true,
-        type: Sequelize.ENUM("berjamaah", "sendirian", "tidak solat"),
+        type: Sequelize.STRING,
       },
     });
   },

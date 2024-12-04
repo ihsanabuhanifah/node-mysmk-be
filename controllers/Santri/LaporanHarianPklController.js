@@ -143,8 +143,9 @@ const detailLaporanPkl = response.requestResponse(async (req, res) => {
 });
 
 const downloadPdf = response.requestResponse(async (req, res) => {
-  const { bulan, tahun } = req.query;
+  const { bulan, tahun  } = req.query;
 
+  // Ambil data laporan harian PKL beserta laporan diniyyah
   const reportBulanan = await LaporanHarianPklModel.findAll({
     where: {
       student_id: req.student_id,
@@ -162,16 +163,41 @@ const downloadPdf = response.requestResponse(async (req, res) => {
         model: StudentModel,
         attributes: ["id", "nama_siswa"],
       },
+      {
+        require: false,
+        as: "laporan_diniyyah_harian",
+        model: laporanDiniyyahModel,
+        attributes: [
+          "dari_surat",
+          "sampai_surat",
+          "dari_ayat",
+          "sampai_ayat",
+          "dzikir_pagi",
+          "dzikir_petang",
+          "sholat_shubuh",
+          "sholat_dzuhur",
+          "sholat_ashar",
+          "sholat_magrib",
+          "sholat_isya",
+        ],
+      },
     ],
     order: [["created_at", "ASC"]],
   });
-  console.log("reportttt -->", reportBulanan);
+  console.log('rer', reportBulanan)
+
+  if (!reportBulanan || reportBulanan.length === 0) {
+    return res.status(404).json({
+      message: "Tidak ada laporan pada rentang waktu ini.",
+    });
+  }
 
   return {
     message: "Berhasil",
     data: reportBulanan,
   };
 });
+
 // const downloadPdf = async (req, res) => {
 //   const { bulan, tahun } = req.query;
 

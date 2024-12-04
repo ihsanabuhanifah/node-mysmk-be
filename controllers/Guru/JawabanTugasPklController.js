@@ -167,19 +167,22 @@ const getJawabanByTugasId = response.requestResponse(async (req, res) => {
     const sudahDikerjakan = jawabanTugas.length;
 
     const result = students.map((student) => {
-      const jawaban = jawabanTugas.find(j => j.student_id === student.id);
+      const jawaban = jawabanTugas.find((j) => j.student_id === student.id);
       return {
+        id: jawaban ? jawaban.id : null,
         student_id: student.id,
         nama: student.nama_siswa,
         status: jawaban ? jawaban.status : "belum dikerjakan",
         pesan: jawaban ? jawaban.pesan : null,
-        jawaban: jawaban ? {
-          jawaban_id: jawaban.id,
-          tugas_pkl_id: jawaban.tugas_pkl_id,
-          isi_jawaban: jawaban.link_jawaban,
-          createdAt: jawaban.createdAt,
-          updatedAt: jawaban.updatedAt,
-        } : null,
+        jawaban: jawaban
+          ? {
+              jawaban_id: jawaban.id,
+              tugas_pkl_id: jawaban.tugas_pkl_id,
+              isi_jawaban: jawaban.link_jawaban,
+              createdAt: jawaban.createdAt,
+              updatedAt: jawaban.updatedAt,
+            }
+          : null,
       };
     });
 
@@ -209,5 +212,5 @@ module.exports = {
   listJawabanSantri,
   detailJawabanSantri,
   getJawabanByTugasPklId,
-  getJawabanByTugasId
+  getJawabanByTugasId,
 };
