@@ -168,7 +168,7 @@ const remidial = response.requestResponse(async (req, res) => {
     { remidial_count: 1, status: "open" },
     {
       where: {
-        teacher_id: req.teacher_id,
+        // teacher_id: req.teacher_id,
 
         id: {
           [Op.in]: payload, // arrayOfIds adalah array yang berisi ID-ID yang ingin di-update
@@ -190,7 +190,7 @@ const refreshCount = response.requestResponse(async (req, res) => {
     { refresh_count: 3 },
     {
       where: {
-        teacher_id: req.teacher_id,
+        // teacher_id: req.teacher_id,
 
         id: {
           [Op.in]: payload, // arrayOfIds adalah array yang berisi ID-ID yang ingin di-update
