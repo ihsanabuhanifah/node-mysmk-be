@@ -33,6 +33,7 @@ const {
 const {
   createNilai,
   updateNilai,
+  detailNilai,
 } = require("../../controllers/ppdb/nilaiPpdbController");
 const {
   getExamPpdb,
@@ -139,6 +140,7 @@ ppdb.get("/wawancara/detail", detailWawancara);
 //Nilai
 ppdb.post("/nilai/create", createNilai);
 ppdb.put("/nilai/update/:id", updateNilai);
+ppdb.get("/nilai/detail", detailNilai);
 
 //exam
 ppdb.get("/exam/list", getExamPpdb);

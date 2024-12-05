@@ -1,4 +1,5 @@
 const nilaiModel = require("../../models").nilai_ppdb;
+const models = require("../../models");
 
 const createNilai = async (req, res) => {
   try {
@@ -68,8 +69,44 @@ const updateNilai = async (req, res) => {
     });
   }
 };
-
+const detailNilai = async (req, res) => {
+  try {
+    const user_id = req.id;
+    console.log(user_id);
+    const detail = await nilaiModel.findOne({
+      where: {
+        user_id,
+      },
+      include: [
+        {
+          model: models.user,
+          required: true,
+          attributes: ["id", "name"],
+        },
+      ],
+    });
+    if (!detail || detail.length === 0) {
+      return res.status(200).json({
+        status: "Success",
+        msg: "Tidak ditemukan nilai",
+      });
+    }
+    return res.status(200).json({
+      status: "Success",
+      msg: "Berhasil menemukan nilai",
+      data: detail,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      status: "Error",
+      msg: "Terjadi kesalahan saat mengambil data nilai",
+      error: error.message,
+    });
+  }
+};
 module.exports = {
   createNilai,
   updateNilai,
+  detailNilai,
 };
