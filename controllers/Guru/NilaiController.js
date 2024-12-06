@@ -83,7 +83,7 @@ const updateLastExam = response.requestResponse(async (req, res) => {
     total_point = total_point + item.point;
     jawaban_siswa = jawaban?.map((jawab) => {
       if (jawab.id === item.id) {
-        if (item.tipe !== "ES") {
+        if (["ES", "LV"].includes(item.tipe) === false) {
           if (jawab.jawaban === item.jawaban) {
             point_siswa = point_siswa + item.point;
           }
