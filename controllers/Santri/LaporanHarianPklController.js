@@ -186,11 +186,11 @@ const downloadPdf = response.requestResponse(async (req, res) => {
   });
   console.log('rer', reportBulanan)
 
-  if (!reportBulanan || reportBulanan.length === 0) {
-    return res.status(404).json({
-      message: "Tidak ada laporan pada rentang waktu ini.",
-    });
-  }
+  // if (!reportBulanan || reportBulanan.length === 0) {
+  //   return res.status(404).json({
+  //     message: "Tidak ada laporan pada rentang waktu ini.",
+  //   });
+  // }
 
   return {
     message: "Berhasil",
