@@ -60,7 +60,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: true,
       },
       waktu_tersisa: {
-        type: DataTypes.DATE,
+        type: DataTypes.BIGINT,
         allowNull: true,
       },
     },

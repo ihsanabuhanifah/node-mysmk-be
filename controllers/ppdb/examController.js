@@ -122,10 +122,14 @@ const takeExamPpdb = response.requestResponse(async (req, res) => {
     }
 
     if (exam.status === "progress") {
+      const waktuTersisa = calculateMinutesDifference(
+        new Date(),
+        exam.jam_selesai
+      );
+
       await nilaiPPdbController.update(
         {
-          waktu_tersisa:
-            calculateMinutesDifference(new Date(), exam.jam_selesai) * 60,
+          waktu_tersisa: waktuTersisa,
         },
         {
           where: {
@@ -133,10 +137,10 @@ const takeExamPpdb = response.requestResponse(async (req, res) => {
           },
         }
       );
+
       return {
         msg: "Selamat melanjutkan Ujian",
-        waktu_tersisa:
-          calculateMinutesDifference(new Date(), exam.jam_selesai) * 60,
+        waktu_tersisa: waktuTersisa * 60,
         jam_mulai: exam.jam_mulai,
         jam_selesai: exam.jam_selesai,
         status_ujian: exam.status,
@@ -291,14 +295,32 @@ const progressExamPpdb = response.requestResponse(async (req, res) => {
       msg: "Ujian belum dimulai",
     };
   }
-
-  if (
-    calculateMinutesDifference(new Date(), exam.jam_selesai) < -1 ||
-    exam.status === "finish"
-  ) {
+  if (exam.status === "finish") {
     return {
       statusCode: 422,
       msg: "Ujian telah selesai",
+    };
+  }
+  const timeRemaining = calculateMinutesDifference(
+    new Date(),
+    exam.jam_selesai
+  );
+  if (timeRemaining <= 0 && timeRemaining > -1000) {
+    await nilaiPPdbController.update(
+      {
+        status: "finish",
+        jam_progress: new Date(),
+        jawaban: JSON.stringify(jawaban),
+      },
+      {
+        where: {
+          id: id,
+        },
+      }
+    );
+    return {
+      statusCode: 422,
+      msg: "Waktu ujian telah habis",
     };
   }
 
