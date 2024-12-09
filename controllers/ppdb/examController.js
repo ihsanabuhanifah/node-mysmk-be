@@ -7,7 +7,9 @@ const {
 const nilaiPPdbController = require("../../models").nilai_ppdb;
 const BankSoalController = require("../../models").bank_soal;
 const { RESPONSE_API } = require("../../utils/response");
-
+const moment = require("moment-timezone");
+const formatIndonesia = (date) =>
+  moment(date).tz("Asia/Jakarta").format("DD-MM-YYYY HH:mm:ss");
 const response = new RESPONSE_API();
 
 const getExamPpdb = response.requestResponse(async (req, res) => {
@@ -84,9 +86,9 @@ const takeExamPpdb = response.requestResponse(async (req, res) => {
     };
   }
 
-  const now = new Date();
-  const startTime = new Date(exam.ujian.jam_mulai);
-  const endTime = new Date(exam.ujian.jam_selesai);
+  const now = moment().tz("Asia/Jakarta").toDate();
+  const startTime = moment(exam.ujian.waktu_mulai).tz("Asia/Jakarta").toDate();
+  const endTime = moment(exam.ujian.waktu_selesai).tz("Asia/Jakarta").toDate();
 
   if (
     (now >= startTime && now <= endTime) ||
@@ -102,11 +104,12 @@ const takeExamPpdb = response.requestResponse(async (req, res) => {
     });
 
     if (exam.status === "open") {
+      const currentTime = moment().tz("Asia/Jakarta").toDate();
       await nilaiPPdbController.update(
         {
           status: "progress",
           jawaban: JSON.stringify([]),
-          jam_mulai: new Date(),
+          jam_mulai: currentTime,
           waktu_tersisa: exam.ujian.durasi,
           jam_selesai: calculateWaktuSelesai(exam.ujian.durasi),
         },
@@ -118,33 +121,47 @@ const takeExamPpdb = response.requestResponse(async (req, res) => {
         status_ujian: "progress",
         jawaban: JSON.stringify([]),
         soal: JSON.stringify(soal),
+        jam_mulai: formatIndonesia(currentTime),
       };
     }
 
     if (exam.status === "progress") {
+      const currentTime = moment().tz("Asia/Jakarta").toDate();
       const waktuTersisa = calculateMinutesDifference(
-        new Date(),
+        currentTime,
         exam.jam_selesai
       );
 
-      await nilaiPPdbController.update(
-        {
-          waktu_tersisa: waktuTersisa,
-        },
-        {
-          where: {
-            id: exam.id,
+      if (!exam.jam_mulai) {
+        await nilaiPPdbController.update(
+          {
+            waktu_tersisa: waktuTersisa,
+            jam_mulai: currentTime,
           },
-        }
-      );
+          {
+            where: {
+              id: exam.id,
+            },
+          }
+        );
+      } else {
+        await nilaiPPdbController.update(
+          {
+            waktu_tersisa: waktuTersisa,
+          },
+          {
+            where: {
+              id: exam.id,
+            },
+          }
+        );
+      }
 
       return {
         msg: "Selamat melanjutkan Ujian",
         waktu_tersisa: waktuTersisa * 60,
-        jam_mulai: exam.jam_mulai,
-        jam_selesai: exam.jam_selesai,
+        jam_mulai: formatIndonesia(exam.jam_mulai),
         status_ujian: exam.status,
-        jawaban: exam.jawaban,
         soal: JSON.stringify(soal),
       };
     }
@@ -169,16 +186,15 @@ const takeExamPpdb = response.requestResponse(async (req, res) => {
 });
 
 const submitExamPpdb = response.requestResponse(async (req, res) => {
-  const { id, data: jawaban } = req.body;
+  const { data: jawaban } = req.body;
   const exam = await nilaiPPdbController.findOne({
     where: {
-      id: id,
       user_id: req.id,
     },
     include: [
       {
         model: models.ujian,
-        attributes: ["id", "soal"],
+        attributes: ["id", "soal", "waktu_selesai"],
       },
     ],
   });
@@ -257,6 +273,8 @@ const submitExamPpdb = response.requestResponse(async (req, res) => {
       status: "finish",
       jawaban: JSON.stringify(jawaban),
       is_lulus: nilai >= 75 ? 1 : 0,
+      jam_selesai: moment().tz("Asia/Jakarta").toDate(),
+      waktu_selesai: exam.ujian.waktu_selesai,
     },
     {
       where: {
@@ -275,19 +293,25 @@ const submitExamPpdb = response.requestResponse(async (req, res) => {
     lulus: nilai >= 75 ? "Ya" : "Tidak",
     totalPoint,
     achievedPoint,
+    jam_selesai: formatIndonesia(new Date()),
   };
 });
 
 const progressExamPpdb = response.requestResponse(async (req, res) => {
   const jawaban = req.body.data;
-  const id = req.body.id;
-
   const exam = await nilaiPPdbController.findOne({
     where: {
-      id: id,
       user_id: req.id,
     },
+    include: [
+      {
+        model: models.ujian,
+        attributes: ["id", "soal", "status"],
+      },
+    ],
   });
+  console.log("exam status", exam.status);
+  console.log("user_id:", req.id);
 
   if (exam.status === "open") {
     return {
@@ -302,19 +326,18 @@ const progressExamPpdb = response.requestResponse(async (req, res) => {
     };
   }
   const timeRemaining = calculateMinutesDifference(
-    new Date(),
+    moment().tz("Asia/Jakarta").toDate(),
     exam.jam_selesai
   );
   if (timeRemaining <= 0 && timeRemaining > -1000) {
     await nilaiPPdbController.update(
       {
         status: "finish",
-        jam_progress: new Date(),
         jawaban: JSON.stringify(jawaban),
       },
       {
         where: {
-          id: id,
+          id: exam.id,
         },
       }
     );
@@ -331,7 +354,7 @@ const progressExamPpdb = response.requestResponse(async (req, res) => {
     },
     {
       where: {
-        id: id,
+        id: exam.id,
       },
     }
   );
@@ -339,6 +362,7 @@ const progressExamPpdb = response.requestResponse(async (req, res) => {
   return {
     statusCode: 200,
     msg: "Progress ujian berhasil tersimpan",
+    jam_progress: formatIndonesia(exam.jam_progress),
   };
 });
 
