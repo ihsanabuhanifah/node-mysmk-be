@@ -63,6 +63,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.BIGINT,
         allowNull: true,
       },
+      exam_result: {
+        type: DataTypes.DECIMAL(5, 2),
+        allowNull: true,
+      },
     },
     {
       sequelize,

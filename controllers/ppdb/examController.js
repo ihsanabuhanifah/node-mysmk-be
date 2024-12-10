@@ -275,6 +275,8 @@ const submitExamPpdb = response.requestResponse(async (req, res) => {
       is_lulus: nilai >= 75 ? 1 : 0,
       jam_selesai: moment().tz("Asia/Jakarta").toDate(),
       waktu_selesai: exam.ujian.waktu_selesai,
+      exam_result: nilai,
+      jam_submit: moment().tz("Asia/Jakarta").toDate(),
     },
     {
       where: {

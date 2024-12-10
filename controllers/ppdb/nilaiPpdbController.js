@@ -10,7 +10,7 @@ const createNilai = async (req, res) => {
         .status(500)
         .json({ message: "user_id atau ujian_id tidak tersedia" });
     }
-    const { jawaban, is_lulus, status } = req.body;
+    const { jawaban, is_lulus } = req.body;
 
     const serializedJawaban = JSON.stringify(jawaban);
 
