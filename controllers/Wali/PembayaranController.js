@@ -369,7 +369,8 @@ async function createPembayaran(req, res) {
     const proses = await PembayaranController.update(
       {
         foto: foto,
-        tanggal: new Date()
+        tanggal: new Date(),
+        walsan_id: req.walsan_id
       },
       {
         where: {
