@@ -99,7 +99,7 @@ const createKartuSpp = async (req, res) => {
                 status: "Belum",
                 bulan: month,
                 tahun: year,
-                tanggal_konfirmasi: null
+                tanggal_konfirmasi: null,
               };
             });
 
@@ -370,7 +370,7 @@ async function createPembayaran(req, res) {
       {
         foto: foto,
         tanggal: new Date(),
-        walsan_id: req.walsan_id
+        walsan_id: req.walsan_id,
       },
       {
         where: {
@@ -404,27 +404,41 @@ async function createPembayaranOtomatis(req, res) {
   }
 
   try {
-
     const timestamp = Date.now();
 
     const user = await userModel.findOne({
-      where: { id: req.id }
-    })
+      where: { id: req.id },
+    });
 
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
 
-        const dataUpdate = await pembayaranModel.findOne({
+    const dataUpdate = await pembayaranModel.findOne({
       where: {
         id: id,
       },
       attributes: [
-        'id', 'walsan_id', 'tanggal', 'foto', 'status', 'bulan', 'tahun',
-        'nominal', 'tanggal_konfirmasi', 'teacher_id', 'no_telepon',
-        'keterangan', 'redirect_url', 'transaction_token',
-        'status_midtrans', 'created_at', 'updated_at', 'order_id', 'transaction_id'
-      ]
+        "id",
+        "walsan_id",
+        "tanggal",
+        "foto",
+        "status",
+        "bulan",
+        "tahun",
+        "nominal",
+        "tanggal_konfirmasi",
+        "teacher_id",
+        "no_telepon",
+        "keterangan",
+        "redirect_url",
+        "transaction_token",
+        "status_midtrans",
+        "created_at",
+        "updated_at",
+        "order_id",
+        "transaction_id",
+      ],
     });
 
     if (!dataUpdate) {
@@ -487,28 +501,32 @@ async function createPembayaranOtomatis(req, res) {
       ],
     };
 
-
-    const response = await axios.post('https://app.sandbox.midtrans.com/snap/v1/transactions', parameter, {
-      headers: {
-        'Content-Type' : 'application/json',
-        'Authorization': `Basic ${Buffer.from(process.env.MIDTRANS_SERVER_KEY + ':').toString('base64')}`
+    const response = await axios.post(
+      "https://app.sandbox.midtrans.com/snap/v1/transactions",
+      parameter,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Basic ${Buffer.from(
+            process.env.MIDTRANS_SERVER_KEY + ":"
+          ).toString("base64")}`,
+        },
       }
-    });
+    );
 
     console.log("Midtrans Response:", response.data);
     const token = response.data.token;
     const redirect_url = response.data.redirect_url;
     const transactionId = response.data.transaction_id;
 
-
-      await PembayaranController.update(
+    await PembayaranController.update(
       {
         walsan_id: req.walsan_id,
         no_telepon: walsan.no_hp,
         transaction_token: token,
         redirect_url: redirect_url,
         order_id: transaksi_id,
-        transaction_id: transactionId
+        transaction_id: transactionId,
       },
       {
         where: {
@@ -521,7 +539,7 @@ async function createPembayaranOtomatis(req, res) {
       status: "Success",
       msg: "Berhasil Membayar SPP",
       data: dataUpdate,
-      transaction_id: transactionId
+      transaction_id: transactionId,
     });
   } catch (error) {
     console.log("Error Log:", error);
@@ -552,9 +570,9 @@ async function createPembayaranOtomatis(req, res) {
 //       },
 //     });
 
-    // if (!user) {
-    //   return res.status(404).json({ error: "User not found" });
-    // }
+// if (!user) {
+//   return res.status(404).json({ error: "User not found" });
+// }
 
 //     const dataUpdate = await pembayaranModel.findOne({
 //       where: {
@@ -732,8 +750,7 @@ async function createPembayaranOtomatis(req, res) {
 
 const createNotifPembayaran = async (req, res) => {
   try {
-    const { order_id, transaction_status, fraud_status } =
-      req.body;
+    const { order_id, transaction_status, fraud_status } = req.body;
 
     console.log(
       `Transaction notification received. Order ID: ${order_id}. Transaction status: ${transaction_status}. Fraud status: ${fraud_status}`
@@ -751,8 +768,8 @@ const createNotifPembayaran = async (req, res) => {
     // Find the pembayaran entry in the database
     const pembayaran = await pembayaranModel.findOne({
       where: {
-        order_id:order_id, // Ensure this matches the correct column
-      }
+        order_id: order_id, // Ensure this matches the correct column
+      },
     });
 
     if (!pembayaran) {
@@ -884,47 +901,40 @@ const createNotifPembayaran = async (req, res) => {
 // Wablas
 
 async function createNotification(req, res) {
-  const {bulan_pilihan, ta_id} = req.body
+  const { bulan_pilihan, ta_id } = req.body;
 
   try {
-    const walsan = await parentModel.findAll(
-      {
+    const walsan = await parentModel.findAll({
       include: [
         {
           model: models.student,
           as: "siswa",
           require: true,
-          attributes: ["id", "nama_siswa"]
-        }
-      ]
+          attributes: ["id", "nama_siswa"],
+        },
+      ],
     });
 
-    
-
-    
-  const pembayaran = await pembayaranModel.findAll({
-    where: {
-      bulan: bulan_pilihan,
-      ta_id: ta_id
-    },
-    include: [
-  {
-    model: models.student,
-    as: "murid",
-    require: true,
-    attributes: ["id", "nama_siswa"]
-  },
-  {
-    model: models.ta,
-    as: "ta",
-    require:true,
-    attributes: ["id", "nama_tahun_ajaran"]
-  }
-    ]
-  })
-
-
-    
+    const pembayaran = await pembayaranModel.findAll({
+      where: {
+        bulan: bulan_pilihan,
+        ta_id: ta_id,
+      },
+      include: [
+        {
+          model: models.student,
+          as: "murid",
+          require: true,
+          attributes: ["id", "nama_siswa"],
+        },
+        {
+          model: models.ta,
+          as: "ta",
+          require: true,
+          attributes: ["id", "nama_tahun_ajaran"],
+        },
+      ],
+    });
 
     const token = `${process.env.WABLAS_TOKEN}`;
 
@@ -941,42 +951,49 @@ async function createNotification(req, res) {
     //         });
 
     function delay(ms) {
-      return new Promise((resolve) => setTimeout(resolve, ms))
+      return new Promise((resolve) => setTimeout(resolve, ms));
     }
 
     await Promise.all(
-      pembayaran.map( async (payment) => {
+      pembayaran.map(async (payment) => {
         const namaSiswa = payment.murid?.nama_siswa || "siswa";
         const tahunAjaran = payment.ta?.nama_tahun_ajaran;
         const namaBulan = payment.bulan;
 
         const filterSiswa = walsan.filter(
           (item) => item.siswa?.id === payment.murid?.id
-        )
+        );
 
         console.log("WABLAS", process.env.WABLAS_TOKEN);
-        console.log("Gabungan Nama Siswa Di Pembayaran Dan Nama Siswa Di Filter", filterSiswa, payment.murid.nama_siswa)
+        console.log(
+          "Gabungan Nama Siswa Di Pembayaran Dan Nama Siswa Di Filter",
+          filterSiswa,
+          payment.murid.nama_siswa
+        );
 
         if (filterSiswa.length === 0) {
-          console.log("Tidak Ada Nama Yang Sama Dalam Filter Siswa")
-          return res.status(403).json("Terjadi Kesalahan")
+          console.log("Tidak Ada Nama Yang Sama Dalam Filter Siswa");
+          return res.status(403).json("Terjadi Kesalahan");
         }
 
         filterSiswa.map(async (item, idx) => {
-          await delay(idx * 200)
+          await delay(idx * 200);
           const data = {
-            phone: `62${item.no_hp.substring(1,12)}`,
-            message:
-              `Assalamu'alaikum Wr. Wb. Yth. Bapak/Ibu Wali Murid, Kami ingin menginformasikan bahwa pembayaran SPP untuk ${namaSiswa} pada bulan ${namaBulan} tahun ajaran ${tahunAjaran} belum kami terima. Kami harap Bapak/Ibu dapat segera menyelesaikan pembayaran agar proses pembelajaran putra/putri Bapak/Ibu dapat terus berjalan lancar. Silakan melakukan pembayaran melalui metode yang telah tersedia. Jika Bapak Atau Ibu memiliki pertanyaan atau membutuhkan bantuan, jangan ragu untuk menghubungi kami. Terima kasih atas perhatian dan kerjasamanya.`,
+            phone: `62${item.no_hp.substring(1, 12)}`,
+            message: `Assalamu'alaikum Wr. Wb. Yth. Bapak/Ibu Wali Murid, Kami ingin menginformasikan bahwa pembayaran SPP untuk ${namaSiswa} pada bulan ${namaBulan} tahun ajaran ${tahunAjaran} belum kami terima. Kami harap Bapak/Ibu dapat segera menyelesaikan pembayaran agar proses pembelajaran putra/putri Bapak/Ibu dapat terus berjalan lancar. Silakan melakukan pembayaran melalui metode yang telah tersedia. Jika Bapak Atau Ibu memiliki pertanyaan atau membutuhkan bantuan, jangan ragu untuk menghubungi kami. Terima kasih atas perhatian dan kerjasamanya.`,
           };
-  
+
           try {
-            await axios.post("https://jogja.wablas.com/api/send-message", data, {
-              headers: {
-                Authorization: token,
-                "Content-Type": "application/json",
-              },
-            });
+            await axios.post(
+              "https://jogja.wablas.com/api/send-message",
+              data,
+              {
+                headers: {
+                  Authorization: token,
+                  "Content-Type": "application/json",
+                },
+              }
+            );
           } catch (error) {
             if (error.response) {
               // Log detailed error information
@@ -993,11 +1010,8 @@ async function createNotification(req, res) {
               console.error("Error setting up the request:", error.message);
             }
           }
-        })
-      }
-        
-      )
-      
+        });
+      })
     );
 
     return res.status(201).json({
@@ -1073,7 +1087,7 @@ async function detailPembayaranSiswa(req, res) {
     } = req.query;
 
     let Result = {
-      student_id: student_id
+      student_id: student_id,
     };
 
     const dariBulan = dari_bulan ? Monthmap[dari_bulan] : null;
@@ -1139,6 +1153,14 @@ async function detailPembayaranSiswa(req, res) {
       };
     }
 
+    if (nama_tahun_ajaran) {
+      Result['$ta.nama_tahun_ajaran$'] = {
+        [Op.like]: nama_tahun_ajaran,
+      };
+    }
+
+    
+
     const cari = await PembayaranController.findAndCountAll({
       where: Result,
       limit: pageSize,
@@ -1154,6 +1176,7 @@ async function detailPembayaranSiswa(req, res) {
         "nominal",
         "tanggal_konfirmasi",
         "teacher_id",
+        "ta_id",
         "no_telepon",
         "keterangan",
         "transaction_id",
@@ -1179,7 +1202,7 @@ async function detailPembayaranSiswa(req, res) {
         },
         {
           model: models.ta,
-          require: true,
+          required: true,  // This will make it an INNER JOIN. If you want to allow rows without matching ta records, set this to false
           as: "ta",
           attributes: ["id", "nama_tahun_ajaran"],
         },
@@ -1193,6 +1216,8 @@ async function detailPembayaranSiswa(req, res) {
       order: ["id", ["bulan", "ASC"]],
     });
 
+    
+
     return res.status(201).json({
       status: "Success",
       msg: "Berhasil Menampilkan Data Pembayaran Siswa",
@@ -1203,6 +1228,7 @@ async function detailPembayaranSiswa(req, res) {
     return res.status(403).send("Terjadi Kesalahan");
   }
 }
+
 
 async function updateResponse(req, res) {
   try {
@@ -1231,16 +1257,21 @@ async function updateResponse(req, res) {
           });
 
           if (!pembayaran || !pembayaran.walsan) {
-            console.error("Payment or parent information not found for data:", data);
+            console.error(
+              "Payment or parent information not found for data:",
+              data
+            );
             gagal += 1;
             return;
           }
 
           // Check if the phone number is null
           if (!pembayaran.walsan.no_hp) {
-            console.error(`Phone number is missing for parent ID ${pembayaran.walsan.id}`);
+            console.error(
+              `Phone number is missing for parent ID ${pembayaran.walsan.id}`
+            );
             gagal += 1;
-            return;  // Prevent sending the message
+            return; // Prevent sending the message
           }
 
           const hp = `62${pembayaran.walsan.no_hp.substring(1, 12)}`;
@@ -1263,7 +1294,12 @@ async function updateResponse(req, res) {
                 }
               );
 
-              console.log(`Pesan Sudah Dikirim Ke Nomor ${pesanData.phone}`, token, pesanData, response.data);
+              console.log(
+                `Pesan Sudah Dikirim Ke Nomor ${pesanData.phone}`,
+                token,
+                pesanData,
+                response.data
+              );
             } catch (error) {
               console.error("Error sending notification:", error);
               gagal += 1;
@@ -1286,10 +1322,15 @@ async function updateResponse(req, res) {
                 },
               }
             );
-            console.log(`Successfully updated status for payment ID ${data.id} to ${data.status}`);
+            console.log(
+              `Successfully updated status for payment ID ${data.id} to ${data.status}`
+            );
             berhasil += 1;
           } catch (error) {
-            console.error(`Error updating status for payment ID ${data.id}:`, error);
+            console.error(
+              `Error updating status for payment ID ${data.id}:`,
+              error
+            );
             gagal += 1;
           }
         } catch (error) {
@@ -1310,8 +1351,6 @@ async function updateResponse(req, res) {
   }
 }
 
-
-
 async function createpdfBulanan(req, res) {
   const { bulan, tahun } = req.query;
   const { student_id } = req.params;
@@ -1320,7 +1359,7 @@ async function createpdfBulanan(req, res) {
       where: {
         student_id: student_id,
       },
-      
+
       attributes: [
         "id",
         "walsan_id",
@@ -1490,8 +1529,6 @@ async function createpdfBulanan(req, res) {
     res.status(500).json({ msg: "Terjadi Kesalahan Di Dalam Server" });
   }
 }
-
-
 
 module.exports = {
   createKartuSpp,
