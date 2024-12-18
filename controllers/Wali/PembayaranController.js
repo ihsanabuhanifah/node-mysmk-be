@@ -909,7 +909,7 @@ async function createNotification(req, res) {
         {
           model: models.student,
           as: "siswa",
-          require: true,
+          required: true,
           attributes: ["id", "nama_siswa"],
         },
       ],
@@ -924,13 +924,13 @@ async function createNotification(req, res) {
         {
           model: models.student,
           as: "murid",
-          require: true,
+          required: true,
           attributes: ["id", "nama_siswa"],
         },
         {
           model: models.ta,
           as: "ta",
-          require: true,
+          required: true,
           attributes: ["id", "nama_tahun_ajaran"],
         },
       ],
@@ -938,91 +938,199 @@ async function createNotification(req, res) {
 
     const token = `${process.env.WABLAS_TOKEN}`;
 
-    //       const data = {
-    //       phone: `6281775490737`,
-    //       message: "Test",
-    //     };
-
-    // await axios.post("https://jogja.wablas.com/api/send-message", data, {
-    //           headers: {
-    //             Authorization: token,
-    //             "Content-Type": "application/json",
-    //           },
-    //         });
-
     function delay(ms) {
       return new Promise((resolve) => setTimeout(resolve, ms));
     }
 
-    await Promise.all(
-      pembayaran.map(async (payment) => {
-        const namaSiswa = payment.murid?.nama_siswa || "siswa";
-        const tahunAjaran = payment.ta?.nama_tahun_ajaran;
-        const namaBulan = payment.bulan;
+    const errors = [];
 
-        const filterSiswa = walsan.filter(
-          (item) => item.siswa?.id === payment.murid?.id
-        );
+    for (const payment of pembayaran) {
+      const namaSiswa = payment.murid?.nama_siswa || "siswa";
+      const tahunAjaran = payment.ta?.nama_tahun_ajaran;
+      const namaBulan = payment.bulan;
 
-        console.log("WABLAS", process.env.WABLAS_TOKEN);
-        console.log(
-          "Gabungan Nama Siswa Di Pembayaran Dan Nama Siswa Di Filter",
-          filterSiswa,
-          payment.murid.nama_siswa
-        );
+      const filterSiswa = walsan.filter(
+        (item) => item.siswa?.id === payment.murid?.id
+      );
 
-        if (filterSiswa.length === 0) {
-          console.log("Tidak Ada Nama Yang Sama Dalam Filter Siswa");
-          return res.status(403).json("Terjadi Kesalahan");
-        }
+      if (filterSiswa.length === 0) {
+        errors.push(`No matching parent found for student: ${namaSiswa}`);
+        continue;
+      }
 
-        filterSiswa.map(async (item, idx) => {
-          await delay(idx * 200);
-          const data = {
-            phone: `62${item.no_hp.substring(1, 12)}`,
-            message: `Assalamu'alaikum Wr. Wb. Yth. Bapak/Ibu Wali Murid, Kami ingin menginformasikan bahwa pembayaran SPP untuk ${namaSiswa} pada bulan ${namaBulan} tahun ajaran ${tahunAjaran} belum kami terima. Kami harap Bapak/Ibu dapat segera menyelesaikan pembayaran agar proses pembelajaran putra/putri Bapak/Ibu dapat terus berjalan lancar. Silakan melakukan pembayaran melalui metode yang telah tersedia. Jika Bapak Atau Ibu memiliki pertanyaan atau membutuhkan bantuan, jangan ragu untuk menghubungi kami. Terima kasih atas perhatian dan kerjasamanya.`,
-          };
+      for (const [idx, item] of filterSiswa.entries()) {
+        await delay(idx * 200); // Add delay for throttling
 
-          try {
-            await axios.post(
-              "https://jogja.wablas.com/api/send-message",
-              data,
-              {
-                headers: {
-                  Authorization: token,
-                  "Content-Type": "application/json",
-                },
-              }
-            );
-          } catch (error) {
-            if (error.response) {
-              // Log detailed error information
-              console.error(
-                "Error sending notification:",
-                error.response.status,
-                error.response.data
-              );
-            } else if (error.request) {
-              // Request was made but no response received
-              console.error("No response received:", error.request);
-            } else {
-              // Something else caused the error
-              console.error("Error setting up the request:", error.message);
+        const data = {
+          phone: `6281775490737`,
+          message: `Assalamu'alaikum Wr. Wb. Yth. Bapak/Ibu Wali Murid, Kami ingin menginformasikan bahwa pembayaran SPP untuk ${namaSiswa} pada bulan ${namaBulan} tahun ajaran ${tahunAjaran} belum kami terima. Kami harap Bapak/Ibu dapat segera menyelesaikan pembayaran agar proses pembelajaran putra/putri Bapak/Ibu dapat terus berjalan lancar. Silakan melakukan pembayaran melalui metode yang telah tersedia. Jika Bapak Atau Ibu memiliki pertanyaan atau membutuhkan bantuan, jangan ragu untuk menghubungi kami. Terima kasih atas perhatian dan kerjasamanya.`,
+        };
+
+        try {
+          await axios.post(
+            "https://jogja.wablas.com/api/send-message",
+            data,
+            {
+              headers: {
+                Authorization: token,
+                "Content-Type": "application/json",
+              },
             }
-          }
-        });
-      })
-    );
+          );
+
+          console.log("Berhasil Mengirim Pesan", token, data.message)
+        } catch (error) {
+          console.error(`Error sending message to ${data.phone}:`, error);
+          errors.push(`Failed to send message to ${data.phone}`);
+        }
+      }
+    }
+
+    if (errors.length > 0) {
+      return res.status(207).json({
+        status: "Partial Success",
+        msg: "Some messages failed to send",
+        errors,
+      });
+    }
 
     return res.status(201).json({
       status: "Success",
-      msg: "Berhasil Menambahkan Pesan",
+      msg: "All messages sent successfully",
     });
   } catch (error) {
-    console.log(error.message);
-    return res.status(403).send("Terjadi Kesalahan");
+    console.error("Error:", error.message);
+    return res.status(500).json({
+      status: "Error",
+      msg: "An error occurred while sending notifications",
+    });
   }
 }
+
+
+// async function createNotification(req, res) {
+//   const { bulan_pilihan, ta_id } = req.body;
+
+//   try {
+//     const walsan = await parentModel.findAll({
+//       include: [
+//         {
+//           model: models.student,
+//           as: "siswa",
+//           require: true,
+//           attributes: ["id", "nama_siswa"],
+//         },
+//       ],
+//     });
+
+//     const pembayaran = await pembayaranModel.findAll({
+//       where: {
+//         bulan: bulan_pilihan,
+//         ta_id: ta_id,
+//       },
+//       include: [
+//         {
+//           model: models.student,
+//           as: "murid",
+//           require: true,
+//           attributes: ["id", "nama_siswa"],
+//         },
+//         {
+//           model: models.ta,
+//           as: "ta",
+//           require: true,
+//           attributes: ["id", "nama_tahun_ajaran"],
+//         },
+//       ],
+//     });
+
+//     const token = `${process.env.WABLAS_TOKEN}`;
+
+//     //       const data = {
+//     //       phone: `6281775490737`,
+//     //       message: "Test",
+//     //     };
+
+//     // await axios.post("https://jogja.wablas.com/api/send-message", data, {
+//     //           headers: {
+//     //             Authorization: token,
+//     //             "Content-Type": "application/json",
+//     //           },
+//     //         });
+
+//     function delay(ms) {
+//       return new Promise((resolve) => setTimeout(resolve, ms));
+//     }
+
+//     await Promise.all(
+//       pembayaran.map(async (payment) => {
+//         const namaSiswa = payment.murid?.nama_siswa || "siswa";
+//         const tahunAjaran = payment.ta?.nama_tahun_ajaran;
+//         const namaBulan = payment.bulan;
+
+//         const filterSiswa = walsan.filter(
+//           (item) => item.siswa?.id === payment.murid?.id
+//         );
+
+//         console.log("WABLAS", process.env.WABLAS_TOKEN);
+//         console.log(
+//           "Gabungan Nama Siswa Di Pembayaran Dan Nama Siswa Di Filter",
+//           filterSiswa,
+//           payment.murid.nama_siswa
+//         );
+
+//         if (filterSiswa.length === 0) {
+//           console.log("Tidak Ada Nama Yang Sama Dalam Filter Siswa");
+//           return res.status(403).json("Terjadi Kesalahan");
+//         }
+
+//         filterSiswa.map(async (item, idx) => {
+//           await delay(idx * 200);
+//           const data = {
+//             phone: `62${item.no_hp.substring(1, 12)}`,
+//             message: `Assalamu'alaikum Wr. Wb. Yth. Bapak/Ibu Wali Murid, Kami ingin menginformasikan bahwa pembayaran SPP untuk ${namaSiswa} pada bulan ${namaBulan} tahun ajaran ${tahunAjaran} belum kami terima. Kami harap Bapak/Ibu dapat segera menyelesaikan pembayaran agar proses pembelajaran putra/putri Bapak/Ibu dapat terus berjalan lancar. Silakan melakukan pembayaran melalui metode yang telah tersedia. Jika Bapak Atau Ibu memiliki pertanyaan atau membutuhkan bantuan, jangan ragu untuk menghubungi kami. Terima kasih atas perhatian dan kerjasamanya.`,
+//           };
+
+//           try {
+//             await axios.post(
+//               "https://jogja.wablas.com/api/send-message",
+//               data,
+//               {
+//                 headers: {
+//                   Authorization: token,
+//                   "Content-Type": "application/json",
+//                 },
+//               }
+//             );
+//           } catch (error) {
+//             if (error.response) {
+//               // Log detailed error information
+//               console.error(
+//                 "Error sending notification:",
+//                 error.response.status,
+//                 error.response.data
+//               );
+//             } else if (error.request) {
+//               // Request was made but no response received
+//               console.error("No response received:", error.request);
+//             } else {
+//               // Something else caused the error
+//               console.error("Error setting up the request:", error.message);
+//             }
+//           }
+//         });
+//       })
+//     );
+
+//     return res.status(201).json({
+//       status: "Success",
+//       msg: "Berhasil Menambahkan Pesan",
+//     });
+//   } catch (error) {
+//     console.log(error.message);
+//     return res.status(403).send("Terjadi Kesalahan");
+//   }
+// }
 
 async function daftarSiswa(req, res) {
   const { page, pageSize, angkatan, tahun_ajaran, status, nama_siswa } =
@@ -1239,8 +1347,7 @@ async function updateResponse(req, res) {
 
     await Promise.all(
       payload.map(async (data) => {
-        const token = process.env.WABLAS_TOKEN;
-
+        const token = 'hIcQxtpRplbVVvY46d0GsMDWSCNYpIcbs95SucC6DNS3E5rUn1osPECHuiL1jJRI';
         try {
           const pembayaran = await pembayaranModel.findOne({
             where: {
@@ -1274,7 +1381,7 @@ async function updateResponse(req, res) {
             return; // Prevent sending the message
           }
 
-          const hp = `62${pembayaran.walsan.no_hp.substring(1, 12)}`;
+          const hp = `6281775490737`;
           const pesanData = {
             phone: hp,
             message:
@@ -1301,9 +1408,13 @@ async function updateResponse(req, res) {
                 response.data
               );
             } catch (error) {
-              console.error("Error sending notification:", error);
-              gagal += 1;
-              return;
+              console.error("Error sending notification:", {
+    message: error.message,
+    response: error.response?.data || null, // Log the API error response
+    config: error.config, // Log request config for debugging
+  });
+  gagal += 1;
+  return;
             }
           } else if (pembayaran.status === "Belum") {
             console.log("Status not 'Sudah', skipping message sending.");
