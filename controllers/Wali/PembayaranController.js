@@ -1,25 +1,22 @@
 const PembayaranController = require("../../models").pembayaran_spp;
 const models = require("../../models");
 const pembayaranModel = require("../../models").pembayaran_spp;
-const cron = require("node-cron");
-const midtrans = require("midtrans-client");
-const { format, parse, eachMonthOfInterval } = require("date-fns");
-const { param } = require("express-validator");
+
 const { checkQuery } = require("../../utils/format");
 const userModel = require("../../models").user;
-const notificationModel = require("../../models").notification;
 const studentModel = require("../../models").student;
 const parentModel = require("../../models").parent;
-const { Op } = require("sequelize");
+const { Op, where } = require("sequelize");
 const axios = require("axios");
-const { tanggal } = require("../../utils/tanggal");
-const crypto = require("crypto");
-const Midtrans = require("midtrans-client");
+const PDFDocument = require("pdfkit");
+const midtransClient = require("midtrans-client");
+
 require("dotenv").config();
 
-let snap = new midtrans.Snap({
-  isProduction: process.env.MIDTRANS_PRDOUCITON,
-  serverKey: process.env.MIDTRANS_SERVER_KEY,
+let snap = new midtransClient.Snap({
+  // Set to true if you want Production Environment (accept real transaction).
+  isProduction: false,
+  serverKey: "SB-Mid-server-eNvmFDUCr_FrDMUNKw0-9-9m",
 });
 
 const Monthmap = {
@@ -102,7 +99,8 @@ const createKartuSpp = async (req, res) => {
                 status: "Belum",
                 bulan: month,
                 tahun: year,
-                teacher_id: req.id,
+                tanggal_konfirmasi: null
+
               };
             });
 
@@ -197,7 +195,7 @@ const ListPembayaran = async (req, res) => {
       tahun,
       bulan,
       nama_tahun_ajaran,
-      status
+      status,
     } = req.query;
 
     let Result = {};
@@ -261,16 +259,35 @@ const ListPembayaran = async (req, res) => {
     }
     if (status) {
       Result.status = {
-        [Op.like] : status
-      }
+        [Op.like]: status,
+      };
     }
-  
-    
 
     const list = await PembayaranController.findAndCountAll({
       limit: pageSize,
       offset: page,
       where: Result,
+      attributes: [
+        "id",
+        "walsan_id",
+        "tanggal",
+        "foto",
+        "status",
+        "bulan",
+        "tahun",
+        "nominal",
+        "tanggal_konfirmasi",
+        "teacher_id",
+        "no_telepon",
+        "keterangan",
+        "transaction_id",
+        "redirect_url",
+        "transaction_token",
+        "status_midtrans",
+        "created_at",
+        "updated_at",
+        "order_id",
+      ],
       include: [
         {
           model: models.parent,
@@ -297,10 +314,10 @@ const ListPembayaran = async (req, res) => {
           where: {
             ...(checkQuery(nama_tahun_ajaran) && {
               nama_tahun_ajaran: {
-                [Op.substring] : nama_tahun_ajaran
-              }
-            })
-          }
+                [Op.substring]: nama_tahun_ajaran,
+              },
+            }),
+          },
         },
         {
           model: models.teacher,
@@ -353,7 +370,7 @@ async function createPembayaran(req, res) {
     const proses = await PembayaranController.update(
       {
         foto: foto,
-        tanggal: new Date(),
+        tanggal: new Date()
       },
       {
         where: {
@@ -365,7 +382,7 @@ async function createPembayaran(req, res) {
     return res.json({
       status: "Success",
       msg: "Berhasil Memperbarui Pembayaran",
-      data: proses,
+      data: detail,
     });
   } catch (error) {
     console.log(error);
@@ -378,8 +395,6 @@ async function createPembayaran(req, res) {
 async function createPembayaranOtomatis(req, res) {
   const { id } = req.params;
 
-  const { nominal, walsan_id, bulan, tahun } = req.body;
-
   console.log("ID from req.params:", id);
   console.log("req.id:", req.id);
   console.log("req.walsan_id:", req.walsan_id);
@@ -388,54 +403,71 @@ async function createPembayaranOtomatis(req, res) {
     return res.status(400).json({ error: "ID parameter is required" });
   }
 
-  const timestamp = new Date();
+  try {
 
-  const user = await userModel.findOne({
-    where: {
-      id: req.id,
-    },
-  });
+    const timestamp = Date.now();
 
-  if (!user) {
-    return res.status(404).json({ error: "User not found" });
-  }
+    const user = await userModel.findOne({
+      where: { id: req.id }
+    })
 
-  const dataUpdate = await PembayaranController.findOne({
-    where: {
-      id: id,
-    },
-  });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
 
-  if (!dataUpdate) {
-    return res.status(404).json({ error: "Pembayaran not found" });
-  }
+        const dataUpdate = await pembayaranModel.findOne({
+      where: {
+        id: id,
+      },
+      attributes: [
+        'id', 'walsan_id', 'tanggal', 'foto', 'status', 'bulan', 'tahun',
+        'nominal', 'tanggal_konfirmasi', 'teacher_id', 'no_telepon',
+        'keterangan', 'redirect_url', 'transaction_token',
+        'status_midtrans', 'created_at', 'updated_at', 'order_id', 'transaction_id'
+      ]
+    });
 
-  const walsan = await parentModel.findOne({
-    where: {
-      id: req.walsan_id,
-    },
-  });
+    if (!dataUpdate) {
+      return res.status(404).json({ error: "Pembayaran not found" });
+    }
 
-  if (!walsan) {
-    return res.status(404).json({ error: "Walsan not found" });
-  }
+    const walsan = await parentModel.findOne({
+      where: {
+        id: req.walsan_id,
+      },
+    });
 
-  let transaksi_id = `SPP${walsan.id}`;
+    if (!walsan) {
+      return res.status(404).json({ error: "Walsan not found" });
+    }
 
-  let parameter = {
-    transaction_details: {
-      order_id: transaksi_id,
-      gross_amount: dataUpdate.nominal,
-    },
-    credit_card: {
-      secure: true,
-    },
-    customer_details: {
-      email: user.email,
-      first_name: walsan.nama_wali,
-      last_name: "MQ",
-      phone: `+62${walsan.no_hp}`,
-      biling_address: {
+    let transaksi_id = `SPP${user.id}${walsan.id}${timestamp}`;
+
+    let parameter = {
+      transaction_details: {
+        order_id: transaksi_id,
+        gross_amount: dataUpdate.nominal,
+      },
+      credit_card: {
+        secure: true,
+      },
+      customer_details: {
+        email: user.email,
+        first_name: walsan.nama_wali,
+        last_name: "MQ",
+        phone: `+62${walsan.no_hp}`,
+        biling_address: {
+          first_name: walsan.nama_wali,
+          last_name: "MQ",
+          email: user.email,
+          phone: walsan.no_hp,
+          address: "Desa Singasari",
+          city: "Bogor",
+          postal_code: "16830",
+          country_code: "IDN",
+        },
+      },
+      shipping_address: {
         first_name: walsan.nama_wali,
         last_name: "MQ",
         email: user.email,
@@ -445,61 +477,195 @@ async function createPembayaranOtomatis(req, res) {
         postal_code: "16830",
         country_code: "IDN",
       },
-    },
-    shipping_address: {
-      first_name: walsan.nama_wali,
-      last_name: "MQ",
-      email: user.email,
-      phone: walsan.no_hp,
-      address: "Desa Singasari",
-      city: "Bogor",
-      postal_code: "16830",
-      country_code: "IDN",
-    },
-    item_details: [
-      {
-        id: dataUpdate.id,
-        price: dataUpdate.nominal,
-        quantity: 1,
-        name: `SPP Bulan ${dataUpdate.bulan}`,
-      },
-    ],
-  };
-
-  snap
-    .createTransaction(parameter)
-    .then((transaksi) => {
-      let tokenTransaksi = transaksi.token;
-      console.log("Transaksi Token: ", tokenTransaksi);
-
-      PembayaranController.update(
+      item_details: [
         {
-          walsan_id: req.walsan_id,
-          no_telepon: walsan.no_hp,
-          token_bayar: tokenTransaksi,
-          transaksi_id: transaksi_id,
+          id: dataUpdate.id,
+          price: dataUpdate.nominal,
+          quantity: 1,
+          name: `SPP Bulan ${dataUpdate.bulan}`,
         },
-        {
-          where: {
-            id: id,
-          },
-        }
-      );
+      ],
+    };
 
-      return res.status(201).json({
-        status: "Success",
-        msg: "Berhail Membayar SPP",
-        token: tokenTransaksi,
-        data: dataUpdate,
-      });
-    })
-    .catch((error) => {
-      console.error("Error Dalam Transaksi:", error);
-      res.json({
-        msg: "Terjadi Kesalahan",
-      });
+
+    const response = await axios.post('https://app.sandbox.midtrans.com/snap/v1/transactions', parameter, {
+      headers: {
+        'Content-Type' : 'application/json',
+        'Authorization': `Basic ${Buffer.from(process.env.MIDTRANS_SERVER_KEY + ':').toString('base64')}`
+      }
     });
+
+    console.log("Midtrans Response:", response.data);
+    const token = response.data.token;
+    const redirect_url = response.data.redirect_url;
+    const transactionId = response.data.transaction_id;
+
+
+      await PembayaranController.update(
+      {
+        walsan_id: req.walsan_id,
+        no_telepon: walsan.no_hp,
+        transaction_token: token,
+        redirect_url: redirect_url,
+        order_id: transaksi_id,
+        transaction_id: transactionId
+      },
+      {
+        where: {
+          id: id,
+        },
+      }
+    );
+
+    return res.status(201).json({
+      status: "Success",
+      msg: "Berhasil Membayar SPP",
+      data: dataUpdate,
+      transaction_id: transactionId
+    });
+  } catch (error) {
+    console.log("Error Log:", error);
+    return res.status(403).send("Terjadi Kesalahan");
+  }
 }
+
+// async function createPembayaranOtomatis(req, res) {
+
+//   const { id } = req.params;
+
+//   const { nominal, walsan_id, bulan, tahun, user_id } = req.body;
+
+//   console.log("ID from req.params:", id);
+//   console.log("req.id:", req.id);
+//   console.log("req.walsan_id:", req.walsan_id);
+
+//   if (!id) {
+//     return res.status(400).json({ error: "ID parameter is required" });
+//   }
+
+//   try {
+//     const timestamp = Date.now();
+
+//     const user = await userModel.findOne({
+//       where: {
+//         id: req.id,
+//       },
+//     });
+
+    // if (!user) {
+    //   return res.status(404).json({ error: "User not found" });
+    // }
+
+//     const dataUpdate = await pembayaranModel.findOne({
+//       where: {
+//         id: id,
+//       },
+//       attributes: [
+//         'id', 'walsan_id', 'tanggal', 'foto', 'status', 'bulan', 'tahun',
+//         'nominal', 'tanggal_konfirmasi', 'teacher_id', 'no_telepon',
+//         'keterangan', 'redirect_url', 'transaction_token',
+//         'status_midtrans', 'created_at', 'updated_at', 'order_id', 'transaction_id'
+//       ]
+//     });
+
+//     if (!dataUpdate) {
+//       return res.status(404).json({ error: "Pembayaran not found" });
+//     }
+
+//     const walsan = await parentModel.findOne({
+//       where: {
+//         id: req.walsan_id,
+//       },
+//     });
+
+//     if (!walsan) {
+//       return res.status(404).json({ error: "Walsan not found" });
+//     }
+
+//     let transaksi_id = `SPP${user.id}${walsan.id}${timestamp}`;
+
+//     let parameter = {
+//       transaction_details: {
+//         order_id: transaksi_id,
+//         gross_amount: dataUpdate.nominal,
+//       },
+//       credit_card: {
+//         secure: true,
+//       },
+//       customer_details: {
+//         email: user.email,
+//         first_name: walsan.nama_wali,
+//         last_name: "MQ",
+//         phone: `+62${walsan.no_hp}`,
+//         biling_address: {
+//           first_name: walsan.nama_wali,
+//           last_name: "MQ",
+//           email: user.email,
+//           phone: walsan.no_hp,
+//           address: "Desa Singasari",
+//           city: "Bogor",
+//           postal_code: "16830",
+//           country_code: "IDN",
+//         },
+//       },
+//       shipping_address: {
+//         first_name: walsan.nama_wali,
+//         last_name: "MQ",
+//         email: user.email,
+//         phone: walsan.no_hp,
+//         address: "Desa Singasari",
+//         city: "Bogor",
+//         postal_code: "16830",
+//         country_code: "IDN",
+//       },
+//       item_details: [
+//         {
+//           id: dataUpdate.id,
+//           price: dataUpdate.nominal,
+//           quantity: 1,
+//           name: `SPP Bulan ${dataUpdate.bulan}`,
+//         },
+//       ],
+//     };
+
+//     // Log after transaction creation
+//     console.log("Transaction created successfully, updating database...");
+
+//     const transaksi = await snap.createTransaction(parameter);
+//     console.log("Midtrans Response:", transaksi)
+//     let tokenTransaksi = transaksi.token;
+//     let redirect = transaksi.redirect_url;
+
+//     console.log("Updating with transaction_id:");
+
+//     console.log("Database updated successfully.");
+
+//     await PembayaranController.update(
+//       {
+//         walsan_id: req.walsan_id,
+//         no_telepon: walsan.no_hp,
+//         transaction_token: tokenTransaksi,
+//         redirect_url: redirect,
+//         order_id: transaksi_id,
+//         transaction_id: transaksi_id
+//       },
+//       {
+//         where: {
+//           id: id,
+//         },
+//       }
+//     );
+
+//     return res.status(201).json({
+//       status: "Success",
+//       msg: "Berhasil Membayar SPP",
+//       data: dataUpdate,
+//     });
+//   } catch (error) {
+//     console.log("Error Log:", error);
+//     return res.status(403).send("Terjadi Kesalahan");
+//   }
+// }
 
 // const updateStatusDariMidtrans = async (transaction_id, data) => {
 //   const hash = crypto.createHash('sha512').update(`${transaction_id}${data.gross_amount}${process.env.MIDTRANS_SERVER_KEY}`).digest('hex')
@@ -516,74 +682,249 @@ async function createPembayaranOtomatis(req, res) {
 //   let fraudStatus = data.fraud_status;
 // }
 
-async function createNotifPembayaran(req, res) {
+// async function createNotifPembayaran(req, res) {
+//   const data = req.body;
 
+//   const { order_id, transaction_status, fraud_status } = data;
+
+//   await snap.transaction.notification(data).then((responStatus) => {
+//     let orderId = responStatus.order_id;
+//     let transactionStatus = responStatus.transaction_status;
+//     let fraudStatus = responStatus.fraud_status;
+
+//     console.log(
+//       `Transaction notification received. Order ID: ${orderId}. Transaction status: ${transactionStatus}. Fraud status: ${fraudStatus}`
+//     );
+
+//     const pembayaran = pembayaranModel.findOne({
+//       where: {
+//         transaksi_id: order_id,
+//       },
+//     });
+
+//     let updateData = {};
+
+//     if (transactionStatus == "capture") {
+//       if (fraudStatus == "accept") {
+//         updateData.status = "Sudah";
+//       }
+//     } else if (transactionStatus == "settlement") {
+
+//       updateData.status = "Sudah";
+//     } else if (
+//       transactionStatus == "cancel" ||
+//       transactionStatus == "deny" ||
+//       transactionStatus == "expire"
+//     ) {
+//       updateData.status = "Belum";
+//     } else if (transactionStatus == "pending") {
+//       updateData.status = "Belum";
+//     }
+
+//     pembayaran.update(updateData);
+//   });
+
+//   return res.status(201).json({
+//     status: "Success",
+//     msg: "Berhasil Mengirim Notif Pembayaran",
+//   });
+// }
+
+const createNotifPembayaran = async (req, res) => {
   try {
-    const data = req.body;
+    const { order_id, transaction_status, fraud_status } =
+      req.body;
 
-    snap.transaction.notification(data).then((statusResponse) => {
-      let responData = null;
-      let orderId = statusResponse.order_id;
-      let transactionStatus = statusResponse.transaction_status;
-      let fraudStatus = statusResponse.fraud_status;
+    console.log(
+      `Transaction notification received. Order ID: ${order_id}. Transaction status: ${transaction_status}. Fraud status: ${fraud_status}`
+    );
 
-      if (transactionStatus == 'capture'){
-        if (fraudStatus == 'accept'){
-                  const pembayaran = pembayaranModel.update({
-                    id_transaksi: orderId,
-                    status: "Sudah"
-                  })
+    // Log all transaction tokens for debugging
+    const pembayaranEntries = await pembayaranModel.findAll({
+      attributes: ["order_id"],
+    });
+    console.log(
+      "All transaction_tokens in database:",
+      pembayaranEntries.map((entry) => entry.transaction_token)
+    );
 
-                  responData = pembayaran;
-              }
-          } else if (transactionStatus == 'settlement'){
-            const pembayaran = pembayaranModel.update({
-              id_transaksi: orderId,
-              status: "Sudah"
-            })
-
-            responData = pembayaran;
-          } else if (transactionStatus == 'cancel' ||
-            transactionStatus == 'deny' ||
-            transactionStatus == 'expire'){
-              const pembayaran = pembayaranModel.update({
-                id_transaksi: orderId,
-                status: "Belum"
-              })
-  
-              responData = pembayaran;
-          } else if (transactionStatus == 'pending'){
-            const pembayaran = pembayaranModel.update({
-              id_transaksi: orderId,
-              status: "Belum"
-            })
-
-            responData = pembayaran;
-          }
+    // Find the pembayaran entry in the database
+    const pembayaran = await pembayaranModel.findOne({
+      where: {
+        order_id:order_id, // Ensure this matches the correct column
+      }
     });
 
-    console.log("Isi Data:", data);
+    if (!pembayaran) {
+      console.error("Pembayaran not found for the given order_id:", order_id);
+      return res.status(404).json({ error: "Pembayaran not found" });
+    }
 
+    console.log(`Found pembayaran for Order ID: ${order_id}`);
 
+    // Check if the status has already been updated to avoid duplicate updates
+    if (pembayaran.status === "Sudah" && transaction_status === "settlement") {
+      return res.status(200).json({
+        status: "Success",
+        msg: "Pembayaran sudah diupdate sebelumnya",
+      });
+    }
 
-  return res.status(201).json({
-    status: "Success",
-    msg: "Berhasil Mengirim Notif Pembayaran",
-  });
+    // Prepare the data for updating the pembayaran status
+    let updateData = {
+      status_midtrans: transaction_status,
+    };
+
+    // Update logic based on transaction status
+    if (transaction_status === "capture" && fraud_status === "accept") {
+      updateData.status = "Sudah";
+    } else if (transaction_status === "settlement") {
+      updateData.status = "Sudah";
+    } else if (
+      ["cancel", "deny", "expire", "pending"].includes(transaction_status)
+    ) {
+      updateData.status = "Belum";
+    }
+
+    // Update the pembayaran entry
+    await pembayaran.update(updateData);
+
+    // Return a successful response
+    return res.status(201).json({
+      status: "Success",
+      msg: "Berhasil Mengupdate Status Pembayaran",
+    });
   } catch (error) {
-    console.error('Error processing notification:', error);
-    return res.status(500).send('Internal Server Error');
+    console.error("Error processing notification:", error);
+
+    // Handle errors, specifically check for Midtrans 404 error
+    if (error.httpStatusCode === 404) {
+      return res
+        .status(404)
+        .json({ status: "Failed", message: "Error 404 Dari Midtrans" });
+    }
+
+    // Handle other errors and send a 500 response
+    return res.status(500).json({
+      status: "fail",
+      message: "Internal Server Error",
+      error: error.message,
+    });
   }
-  
-}
+};
+
+// const createNotifPembayaran = async (req, res) => {
+//   try {
+//     const { order_id, transaction_status, fraud_status } = req.body; // Keep all three fields
+
+//     console.log(
+//       `Transaction notification received. Order ID: ${order_id}. Transaction status: ${transaction_status}. Fraud status: ${fraud_status}`
+//     );
+
+//     // Find the pembayaran entry in the database using order_id
+//     const pembayaran = await pembayaranModel.findOne({
+//       where: { order_id: order_id },
+//       attributes: [
+//         'id', 'walsan_id', 'tanggal', 'foto', 'status', 'bulan', 'tahun',
+//         'nominal', 'tanggal_konfirmasi', 'teacher_id', 'no_telepon',
+//         'keterangan', 'redirect_url', 'transaction_token',
+//         'status_midtrans', 'created_at', 'updated_at', 'order_id', 'transaction_id'
+//       ] // Look for the entry by order_id
+//     });
+
+//     if (!pembayaran) {
+//       console.error("Pembayaran not found for the given order_id:", order_id);
+//       return res.status(404).json({ error: "Pembayaran not found" });
+//     }
+
+//     console.log(`Found pembayaran for Order ID: ${order_id}`);
+
+//     // Check if the status has already been updated to avoid duplicate updates
+//     if (pembayaran.status === "Sudah" && transaction_status === "settlement") {
+//       return res.status(200).json({
+//         status: "Success",
+//         msg: "Pembayaran sudah diupdate sebelumnya",
+//       });
+//     }
+
+//     // Prepare the data for updating the pembayaran status
+//     let updateData = {};
+
+//     // Update logic based on transaction status and fraud status
+//     if (transaction_status === "capture" && fraud_status === "accept") {
+//       updateData.status = "Sudah";
+//     } else if (transaction_status === "settlement") {
+//       updateData.status = "Sudah";
+//     } else if (
+//       ["cancel", "deny", "expire", "pending"].includes(transaction_status)
+//     ) {
+//       updateData.status = "Belum";
+//     }
+
+//     // Update the pembayaran entry
+//     await pembayaran.update(updateData);
+
+//     // Return a successful response
+//     return res.status(201).json({
+//       status: "Success",
+//       msg: "Berhasil Mengupdate Status Pembayaran",
+//     });
+//   } catch (error) {
+//     console.error("Error processing notification:", error);
+
+//     // Handle errors and send a 500 response
+//     return res.status(500).json({
+//       status: "fail",
+//       message: "Internal Server Error",
+//       error: error.message,
+//     });
+//   }
+// };
 
 // Wablas
 
 async function createNotification(req, res) {
-  try {
-    const walsan = await parentModel.findAll();
+  const {bulan_pilihan, ta_id} = req.body
 
-    console.log("WABLAS", process.env.WABLAS_TOKEN);
+  try {
+    const walsan = await parentModel.findAll(
+      {
+      include: [
+        {
+          model: models.student,
+          as: "siswa",
+          require: true,
+          attributes: ["id", "nama_siswa"]
+        }
+      ]
+    });
+
+    
+
+    
+  const pembayaran = await pembayaranModel.findAll({
+    where: {
+      bulan: bulan_pilihan,
+      ta_id: ta_id
+    },
+    include: [
+  {
+    model: models.student,
+    as: "murid",
+    require: true,
+    attributes: ["id", "nama_siswa"]
+  },
+  {
+    model: models.ta,
+    as: "ta",
+    require:true,
+    attributes: ["id", "nama_tahun_ajaran"]
+  }
+    ]
+  })
+
+
+    
 
     const token = `${process.env.WABLAS_TOKEN}`;
 
@@ -599,38 +940,64 @@ async function createNotification(req, res) {
     //           },
     //         });
 
-    await Promise.all(
-      walsan.map(async (item) => {
-        const data = {
-          phone: `62${item.no_hp}`,
-          message:
-            "Assalamualaikum, Para Wali Santri, Dimohon Untuk Setiap Tanggal 5 Setiap Bulan Diingatkan Untuk Membayar SPP Anak Anda, Terimakasih Atas Perhatiannya. Jazzamukhairan Khasiran",
-        };
+    function delay(ms) {
+      return new Promise((resolve) => setTimeout(resolve, ms))
+    }
 
-        try {
-          await axios.post("https://jogja.wablas.com/api/send-message", data, {
-            headers: {
-              Authorization: token,
-              "Content-Type": "application/json",
-            },
-          });
-        } catch (error) {
-          if (error.response) {
-            // Log detailed error information
-            console.error(
-              "Error sending notification:",
-              error.response.status,
-              error.response.data
-            );
-          } else if (error.request) {
-            // Request was made but no response received
-            console.error("No response received:", error.request);
-          } else {
-            // Something else caused the error
-            console.error("Error setting up the request:", error.message);
-          }
+    await Promise.all(
+      pembayaran.map( async (payment) => {
+        const namaSiswa = payment.murid?.nama_siswa || "siswa";
+        const tahunAjaran = payment.ta?.nama_tahun_ajaran;
+        const namaBulan = payment.bulan;
+
+        const filterSiswa = walsan.filter(
+          (item) => item.siswa?.id === payment.murid?.id
+        )
+
+        console.log("WABLAS", process.env.WABLAS_TOKEN);
+        console.log("Gabungan Nama Siswa Di Pembayaran Dan Nama Siswa Di Filter", filterSiswa, payment.murid.nama_siswa)
+
+        if (filterSiswa.length === 0) {
+          console.log("Tidak Ada Nama Yang Sama Dalam Filter Siswa")
+          return res.status(403).json("Terjadi Kesalahan")
         }
-      })
+
+        filterSiswa.map(async (item, idx) => {
+          await delay(idx * 200)
+          const data = {
+            phone: `62${item.no_hp.substring(1,12)}`,
+            message:
+              `Assalamu'alaikum Wr. Wb. Yth. Bapak/Ibu Wali Murid, Kami ingin menginformasikan bahwa pembayaran SPP untuk ${namaSiswa} pada bulan ${namaBulan} tahun ajaran ${tahunAjaran} belum kami terima. Kami harap Bapak/Ibu dapat segera menyelesaikan pembayaran agar proses pembelajaran putra/putri Bapak/Ibu dapat terus berjalan lancar. Silakan melakukan pembayaran melalui metode yang telah tersedia. Jika Bapak Atau Ibu memiliki pertanyaan atau membutuhkan bantuan, jangan ragu untuk menghubungi kami. Terima kasih atas perhatian dan kerjasamanya.`,
+          };
+  
+          try {
+            await axios.post("https://jogja.wablas.com/api/send-message", data, {
+              headers: {
+                Authorization: token,
+                "Content-Type": "application/json",
+              },
+            });
+          } catch (error) {
+            if (error.response) {
+              // Log detailed error information
+              console.error(
+                "Error sending notification:",
+                error.response.status,
+                error.response.data
+              );
+            } else if (error.request) {
+              // Request was made but no response received
+              console.error("No response received:", error.request);
+            } else {
+              // Something else caused the error
+              console.error("Error setting up the request:", error.message);
+            }
+          }
+        })
+      }
+        
+      )
+      
     );
 
     return res.status(201).json({
@@ -653,7 +1020,6 @@ async function daftarSiswa(req, res) {
       where: {
         ...(checkQuery(angkatan) && {
           angkatan: { [Op.like]: angkatan },
-         
         }),
         ...(checkQuery(nama_siswa) && {
           nama_siswa: {
@@ -662,14 +1028,14 @@ async function daftarSiswa(req, res) {
         }),
         ...(checkQuery(status) && {
           status: {
-            [Op.like] : status
-          }
+            [Op.like]: status,
+          },
         }),
         ...(checkQuery(tahun_ajaran) && {
           tahun_ajaran: {
-            [Op.like] : tahun_ajaran
-          }
-        })
+            [Op.like]: tahun_ajaran,
+          },
+        }),
       },
     });
 
@@ -678,7 +1044,7 @@ async function daftarSiswa(req, res) {
       msg: "Berhasil Menampilkan Siswa",
       data: cari,
       page,
-      pageSize
+      pageSize,
     });
   } catch (error) {
     console.log(error);
@@ -692,14 +1058,112 @@ async function daftarSiswa(req, res) {
 async function detailPembayaranSiswa(req, res) {
   try {
     const { student_id } = req.params;
-    const { page, pageSize } = req.query;
+    const {
+      page,
+      pageSize,
+      nama_siswa,
+      dari_tahun,
+      ke_tahun,
+      dari_bulan,
+      ke_bulan,
+      tahun,
+      bulan,
+      nama_tahun_ajaran,
+      status,
+    } = req.query;
+
+    let Result = {
+      student_id: student_id
+    };
+
+    const dariBulan = dari_bulan ? Monthmap[dari_bulan] : null;
+
+    const keBulan = ke_bulan ? Monthmap[ke_bulan] : null;
+
+    console.log("Dari Bulan :", dariBulan);
+    console.log("Ke Bulan:", keBulan);
+
+    if (dari_bulan && ke_bulan) {
+      Result = {
+        bulan: {
+          [Op.or]: [
+            { [Op.eq]: dari_bulan },
+            { [Op.eq]: ke_bulan },
+            {
+              [Op.and]: [
+                { [Op.gte]: dari_bulan },
+                {
+                  [Op.lte]: ke_bulan,
+                },
+              ],
+            },
+          ],
+        },
+      };
+    } else if (dari_bulan) {
+      Result = {
+        bulan: {
+          [Op.substring]: dari_bulan,
+        },
+      };
+    } else if (ke_bulan) {
+      Result = {
+        bulan: {
+          [Op.substring]: ke_bulan,
+        },
+      };
+    }
+
+    if (dari_tahun && ke_tahun) {
+      Result = {
+        tahun: {
+          [Op.between]: [dari_tahun, ke_tahun],
+        },
+      };
+    }
+
+    if (bulan) {
+      Result.bulan = {
+        [Op.substring]: bulan,
+      };
+    }
+
+    if (tahun) {
+      Result.tahun = {
+        [Op.substring]: tahun,
+      };
+    }
+    if (status) {
+      Result.status = {
+        [Op.like]: status,
+      };
+    }
 
     const cari = await PembayaranController.findAndCountAll({
-      where: {
-        student_id: student_id,
-      },
+      where: Result,
       limit: pageSize,
       offset: page,
+      attributes: [
+        "id",
+        "walsan_id",
+        "tanggal",
+        "foto",
+        "status",
+        "bulan",
+        "tahun",
+        "nominal",
+        "tanggal_konfirmasi",
+        "teacher_id",
+        "no_telepon",
+        "keterangan",
+        "transaction_id",
+        "redirect_url",
+        "transaction_token",
+        "status_midtrans",
+        "created_at",
+        "updated_at",
+        "order_id",
+      ],
       include: [
         {
           model: models.parent,
@@ -749,47 +1213,44 @@ async function updateResponse(req, res) {
 
     await Promise.all(
       payload.map(async (data) => {
-
         const token = process.env.WABLAS_TOKEN;
 
-        const pembayaran = await pembayaranModel.findOne({
-          where: {
-            status: data.status,
-          },
-          include: [
-            {
-              model: models.parent,
-              require: true,
-              as: "walsan",
-              attributes: ["id", "nama_wali", "no_hp"],
-            }
-          ]
-        });
-
-
-
-        const hp = `62${pembayaran.walsan.no_hp}`;
-
-        if (pembayaran && pembayaran.walsan.no_hp) {
-          
-          console.log("Phone number:", hp);
-          // Now use `phone` in your pesanData
-        }
-        const pesanData = {
-          phone : hp,
-          message: "Assalamualaikum, Para Wali Santri, Terima Kasih Sudah Membayar SPP Sekolah Ke Pihak Guru. Jazzamukhairan Khasiran"
-        }
-       
-       
-
-        
-        console.log(token);
-        console.log(data);
-
         try {
-         
+          const pembayaran = await pembayaranModel.findOne({
+            where: {
+              id: data.id,
+            },
+            include: [
+              {
+                model: models.parent,
+                required: true,
+                as: "walsan",
+                attributes: ["id", "nama_wali", "no_hp"],
+              },
+            ],
+          });
 
-          if (pembayaran && pembayaran.status === "Sudah") {
+          if (!pembayaran || !pembayaran.walsan) {
+            console.error("Payment or parent information not found for data:", data);
+            gagal += 1;
+            return;
+          }
+
+          // Check if the phone number is null
+          if (!pembayaran.walsan.no_hp) {
+            console.error(`Phone number is missing for parent ID ${pembayaran.walsan.id}`);
+            gagal += 1;
+            return;  // Prevent sending the message
+          }
+
+          const hp = `62${pembayaran.walsan.no_hp.substring(1, 12)}`;
+          const pesanData = {
+            phone: hp,
+            message:
+              "Assalamualaikum, Para Wali Santri, Terima Kasih Sudah Membayar SPP Sekolah Ke Pihak Guru. Jazzamukhairan Khasiran",
+          };
+
+          if (pembayaran.status === "Sudah") {
             try {
               const response = await axios.post(
                 "https://jogja.wablas.com/api/send-message",
@@ -802,37 +1263,37 @@ async function updateResponse(req, res) {
                 }
               );
 
-              // Check the response from the Wablas API
-              if (response.data.status && response.data.status === "success") {
-                console.log(`Message sent successfully to ${pesanData.phone}`);
-              } else {
-                console.error("Failed to send message:", response.data);
-                gagal += 1;
-                return;
-              }
+              console.log(`Pesan Sudah Dikirim Ke Nomor ${pesanData.phone}`, token, pesanData, response.data);
             } catch (error) {
               console.error("Error sending notification:", error);
               gagal += 1;
               return;
             }
+          } else if (pembayaran.status === "Belum") {
+            console.log("Status not 'Sudah', skipping message sending.");
           }
 
-
-          await pembayaranModel.update(
-            {
-              status: data.status,
-              tanggal_konfirmasi: new Date(),
-              teacher_id: req.teacher_id,
-            },
-            {
-              where: {
-                id: data.id,
+          try {
+            await pembayaranModel.update(
+              {
+                status: data.status,
+                tanggal_konfirmasi: new Date(),
+                teacher_id: req.teacher_id,
               },
-            }
-          );
-          berhasil += 1;
+              {
+                where: {
+                  id: data.id,
+                },
+              }
+            );
+            console.log(`Successfully updated status for payment ID ${data.id} to ${data.status}`);
+            berhasil += 1;
+          } catch (error) {
+            console.error(`Error updating status for payment ID ${data.id}:`, error);
+            gagal += 1;
+          }
         } catch (error) {
-          console.log(error);
+          console.error("Error processing data entry:", data, error);
           gagal += 1;
         }
       })
@@ -840,14 +1301,197 @@ async function updateResponse(req, res) {
 
     return res.status(201).json({
       status: "Success",
-      msg: "Berhasil Menguhah Status Approval",
-      data: payload,
+      msg: "Berhasil Mengubah Status Approval",
+      data: { berhasil, gagal },
     });
   } catch (error) {
-    console.log(error);
+    console.error("Unexpected error:", error);
     return res.status(403).send("Terjadi Kesalahan");
   }
 }
+
+
+
+async function createpdfBulanan(req, res) {
+  const { bulan, tahun } = req.query;
+  const { student_id } = req.params;
+  try {
+    const laporan = await pembayaranModel.findAll({
+      where: {
+        student_id: student_id,
+      },
+      
+      attributes: [
+        "id",
+        "walsan_id",
+        "tanggal",
+        "foto",
+        "status",
+        "bulan",
+        "tahun",
+        "nominal",
+        "tanggal_konfirmasi",
+        "teacher_id",
+        "no_telepon",
+        "keterangan",
+        "transaction_id",
+        "redirect_url",
+        "transaction_token",
+        "status_midtrans",
+        "created_at",
+        "updated_at",
+        "order_id",
+      ],
+      include: [
+        {
+          require: true,
+          as: "murid",
+          model: models.student,
+          attributes: ["id", "nama_siswa"],
+        },
+      ],
+      order: ["id", ["bulan", "ASC"]],
+    });
+
+    const doc = new PDFDocument({ margin: 50 });
+
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=Laporan_Pembayaran_${bulan}_${tahun}`
+    );
+
+    doc.pipe(res);
+
+    // Kop Surat
+    doc
+      .image("assets/kop_surat.png", {
+        fit: [500, 150],
+        align: "center",
+        valign: "top",
+      })
+      .moveDown(12);
+
+    // Judul And Periode
+    doc
+      .font("Helvetica-Bold")
+      .fontSize(14)
+      .text(`Data Pembayaran SPP ${laporan[0].murid.nama_siswa} `)
+      .moveDown(5);
+
+    // Table headers
+    const tableTop = 250;
+    const colWidths = [50, 200, 200, 100];
+    const tableWidth = colWidths.reduce((a, b) => a + b, 0);
+    const startX = 50;
+    const rowHeight = 30;
+
+    doc
+      .fontSize(12)
+      .font("Helvetica-Bold")
+      .text("No.", startX, tableTop, {
+        align: "center",
+        width: colWidths[0],
+      })
+      .text("Bulan", startX + colWidths[0] + colWidths[1], tableTop, {
+        width: colWidths[1],
+        align: "center",
+      })
+      .text("Tahun", startX + colWidths[1], tableTop, {
+        width: colWidths[2],
+        align: "center",
+      })
+      .text(
+        "Status",
+        startX + colWidths[0] + colWidths[1] + colWidths[2],
+        tableTop,
+        {
+          width: colWidths[3],
+          align: "center",
+        }
+      );
+
+    doc
+      .moveTo(startX, tableTop + rowHeight)
+      .lineTo(startX + tableWidth, tableTop + rowHeight)
+      .stroke();
+
+    const drawTableBorders = (
+      startX,
+      startY,
+      colWidths,
+      rowCount,
+      rowHeight
+    ) => {
+      doc
+        .lineJoin("miter")
+        .rect(startX, startY, tableWidth, rowHeight * rowCount)
+        .stroke();
+
+      colWidths.reduce((x, width) => {
+        doc
+          .moveTo(x, startY)
+          .lineTo(x, startY + rowHeight * rowCount)
+          .stroke();
+
+        return x + width;
+      }, startX);
+      for (let i = 1; i <= rowCount; i++) {
+        doc.moveTo(startX, startY + rowHeight * i).stroke();
+      }
+    };
+
+    let position = tableTop + rowHeight;
+
+    laporan.forEach((laporan, index) => {
+      doc
+        .font("Helvetica")
+        .fontSize(10)
+        .text(`${index + 1}`, startX, position + rowHeight / 4, {
+          width: colWidths[0],
+          align: "center",
+        })
+        .text(laporan.bulan, startX + colWidths[0], position + rowHeight / 4, {
+          width: colWidths[1],
+          align: "center",
+        })
+        .text(
+          laporan.tahun,
+          startX + colWidths[0] + colWidths[1],
+          position + rowHeight / 4,
+          {
+            width: colWidths[2],
+            align: "center",
+          }
+        )
+        .text(
+          laporan.status,
+          startX + colWidths[0] + colWidths[1] + colWidths[2],
+          position + rowHeight / 4,
+          {
+            width: colWidths[3],
+            align: "center",
+          }
+        );
+
+      position += rowHeight;
+    });
+
+    drawTableBorders(
+      startX,
+      tableTop + rowHeight,
+      colWidths,
+      laporan.length,
+      rowHeight
+    );
+
+    doc.end();
+  } catch (error) {
+    console.error("Terjadi Kesalahan:", error);
+    res.status(500).json({ msg: "Terjadi Kesalahan Di Dalam Server" });
+  }
+}
+
+
 
 module.exports = {
   createKartuSpp,
@@ -860,4 +1504,5 @@ module.exports = {
   detailPembayaranSiswa,
   createPembayaranOtomatis,
   createNotifPembayaran,
+  createpdfBulanan,
 };

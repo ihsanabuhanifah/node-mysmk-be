@@ -170,7 +170,6 @@ const detailSiswa = response.requestResponse(async (req, res) => {
         model: models.user,
         require: true,
         as: "user",
-        attributes: ["email"],
       },
     ],
   });

@@ -22,6 +22,10 @@ const {
   submitExam,
   progressExam,
 } = require("../../controllers/Santri/ExamController");
+const { listHasilUjain } = require("../../controllers/Santri/HasilUjian");
+const { listTidakHadir } = require("../../controllers/Santri/Absensi");
+
+
 
 const validateUpdate = [
   check("nama_siswa")
@@ -72,6 +76,9 @@ santri.put("/exam/progress", progressExam);
 santri.put("/exam/submit", submitExam);
 santri.get("/hasil-belajar", getHasilBelajar);
 santri.get("/hasil-belajar-detail/:id", detailHasilBelajar);
+santri.get('/hasil-belajar-detail/:id/:ta_id', detailHasilBelajar)
+santri.get('/hasil-ujian', listHasilUjain)
+santri.get('/tidakhadir', listTidakHadir)
 
 
 module.exports = santri;

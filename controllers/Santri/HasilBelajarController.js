@@ -1,5 +1,6 @@
 const mapelModel = require('../../models').mapel;
 const nilaiModel = require('../../models').nilai;
+const kelasModel = require('../../models').kelas;
 const tahunAjaranModel = require('../../models').ta;
 const hasilBelajarModel = require('../../models').hasil_belajar;
 const ujianModel = require('../../models').ujian;
@@ -8,48 +9,53 @@ const { checkQuery } = require('../../utils/format');
 const { Op } = require('sequelize')
 
 const getHasilBelajar = async (req, res) => {
-  let { nama_mapel, ta_id, tanggal } = req.query;
+  let { nama_mapel, ta_id, tanggal, nama_kelas } = req.query;
 
-  console.log(req.student_id)
-  const result = await mapelModel.findAll({
-    where: {
-      ...(checkQuery(nama_mapel) && {
-        nama_mapel: {
-          [Op.substring]: nama_mapel
+  const result = await hasilBelajarModel.findAll({
+    where: { 
+      ...(checkQuery(tanggal) && {
+        createdAt: {
+          [Op.gte]: tanggal
         }
       }),
-    },
-    attributes: {
-      exclude: 'mapel_id',
-      include: ['id']
+      student_id: req.student_id
     },
     include: [
       {
-        model: hasilBelajarModel,
-        require: true,
-        as: 'hasil_belajar',
-        where: { 
-          ...(checkQuery(tanggal) && {
-            createdAt: {
-              [Op.gte]: tanggal
+        model: kelasModel,
+        as: 'kelas',
+        where: {
+          ...(checkQuery(nama_kelas) && {
+            nama_kelas: nama_kelas
+          })
+        }
+      },
+      {
+        model: mapelModel,
+        as: 'mapel',
+        where: {
+          ...(checkQuery(nama_mapel) && {
+            nama_mapel: {
+              [Op.substring]: nama_mapel
             }
           }),
-          student_id: req.student_id
         },
-        include: [
-          {
-            where: {
-              ...(checkQuery(ta_id) && {
-                nama_tahun_ajaran: ta_id,
-              }),
-            },
-            model: tahunAjaranModel,
-            require: true,
-            as: 'tahun_ajaran'
-          }
-        ]
+        attributes: {
+          exclude: 'mapel_id',
+          include: ['id']
+        }
+      },
+      {
+        model: tahunAjaranModel,
+        as: 'tahun_ajaran',
+        where: {
+          ...(checkQuery(ta_id) && {
+            nama_tahun_ajaran: ta_id,
+          }),
+        }
       }
-    ]
+    ],
+    order: [['createdAt', 'DESC']] 
   }) 
 
   return res.json({
@@ -60,6 +66,7 @@ const getHasilBelajar = async (req, res) => {
 
 const detailHasilBelajar = async (req, res) => {
   console.log(req.params.id)
+  console.log(req.params)
 
   const result = await nilaiModel.findAll({
     where: { mapel_id: req.params.id, student_id: req.student_id },
@@ -74,6 +81,11 @@ const detailHasilBelajar = async (req, res) => {
         as: 'ujian'
       },
       {
+        where: {
+          ...(checkQuery(req.params.ta_id) && {
+            id: req.params.ta_id
+          })
+        },
         model: tahunAjaranModel,
         require: true,
         as: 'tahun_ajaran'

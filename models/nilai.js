@@ -36,7 +36,7 @@ module.exports = (sequelize, DataTypes) => {
         as: "tahun_ajaran",
         foreignKey: "ta_id",
       });
-     
+
     }
   }
   nilai.init(

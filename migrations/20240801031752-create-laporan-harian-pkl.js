@@ -31,7 +31,7 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE,
       },
-      tanggal: {
+     tanggal: {
         allowNull: false,
         type: Sequelize.DATEONLY,
       },
@@ -55,10 +55,6 @@ module.exports = {
       latitude: {
         allowNull: false,
         type: Sequelize.DECIMAL(14, 10),
-      },
-      status: {
-        allowNull: false,
-        type: Sequelize.ENUM("hadir", "izin"),
       },
     });
   },
