@@ -6,14 +6,7 @@ const validateFields = require("./validateFields");
 const santri = express.Router();
 
 // Laporan harian Pkl
-const {
-  createLaporanPkl,
-  updateLaporanPkl,
-  laporanPklList,
-  detailLaporanPkl,
-  downloadPdf,
-  downloadLaporanBulanan
-} = require("../../controllers/Santri/LaporanHarianPklController");
+
 
 const {
   profile,
@@ -70,18 +63,9 @@ const validateUpdate = [
   },
 ];
 
-// Laporan laporanDiniyyahHarian
-const {
-  createLaporanDiniyyah,
-  laporanDiniyyahList,
-  updateLaporanDiniyyah,
-  getDetailByPklId,
-} = require("../../controllers/Santri/LaporanDiniyyahHarianController");
 
-// tempat pkl
-const {
-  lokasiTempatPkl,
-} = require("../../controllers/Santri/TempatPklController");
+
+
 
 santri.use(santriAccessMiddleware);
 santri.get("/profile", profile);
@@ -96,22 +80,5 @@ santri.get('/hasil-belajar-detail/:id/:ta_id', detailHasilBelajar)
 santri.get('/hasil-ujian', listHasilUjain)
 santri.get('/tidakhadir', listTidakHadir)
 
-// Laporan Harian pkl
-
-santri.post("/laporan-harian-pkl/create", createLaporanPkl);
-santri.put("/laporan-harian-pkl/update/:id", updateLaporanPkl);
-santri.get("/laporan-harian-pkl/list", laporanPklList);
-santri.get("/laporan-harian-pkl/detail/:id", detailLaporanPkl);
-santri.get("/laporan-harian-pkl/downdload-pdf", downloadPdf);
-santri.get("/laporan-harian-pkl/downdload-pdf-bulanan", downloadLaporanBulanan);
-
-// Laporan Diniyyah
-santri.post("/laporan-diniyyah/create", createLaporanDiniyyah);
-santri.get("/laporan-diniyyah/list", laporanDiniyyahList);
-santri.get("/laporan-diniyyah/detailPkl/:id", getDetailByPklId);
-santri.put("/laporan-diniyyah/update/:id", updateLaporanDiniyyah);
-
-// Tempat pkl
-santri.get("/tempat-pkl/lokasi", lokasiTempatPkl);
 
 module.exports = santri;

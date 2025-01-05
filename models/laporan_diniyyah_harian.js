@@ -1,7 +1,5 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
+"use strict";
+const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class laporan_diniyyah_harian extends Model {
     /**
@@ -12,30 +10,38 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       laporan_diniyyah_harian.belongsTo(models.student, {
-        as : "siswa",
-        foreignKey : "student_id"
+        as: "siswa",
+        foreignKey: "student_id",
       });
       laporan_diniyyah_harian.belongsTo(models.laporan_harian_pkl, {
-        as : "laporan_diniyyah_harian",
-        foreignKey : "laporan_harian_pkl_id"
+        as: "laporan_diniyyah_harian",
+        foreignKey: "laporan_harian_pkl_id",
       });
     }
-  };
-  laporan_diniyyah_harian.init({
-    dzikir_pagi: DataTypes.BOOLEAN,
-    dzikir_petang: DataTypes.BOOLEAN,
-    sholat_shubuh: DataTypes.BOOLEAN,
-    sholat_dzuhur: DataTypes.BOOLEAN,
-    sholat_ashar: DataTypes.BOOLEAN,
-    sholat_magrib: DataTypes.BOOLEAN,
-    sholat_isya: DataTypes.BOOLEAN,
-    tanggal : DataTypes.DATEONLY,
-    laporan_harian_pkl_id : DataTypes.INTEGER,
-    created_at: DataTypes.DATE,
-    updated_at: DataTypes.DATE,
-  }, {
-    sequelize,
-    modelName: 'laporan_diniyyah_harian',
-  });
+  }
+  laporan_diniyyah_harian.init(
+    {
+      dzikir_pagi: DataTypes.BOOLEAN,
+      dzikir_petang: DataTypes.BOOLEAN,
+      student_id: DataTypes.INTEGER,
+      sholat_shubuh: DataTypes.STRING,
+      sholat_dzuhur: DataTypes.STRING,
+      sholat_ashar: DataTypes.STRING,
+      sholat_magrib: DataTypes.STRING,
+      sholat_isya: DataTypes.STRING,
+      tanggal: DataTypes.DATEONLY,
+      laporan_harian_pkl_id: DataTypes.INTEGER,
+      created_at: DataTypes.DATE,
+      updated_at: DataTypes.DATE,
+      dari_surat: DataTypes.STRING,
+      sampai_surat: DataTypes.STRING,
+      dari_ayat: DataTypes.INTEGER,
+      sampai_ayat: DataTypes.INTEGER,
+    },
+    {
+      sequelize,
+      modelName: "laporan_diniyyah_harian",
+    }
+  );
   return laporan_diniyyah_harian;
 };
