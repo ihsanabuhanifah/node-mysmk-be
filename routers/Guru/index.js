@@ -4,6 +4,7 @@ const guruAccessMiddleware = require("../../middleware/guruAccessMiddleware");
 const { upload } = require("../../middleware/uploadNoticeMiddleware");
 const guru = express.Router();
 const excelUpload = require("../../middleware/multerExcelMiddleware");
+
 const {
   getRole,
   saveToken,
@@ -75,6 +76,7 @@ const {
 } = require("../../controllers/Guru/LaporanController");
 //absensi
 
+
 //Tempat Pkl
 
 const {
@@ -93,6 +95,7 @@ const {
   detailLaporanPkl,
   laporanPklListForPembimbing,
 } = require("../../controllers/Guru/LaporanHarianPklController");
+
 
 //jadwal
 
@@ -329,6 +332,7 @@ guru.get("/nilai/soal/teacher/:id", getSoal);
 guru.get("/report/list", listReport);
 guru.post("/report/generate", generateReport);
 
+
 //tempat_pkl
 guru.post("/tempat-pkl/create", createTempatPkl);
 guru.put("/tempat-pkl/update/:id", updateTempatPkl);
@@ -377,6 +381,14 @@ guru.put("/pembayaran/update", updateResponse);
 // Notification
 guru.post("/pesan/create", createNotification);
 
+
+//Pembayaran PPDB
+guru.put("/pembayaran-ppdb/update/:id", updatePembayaranPpdb);
+guru.get("/pembayaran-ppdb/list", listPembayaran);
+guru.get("/walisantri/list", getListWali);
+guru.put("/walisantri/update/:id", updateWali);
+guru.get("/walisantri/detail/:id", detailWali);
+
 // Laporan harian pkl
 guru.get("/laporan-harian-pkl/list", laporanPklList);
 guru.get("/laporan-harian-pkl/detail/:id", detailLaporanPkl);
@@ -386,5 +398,6 @@ guru.get("/walisantri/list", getListWali);
 guru.post("/walisantri/create", createBulkWali);
 guru.get("/laporan-harian-pkl/list", laporanPklList);
 guru.get("/laporan-harian-pkl/detail/:id", detailLaporanPkl);
+
 
 module.exports = guru;

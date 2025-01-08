@@ -50,11 +50,11 @@ module.exports = {
       },
       longtitude: {
         allowNull: false,
-        type: Sequelize.DECIMAL(10, 8),
+        type: Sequelize.DECIMAL(14, 10),
       },
       latitude: {
         allowNull: false,
-        type: Sequelize.DECIMAL(10, 8),
+        type: Sequelize.DECIMAL(14, 10),
       },
     });
   },

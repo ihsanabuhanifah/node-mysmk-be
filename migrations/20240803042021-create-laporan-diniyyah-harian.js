@@ -8,14 +8,11 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER,
       },
-      dzikir_pagi: {
-        type: Sequelize.BOOLEAN,
-      },
       created_at: {
         allowNull: false,
         type: Sequelize.DATE,
       },
-     updated_at: {
+      updated_at: {
         allowNull: false,
         type: Sequelize.DATE,
       },
@@ -42,35 +39,51 @@ module.exports = {
         },
       },
       dzikir_pagi: {
-        allowNull: false,
-        defaultValue : false,
+        allowNull: true,
+        defaultValue: false,
         type: Sequelize.BOOLEAN,
       },
       dzikir_petang: {
         allowNull: true,
         type: Sequelize.BOOLEAN,
       },
+      dari_surat: {
+        allowNull: true,
+        type: Sequelize.STRING,
+      },
+      sampai_surat: {
+        allowNull: true,
+        type: Sequelize.STRING,
+      },
+      dari_ayat: {
+        allowNull: true,
+        type: Sequelize.INTEGER,
+      },
+      sampai_ayat: {
+        allowNull: true,
+        type: Sequelize.INTEGER,
+      },
       sholat_shubuh: {
-        allowNull: false,
-        type: Sequelize.BOOLEAN,
+        allowNull: true,
+        type: Sequelize.STRING,
       },
       sholat_dzuhur: {
-        allowNull: false,
-        type: Sequelize.BOOLEAN,
+        allowNull: true,
+        type: Sequelize.STRING,
       },
       sholat_ashar: {
-        allowNull: false,
-        type: Sequelize.BOOLEAN,
+        allowNull: true,
+        
+        type: Sequelize.STRING,
       },
       sholat_magrib: {
-        allowNull: false,
-        type: Sequelize.BOOLEAN,
+        allowNull: true,
+        type: Sequelize.STRING,
       },
       sholat_isya: {
-        allowNull: false,
-        type: Sequelize.BOOLEAN,
+        allowNull: true,
+        type: Sequelize.STRING,
       },
-      
     });
   },
   down: async (queryInterface, Sequelize) => {
