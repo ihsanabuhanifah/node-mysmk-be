@@ -188,6 +188,8 @@ const {
 const { profile } = require("../../controllers/Guru/ProfileController");
 const { listHasilUjain } = require("../../controllers/Guru/HasilUjian");
 
+const {updatePembayaranPpdb, listPembayaran} = require("../../controllers/Guru/PembayaranPpdbController")
+
 guru.use(guruAccessMiddleware);
 
 guru.get("/profile", profile);
