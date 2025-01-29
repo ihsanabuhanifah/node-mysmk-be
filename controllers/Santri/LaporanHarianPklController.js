@@ -36,6 +36,8 @@ const createLaporanPkl = response.requestResponse(async (req, res) => {
   }
   const laporanHarianPkl = await LaporanHarianPklModel.create({
     ...payload,
+    latitude: -6.4871606,
+    longtitude: 107.0185238,
     student_id: req.student_id,
     tanggal: today,
   });

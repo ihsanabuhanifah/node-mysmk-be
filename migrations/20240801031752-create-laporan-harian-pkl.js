@@ -23,6 +23,9 @@ module.exports = {
 
         type: Sequelize.STRING,
       },
+      status: {
+        type: Sequelize.STRING,
+      },
       is_absen: {
         allowNull: false,
         type: Sequelize.BOOLEAN,
@@ -31,7 +34,7 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE,
       },
-     tanggal: {
+      tanggal: {
         allowNull: false,
         type: Sequelize.DATEONLY,
       },
