@@ -102,6 +102,12 @@ io.on('connection', (socket) => {
     }
   });
 
+  socket.on('get-members', (roomId, callback) => {
+  const members = roomMembers[roomId] 
+    ? Array.from(roomMembers[roomId].values()) 
+    : [];
+  callback({ success: true, members });
+});
   // Handle leave/disconnect
   socket.on('leave-room', ({ roomId, userId }) => {
     if (roomMembers[roomId]?.has(userId)) {
