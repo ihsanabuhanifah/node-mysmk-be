@@ -60,6 +60,20 @@ let clients = [];
 // Simpan di level server (bukan per socket)
 const roomMembers = new Map();
 const catatanUjian = []
+
+
+const resetCatatanUjian = () => {
+  catatanUjian.length = 0; // Mengosongkan array
+  console.log('Catatan ujian telah direset pada', new Date().toISOString());
+};
+
+const resetCatatan = cron.schedule('0 0 * * *', resetCatatanUjian, {
+  timezone: 'Asia/Jakarta' // Sesuaikan timezone
+});
+
+
+
+
 io.on("connection", (socket) => {
   socket.on("join-room", ({ roomId, user }, callback) => {
     try {
@@ -203,6 +217,7 @@ setInterval(() => {
   });
 }, 60000);
 
+resetCatatan.start();
 job.start();
 kehadiran_guru.start();
 halaqoh.start();
