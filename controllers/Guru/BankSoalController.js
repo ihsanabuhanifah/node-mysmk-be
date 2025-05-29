@@ -35,8 +35,16 @@ const createSoal = async (req, res) => {
 };
 
 const listSoal = async (req, res) => {
-  let = { mapel_id, is_all, keyword, page, pageSize, isExam, materi } =
-    req.query;
+  let = {
+    mapel_id,
+    is_all,
+    keyword,
+    page,
+    pageSize,
+    isExam,
+    materi,
+    nama_mapel,
+  } = req.query;
 
   if (isExam && !!mapel_id === false) {
     return res.json({
@@ -50,12 +58,43 @@ const listSoal = async (req, res) => {
     });
   }
 
+  const mapel_ids = [];
+
+  if (!!nama_mapel === true) {
+    const mapel_idsx = await models.mapel.findAll({
+      attributes: ["id"],
+      where: {
+        ...(checkQuery(nama_mapel) && {
+          nama_mapel: {
+            [Op.like]: `%${nama_mapel}%`,
+          },
+        }),
+      },
+    });
+
+    mapel_idsx.map((item) => {
+      mapel_ids.push(item.id);
+    });
+  }
+
+  console.log("mapel_ids", mapel_ids);
+
   try {
     const soals = await BankSoalController.findAndCountAll({
       attributes: ["id", "materi", "soal", "tipe", "jawaban", "point"],
       where: {
         ...(checkQuery(mapel_id) && {
-          mapel_id: mapel_id,
+
+          
+          mapel_id: {
+            [Op.in] : mapel_ids.length > 0 ? mapel_ids : [mapel_id],
+          },
+        }),
+
+        ...(checkQuery(nama_mapel) && {
+          materi: {
+            [Op.like]: `%${materi}%`,
+          },
         }),
 
         ...(checkQuery(materi) && {
@@ -92,6 +131,7 @@ const listSoal = async (req, res) => {
       page: req.page,
       pageSize: pageSize,
       data: soals,
+      mapel_ids: mapel_ids,
     });
   } catch (err) {
     console.log(err);
