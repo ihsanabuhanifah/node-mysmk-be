@@ -132,9 +132,9 @@ const listUjian = async (req, res) => {
           ta_id: ta_id,
         }),
 
-        // ...(parseInt(is_all) === 1 && {
-        //   teacher_id: req.teacher_id,
-        // }),
+        ...(parseInt(is_all) === 1 && {
+          teacher_id: req.teacher_id,
+        }),
       },
       include: [
         {
