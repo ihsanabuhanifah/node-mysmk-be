@@ -54,92 +54,127 @@ const io = new Server(server, {
 let connectedUser = [];
 let clients = [];
 
-io.on("connection", (socket) => {
-  const user = {
-    idDB: socket.handshake.query.idDB,
-    roleDB: socket.handshake.query.roleDB,
-  };
-  connectedUser.push(user);
-  socket.user = user;
-  clients.push(socket);
+// server.js (Socket.IO bagian join room)
+// server.js
 
-  socket.on("join", async (data) => {
-    console.log("data", data);
 
-    socket.emit("join.reply", {
-      message: `You have joined room`,
-    });
-  });
+// Simpan di level server (bukan per socket)
+const roomMembers =  new Map()
 
-  socket.on("create_room", async (data) => {
-    console.log("data", data);
+io.on('connection', (socket) => {
+  socket.on('join-room', ({ roomId, user }, callback) => {
+    try {
+      // Validasi
+      if (!roomId || !user?.id) throw new Error('Room ID and user ID required');
 
-    socket.emit("create_room.reply", {
-      message: `Room Berhasild ibayr`,
-    });
-  });
-  socket.on("user-join", async (data) => {
-    console.log("user.join", data);
+      // Join room
+      socket.join(roomId);
 
-    socket.emit("user-join.reply", {
-      peerId : data.peerId
-    });
-  });
-
-  socket.on("message", async (msg) => {
-    console.log("message from client:", msg);
-
-    await messagesModel.create({
-      id: Date.now(),
-      text: msg.text,
-      pengirim: socket.user.idDB,
-      penerima: msg.penerima,
-      role: socket.user.roleDB,
-    });
-
-    if (msg.penerima && msg.role == "siswa") {
-      for (let i = 0; i < clients.length; i++) {
-        if (
-          clients[i].user.idDB == msg.penerima &&
-          clients[i].user.roleDB == "guru"
-        ) {
-          clients[i].emit("message", {
-            pengirim: socket.user.idDB,
-            role: socket.user.roleDB,
-            text: msg.text,
-            id: Date.now(),
-            penerima: msg.penerima,
-          });
-        }
+      // Inisialisasi room jika belum ada
+      if (!roomMembers[roomId]) {
+        roomMembers[roomId] = new Map(); // Gunakan Map untuk simpan user data
       }
-    }
-    if (msg.penerima && msg.role == "guru") {
-      for (let i = 0; i < clients.length; i++) {
-        if (
-          clients[i].user.idDB == msg.penerima &&
-          clients[i].user.roleDB == "siswa"
-        ) {
-          clients[i].emit("message", {
-            pengirim: socket.user.idDB,
-            role: socket.user.roleDB,
-            text: msg.text,
-            id: Date.now(),
-            penerima: msg.penerima,
-          });
-        }
-      }
+
+      // Tambahkan user ke room
+      roomMembers[roomId].set(user.id, {
+        id: user.id,
+        name: user.name,
+        socketId: socket.id,
+        role : user.role,
+        joinedAt: new Date().toISOString()
+      });
+
+      // Kirim update ke semua anggota room
+      io.to(roomId).emit('room-update', {
+        type: 'user-joined',
+        roomId,
+        user,
+        members: Array.from(roomMembers[roomId].values()) // Konversi Map ke Array
+      });
+
+      callback({
+        success: true,
+        members: Array.from(roomMembers[roomId].values())
+      });
+
+    } catch (error) {
+      callback({ success: false, error: error.message });
     }
   });
 
-  socket.on("disconnect", () => {
-    const user = {
-      socketID: socket,
-      idDB: socket.handshake.query.idDB,
-    };
-    const userUpdate = connectedUser.filter((item) => item.idDB != user.idDB);
-    connectedUser = userUpdate;
+  // Handle leave/disconnect
+  socket.on('leave-room', ({ roomId, userId }) => {
+    if (roomMembers[roomId]?.has(userId)) {
+      roomMembers[roomId].delete(userId);
+      io.to(roomId).emit('room-update', {
+        type: 'user-left',
+        roomId,
+        userId,
+        members: Array.from(roomMembers[roomId].values())
+      });
+    }
   });
+
+  socket.on('disconnect', () => {
+    // Cari semua room yang mengandung socket ini dan hapus
+    Object.entries(roomMembers).forEach(([roomId, members]) => {
+      if ([...members.values()].some(u => u.socketId === socket.id)) {
+        const userToRemove = [...members.values()].find(u => u.socketId === socket.id);
+        members.delete(userToRemove.id);
+        io.to(roomId).emit('room-update', {
+          type: 'user-left',
+          roomId,
+          userId: userToRemove.id,
+          members: Array.from(members.values())
+        });
+      }
+    });
+  });
+
+
+  socket.on('simpan', ({ data }, callback) => {
+  try {
+    // Validasi
+    if (!data || typeof data !== 'object') {
+      throw new Error('Data harus berupa object');
+    }
+
+    // Kirim balasan ke pengirim saja
+    callback({ success: true });
+
+    // Broadcast ke semua client LAIN (kecuali pengirim)
+    socket.broadcast.emit('simpan.reply', { data });
+
+  } catch (error) {
+    callback({ success: false, error: error.message });
+  }
 });
+});
+
+
+
+
+// Periodic cleanup (setiap 1 menit)
+setInterval(() => {
+  const now = Date.now();
+  roomMembers.forEach((users, roomId) => {
+    users.forEach((user, userId) => {
+      // Jika user tidak aktif > 2 menit, anggap disconnected
+      if (now - user.lastActive > 120000) {
+        users.delete(userId);
+        io.to(roomId).emit('room-update', {
+          type: 'user-timeout',
+          roomId,
+          userId,
+          members: Array.from(users.values())
+        });
+      }
+    });
+  });
+}, 60000);
+
+
+ 
 
 job.start();
 kehadiran_guru.start();
