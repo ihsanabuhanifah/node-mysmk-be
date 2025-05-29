@@ -15,7 +15,6 @@ const NilaiController = require("../../models").nilai;
 const BankSoalController = require("../../models").bank_soal;
 const StudentModel = require("../../models").kelas_student;
 
-
 const response = new RESPONSE_API();
 
 const getExam = response.requestResponse(async (req, res) => {
@@ -43,24 +42,24 @@ const getExam = response.requestResponse(async (req, res) => {
       },
       {
         model: mapelModel,
-        as: 'mapel',
+        as: "mapel",
         where: {
           ...(checkQuery(nama_mapel) && {
-            nama_mapel: nama_mapel
-          }) 
+            nama_mapel: nama_mapel,
+          }),
         },
         attributes: {
-          exclude: 'mapel_id',
-          include: 'id'
-        }
+          exclude: "mapel_id",
+          include: "id",
+        },
       },
       {
         model: models.ujian,
         where: {
           ...(checkQuery(judul_ujian) && {
             judul_ujian: {
-              [Op.substring]: judul_ujian
-            }
+              [Op.substring]: judul_ujian,
+            },
           }),
         },
         require: true,
@@ -75,7 +74,7 @@ const getExam = response.requestResponse(async (req, res) => {
           "durasi",
           "judul_ujian",
           "is_hirarki",
-          "urutan"
+          "urutan",
         ],
         include: [
           {
@@ -189,24 +188,25 @@ const takeExam = response.requestResponse(async (req, res) => {
     };
   }
 
-  if (
-    exam.refresh_count <= 0 &&
-    exam.status === "progress" &&
-    exam.ujian.tipe_ujian === "closed"
-  ) {
-    return {
-      statusCode: 422,
-      msg: "Anda tidak dapat mengambil ujian ini , Silahkan  menghubungi pengawas",
-    };
-  }
+  // if (
+  //   exam.refresh_count <= 0 &&
+  //   exam.status === "progress" &&
+  //   exam.ujian.tipe_ujian === "closed"
+  // ) {
+  //   return {
+  //     statusCode: 422,
+  //     msg: "Anda tidak dapat mengambil ujian ini , Silahkan  menghubungi pengawas",
+  //   };
+  // }
 
   const now = new Date();
   const startTime = new Date(exam.ujian.waktu_mulai);
   const endTime = new Date(exam.ujian.waktu_selesai);
 
+  console.log(exam.ujian.tipe_ujian, exam.status, exam.remidial_count);
   if (
     // (now >= startTime && now <= endTime) ||
-    exam.ujian.tipe_ujian === "open" ||
+    exam.status === "open" ||
     exam.status === "progress" ||
     exam.remidial_count === 1
   ) {
@@ -244,6 +244,7 @@ const takeExam = response.requestResponse(async (req, res) => {
         jawaban: JSON.stringify([]),
         soal: JSON.stringify(soal),
         tipe_ujian: exam.ujian.tipe_ujian,
+        mapel: exam.mapel_id,
       };
     }
 
@@ -271,20 +272,25 @@ const takeExam = response.requestResponse(async (req, res) => {
         jawaban: exam.jawaban,
         soal: JSON.stringify(soal),
         tipe_ujian: exam.ujian.tipe_ujian,
+        mapel: exam.mapel_id,
       };
     }
   } else {
-    if (now < startTime) {
-      return {
-        statusCode: 422,
-        msg: "Waktu Ujian belum dimulai",
-      };
-    } else {
-      return {
-        statusCode: 422,
-        msg: "Waktu Ujian sudah terlewat",
-      };
-    }
+    return {
+      statusCode: 422,
+      msg: "Waktu Ujian belum dimulai",
+    };
+    // if (now < startTime) {
+    //   return {
+    //     statusCode: 422,
+    //     msg: "Waktu Ujian belum dimulai",
+    //   };
+    // } else {
+    //   return {
+    //     statusCode: 422,
+    //     msg: "Waktu Ujian sudah terlewat",
+    //   };
+    // }
   }
 });
 
@@ -468,7 +474,7 @@ const notifExam = response.requestResponse(async (req, res) => {
   const exam = await NilaiController.findAndCountAll({
     where: {
       student_id: req.student_id,
-      status: 'open'
+      status: "open",
     },
     attributes: {
       exclude: ["jawaban", "urutan"],
@@ -482,11 +488,11 @@ const notifExam = response.requestResponse(async (req, res) => {
       },
       {
         model: mapelModel,
-        as: 'mapel',
+        as: "mapel",
         attributes: {
-          exclude: 'mapel_id',
-          include: 'id'
-        }
+          exclude: "mapel_id",
+          include: "id",
+        },
       },
       {
         model: models.ujian,
@@ -502,7 +508,7 @@ const notifExam = response.requestResponse(async (req, res) => {
           "durasi",
           "judul_ujian",
           "is_hirarki",
-          "urutan"
+          "urutan",
         ],
         include: [
           {
@@ -517,9 +523,8 @@ const notifExam = response.requestResponse(async (req, res) => {
   });
 
   return {
-    list: exam
-  }
+    list: exam,
+  };
 });
 
 module.exports = { getExam, takeExam, submitExam, progressExam, notifExam };
-
