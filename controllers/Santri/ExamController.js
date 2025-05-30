@@ -206,8 +206,8 @@ const takeExam = response.requestResponse(async (req, res) => {
 
   console.log(exam.ujian.tipe_ujian, exam.status, exam.remidial_count);
   if (
-    // (now >= startTime && now <= endTime) ||
-    exam.status === "open" ||
+    (now >= startTime && now <= endTime) ||
+    // exam.status === "open" ||
     exam.status === "progress" ||
     exam.remidial_count === 1
   ) {
