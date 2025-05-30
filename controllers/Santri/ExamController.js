@@ -120,6 +120,7 @@ const takeExam = response.requestResponse(async (req, res) => {
           "id",
           "jenis_ujian",
           "tipe_ujian",
+          "id",
           "waktu_mulai",
           "waktu_selesai",
           "status",
@@ -188,16 +189,16 @@ const takeExam = response.requestResponse(async (req, res) => {
     };
   }
 
-  if (
-    exam.refresh_count <= 0 &&
-    exam.status === "progress" &&
-    exam.ujian.tipe_ujian === "closed"
-  ) {
-    return {
-      statusCode: 422,
-      msg: "Anda tidak dapat mengambil ujian ini , Silahkan  menghubungi pengawas",
-    };
-  }
+  // if (
+  //   exam.refresh_count <= 0 &&
+  //   exam.status === "progress" &&
+  //   exam.ujian.tipe_ujian === "closed"
+  // ) {
+  //   return {
+  //     statusCode: 422,
+  //     msg: "Anda tidak dapat mengambil ujian ini , Silahkan  menghubungi pengawas",
+  //   };
+  // }
 
   const now = new Date();
   const startTime = new Date(exam.ujian.waktu_mulai);
@@ -245,6 +246,7 @@ const takeExam = response.requestResponse(async (req, res) => {
         soal: JSON.stringify(soal),
         tipe_ujian: exam.ujian.tipe_ujian,
         mapel: exam.mapel_id,
+        id:exam.ujian.id
       };
     }
 
@@ -273,6 +275,7 @@ const takeExam = response.requestResponse(async (req, res) => {
         soal: JSON.stringify(soal),
         tipe_ujian: exam.ujian.tipe_ujian,
         mapel: exam.mapel_id,
+         id:exam.ujian.id
       };
     }
   } else {

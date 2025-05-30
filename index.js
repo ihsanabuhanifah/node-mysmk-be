@@ -59,20 +59,17 @@ let clients = [];
 
 // Simpan di level server (bukan per socket)
 const roomMembers = new Map();
-const catatanUjian = []
-
+const catatanUjian = [];
+const pesanchat = [];
 
 const resetCatatanUjian = () => {
   catatanUjian.length = 0; // Mengosongkan array
-  console.log('Catatan ujian telah direset pada', new Date().toISOString());
+  console.log("Catatan ujian telah direset pada", new Date().toISOString());
 };
 
-const resetCatatan = cron.schedule('0 0 * * *', resetCatatanUjian, {
-  timezone: 'Asia/Jakarta' // Sesuaikan timezone
+const resetCatatan = cron.schedule("0 0 * * *", resetCatatanUjian, {
+  timezone: "Asia/Jakarta", // Sesuaikan timezone
 });
-
-
-
 
 io.on("connection", (socket) => {
   socket.on("join-room", ({ roomId, user }, callback) => {
@@ -151,43 +148,50 @@ io.on("connection", (socket) => {
     });
   });
 
-  socket.on("simpan", ({ data }, callback) => {
+  socket.on("kirim-pesan", ({ data }, callback) => {
     try {
       // Validasi
       if (!data || typeof data !== "object") {
         throw new Error("Data harus berupa object");
+
+       
       }
+
+
+      console.log("data", data);
+
+       pesanchat.unshift(data);
 
       // Kirim balasan ke pengirim saja
       callback({ success: true });
 
       // Broadcast ke semua client LAIN (kecuali pengirim)
-      socket.broadcast.emit("simpan.reply", { data });
+      socket.broadcast.emit("kirim-pesan.reply", data);
     } catch (error) {
       callback({ success: false, error: error.message });
     }
   });
 
   socket.on("get-catatan", (roomId, callback) => {
-  
     callback({ success: true, catatanUjian });
   });
 
-
-socket.on("catatan", ({ message, roomId }, callback) => {
+  socket.on("catatan", ({ message,id, userId, roomId }, callback) => {
     try {
       // Validasi
-    
+
       console.log("message", message);
       console.log("roomId", roomId);
-       console.log("catatanUjian", catatanUjian);
+      console.log("catatanUjian", catatanUjian);
 
-      catatanUjian.unshift(message)
+      catatanUjian.unshift({
+        message: message,
+        id: id,
+        userId: userId,
+      });
 
       // Kirim balasan ke pengirim saja
       // callback({ success: true });
-
-     
 
       // Broadcast ke semua client LAIN (kecuali pengirim)
       socket.to(roomId).emit("catatan.reply", { catatanUjian });
@@ -195,7 +199,6 @@ socket.on("catatan", ({ message, roomId }, callback) => {
       // callback({ success: false, error: error.message });
     }
   });
-
 });
 
 // Periodic cleanup (setiap 1 menit)
