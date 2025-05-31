@@ -9,6 +9,7 @@ const RombelModel = require("../../models").kelas_student;
 const fs = require("fs");
 const readXlsxFile = require("read-excel-file/node");
 
+
 const dotenv = require("dotenv");
 const path = require("path");
 dotenv.config();
@@ -41,7 +42,7 @@ async function importRoles(req, res) {
         roles.push(role);
       });
 
-      fs.unlinkSync(`./public/data/uploads/${path}`);
+      fs.unlinkSync(path);
       console.log(roles);
       await Promise.all(
         roles.map(async (role) => {
@@ -92,7 +93,7 @@ async function importTa(req, res) {
         tas.push(ta);
       });
 
-      fs.unlinkSync(`./public/data/uploads/${path}`);
+      fs.unlinkSync(path);
 
       await Promise.all(
         tas.map(async (ta) => {
@@ -144,7 +145,7 @@ async function importMapel(req, res) {
         mapels.push(mapel);
       });
 
-      fs.unlinkSync(`./public/data/uploads/${path}`);
+      fs.unlinkSync(path);
 
       console.log("maoel", mapels);
       await Promise.all(
@@ -196,7 +197,7 @@ async function importKelas(req, res) {
         tas.push(ta);
       });
 
-      fs.unlinkSync(`./public/data/uploads/${path}`);
+      fs.unlinkSync(path);
 
       await Promise.all(
         tas.map(async (ta) => {
@@ -249,7 +250,7 @@ async function importAlquran(req, res) {
         mapels.push(mapel);
       });
 
-      fs.unlinkSync(`./public/data/uploads/${path}`);
+      fs.unlinkSync(path);
 
       await Promise.all(
         mapels.map(async (mapel) => {
@@ -308,7 +309,7 @@ async function importJadwal(req, res) {
       });
 
       console.log(jadwals);
-      fs.unlinkSync(`./public/data/uploads/${path}`);
+      fs.unlinkSync(path);
 
       await Promise.all(
         jadwals.map(async (jadwal) => {
@@ -362,7 +363,7 @@ async function importRombel(req, res) {
       });
 
       console.log(rombels);
-      fs.unlinkSync(`./public/data/uploads/${path}`);
+      fs.unlinkSync(path);
 
       await Promise.all(
         rombels.map(async (rombel) => {
@@ -412,7 +413,7 @@ async function uploadImage(req, res) {
 async function hapusFile(req, res) {
   const { path } = req.body;
   try {
-    fs.unlinkSync(`./public/data/uploads/${path}`);
+    fs.unlinkSync(path);
     return res.json({
       status: "Success",
       msg: "File Berhasil dihapus",
