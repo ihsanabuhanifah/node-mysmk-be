@@ -57,44 +57,104 @@ importRouter.post("/soal/image", upload.single("file"), async (req, res) => {
   }
 });
 
-function parseSoal(text) {
-  const lines = text.split('\n').map(line => line.trim()).filter(Boolean);
 
-  let pertanyaan = '';
+function parseSoal(text) {
+  const lines = text.split('\n');
+  
+  let pertanyaan = [];
   const pilihan = {};
   let jawaban = '';
+  let currentOption = null;
+  let isPertanyaan = true;
 
-  const pilihanRegex = /^([A-E8])[\.\:\-\=\s]+(.+)/i; // 8 bisa jadi OCR dari B
-  const jawabanRegex = /jawaban[^A-Z0-9]*[:=\s]*([A-E])/i;
+  // Regex yang lebih komprehensif
+  const pilihanRegex = /^\s*([A-Ea-e8])[.)\-\s]\s*(.+)?/i;
+  const jawabanRegex = /^\s*jawaban\s*[:=\-]\s*([A-Ea-e])/i;
 
-  for (const line of lines) {
-    const jawabanMatch = line.match(jawabanRegex);
+  for (let i = 0; i < lines.length; i++) {
+    const originalLine = lines[i];
+    const lineContent = originalLine.trim();
+
+    // Deteksi pilihan (A. B. C. dst) - case insensitive
+    const pilihanMatch = lineContent.match(pilihanRegex);
+    if (pilihanMatch && ['A','B','C','D','E','8','a','b','c','d','e'].includes(pilihanMatch[1])) {
+      let huruf = pilihanMatch[1].toUpperCase();
+      if (huruf === '8') huruf = 'B';
+      
+      currentOption = huruf;
+      isPertanyaan = false;
+      pilihan[currentOption] = (pilihanMatch[2] || '').trim();
+      continue;
+    }
+
+    // Deteksi jawaban
+    const jawabanMatch = lineContent.match(jawabanRegex);
     if (jawabanMatch) {
       jawaban = jawabanMatch[1].toUpperCase();
+      currentOption = null;
       continue;
     }
 
-    const pilihanMatch = line.match(pilihanRegex);
-    if (pilihanMatch) {
-      let huruf = pilihanMatch[1].toUpperCase();
-      if (huruf === '8') huruf = 'B'; // Koreksi OCR
-      pilihan[huruf] = pilihanMatch[2].trim();
-      continue;
-    }
-
-    // Anggap baris bukan pilihan atau jawaban sebagai bagian pertanyaan
-    if (!line.toLowerCase().startsWith("soal")) {
-      pertanyaan += (pertanyaan ? ' ' : '') + line;
+    // Logika penempatan konten
+    if (isPertanyaan) {
+      pertanyaan.push(originalLine);
+    } else if (currentOption) {
+      pilihan[currentOption] += (pilihan[currentOption] ? '\n' : '') + originalLine;
     }
   }
 
+  // Format output akhir
   return {
-    pertanyaan: pertanyaan.trim(),
-    pilihan,
+    pertanyaan: pertanyaan.join('\n').trim(),
+    pilihan: Object.keys(pilihan).sort().reduce((acc, key) => {
+      acc[key] = pilihan[key].trim();
+      return acc;
+    }, {}),
     jawaban
   };
 }
+// function parseSoal(text) {
+//   const lines = text.split('\n');
+  
+//   let pertanyaan = [];
+//   const pilihan = {};
+//   let jawaban = '';
+//   let foundFirstOption = false;
 
+//   const pilihanRegex = /^([A-E])[\.\:\-\=\s]+(.+)/i;
+//   const jawabanRegex = /jawaban[^A-Z0-9]*[:=\s]*([A-E])/i;
+
+//   for (let i = 0; i < lines.length; i++) {
+//     const line = lines[i].trim();
+    
+//     // Jika menemukan pola pilihan jawaban (A., B., etc)
+//     const pilihanMatch = line.match(pilihanRegex);
+//     if (pilihanMatch) {
+//       foundFirstOption = true;
+//       const huruf = pilihanMatch[1].toUpperCase();
+//       pilihan[huruf] = pilihanMatch[2].trim();
+//       continue;
+//     }
+
+//     // Jika menemukan pola jawaban
+//     const jawabanMatch = line.match(jawabanRegex);
+//     if (jawabanMatch) {
+//       jawaban = jawabanMatch[1].toUpperCase();
+//       continue;
+//     }
+
+//     // Jika belum menemukan pilihan pertama, masukkan ke pertanyaan
+//     if (!foundFirstOption) {
+//       pertanyaan.push(lines[i]); // Gunakan line asli (dengan trim hanya untuk pemeriksaan)
+//     }
+//   }
+
+//   return {
+//     pertanyaan: pertanyaan.join('\n').trim(),
+//     pilihan,
+//     jawaban
+//   };
+// }
 
 
 module.exports = importRouter;
