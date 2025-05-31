@@ -77,9 +77,9 @@ function parseSoal(text) {
 
     // Deteksi pilihan (A. B. C. dst) - case insensitive
     const pilihanMatch = lineContent.match(pilihanRegex);
-    if (pilihanMatch && ['A','B','C','D','E','8','a','b','c','d','e'].includes(pilihanMatch[1])) {
+    if (pilihanMatch && ['A','B','C','D','E','a','b','c','d','e'].includes(pilihanMatch[1])) {
       let huruf = pilihanMatch[1].toUpperCase();
-      if (huruf === '8') huruf = 'B';
+      
       
       currentOption = huruf;
       isPertanyaan = false;
