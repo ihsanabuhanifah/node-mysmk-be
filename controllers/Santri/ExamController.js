@@ -201,6 +201,7 @@ const takeExam = response.requestResponse(async (req, res) => {
   // }
 
   const now = new Date();
+  now.setHours(now.getHours() + 7); // Tambah 7 jam
   const startTime = new Date(exam.ujian.waktu_mulai);
   const endTime = new Date(exam.ujian.waktu_selesai);
 
@@ -246,7 +247,7 @@ const takeExam = response.requestResponse(async (req, res) => {
         soal: JSON.stringify(soal),
         tipe_ujian: exam.ujian.tipe_ujian,
         mapel: exam.mapel_id,
-        id:exam.ujian.id
+        id: exam.ujian.id,
       };
     }
 
@@ -275,7 +276,7 @@ const takeExam = response.requestResponse(async (req, res) => {
         soal: JSON.stringify(soal),
         tipe_ujian: exam.ujian.tipe_ujian,
         mapel: exam.mapel_id,
-         id:exam.ujian.id
+        id: exam.ujian.id,
       };
     }
   } else {
