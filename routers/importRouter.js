@@ -1,7 +1,8 @@
 const express = require("express");
 const importRouter = express.Router();
 const upload = require("../middleware/multerExcelMiddleware");
-const Tesseract = require('tesseract.js');
+const Tesseract = require("tesseract.js");
+const dotenv = require("dotenv");
 const fs = require("fs");
 const {
   importRoles,
@@ -20,7 +21,6 @@ const {
   importSiswa,
   importWali,
 } = require("../controllers/ExportImport/importUserController");
-
 
 importRouter.post("/import/roles", upload.single("file"), importRoles);
 importRouter.post("/import/guru", upload.single("file"), importGuru);
@@ -45,7 +45,6 @@ importRouter.post("/soal/image", upload.single("file"), async (req, res) => {
     const text = result.data.text;
 
     // 2. Prompt ke GPT
-    
 
     res.json({ text: parseSoal(text), asli: text });
 
@@ -57,13 +56,12 @@ importRouter.post("/soal/image", upload.single("file"), async (req, res) => {
   }
 });
 
-
 function parseSoal(text) {
-  const lines = text.split('\n');
-  
+  const lines = text.split("\n");
+
   let pertanyaan = [];
   const pilihan = {};
-  let jawaban = '';
+  let jawaban = "";
   let currentOption = null;
   let isPertanyaan = true;
 
@@ -77,13 +75,17 @@ function parseSoal(text) {
 
     // Deteksi pilihan (A. B. C. dst) - case insensitive
     const pilihanMatch = lineContent.match(pilihanRegex);
-    if (pilihanMatch && ['A','B','C','D','E','a','b','c','d','e'].includes(pilihanMatch[1])) {
+    if (
+      pilihanMatch &&
+      ["A", "B", "C", "D", "E", "a", "b", "c", "d", "e"].includes(
+        pilihanMatch[1]
+      )
+    ) {
       let huruf = pilihanMatch[1].toUpperCase();
-      
-      
+
       currentOption = huruf;
       isPertanyaan = false;
-      pilihan[currentOption] = (pilihanMatch[2] || '').trim();
+      pilihan[currentOption] = (pilihanMatch[2] || "").trim();
       continue;
     }
 
@@ -99,62 +101,86 @@ function parseSoal(text) {
     if (isPertanyaan) {
       pertanyaan.push(originalLine);
     } else if (currentOption) {
-      pilihan[currentOption] += (pilihan[currentOption] ? '\n' : '') + originalLine;
+      pilihan[currentOption] +=
+        (pilihan[currentOption] ? "\n" : "") + originalLine;
     }
   }
 
   // Format output akhir
   return {
-    pertanyaan: pertanyaan.join('\n').trim(),
-    pilihan: Object.keys(pilihan).sort().reduce((acc, key) => {
-      acc[key] = pilihan[key].trim();
-      return acc;
-    }, {}),
-    jawaban
+    pertanyaan: pertanyaan.join("\n").trim(),
+    pilihan: Object.keys(pilihan)
+      .sort()
+      .reduce((acc, key) => {
+        acc[key] = pilihan[key].trim();
+        return acc;
+      }, {}),
+    jawaban,
   };
 }
-// function parseSoal(text) {
-//   const lines = text.split('\n');
-  
-//   let pertanyaan = [];
-//   const pilihan = {};
-//   let jawaban = '';
-//   let foundFirstOption = false;
 
-//   const pilihanRegex = /^([A-E])[\.\:\-\=\s]+(.+)/i;
-//   const jawabanRegex = /jawaban[^A-Z0-9]*[:=\s]*([A-E])/i;
+importRouter.post(
+  "/api/telegram-upload",
+  upload.single("file"),
+  async (req, res) => {
+    try {
+      const { file } = req;
+      const { caption } = req.body;
+      const botToken = process.env.TELEGRAM_BOT_TOKEN;
 
-//   for (let i = 0; i < lines.length; i++) {
-//     const line = lines[i].trim();
-    
-//     // Jika menemukan pola pilihan jawaban (A., B., etc)
-//     const pilihanMatch = line.match(pilihanRegex);
-//     if (pilihanMatch) {
-//       foundFirstOption = true;
-//       const huruf = pilihanMatch[1].toUpperCase();
-//       pilihan[huruf] = pilihanMatch[2].trim();
-//       continue;
-//     }
+      console.log("process.env.TELEGRAM_BOT_TOKE", process.env.TELEGRAM_CHAT_ID)
+      console.log("token", process.env.TELEGRAM_BOT_TOKEN);
 
-//     // Jika menemukan pola jawaban
-//     const jawabanMatch = line.match(jawabanRegex);
-//     if (jawabanMatch) {
-//       jawaban = jawabanMatch[1].toUpperCase();
-//       continue;
-//     }
+      if (!file) {
+        return res.status(400).json({ error: "No file uploaded" });
+      }
 
-//     // Jika belum menemukan pilihan pertama, masukkan ke pertanyaan
-//     if (!foundFirstOption) {
-//       pertanyaan.push(lines[i]); // Gunakan line asli (dengan trim hanya untuk pemeriksaan)
-//     }
-//   }
+      const formData = new FormData();
+      formData.append("chat_id", process.env.TELEGRAM_CHAT_ID);
+      if (caption) formData.append("caption", caption);
 
-//   return {
-//     pertanyaan: pertanyaan.join('\n').trim(),
-//     pilihan,
-//     jawaban
-//   };
-// }
+      // Tentukan endpoint dan field name berdasarkan tipe file
+      let endpoint, fieldName;
 
+      if (file.mimetype.startsWith("image/")) {
+        endpoint = `https://api.telegram.org/bot${botToken}/sendPhoto`;
+        fieldName = "photo";
+      } else if (file.mimetype.startsWith("video/")) {
+        endpoint = `https://api.telegram.org/bot${botToken}/sendVideo`;
+        fieldName = "video";
+        // Optional: Tambahan parameter untuk video
+        formData.append("supports_streaming", "true");
+      } else {
+        return res.status(400).json({ error: "Unsupported file type" });
+      }
+
+      formData.append(fieldName, file.buffer, {
+        filename: file.originalname,
+        contentType: file.mimetype,
+      });
+
+      const response = await axios.post(endpoint, formData, {
+        headers: {
+          ...formData.getHeaders(),
+        },
+      });
+
+      res.json({
+        success: true,
+        result: response.data.result,
+        file_id:
+          response.data.result.document?.file_id ||
+          response.data.result.photo?.[0]?.file_id ||
+          response.data.result.video?.file_id,
+      });
+    } catch (error) {
+      console.error("Upload error:", error.response?.data || error.message);
+      res.status(500).json({
+        error: "Failed to upload file",
+        details: error.response?.data?.description || error.message,
+      });
+    }
+  }
+);
 
 module.exports = importRouter;

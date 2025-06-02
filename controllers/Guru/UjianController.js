@@ -175,6 +175,73 @@ const listUjian = async (req, res) => {
     });
   }
 };
+
+
+const listUjianBerjalan = async (req, res) => {
+  let {
+    mapel_id,
+    is_all,
+    kelas_id,
+    ta_id,
+    teacher_id,
+    jenis_ujian,
+    page,
+    pageSize,
+  } = req.query;
+  const now = new Date();
+  now.setHours(now.getHours() + 7); // Tambah 7 jam
+
+  try {
+    const ujianBerjalan = await UjianController.findAndCountAll({
+      where: {
+        waktu_mulai: { [Op.lte]: now }, // Waktu mulai kurang dari atau sama dengan sekarang
+        waktu_selesai: { [Op.gte]: now }, // Waktu selesai lebih dari atau sama dengan sekarang
+        // ...(mapel_id && { mapel_id }), // Filter opsional
+        // ...(kelas_id && { kelas_id }), // Filter opsional
+        // ...(teacher_id && { teacher_id }), // Filter opsional
+        // ...(ta_id && { ta_id }), // Filter opsional
+        // ...(jenis_ujian && { jenis_ujian }), // Filter opsional
+      },
+      include: [
+        {
+          model: models.teacher,
+          require: true,
+          as: "teacher",
+          attributes: ["id", "nama_guru"],
+        },
+        {
+          model: models.kelas,
+          require: true,
+          as: "kelas",
+          attributes: ["id", "nama_kelas"],
+        },
+        {
+          model: models.mapel,
+          require: true,
+          as: "mapel",
+          attributes: ["id", "nama_mapel"],
+        },
+      ],
+      limit: pageSize,
+      offset: page,
+      order: [["id", "desc"]],
+    });
+    return res.json({
+      status: "Success",
+      msg: "Berhasil ditemukan",
+      now : now,
+      page: req.page,
+      pageSize: pageSize,
+      data: ujianBerjalan,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(403).json({
+      status: "Fail",
+      msg: "Terjadi Kesalahan",
+    });
+  }
+};
 const detailUjian = async (req, res) => {
   try {
     const { id } = req.params;
@@ -407,6 +474,7 @@ module.exports = {
   createPenilaian,
   AnalisislUjian,
   cekUrutan,
+   listUjianBerjalan 
 };
 
 const analyzeAnswers = (data) => {
