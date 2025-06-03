@@ -252,21 +252,28 @@ const listUjianHari = async (req, res) => {
     pageSize,
   } = req.query;
   
-  // Dapatkan tanggal hari ini
-  const today = new Date();
-  today.setHours(0, 0, 0, 0); // Set ke awal hari (00:00:00)
+  // Dapatkan waktu sekarang dalam UTC
+  const nowUTC = new Date();
   
-  const tomorrow = new Date(today);
-  tomorrow.setDate(tomorrow.getDate() + 1); // Hari berikutnya
+  // Konversi ke WIB (UTC+7)
+  const nowWIB = new Date(nowUTC);
+  nowWIB.setHours(nowWIB.getHours() + 7);
+  
+  // Dapatkan tanggal hari ini dalam WIB
+  const todayWIB = new Date(nowWIB);
+  todayWIB.setHours(0, 0, 0, 0); // Set ke awal hari (00:00:00 WIB)
+  
+  const tomorrowWIB = new Date(todayWIB);
+  tomorrowWIB.setDate(tomorrowWIB.getDate() + 1); // Hari berikutnya di WIB
 
   try {
     const ujianBerjalan = await UjianController.findAndCountAll({
       where: {
         waktu_mulai: { 
-          [Op.gte]: today, // Waktu mulai lebih dari atau sama dengan hari ini
-          [Op.lt]: tomorrow // Kurang dari besok (artinya masih hari ini)
+          [Op.gte]: todayWIB, // Waktu mulai lebih dari atau sama dengan hari ini WIB
+          [Op.lt]: tomorrowWIB // Kurang dari besok WIB (artinya masih hari ini)
         },
-        waktu_selesai: { [Op.gte]: new Date() }, // Waktu selesai lebih dari atau sama dengan sekarang
+        waktu_selesai: { [Op.gte]: nowWIB }, // Waktu selesai lebih dari atau sama dengan sekarang WIB
       },
       include: [
         {
@@ -296,7 +303,9 @@ const listUjianHari = async (req, res) => {
     return res.json({
       status: "Success",
       msg: "Berhasil ditemukan",
-      now: new Date(),
+      nowUTC: nowUTC, // Waktu server UTC
+      nowWIB: nowWIB, // Waktu WIB (UTC+7)
+      todayWIB: todayWIB, // Hari ini di WIB
       page: req.page,
       pageSize: pageSize,
       data: ujianBerjalan,
