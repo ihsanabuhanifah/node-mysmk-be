@@ -54,9 +54,6 @@ const io = new Server(server, {
 let connectedUser = [];
 let clients = [];
 
-// server.js (Socket.IO bagian join room)
-// server.js
-
 // Simpan di level server (bukan per socket)
 const roomMembers = new Map();
 const catatanUjian = [];
@@ -72,6 +69,9 @@ const resetCatatan = cron.schedule("0 0 * * *", resetCatatanUjian, {
 });
 
 io.on("connection", (socket) => {
+  // Set lastActive when user first connects
+  socket.lastActive = Date.now();
+
   socket.on("join-room", ({ roomId, user }, callback) => {
     try {
       // Validasi
@@ -81,17 +81,20 @@ io.on("connection", (socket) => {
       socket.join(roomId);
 
       // Inisialisasi room jika belum ada
-      if (!roomMembers[roomId]) {
-        roomMembers[roomId] = new Map(); // Gunakan Map untuk simpan user data
+      if (!roomMembers.has(roomId)) {
+        roomMembers.set(roomId, new Map());
       }
 
-      // Tambahkan user ke room
-      roomMembers[roomId].set(user.id, {
+      const room = roomMembers.get(roomId);
+      
+      // Tambahkan user ke room dengan lastActive
+      room.set(user.id, {
         id: user.id,
         name: user.name,
         socketId: socket.id,
         role: user.role,
         joinedAt: new Date().toISOString(),
+        lastActive: Date.now() // Tambahkan timestamp aktif terakhir
       });
 
       // Kirim update ke semua anggota room
@@ -99,73 +102,81 @@ io.on("connection", (socket) => {
         type: "user-joined",
         roomId,
         user,
-        members: Array.from(roomMembers[roomId].values()), // Konversi Map ke Array
+        members: Array.from(room.values()),
       });
 
       callback({
         success: true,
-        members: Array.from(roomMembers[roomId].values()),
+        members: Array.from(room.values()),
       });
     } catch (error) {
       callback({ success: false, error: error.message });
     }
   });
 
+  // Handler untuk update lastActive ketika user melakukan aktivitas
+  socket.on("user-activity", ({ roomId, userId }) => {
+    if (roomId && userId && roomMembers.has(roomId)) {
+      const room = roomMembers.get(roomId);
+      if (room.has(userId)) {
+        const user = room.get(userId);
+        user.lastActive = Date.now();
+        room.set(userId, user);
+      }
+    }
+  });
+
   socket.on("get-members", (roomId, callback) => {
-    const members = roomMembers[roomId]
-      ? Array.from(roomMembers[roomId].values())
+    const members = roomMembers.has(roomId)
+      ? Array.from(roomMembers.get(roomId).values())
       : [];
     callback({ success: true, members });
   });
+
   // Handle leave/disconnect
   socket.on("leave-room", ({ roomId, userId }) => {
-    if (roomMembers[roomId]?.has(userId)) {
-      roomMembers[roomId].delete(userId);
+    if (roomMembers.has(roomId) && roomMembers.get(roomId).has(userId)) {
+      roomMembers.get(roomId).delete(userId);
       io.to(roomId).emit("room-update", {
         type: "user-left",
         roomId,
         userId,
-        members: Array.from(roomMembers[roomId].values()),
+        members: Array.from(roomMembers.get(roomId).values()),
       });
     }
   });
 
   socket.on("disconnect", () => {
     // Cari semua room yang mengandung socket ini dan hapus
-    Object.entries(roomMembers).forEach(([roomId, members]) => {
-      if ([...members.values()].some((u) => u.socketId === socket.id)) {
-        const userToRemove = [...members.values()].find(
-          (u) => u.socketId === socket.id
-        );
-        members.delete(userToRemove.id);
-        io.to(roomId).emit("room-update", {
-          type: "user-left",
-          roomId,
-          userId: userToRemove.id,
-          members: Array.from(members.values()),
-        });
-      }
+    roomMembers.forEach((members, roomId) => {
+      members.forEach((user, userId) => {
+        if (user.socketId === socket.id) {
+          members.delete(userId);
+          io.to(roomId).emit("room-update", {
+            type: "user-left",
+            roomId,
+            userId: user.id,
+            members: Array.from(members.values()),
+          });
+        }
+      });
     });
   });
 
   socket.on("kirim-pesan", ({ data }, callback) => {
     try {
-      // Validasi
-      if (!data || typeof data !== "object") {
-        throw new Error("Data harus berupa object");
-
-       
+      // Update lastActive
+      if (data.roomId && data.senderId && roomMembers.has(data.roomId)) {
+        const room = roomMembers.get(data.roomId);
+        if (room.has(data.senderId)) {
+          const user = room.get(data.senderId);
+          user.lastActive = Date.now();
+          room.set(data.senderId, user);
+        }
       }
 
-
-      console.log("data", data);
-
-       pesanchat.unshift(data);
-
-      // Kirim balasan ke pengirim saja
+      pesanchat.unshift(data);
       callback({ success: true });
-
-      // Broadcast ke semua client LAIN (kecuali pengirim)
       socket.broadcast.emit("kirim-pesan.reply", data);
     } catch (error) {
       callback({ success: false, error: error.message });
@@ -176,13 +187,17 @@ io.on("connection", (socket) => {
     callback({ success: true, catatanUjian });
   });
 
-  socket.on("catatan", ({ message,id, userId, roomId }, callback) => {
+  socket.on("catatan", ({ message, id, userId, roomId }, callback) => {
     try {
-      // Validasi
-
-      console.log("message", message);
-      console.log("roomId", roomId);
-      console.log("catatanUjian", catatanUjian);
+      // Update lastActive
+      if (roomId && userId && roomMembers.has(roomId)) {
+        const room = roomMembers.get(roomId);
+        if (room.has(userId)) {
+          const user = room.get(userId);
+          user.lastActive = Date.now();
+          room.set(userId, user);
+        }
+      }
 
       catatanUjian.unshift({
         message: message,
@@ -190,35 +205,48 @@ io.on("connection", (socket) => {
         userId: userId,
       });
 
-      // Kirim balasan ke pengirim saja
-      // callback({ success: true });
-
-      // Broadcast ke semua client LAIN (kecuali pengirim)
       socket.to(roomId).emit("catatan.reply", { catatanUjian });
     } catch (error) {
-      // callback({ success: false, error: error.message });
+      console.error("Error in catatan handler:", error);
     }
   });
 });
 
-// Periodic cleanup (setiap 1 menit)
-setInterval(() => {
+// Periodic cleanup (setiap 30 detik untuk mengecek user yang tidak aktif)
+const inactiveCheckInterval = setInterval(() => {
   const now = Date.now();
-  roomMembers.forEach((users, roomId) => {
-    users.forEach((user, userId) => {
-      // Jika user tidak aktif > 2 menit, anggap disconnected
-      if (now - user.lastActive > 120000) {
-        users.delete(userId);
+  const inactiveTime = 60000; // 1 menit dalam milidetik
+
+  roomMembers.forEach((members, roomId) => {
+    members.forEach((user, userId) => {
+      // Jika user tidak aktif > 1 menit, anggap disconnected
+      if (now - user.lastActive > inactiveTime) {
+        members.delete(userId);
+        
+        // Dapatkan socket yang terkait dengan user ini
+        const userSocket = io.sockets.sockets.get(user.socketId);
+        
+        // Jika socket masih ada, keluarkan dari room
+        if (userSocket) {
+          userSocket.leave(roomId);
+        }
+
         io.to(roomId).emit("room-update", {
           type: "user-timeout",
           roomId,
           userId,
-          members: Array.from(users.values()),
+          members: Array.from(members.values()),
+          message: `${user.name} telah keluar karena tidak aktif`
         });
       }
     });
   });
-}, 60000);
+}, 30000); // Cek setiap 30 detik
+
+// Cleanup interval ketika server dimatikan
+server.on("close", () => {
+  clearInterval(inactiveCheckInterval);
+});
 
 resetCatatan.start();
 job.start();
