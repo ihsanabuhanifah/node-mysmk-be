@@ -209,7 +209,6 @@ const listPenilaianByTeacher = response.requestResponse(async (req, res) => {
   let = { mapel_id, ujian_id, page, pageSize } = req.query;
 
   const soals = await NilaiController.findAll({
-    // attributes: ["id", "materi", "soal", "tipe", "jawaban", "point"],
     where: {
       // teacher_id: req.teacher_id,
       ujian_id: ujian_id,
@@ -238,6 +237,9 @@ const listPenilaianByTeacher = response.requestResponse(async (req, res) => {
           "durasi",
         ],
       },
+    ],
+    order: [
+      [{ model: models.student, as: "siswa" }, 'nama_siswa', 'ASC']
     ],
     limit: pageSize,
     offset: page,
