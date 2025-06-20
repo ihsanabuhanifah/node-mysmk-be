@@ -24,9 +24,9 @@ const getExam = response.requestResponse(async (req, res) => {
     ...(pageSize !== undefined && { limit: pageSize }),
     ...(page !== undefined && { offset: page }),
     where: {
-      ...(checkQuery(status) && {
-        status: status,
-      }),
+      status: {
+        [Op.ne]: "finish", // Menggunakan Op.ne (not equal) untuk mengecualikan status "finish"
+      },
 
       student_id: req.student_id,
     },
