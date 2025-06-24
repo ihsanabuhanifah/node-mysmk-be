@@ -76,7 +76,6 @@ const {
 } = require("../../controllers/Guru/LaporanController");
 //absensi
 
-
 //Tempat Pkl
 
 const {
@@ -95,7 +94,6 @@ const {
   detailLaporanPkl,
   laporanPklListForPembimbing,
 } = require("../../controllers/Guru/LaporanHarianPklController");
-
 
 //jadwal
 
@@ -172,7 +170,6 @@ const {
   createNotification,
 } = require("../../controllers/Wali/PembayaranController");
 
-
 const {
   remidial,
   refreshCount,
@@ -190,7 +187,11 @@ const {
 const { profile } = require("../../controllers/Guru/ProfileController");
 const { listHasilUjain } = require("../../controllers/Guru/HasilUjian");
 
-const {updatePembayaranPpdb, listPembayaran} = require("../../controllers/Guru/PembayaranPpdbController")
+const {
+  updatePembayaranPpdb,
+  listPembayaran,
+  konfirmasiPembayaran,
+} = require("../../controllers/Guru/PembayaranPpdbController");
 
 guru.use(guruAccessMiddleware);
 
@@ -338,7 +339,6 @@ guru.get("/nilai/soal/teacher/:id", getSoal);
 guru.get("/report/list", listReport);
 guru.post("/report/generate", generateReport);
 
-
 //tempat_pkl
 guru.post("/tempat-pkl/create", createTempatPkl);
 guru.put("/tempat-pkl/update/:id", updateTempatPkl);
@@ -383,14 +383,14 @@ guru.put("/pembayaran/update", updateResponse);
 
 // siswa
 
-
 // Notification
 guru.post("/pesan/create", createNotification);
 
-
 //Pembayaran PPDB
+//Pembayaran ppdb
 guru.put("/pembayaran-ppdb/update/:id", updatePembayaranPpdb);
 guru.get("/pembayaran-ppdb/list", listPembayaran);
+guru.put("/pembayaran-ppdb/konfirmasi/:id", konfirmasiPembayaran);
 guru.get("/walisantri/list", getListWali);
 guru.put("/walisantri/update/:id", updateWali);
 guru.get("/walisantri/detail/:id", detailWali);
@@ -404,6 +404,5 @@ guru.get("/walisantri/list", getListWali);
 guru.post("/walisantri/create", createBulkWali);
 guru.get("/laporan-harian-pkl/list", laporanPklList);
 guru.get("/laporan-harian-pkl/detail/:id", detailLaporanPkl);
-
 
 module.exports = guru;

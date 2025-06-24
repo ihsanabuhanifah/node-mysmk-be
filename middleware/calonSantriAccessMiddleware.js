@@ -1,5 +1,7 @@
 async function calonSantriAccessMiddleware(req, res, next) {
-  if (req.role === "Calon Santri") {
+
+  console.log("role", req.role);
+  if (req.role === "Calon Santri" || req.role === "Calon") {
     next();
   } else {
     return res.status(403).json({

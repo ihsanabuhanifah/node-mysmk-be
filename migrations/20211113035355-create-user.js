@@ -33,6 +33,11 @@ module.exports = {
         type: Sequelize.STRING,
         
       },
+       informasi: {
+        allowNull: false,
+        type: Sequelize.STRING,
+        
+      },
       image: {
         type: Sequelize.STRING,
       },

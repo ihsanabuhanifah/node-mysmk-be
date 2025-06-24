@@ -17,13 +17,17 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   pembayaran_ppdb.init(
-    { 
+    {
       user_id: DataTypes.INTEGER,
       bukti_tf: DataTypes.STRING,
-      nominal: DataTypes.DECIMAL(12,2),
+      nominal: DataTypes.DECIMAL(12, 2),
       teacher_id: DataTypes.INTEGER,
-      bukti_tf:DataTypes.STRING,
-      keterangan:DataTypes.STRING
+      bukti_tf: DataTypes.STRING,
+      keterangan: DataTypes.STRING,
+      status: {
+        type: DataTypes.TINYINT,
+        defaultValue: 0,
+      },
     },
     {
       sequelize,

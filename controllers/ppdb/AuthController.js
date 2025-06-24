@@ -11,7 +11,7 @@ dotenv.config();
 
 async function register(req, res) {
   const payload = req.body;
-  const { email, secretKey, no_hp } = payload;
+  const { email, secretKey, no_hp, infoSource } = payload;
   payload.password = await bcrypt.hashSync(req.body.password, 10);
   console.log(`user:`, payload);
 
@@ -38,11 +38,15 @@ async function register(req, res) {
       });
     }
 
-    const newUser = await userModel.create(payload);
+    const newUser = await userModel.create({
+      ...payload,
+      role: "Calon",
+      informasi: infoSource.toString(),
+    });
 
     await userRoleModel.create({
       user_id: newUser.id,
-      role_id: 11, 
+      role_id: 12,
     });
 
     console.log(`User created and role assigned`);

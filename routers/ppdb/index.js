@@ -16,7 +16,9 @@ const {
   createPembayaran,
   getDetailPembayaran,
   listPembayaran,
+
 } = require("../../controllers/ppdb/pembayaranPpdbController")
+
 
 const validation = [
   check("nama_siswa")
@@ -93,11 +95,9 @@ ppdb.use(calonSantriAccessMiddleware);
 
 //Info calon santri
 ppdb.post("/create", validation, validateFields, createInfoCalsan);
-ppdb.put("/update/:id", validation, validateFields, updateInfoCalsan,);
+ppdb.put("/update/:id", validation, validateFields, updateInfoCalsan);
 ppdb.get("/detail", getDetailCalsan);
 ppdb.get("/detail-calsan/:id", detailCalsan);
-
-
 
 //pembayaran
 ppdb.post("/pembayaran-ppdb", createPembayaran);
