@@ -297,7 +297,6 @@ const takeExam = response.requestResponse(async (req, res) => {
     // }
   }
 });
-
 const submitExam = response.requestResponse(async (req, res) => {
   const jawaban = req.body.data;
   const id = req.body.id;
