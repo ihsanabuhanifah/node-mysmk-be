@@ -343,7 +343,7 @@ const submitExam = response.requestResponse(async (req, res) => {
 
   if (exam.status === "finish") {
     return {
-      statusCode: 422,
+      statusCode: 200,
       msg: "Ujian telah berakhir",
     };
   }
@@ -369,11 +369,76 @@ const submitExam = response.requestResponse(async (req, res) => {
   let point_siswa = 0;
   let keterangan = "";
   let nilai = 0;
+
+  // Fungsi untuk membandingkan jawaban MP
+  const compareMPAnswers = (jawabanSiswa, kunciJawaban) => {
+    // Konversi kunci jawaban dari string "a,b,d" menjadi array ["a", "b", "d"]
+    const kunciArray = kunciJawaban.split(',').map(item => item.trim().toLowerCase());
+    
+    // Pastikan jawaban siswa adalah array dan konversi ke lowercase
+    const siswaArray = Array.isArray(jawabanSiswa) 
+      ? jawabanSiswa.map(item => item.toLowerCase())
+      : [];
+
+    // Urutkan kedua array untuk membandingkan tanpa memperhatikan urutan
+    const sortedKunci = [...kunciArray].sort();
+    const sortedSiswa = [...siswaArray].sort();
+
+    // Bandingkan apakah kedua array sama persis
+    return JSON.stringify(sortedKunci) === JSON.stringify(sortedSiswa);
+  };
+
+  // Fungsi untuk membandingkan jawaban MTF (harus sesuai urutan)
+  const compareMTFAnswers = (jawabanSiswa, kunciJawaban) => {
+    try {
+      // Konversi kunci jawaban dari string "true,true,false,false" menjadi array
+      const kunciArray = kunciJawaban.split(',').map(item => 
+        item.trim().toLowerCase() === "true"
+      );
+      
+      // Konversi jawaban siswa dari string "true,true,false,false" menjadi array boolean
+      const siswaArray = typeof jawabanSiswa === 'string' 
+        ? jawabanSiswa.split(',').map(item => item.trim().toLowerCase() === "true")
+        : Array.isArray(jawabanSiswa)
+          ? jawabanSiswa.map(item => item === true || item === "true")
+          : [];
+
+      // Pastikan panjang array sama
+      if (kunciArray.length !== siswaArray.length) {
+        return false;
+      }
+
+      // Bandingkan setiap elemen sesuai urutan
+      for (let i = 0; i < kunciArray.length; i++) {
+        if (kunciArray[i] !== siswaArray[i]) {
+          return false;
+        }
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error comparing MTF answers:', error);
+      return false;
+    }
+  };
+
   await soal.map((item) => {
     total_point = total_point + item.point;
-    if (item.tipe !== "ES") {
-      jawaban?.map((jawab) => {
-        if (jawab.id === item.id && item.tipe !== "ES") {
+    
+    jawaban?.map((jawab) => {
+      if (jawab.id === item.id) {
+        if (item.tipe === "MP") {
+          // Untuk tipe MP, gunakan fungsi compareMPAnswers
+          if (compareMPAnswers(jawab.jawaban, item.jawaban)) {
+            point_siswa = point_siswa + item.point;
+          }
+        } else if (item.tipe === "MTF") {
+          // Untuk tipe MTF, gunakan fungsi compareMTFAnswers
+          if (compareMTFAnswers(jawab.jawaban, item.jawaban)) {
+            point_siswa = point_siswa + item.point;
+          }
+        } else if (item.tipe !== "ES") {
+          // Untuk tipe selain MP, MTF, dan ES
           if (jawab.jawaban === item.jawaban) {
             point_siswa = point_siswa + item.point;
           }
@@ -383,8 +448,11 @@ const submitExam = response.requestResponse(async (req, res) => {
           ...jawab,
           point: jawab.id === item.id ? item.point : 0,
         };
-      });
-    } else {
+      }
+    });
+
+    // Untuk soal ES
+    if (item.tipe === "ES") {
       keterangan = "terdapat essay belum diberikan point";
     }
   });
@@ -407,7 +475,6 @@ const submitExam = response.requestResponse(async (req, res) => {
         keterangan: keterangan,
         exam: JSON.stringify(exam_result),
         status: "finish",
-
         remidial_count: 0,
         jawaban: JSON.stringify(jawaban),
       },
@@ -421,7 +488,6 @@ const submitExam = response.requestResponse(async (req, res) => {
     return {
       msg: "Jawaban berhasil tersimpan",
       nilai: nilai,
-
       keterangan: keterangan,
       total_point,
       point_siswa,

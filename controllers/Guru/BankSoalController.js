@@ -14,7 +14,11 @@ const createSoal = async (req, res) => {
         try {
           item.soal = JSON.stringify(item.soal);
           item.teacher_id = req.teacher_id;
-          await BankSoalController.create(item);
+          await BankSoalController.create({
+            ...item,
+            jawaban: item.jawaban.toString(),
+
+          });
           success = success + 1;
         } catch {
           gagal = gagal + 1;
@@ -191,7 +195,11 @@ const updateSoal = async (req, res) => {
 
     payload.soal = JSON.stringify(payload.soal);
 
-    await BankSoalController.update(payload, {
+    await BankSoalController.update({
+      ...payload,
+       jawaban: payload.jawaban.toString(),
+
+    }, {
       where: {
         id,
       },
