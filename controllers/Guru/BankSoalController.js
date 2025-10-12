@@ -179,7 +179,6 @@ const updateSoal = async (req, res) => {
         id: id,
       },
     });
-
     if (soal === null) {
       return res.status(422).json({
         status: "Fail",
