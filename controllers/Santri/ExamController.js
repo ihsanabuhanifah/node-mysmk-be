@@ -371,21 +371,23 @@ const submitExam = response.requestResponse(async (req, res) => {
 
   // Fungsi untuk membandingkan jawaban MP
   const compareMPAnswers = (jawabanSiswa, kunciJawaban) => {
-    // Konversi kunci jawaban dari string "a,b,d" menjadi array ["a", "b", "d"]
-    const kunciArray = kunciJawaban.split(',').map(item => item.trim().toLowerCase());
-    
-    // Pastikan jawaban siswa adalah array dan konversi ke lowercase
-    const siswaArray = Array.isArray(jawabanSiswa) 
-      ? jawabanSiswa.map(item => item.toLowerCase())
-      : [];
+  // Pastikan kunci dalam bentuk array lowercase
+  const kunciArray = Array.isArray(kunciJawaban)
+    ? kunciJawaban.map(i => i.toLowerCase())
+    : kunciJawaban.split(',').map(i => i.trim().toLowerCase());
 
-    // Urutkan kedua array untuk membandingkan tanpa memperhatikan urutan
-    const sortedKunci = [...kunciArray].sort();
-    const sortedSiswa = [...siswaArray].sort();
+  // Pastikan jawaban siswa array lowercase
+  const siswaArray = Array.isArray(jawabanSiswa)
+    ? jawabanSiswa.map(i => i.toLowerCase())
+    : jawabanSiswa.split(',').map(i => i.trim().toLowerCase());
 
-    // Bandingkan apakah kedua array sama persis
-    return JSON.stringify(sortedKunci) === JSON.stringify(sortedSiswa);
-  };
+  // Urutkan agar tidak bergantung pada urutan
+  const sortedKunci = [...kunciArray].sort();
+  const sortedSiswa = [...siswaArray].sort();
+
+  return JSON.stringify(sortedKunci) === JSON.stringify(sortedSiswa);
+};
+
 
   // Fungsi untuk membandingkan jawaban MTF (harus sesuai urutan)
   const compareMTFAnswers = (jawabanSiswa, kunciJawaban) => {
