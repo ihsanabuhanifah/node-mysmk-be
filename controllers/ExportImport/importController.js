@@ -29,7 +29,7 @@ async function importRoles(req, res) {
       });
     }
     let path = "public/data/uploads/" + req.file.filename;
-    readXlsxFile(path).then(async (rows) => {
+    await readXlsxFile(path).then(async (rows) => {
       rows.shift();
       let roles = [];
 
@@ -81,7 +81,7 @@ async function importTa(req, res) {
       });
     }
     let path = "public/data/uploads/" + req.file.filename;
-    readXlsxFile(path).then(async (rows) => {
+    await readXlsxFile(path).then(async (rows) => {
       rows.shift();
       let tas = [];
 
@@ -133,7 +133,7 @@ async function importMapel(req, res) {
       });
     }
     let path = "public/data/uploads/" + req.file.filename;
-    readXlsxFile(path).then(async (rows) => {
+    await readXlsxFile(path).then(async (rows) => {
       rows.shift();
       let mapels = [];
 
@@ -184,7 +184,7 @@ async function importKelas(req, res) {
       });
     }
     let path = "public/data/uploads/" + req.file.filename;
-    readXlsxFile(path).then(async (rows) => {
+    await readXlsxFile(path).then(async (rows) => {
       rows.shift();
       let tas = [];
 
@@ -236,7 +236,7 @@ async function importAlquran(req, res) {
       });
     }
     let path = "public/data/uploads/" + req.file.filename;
-    readXlsxFile(path).then(async (rows) => {
+    await readXlsxFile(path).then(async (rows) => {
       rows.shift();
       let mapels = [];
 
@@ -289,7 +289,7 @@ async function importJadwal(req, res) {
       });
     }
     let path = "public/data/uploads/" + req.file.filename;
-    readXlsxFile(path).then(async (rows) => {
+    await readXlsxFile(path).then(async (rows) => {
       rows.shift();
       let jadwals = [];
 
@@ -347,7 +347,7 @@ async function importRombel(req, res) {
       });
     }
     let path = "public/data/uploads/" + req.file.filename;
-    readXlsxFile(path).then(async (rows) => {
+    await readXlsxFile(path).then(async (rows) => {
       rows.shift();
       let rombels = [];
 

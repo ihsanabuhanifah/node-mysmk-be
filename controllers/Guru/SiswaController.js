@@ -33,6 +33,7 @@ async function listSiswa(req, res) {
     keyword,
     tahun_ajaran,
     status,
+    kelas_id,
     page,
     pageSize,
   } = req.query;
@@ -42,7 +43,15 @@ async function listSiswa(req, res) {
         ...(checkQuery(status) && {
           status: status,
         }),
+        ...(checkQuery(kelas_id) && {
+          kelas_id: Number(kelas_id),
+        }),
       },
+      distinct: true,
+      order: [
+        [{ model: models.kelas, as: "kelas" }, "nama_kelas", "ASC"],
+        [{ model: models.student, as: "siswa" }, "nama_siswa", "ASC"],
+      ],
       limit: pageSize,
       offset: page,
       include: [

@@ -14,9 +14,11 @@ const response = new RESPONSE_API();
 
 const createPenilaian = async (req, res) => {
   try {
+    // Hanya siswa yang AKTIF di kelas ini (status 0 = riwayat/pindah/alumni)
     const student = await StudentModel.findAll({
       where: {
         kelas_id: req.body.kelas_id,
+        status: 1,
       },
     });
 

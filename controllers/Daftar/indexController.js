@@ -218,6 +218,8 @@ const listTahunAjaran = async (req, res) => {
   try {
     const tahun_ajaran = await TahunAjaranModel.findAll({
       attributes: ["id", "nama_tahun_ajaran"],
+      // kronologis berdasarkan nama (id TA tidak selalu urut tahun)
+      order: [["nama_tahun_ajaran", "ASC"]],
     });
 
     return res.json({

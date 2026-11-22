@@ -15,26 +15,40 @@ const sendEmail = async (email, subject, template, context) => {
       viewPath: path.resolve("./mail/"),
     };
 
+    // Pakai EMAIL_* (mis. Gmail untuk testing) bila diisi, selain itu MAIL_* (server sekolah)
+    const useEmailEnv = Boolean(
+      process.env.EMAIL_USERNAME && process.env.EMAIL_PASSWORD
+    );
+    const smtp = useEmailEnv
+      ? {
+          service: process.env.EMAIL_SERVICE || undefined,
+          host: process.env.EMAIL_HOST,
+          port: Number(process.env.EMAIL_PORT || 465),
+          user: process.env.EMAIL_USERNAME,
+          pass: process.env.EMAIL_PASSWORD,
+          from: `"MySMK" <${process.env.EMAIL_USERNAME}>`,
+        }
+      : {
+          host: process.env.MAIL_HOST,
+          port: Number(process.env.MAIL_PORT || 465),
+          user: process.env.MAIL_USERNAME,
+          pass: process.env.MAIL_PASSWORD,
+          from: '"MySMK" <mysmk-no-reply@smkmadinatulquran.sch.id>',
+        };
+
     const transporter = nodemailer.createTransport({
-      host: process.env.MAIL_HOST,
-      port: process.env.MAIL_PORT,
-      secure: true,
+      service: smtp.service,
+      host: smtp.host,
+      port: smtp.port,
+      secure: smtp.port === 465,
       auth: {
-        user: process.env.MAIL_USERNAME,
-        pass: process.env.MAIL_PASSWORD,
+        user: smtp.user,
+        pass: smtp.pass,
       },
-      
     });
     transporter.use("compile", hbs(handlebarOptions));
-    transporter.verify(function (error, success) {
-      if (error) {
-        console.log('error disini' , error);
-      } else {
-        console.log("Server is ready to take our messages");
-      }
-    });
     await transporter.sendMail({
-      from: "mysmk-no-reply@smkmadinatulquran.sch.id",
+      from: smtp.from,
       to: email,
       subject: subject,
       template: template,

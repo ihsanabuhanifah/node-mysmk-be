@@ -8,8 +8,18 @@ const { Op } = require("sequelize");
 async function belumAbsensitHalaqoh(req, res) {
   let { page, waktu, pageSize } = req.query;
   try {
+    // Kompatibel dengan sql_mode ONLY_FULL_GROUP_BY: hanya kolom yang di-GROUP BY (+ agregat).
+    // Data halaqoh/guru/TA ikut terbawa lewat join PK dari halaqoh_id.
+    const { fn, col } = require("sequelize");
+    const alias = HalaqohModel.name;
     const halaqoh = await HalaqohModel.findAll({
-      attributes: ["id", "tanggal", "waktu"],
+      attributes: [
+        [fn("MIN", col(`${alias}.id`)), "id"],
+        "tanggal",
+        "waktu",
+        "halaqoh_id",
+        [fn("COUNT", col(`${alias}.id`)), "jumlah"],
+      ],
       where: {
         status_absensi: 0,
       },
@@ -225,29 +235,29 @@ async function updateHalaqoh(req, res) {
 
 const notifikasiHalaqoh = async (req, res) => {
   try {
+    // Kompatibel dengan sql_mode ONLY_FULL_GROUP_BY: hanya kolom yang di-GROUP BY (+ agregat).
+    // Join ke halaqoh hanya untuk filter guru; FE memakai tanggal & waktu.
+    const { fn, col } = require("sequelize");
+    const alias = HalaqohModel.name;
     const notifikasi = await HalaqohModel.findAll({
-      attributes: ["id", "tanggal", "waktu"],
+      attributes: [
+        [fn("MIN", col(`${alias}.id`)), "id"],
+        "tanggal",
+        "waktu",
+        [fn("COUNT", col(`${alias}.id`)), "jumlah"],
+      ],
       where: {
         status_absensi: 0,
       },
       include: [
         {
           model: models.halaqoh,
-          require: true,
+          required: true,
           as: "halaqoh",
-          attributes: ["id", "nama_kelompok", "semester", "teacher_id"],
+          attributes: [],
           where: {
             teacher_id: req.teacher_id,
           },
-          include: [
-            {
-              model: models.ta,
-              require: true,
-              as: "tahun_ajaran",
-              attributes: ["id", "nama_tahun_ajaran"],
-            },
-          ],
-          // where: kelas_id !== undefined ? { id: kelas_id } : {},
         },
       ],
       order: [["tanggal", "desc"]],

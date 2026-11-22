@@ -56,9 +56,6 @@ authRouter.put(
   authController.resetPassword
 );
 authRouter.post("/forgot-password", authController.forgotPassword);
-authRouter.post(
-  "/reset-password/:UserId/:token",
-  authController.resetPasswordEmail
-);
+authRouter.post("/reset-password", authController.resetPasswordToken);
 
 module.exports = authRouter;

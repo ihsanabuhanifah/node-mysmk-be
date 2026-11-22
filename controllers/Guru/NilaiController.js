@@ -255,14 +255,26 @@ const listPenilaianByTeacher = response.requestResponse(async (req, res) => {
 
 
 const listNotificationExam = response.requestResponse(async (req, res) => {
-  let = { mapel_id, ujian_id, page, pageSize } = req.query;
+  const { page, pageSize } = req.query;
+  const { fn, col } = require("sequelize");
+  const alias = NilaiController.name;
 
+  // Kompatibel dengan sql_mode ONLY_FULL_GROUP_BY: hanya kolom yang di-GROUP BY (+ agregat).
+  // Dikelompokkan per ujian (FE membuat tautan penilaian dari ujian_id).
   const soals = await NilaiController.findAll({
-    // attributes: ["id", "materi", "soal", "tipe", "jawaban", "point"],
+    attributes: [
+      [fn("MIN", col(`${alias}.id`)), "id"],
+      "ujian_id",
+      "jenis_ujian",
+      "teacher_id",
+      "mapel_id",
+      "ta_id",
+      "kelas_id",
+      [fn("COUNT", col(`${alias}.id`)), "jumlah"],
+    ],
     where: {
       teacher_id: req.teacher_id,
-      exam_result : ""
-      
+      exam_result: "",
     },
     include: [
       {
@@ -279,9 +291,8 @@ const listNotificationExam = response.requestResponse(async (req, res) => {
       },
      
     ],
-    limit: pageSize,
-    offset: page,
-    group: ["teacher_id", "mapel_id", "ta_id", "kelas_id"],
+    ...(pageSize && { limit: Number(pageSize), offset: Number(page) || 0 }),
+    group: ["ujian_id", "jenis_ujian", "teacher_id", "mapel_id", "ta_id", "kelas_id"],
   });
   return {
     msg: "Berhasil ditemukan",

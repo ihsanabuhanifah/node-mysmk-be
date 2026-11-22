@@ -29,7 +29,7 @@ async function importGuru(req, res) {
     }
     let path = "public/data/uploads/" + req.file.filename;
 
-    readXlsxFile(path).then(async (rows) => {
+    await readXlsxFile(path).then(async (rows) => {
       // `rows` is an array of rows
       let users = [];
       let roles = [];
@@ -133,7 +133,7 @@ async function importSiswa(req, res) {
     }
     let path = "public/data/uploads/" + req.file.filename;
 
-    readXlsxFile(path).then(async (rows) => {
+    await readXlsxFile(path).then(async (rows) => {
       // `rows` is an array of rows
       let users = [];
       let roles = [];
@@ -258,7 +258,7 @@ async function importWali(req, res) {
     }
     let path = "public/data/uploads/" + req.file.filename;
 
-    readXlsxFile(path).then(async (rows) => {
+    await readXlsxFile(path).then(async (rows) => {
       // `rows` is an array of rows
       let users = [];
       let roles = [];

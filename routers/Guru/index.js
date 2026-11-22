@@ -285,6 +285,47 @@ guru.put("/siswa/kelas/delete/:id", deleteSiswaKelas);
 guru.post("/siswa/kelas/create", createSiswaKelas);
 guru.delete("/siswa/kelas/delete/:id", deleteSiswaKelas);
 
+// pindah / naik kelas + riwayat kelas
+const {
+  listSiswaTanpaKelas,
+  listAlumni,
+  ringkasanKelas,
+  listAnggotaKelas,
+  pindahKelas,
+  riwayatKelas,
+  nonaktifkanSiswaKelas,
+} = require("../../controllers/Guru/PindahKelasController");
+const requireAdminMiddleware = require("../../middleware/requireAdminMiddleware");
+guru.get("/siswa/kelas/ringkasan", ringkasanKelas);
+guru.get("/siswa/alumni", listAlumni);
+guru.get("/siswa/tanpa-kelas", listSiswaTanpaKelas);
+// daftar guru + kelola (status, role, profil: khusus Admin)
+const {
+  listDaftarGuru,
+  ubahStatusGuru,
+  aturRoleGuru,
+  editProfilGuru,
+} = require("../../controllers/Guru/DaftarGuruController");
+guru.get("/daftar-guru", listDaftarGuru);
+// Data master (Tahun Ajaran, Kelas, Mapel, Role) - khusus Admin
+const dataMaster = require("../../controllers/Admin/DataMasterController");
+guru.get("/master/:jenis", requireAdminMiddleware, dataMaster.list);
+guru.post("/master/:jenis", requireAdminMiddleware, dataMaster.create);
+guru.put("/master/:jenis/:id", requireAdminMiddleware, dataMaster.update);
+guru.delete("/master/:jenis/:id", requireAdminMiddleware, dataMaster.destroy);
+
+guru.get(
+  "/dashboard",
+  require("../../controllers/Guru/DashboardGuruController").dashboardGuru
+);
+guru.put("/daftar-guru/status", requireAdminMiddleware, ubahStatusGuru);
+guru.put("/daftar-guru/:id/roles", requireAdminMiddleware, aturRoleGuru);
+guru.put("/daftar-guru/:id/profil", requireAdminMiddleware, editProfilGuru);
+guru.get("/siswa/kelas/anggota", listAnggotaKelas);
+guru.get("/siswa/kelas/riwayat/:student_id", riwayatKelas);
+guru.post("/siswa/kelas/pindah", requireAdminMiddleware, pindahKelas);
+guru.put("/siswa/kelas/nonaktif", requireAdminMiddleware, nonaktifkanSiswaKelas);
+
 // task rizky
 guru.get("/siswa/hasil-belajar/:id", getHasilBelajar);
 guru.get("/siswa/detail-hasil-belajar/:id/:id_siswa", detailHasilBelajar);

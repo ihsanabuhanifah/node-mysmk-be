@@ -22,16 +22,27 @@ const {
   importWali,
 } = require("../controllers/ExportImport/importUserController");
 
-importRouter.post("/import/roles", upload.single("file"), importRoles);
-importRouter.post("/import/guru", upload.single("file"), importGuru);
-importRouter.post("/import/siswa", upload.single("file"), importSiswa);
-importRouter.post("/import/wali", upload.single("file"), importWali);
-importRouter.post("/import/ta", upload.single("file"), importTa);
-importRouter.post("/import/mapel", upload.single("file"), importMapel);
-importRouter.post("/import/kelas", upload.single("file"), importKelas);
-importRouter.post("/import/alquran", upload.single("file"), importAlquran);
-importRouter.post("/import/jadwal", upload.single("file"), importJadwal);
-importRouter.post("/import/rombel", upload.single("file"), importRombel);
+const {
+  referensiImport,
+} = require("../controllers/ExportImport/referensiImportController");
+const jwtValidateMiddleware = require("../middleware/jwtValidateMiddleware");
+const requireAdminMiddleware = require("../middleware/requireAdminMiddleware");
+const checkImportPassword = require("../middleware/checkImportPasswordMiddleware");
+
+// Semua endpoint import hanya untuk user login dengan role Admin / Super Administrator
+const importAuth = [jwtValidateMiddleware, requireAdminMiddleware];
+
+importRouter.get("/import/referensi", importAuth, referensiImport);
+importRouter.post("/import/roles", importAuth, upload.single("file"), checkImportPassword, importRoles);
+importRouter.post("/import/guru", importAuth, upload.single("file"), checkImportPassword, importGuru);
+importRouter.post("/import/siswa", importAuth, upload.single("file"), checkImportPassword, importSiswa);
+importRouter.post("/import/wali", importAuth, upload.single("file"), checkImportPassword, importWali);
+importRouter.post("/import/ta", importAuth, upload.single("file"), checkImportPassword, importTa);
+importRouter.post("/import/mapel", importAuth, upload.single("file"), checkImportPassword, importMapel);
+importRouter.post("/import/kelas", importAuth, upload.single("file"), checkImportPassword, importKelas);
+importRouter.post("/import/alquran", importAuth, upload.single("file"), checkImportPassword, importAlquran);
+importRouter.post("/import/jadwal", importAuth, upload.single("file"), checkImportPassword, importJadwal);
+importRouter.post("/import/rombel", importAuth, upload.single("file"), checkImportPassword, importRombel);
 importRouter.post("/upload/file", upload.single("file"), uploadImage);
 importRouter.post("/delete/file", hapusFile);
 

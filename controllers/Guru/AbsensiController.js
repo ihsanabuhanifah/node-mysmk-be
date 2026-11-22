@@ -343,8 +343,17 @@ async function updateAbsensi(req, res) {
 
 const notifikasiAbsensi = async (req, res) => {
   try {
+    // Kompatibel dengan sql_mode ONLY_FULL_GROUP_BY: hanya kolom yang di-GROUP BY
+    // (+ agregat). Dikelompokkan per tanggal + kelas + mapel (sesuai tautan notifikasi).
+    const { fn, col } = require("sequelize");
     const notifikasi = await AbsensiKelasModel.findAll({
-      attributes: ["id", "tanggal", "kelas_id"],
+      attributes: [
+        [fn("MIN", col("absensi_kelas.id")), "id"],
+        "tanggal",
+        "kelas_id",
+        "mapel_id",
+        [fn("COUNT", col("absensi_kelas.id")), "jumlah"],
+      ],
       where: {
         teacher_id: req.teacher_id,
         status_absensi: 0,
@@ -364,7 +373,7 @@ const notifikasiAbsensi = async (req, res) => {
         },
       ],
       order: [["tanggal", "desc"]],
-      group: ["tanggal", "kelas_id"],
+      group: ["tanggal", "kelas_id", "mapel_id"],
     });
 
     return res.json({
@@ -382,8 +391,17 @@ const notifikasiAbsensi = async (req, res) => {
 };
 const guruBelumAbsen = async (req, res) => {
   try {
+    // Kompatibel dengan sql_mode ONLY_FULL_GROUP_BY: hanya kolom yang di-GROUP BY (+ agregat)
+    const { fn, col } = require("sequelize");
     const notifikasi = await AbsensiKelasModel.findAll({
-      attributes: ["id", "tanggal", "kelas_id"],
+      attributes: [
+        [fn("MIN", col("absensi_kelas.id")), "id"],
+        "tanggal",
+        "kelas_id",
+        "teacher_id",
+        "mapel_id",
+        [fn("COUNT", col("absensi_kelas.id")), "jumlah"],
+      ],
       where: {
         status_absensi: 0,
       },

@@ -21,6 +21,10 @@ dotenv.config();
 const sendEmail = require("../mail");
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const crypto = require("crypto");
+const {
+  isAkunDiblokir,
+  pesanAkunDiblokir,
+} = require("../utils/statusAkun");
 
 async function login(req, res) {
   try {
@@ -42,6 +46,13 @@ async function login(req, res) {
       return res.status(422).json({
         status: "fail",
         msg: "Email dan Pasword tidak sama",
+      });
+    }
+
+    if (isAkunDiblokir(user.status)) {
+      return res.status(403).json({
+        status: "fail",
+        msg: pesanAkunDiblokir(user.status),
       });
     }
 
@@ -513,6 +524,13 @@ async function googleLogin(req, res) {
       status: "Email belum terdaftar",
     });
 
+  if (isAkunDiblokir(users.status)) {
+    return res.status(403).json({
+      status: "fail",
+      msg: pesanAkunDiblokir(users.status),
+    });
+  }
+
   const token = JWT.sign(
     {
       email: users.email,
@@ -582,93 +600,160 @@ async function resetPassword(req, res) {
   }
 }
 
-async function forgotPassword(req, res) {
-  let { email } = req.body;
+// ===== Lupa password dengan kode 6 karakter =====
+const RESET_TOKEN_LENGTH = 6;
+const RESET_TOKEN_EXPIRES_MINUTES = 15;
+const RESET_TOKEN_MAX_ATTEMPTS = 5;
+// Tanpa karakter yang mirip (0/O, 1/I/L) agar mudah diketik dari email
+const RESET_TOKEN_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+// Hitung salah input per user (in-memory); reset saat token baru dibuat / berhasil
+const resetAttempts = new Map();
 
-  const user = await userModel.findOne({
-    where: {
-      email: email,
-    },
-  });
-
-  if (!user) {
-    return res.status(404).json({
-      status: "fail",
-      msg: "Email tidak ditemukan, Silahkan gunakan Email yang terdaftar",
-    });
+function generateResetToken() {
+  let token = "";
+  for (let i = 0; i < RESET_TOKEN_LENGTH; i++) {
+    token += RESET_TOKEN_ALPHABET[crypto.randomInt(RESET_TOKEN_ALPHABET.length)];
   }
-  let token = crypto.randomBytes(32).toString("hex");
-
-  const link = `${process.env.BASE_URL}/reset-password/${user.id}/${token}`;
-
-  const context = {
-    link: link,
-  };
-  const mail = await sendEmail(
-    user.email,
-    "Password Reset",
-    "lupa_password",
-    context
-  );
-
-  if (mail === "error") {
-    return res.status(422).json({
-      status: "Fail",
-      msg: "Email tidak terkirim ",
-    });
-  }
-  await TokenModel.create({
-    userId: user.id,
-    token: token,
-  });
-  return res.json({
-    status: "Success",
-    msg: "Silahkan Periksa Email Masuk",
-  });
+  return token;
 }
 
-async function resetPasswordEmail(req, res) {
-  let { UserId, token } = req.params;
-  let { newPassword } = req.body;
-  const verify = await TokenModel.findOne({
-    where: {
-      [Op.and]: [{ userId: UserId }, { token: token }],
-    },
-  });
+function hashResetToken(token) {
+  return crypto
+    .createHash("sha256")
+    .update(String(token).trim().toUpperCase())
+    .digest("hex");
+}
 
-  if (verify === null) {
-    return res.status(422).json({
-      status: "fail",
-      msg: "Token Sudah Expired",
-    });
-  }
-
-  newPassword = await bcrypt.hashSync(newPassword, 10);
-  await userModel.update(
-    {
-      password: newPassword,
-    },
-    {
-      where: {
-        id: UserId,
-      },
+async function forgotPassword(req, res) {
+  try {
+    const email = String(req.body?.email || "").trim();
+    if (!email) {
+      return res.status(422).json({ status: "fail", msg: "Email wajib diisi" });
     }
-  );
 
-  await TokenModel.destroy({
-    where: {
-      userId: UserId,
-    },
-  });
+    const user = await userModel.findOne({ where: { email } });
 
-  return res.status(201).json({
-    status: "Success",
-    msg: "Password berhasil di perbaharui",
-  });
+    if (!user) {
+      return res.status(404).json({
+        status: "fail",
+        msg: "Email tidak ditemukan, Silahkan gunakan Email yang terdaftar",
+      });
+    }
 
-  return res.json({
-    status: verify,
-  });
+    const token = generateResetToken();
+
+    const mail = await sendEmail(
+      user.email,
+      `Kode Reset Password MySMK: ${token}`,
+      "reset_password_token",
+      {
+        nama: user.name || user.email,
+        token,
+        menit: RESET_TOKEN_EXPIRES_MINUTES,
+        tahun: new Date().getFullYear(),
+      }
+    );
+
+    if (mail === "error") {
+      return res.status(422).json({
+        status: "Fail",
+        msg: "Email tidak terkirim, silahkan coba lagi",
+      });
+    }
+
+    // Hanya satu kode aktif per user
+    await TokenModel.destroy({ where: { userId: user.id } });
+    await TokenModel.create({ userId: user.id, token: hashResetToken(token) });
+    resetAttempts.delete(user.id);
+
+    return res.json({
+      status: "Success",
+      msg: `Kode reset password telah dikirim ke email Anda. Kode berlaku ${RESET_TOKEN_EXPIRES_MINUTES} menit.`,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ status: "fail", msg: "Terjadi Kesalahan" });
+  }
+}
+
+async function resetPasswordToken(req, res) {
+  try {
+    const email = String(req.body?.email || "").trim();
+    const token = String(req.body?.token || "").trim().toUpperCase();
+    const { newPassword } = req.body || {};
+
+    if (!email || token.length !== RESET_TOKEN_LENGTH) {
+      return res.status(422).json({
+        status: "fail",
+        msg: `Email dan kode ${RESET_TOKEN_LENGTH} karakter wajib diisi`,
+      });
+    }
+    if (!newPassword || String(newPassword).length < 8) {
+      return res.status(422).json({
+        status: "fail",
+        msg: "Password minimal 8 karakter",
+      });
+    }
+
+    const invalid = () =>
+      res.status(422).json({
+        status: "fail",
+        msg: "Kode salah atau sudah kedaluwarsa",
+      });
+
+    const user = await userModel.findOne({ where: { email } });
+    if (!user) return invalid();
+
+    const record = await TokenModel.findOne({
+      where: { userId: user.id },
+      order: [["id", "DESC"]],
+    });
+    if (!record) return invalid();
+
+    const createdAt = new Date(record.createdAt).getTime();
+    if (Date.now() - createdAt > RESET_TOKEN_EXPIRES_MINUTES * 60 * 1000) {
+      await TokenModel.destroy({ where: { userId: user.id } });
+      resetAttempts.delete(user.id);
+      return res.status(422).json({
+        status: "fail",
+        msg: "Kode sudah kedaluwarsa, silahkan minta kode baru",
+      });
+    }
+
+    const expected = Buffer.from(record.token, "hex");
+    const given = Buffer.from(hashResetToken(token), "hex");
+    const match =
+      expected.length === given.length && crypto.timingSafeEqual(expected, given);
+
+    if (!match) {
+      const attempts = (resetAttempts.get(user.id) || 0) + 1;
+      if (attempts >= RESET_TOKEN_MAX_ATTEMPTS) {
+        await TokenModel.destroy({ where: { userId: user.id } });
+        resetAttempts.delete(user.id);
+        return res.status(422).json({
+          status: "fail",
+          msg: "Terlalu banyak percobaan salah, silahkan minta kode baru",
+        });
+      }
+      resetAttempts.set(user.id, attempts);
+      return invalid();
+    }
+
+    await userModel.update(
+      { password: bcrypt.hashSync(String(newPassword), 10) },
+      { where: { id: user.id } }
+    );
+    await TokenModel.destroy({ where: { userId: user.id } });
+    resetAttempts.delete(user.id);
+
+    return res.status(201).json({
+      status: "Success",
+      msg: "Password berhasil di perbaharui",
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ status: "fail", msg: "Terjadi Kesalahan" });
+  }
 }
 module.exports = {
   login,
@@ -679,7 +764,7 @@ module.exports = {
   googleLogin,
   resetPassword,
   forgotPassword,
-  resetPasswordEmail,
+  resetPasswordToken,
   registerWali,
   nisnCek
 };

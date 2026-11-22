@@ -45,8 +45,12 @@ const listGuruPiketBelumLaporan = async (req, res) => {
   try {
     let { status, page, pageSize } = req.query;
 
+    // Tanpa GROUP BY: laporan dibuat 1 baris per guru per tanggal oleh cron,
+    // dan GROUP BY sebelumnya gagal di sql_mode ONLY_FULL_GROUP_BY.
+    // teacher_id dibutuhkan FE untuk mengaktifkan tombol "Ubah Laporan".
     const notifikasi = await LaporanGuruPiketModel.findAndCountAll({
-      attributes: ["id", "tanggal", "laporan", "status"],
+      attributes: ["id", "tanggal", "laporan", "status", "teacher_id"],
+      distinct: true,
 
       include: [
         {
@@ -64,12 +68,13 @@ const listGuruPiketBelumLaporan = async (req, res) => {
         },
       ],
       where: {
-        status: status,
+        ...(status !== undefined && status !== "" && { status: Number(status) }),
       },
-      group: ["tanggal", "teacher_id"],
-      order: [["tanggal", "desc"]],
-      limit: pageSize,
-      offset: page,
+      order: [
+        ["tanggal", "desc"],
+        ["id", "desc"],
+      ],
+      ...(pageSize && { limit: Number(pageSize), offset: Number(page) || 0 }),
     });
 
     return res.json({
