@@ -64,6 +64,16 @@ async function listJadwal(req, res) {
         status: 1,
         ...(hari !== undefined && { hari: hari }),
       },
+      // urut per hari (senin..ahad) lalu jam; paginasi bila pageSize dikirim
+      order: [
+        [models.sequelize.literal("FIELD(`jadwal`.`hari`,'senin','selasa','rabu','kamis','jumat','sabtu','ahad')"), "ASC"],
+        ["jam_ke", "ASC"],
+      ],
+      distinct: true,
+      ...(req.query.pageSize && {
+        limit: Number(req.query.pageSize),
+        offset: Number(req.query.page) || 0,
+      }),
     });
     return res.json({
       status: "Success",
@@ -113,6 +123,16 @@ async function listJadwalAll(req, res) {
         status: 1,
         ...(hari !== undefined && { hari: hari }),
       },
+      // urut per hari (senin..ahad) lalu jam; paginasi bila pageSize dikirim
+      order: [
+        [models.sequelize.literal("FIELD(`jadwal`.`hari`,'senin','selasa','rabu','kamis','jumat','sabtu','ahad')"), "ASC"],
+        ["jam_ke", "ASC"],
+      ],
+      distinct: true,
+      ...(req.query.pageSize && {
+        limit: Number(req.query.pageSize),
+        offset: Number(req.query.page) || 0,
+      }),
     });
     return res.json({
       status: "Success",
