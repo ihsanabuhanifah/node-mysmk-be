@@ -12,6 +12,7 @@ const {
   checkQuery,
 } = require("../../utils/format");
 const NilaiController = require("../../models").nilai;
+const { hitungNilai, normalisasiJawaban, parseJSON } = require("../../utils/penilaianUjian");
 const BankSoalController = require("../../models").bank_soal;
 const StudentModel = require("../../models").kelas_student;
 
@@ -103,6 +104,13 @@ const getExam = response.requestResponse(async (req, res) => {
   };
 });
 
+// ===== Waktu =====
+// waktu_mulai/waktu_selesai ujian disimpan sebagai jam dinding WIB (berlabel UTC),
+// sedangkan jam_mulai/jam_selesai siswa disimpan sebagai waktu nyata (UTC).
+const WIB_MS = 7 * 60 * 60 * 1000;
+const GRACE_SUBMIT_MS = 2 * 60 * 1000; // toleransi jaringan saat submit
+const ujianKeWaktuNyata = (tgl) => new Date(new Date(tgl).getTime() - WIB_MS);
+
 const takeExam = response.requestResponse(async (req, res) => {
   const { id } = req.params;
 
@@ -120,73 +128,47 @@ const takeExam = response.requestResponse(async (req, res) => {
           "id",
           "jenis_ujian",
           "tipe_ujian",
-          "id",
           "waktu_mulai",
           "waktu_selesai",
           "status",
           "soal",
           "durasi",
+          "is_hirarki",
         ],
       },
     ],
   });
 
-  if (exam.urutan > 1) {
+  if (!exam || !exam.ujian) {
+    return { statusCode: 422, msg: "Ujian tidak ditemukan" };
+  }
+
+  if (exam.status === "finish") {
+    return { statusCode: 422, msg: "Ujian telah berakhir" };
+  }
+
+  // Ujian berhierarki: wajib lulus ujian urutan sebelumnya
+  if (Number(exam.ujian.is_hirarki) === 1 && Number(exam.urutan) > 1) {
     const cek = await NilaiController.findOne({
       where: {
         mapel_id: exam.mapel_id,
         kelas_id: exam.kelas_id,
         ta_id: exam.ta_id,
         student_id: req.student_id,
-        urutan: {
-          [Op.lt]: exam.urutan, // Mencari urutan yang lebih kecil dari exam.urutan
-        },
+        urutan: { [Op.lt]: exam.urutan, [Op.gt]: 0 },
       },
-
       include: [
-        {
-          model: models.ujian,
-          require: true,
-          as: "ujian",
-          attributes: ["judul_ujian"],
-        },
+        { model: models.ujian, require: true, as: "ujian", attributes: ["judul_ujian"] },
       ],
-      order: [
-        ["urutan", "DESC"], // Mengambil urutan terbesar dari yang lebih kecil
-      ],
+      order: [["urutan", "DESC"]],
     });
 
-    if (!!cek?.is_lulus === false || !!cek.is_lulus === 0) {
+    if (cek && Number(cek.is_lulus) !== 1) {
       return {
         statusCode: 422,
-        msg: `Anda belum lulus pada exam  ${cek.ujian.judul_ujian} di mata pelajaran ini`,
+        msg: `Anda belum lulus pada exam ${cek.ujian?.judul_ujian || "sebelumnya"} di mata pelajaran ini`,
       };
     }
-  }
-
-  let soal = await BankSoalController.findAll({
-    where: {
-      id: {
-        [Op.in]: JSON.parse(exam.ujian.soal),
-      },
-    },
-  });
-
-  // Mengacak urutan soal
-  soal = soal.sort(() => Math.random() - 0.5);
-
-  if (!exam) {
-    return {
-      statusCode: 422,
-      msg: "Ujian tidak ditemukan",
-    };
-  }
-
-  if (exam.status === "finish") {
-    return {
-      statusCode: 422,
-      msg: "Ujian telah berakhir",
-    };
   }
 
   if (
@@ -200,300 +182,156 @@ const takeExam = response.requestResponse(async (req, res) => {
     };
   }
 
-  const now = new Date();
-  now.setHours(now.getHours() + 7); // Tambah 7 jam
+  const nowNyata = new Date();
+  const now = new Date(nowNyata.getTime() + WIB_MS); // dibandingkan dengan jam dinding WIB
   const startTime = new Date(exam.ujian.waktu_mulai);
   const endTime = new Date(exam.ujian.waktu_selesai);
+  const isRemidial = Number(exam.remidial_count) === 1;
+  const dalamJendela = now >= startTime && now <= endTime;
 
-  console.log(exam.ujian.tipe_ujian, exam.status, exam.remidial_count);
-  if (
-    (now >= startTime && now <= endTime) ||
-    // exam.status === "open" ||
-    exam.status === "progress" ||
-    exam.remidial_count === 1
-  ) {
-    soal = soal.map((item) => {
-      return {
-        id: item.id,
-        soal: item.soal,
-        tipe: item.tipe,
-        point: item.point,
-      };
-    });
-
-    if (exam.status === "open") {
-      await NilaiController.update(
-        {
-          refresh_count: 3,
-          status: "progress",
-          jam_mulai: new Date(),
-          remidial_count: 0,
-          jawaban: JSON.stringify([]),
-          waktu_tersisa: exam.ujian.durasi,
-          jam_selesai: calculateWaktuSelesai(exam.ujian.durasi),
-        },
-        {
-          where: {
-            id: exam.id,
-          },
-        }
-      );
-      return {
-        msg: "Selamat melakukan Ujian",
-        waktu_tersisa: Number(exam.ujian.durasi) * 60,
-        refresh_count: 3,
-        status_ujian: "progress",
-        jawaban: JSON.stringify([]),
-        soal: JSON.stringify(soal),
-        tipe_ujian: exam.ujian.tipe_ujian,
-        mapel: exam.mapel_id,
-        id: exam.ujian.id,
-      };
-    }
-
-    if (exam.status === "progress") {
-      await NilaiController.update(
-        {
-          refresh_count: exam.refresh_count - 1,
-          waktu_tersisa:
-            calculateMinutesDifference(new Date(), exam.jam_selesai) * 60,
-        },
-        {
-          where: {
-            id: exam.id,
-          },
-        }
-      );
-      return {
-        msg: "Selamat melanjutkan Ujian",
-        waktu_tersisa:
-          calculateMinutesDifference(new Date(), exam.jam_selesai) * 60,
-        jam_mulai: exam.jam_mulai,
-        jam_selesai: exam.jam_selesai,
-        refresh_count: exam.refresh_count - 1,
-        status_ujian: exam.status,
-        jawaban: exam.jawaban,
-        soal: JSON.stringify(soal),
-        tipe_ujian: exam.ujian.tipe_ujian,
-        mapel: exam.mapel_id,
-        id: exam.ujian.id,
-      };
-    }
-  } else {
+  if (!(dalamJendela || exam.status === "progress" || isRemidial)) {
     return {
       statusCode: 422,
-      msg: "Waktu Ujian belum dimulai",
+      msg: now < startTime ? "Waktu Ujian belum dimulai" : "Waktu Ujian sudah terlewat",
     };
-    // if (now < startTime) {
-    //   return {
-    //     statusCode: 422,
-    //     msg: "Waktu Ujian belum dimulai",
-    //   };
-    // } else {
-    //   return {
-    //     statusCode: 422,
-    //     msg: "Waktu Ujian sudah terlewat",
-    //   };
-    // }
   }
+
+  let soal = await BankSoalController.findAll({
+    where: { id: { [Op.in]: JSON.parse(exam.ujian.soal || "[]") } },
+  });
+  // Acak urutan soal, kirim TANPA kunci jawaban
+  soal = soal
+    .sort(() => Math.random() - 0.5)
+    .map((item) => ({ id: item.id, soal: item.soal, tipe: item.tipe, point: item.point }));
+
+  if (exam.status === "open") {
+    // Batas selesai = min(mulai + durasi, waktu_selesai ujian); remedial tidak dibatasi jendela
+    let jamSelesai = calculateWaktuSelesai(exam.ujian.durasi);
+    if (!isRemidial) {
+      const batas = ujianKeWaktuNyata(exam.ujian.waktu_selesai);
+      if (batas < jamSelesai) jamSelesai = batas;
+    }
+    const detikTersisa = Math.max(Math.floor((jamSelesai - nowNyata) / 1000), 0);
+
+    await NilaiController.update(
+      {
+        refresh_count: 3,
+        status: "progress",
+        jam_mulai: nowNyata,
+        remidial_count: 0,
+        jawaban: JSON.stringify([]),
+        waktu_tersisa: Math.ceil(detikTersisa / 60),
+        jam_selesai: jamSelesai,
+      },
+      { where: { id: exam.id, status: "open" } }
+    );
+    return {
+      msg: "Selamat melakukan Ujian",
+      waktu_tersisa: detikTersisa,
+      refresh_count: 3,
+      status_ujian: "progress",
+      jawaban: JSON.stringify([]),
+      soal: JSON.stringify(soal),
+      tipe_ujian: exam.ujian.tipe_ujian,
+      mapel: exam.mapel_id,
+      id: exam.ujian.id,
+    };
+  }
+
+  if (exam.status === "progress") {
+    const detikTersisa = Math.max(Math.floor((new Date(exam.jam_selesai) - nowNyata) / 1000), 0);
+    await NilaiController.update(
+      {
+        refresh_count: exam.refresh_count - 1,
+        waktu_tersisa: Math.ceil(detikTersisa / 60),
+      },
+      { where: { id: exam.id } }
+    );
+    return {
+      msg: "Selamat melanjutkan Ujian",
+      waktu_tersisa: detikTersisa,
+      jam_mulai: exam.jam_mulai,
+      jam_selesai: exam.jam_selesai,
+      refresh_count: exam.refresh_count - 1,
+      status_ujian: exam.status,
+      jawaban: exam.jawaban,
+      soal: JSON.stringify(soal),
+      tipe_ujian: exam.ujian.tipe_ujian,
+      mapel: exam.mapel_id,
+      id: exam.ujian.id,
+    };
+  }
+
+  return { statusCode: 422, msg: "Ujian ini tidak dapat diambil saat ini" };
 });
+
 const submitExam = response.requestResponse(async (req, res) => {
-  const jawaban = req.body.data;
   const id = req.body.id;
 
   const exam = await NilaiController.findOne({
-    where: {
-      id: id,
-      student_id: req.student_id,
-    },
+    where: { id: id, student_id: req.student_id },
     include: [
       {
         model: models.ujian,
         require: true,
         as: "ujian",
-        attributes: [
-          "id",
-          "jenis_ujian",
-          "tipe_ujian",
-          "waktu_mulai",
-          "waktu_selesai",
-          "status",
-          "soal",
-          "durasi",
-        ],
+        attributes: ["id", "tipe_ujian", "waktu_selesai", "soal"],
       },
     ],
   });
 
-  if (!exam) {
-    return {
-      statusCode: 422,
-      msg: "Ujian tidak ditemukan",
-    };
+  if (!exam || !exam.ujian) {
+    return { statusCode: 422, msg: "Ujian tidak ditemukan" };
   }
-
-  let soal = await BankSoalController.findAll({
-    where: {
-      id: {
-        [Op.in]: JSON.parse(exam.ujian.soal),
-      },
-    },
-  });
-
   if (exam.status === "finish") {
-    return {
-      statusCode: 200,
-      msg: "Ujian telah berakhir",
-    };
+    return { statusCode: 200, msg: "Ujian telah berakhir" };
+  }
+  if (exam.status !== "progress") {
+    return { statusCode: 422, msg: "Ujian belum dimulai" };
   }
 
-  if (exam.status === "open") {
-    return {
-      statusCode: 422,
-      msg: "Ujian belum dimulai",
-    };
-  }
+  // Submit setelah waktu habis (+ toleransi) -> pakai jawaban tersimpan terakhir
+  const terlambat =
+    !!exam.jam_selesai && Date.now() > new Date(exam.jam_selesai).getTime() + GRACE_SUBMIT_MS;
+  const sumberJawaban = terlambat ? parseJSON(exam.jawaban, []) : req.body.data;
 
-  soal = soal.map((item) => {
-    return {
-      id: item.id,
-      soal: item.soal,
-      tipe: item.tipe,
-      jawaban: item.jawaban,
-      point: item.point,
-    };
+  const soal = await BankSoalController.findAll({
+    attributes: ["id", "tipe", "jawaban", "point"],
+    where: { id: { [Op.in]: JSON.parse(exam.ujian.soal || "[]") } },
   });
 
-  let total_point = 0;
-  let point_siswa = 0;
-  let keterangan = "";
-  let nilai = 0;
+  const hasil = hitungNilai(soal, sumberJawaban, { pakaiPoinManual: false });
+  const riwayat = [...parseJSON(exam.exam, []), hasil.nilai];
+  const keterangan = [hasil.keterangan, terlambat ? "Submit terlambat: dinilai dari jawaban tersimpan terakhir" : ""]
+    .filter(Boolean)
+    .join(". ");
 
-  // Fungsi untuk membandingkan jawaban MP
-  const compareMPAnswers = (jawabanSiswa, kunciJawaban) => {
-  // Pastikan kunci dalam bentuk array lowercase
-  const kunciArray = Array.isArray(kunciJawaban)
-    ? kunciJawaban.map(i => i.toLowerCase())
-    : kunciJawaban.split(',').map(i => i.trim().toLowerCase());
+  // Atomik: hanya baris yang masih "progress" yang diubah (cegah submit ganda)
+  const [jumlah] = await NilaiController.update(
+    {
+      jam_submit: new Date(),
+      keterangan,
+      exam: JSON.stringify(riwayat),
+      status: "finish",
+      remidial_count: 0,
+      jawaban: JSON.stringify(hasil.jawaban),
+    },
+    { where: { id: exam.id, status: "progress" } }
+  );
 
-  // Pastikan jawaban siswa array lowercase
-  const siswaArray = Array.isArray(jawabanSiswa)
-    ? jawabanSiswa.map(i => i.toLowerCase())
-    : jawabanSiswa.split(',').map(i => i.trim().toLowerCase());
+  if (jumlah === 0) {
+    return { statusCode: 200, msg: "Ujian telah berakhir" };
+  }
 
-  // Urutkan agar tidak bergantung pada urutan
-  const sortedKunci = [...kunciArray].sort();
-  const sortedSiswa = [...siswaArray].sort();
-
-  return JSON.stringify(sortedKunci) === JSON.stringify(sortedSiswa);
-};
-
-
-  // Fungsi untuk membandingkan jawaban MTF (harus sesuai urutan)
-  const compareMTFAnswers = (jawabanSiswa, kunciJawaban) => {
-    try {
-      // Konversi kunci jawaban dari string "true,true,false,false" menjadi array
-      const kunciArray = kunciJawaban.split(',').map(item => 
-        item.trim().toLowerCase() === "true"
-      );
-      
-      // Konversi jawaban siswa dari string "true,true,false,false" menjadi array boolean
-      const siswaArray = typeof jawabanSiswa === 'string' 
-        ? jawabanSiswa.split(',').map(item => item.trim().toLowerCase() === "true")
-        : Array.isArray(jawabanSiswa)
-          ? jawabanSiswa.map(item => item === true || item === "true")
-          : [];
-
-      // Pastikan panjang array sama
-      if (kunciArray.length !== siswaArray.length) {
-        return false;
-      }
-
-      // Bandingkan setiap elemen sesuai urutan
-      for (let i = 0; i < kunciArray.length; i++) {
-        if (kunciArray[i] !== siswaArray[i]) {
-          return false;
-        }
-      }
-
-      return true;
-    } catch (error) {
-      console.error('Error comparing MTF answers:', error);
-      return false;
-    }
+  return {
+    msg: terlambat
+      ? "Waktu ujian sudah habis. Jawaban tersimpan terakhir yang dinilai."
+      : "Jawaban berhasil tersimpan",
+    nilai: hasil.nilai,
+    keterangan,
+    total_point: hasil.total_point,
+    point_siswa: hasil.point_siswa,
   };
-
-  await soal.map((item) => {
-    total_point = total_point + item.point;
-    
-    jawaban?.map((jawab) => {
-      if (jawab.id === item.id) {
-        if (item.tipe === "MP") {
-          // Untuk tipe MP, gunakan fungsi compareMPAnswers
-          if (compareMPAnswers(jawab.jawaban, item.jawaban)) {
-            point_siswa = point_siswa + item.point;
-          }
-        } else if (item.tipe === "MTF") {
-          // Untuk tipe MTF, gunakan fungsi compareMTFAnswers
-          if (compareMTFAnswers(jawab.jawaban, item.jawaban)) {
-            point_siswa = point_siswa + item.point;
-          }
-        } else if (item.tipe !== "ES") {
-          // Untuk tipe selain MP, MTF, dan ES
-          if (jawab.jawaban === item.jawaban) {
-            point_siswa = point_siswa + item.point;
-          }
-        }
-
-        return {
-          ...jawab,
-          point: jawab.id === item.id ? item.point : 0,
-        };
-      }
-    });
-
-    // Untuk soal ES
-    if (item.tipe === "ES") {
-      keterangan = "terdapat essay belum diberikan point";
-    }
-  });
-
-  nilai = (point_siswa / total_point) * 100;
-  nilai = Math.ceil(nilai);
-
-  let exam_result = [];
-  if (!!exam.exam === true) {
-    exam_result = JSON.parse(exam.exam);
-    exam_result = [...exam_result, nilai];
-  } else {
-    exam_result = [nilai];
-  }
-
-  if (!!exam.exam1 === false) {
-    await NilaiController.update(
-      {
-        jam_submit: new Date(),
-        keterangan: keterangan,
-        exam: JSON.stringify(exam_result),
-        status: "finish",
-        remidial_count: 0,
-        jawaban: JSON.stringify(jawaban),
-      },
-      {
-        where: {
-          id: id,
-        },
-      }
-    );
-
-    return {
-      msg: "Jawaban berhasil tersimpan",
-      nilai: nilai,
-      keterangan: keterangan,
-      total_point,
-      point_siswa,
-    };
-  }
 });
 
 const progressExam = response.requestResponse(async (req, res) => {
@@ -501,22 +339,19 @@ const progressExam = response.requestResponse(async (req, res) => {
   const id = req.body.id;
 
   const exam = await NilaiController.findOne({
-    where: {
-      id: id,
-      student_id: req.student_id,
-    },
+    where: { id: id, student_id: req.student_id },
+    include: [{ model: models.ujian, as: "ujian", attributes: ["soal"] }],
   });
 
-  if (exam.status === "open") {
-    return {
-      statusCode: 422,
-      msg: "Ujian belum dimulai",
-    };
+  if (!exam) {
+    return { statusCode: 422, msg: "Ujian tidak ditemukan" };
   }
-
+  if (exam.status === "open") {
+    return { statusCode: 422, msg: "Ujian belum dimulai" };
+  }
   if (
-    calculateMinutesDifference(new Date(), exam.jam_selesai) < -1 ||
-    exam.status === "finish"
+    exam.status === "finish" ||
+    (exam.jam_selesai && Date.now() > new Date(exam.jam_selesai).getTime() + GRACE_SUBMIT_MS)
   ) {
     return {
       msg: "Waktu Ujian telah berakhir, Silahkan submit untuk mengakhiri",
@@ -524,21 +359,16 @@ const progressExam = response.requestResponse(async (req, res) => {
     };
   }
 
+  // Simpan hanya jawaban untuk soal ujian ini, satu per soal
+  const soalIds = parseJSON(exam.ujian?.soal, []);
+  const rapi = [...normalisasiJawaban(jawaban, soalIds).values()];
+
   await NilaiController.update(
-    {
-      jam_progress: new Date(),
-      jawaban: JSON.stringify(jawaban),
-    },
-    {
-      where: {
-        id: id,
-      },
-    }
+    { jam_progress: new Date(), jawaban: JSON.stringify(rapi) },
+    { where: { id: exam.id, status: "progress" } }
   );
 
-  return {
-    msg: "Progress Ujian tersimpan",
-  };
+  return { msg: "Progress Ujian tersimpan" };
 });
 
 const notifExam = response.requestResponse(async (req, res) => {

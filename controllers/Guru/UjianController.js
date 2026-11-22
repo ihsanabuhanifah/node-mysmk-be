@@ -9,75 +9,113 @@ const {
   calculateMinutesDifference,
 } = require("../../utils/format");
 const { RESPONSE_API } = require("../../utils/response");
+const { isBenar, parseJSON, TIPE_MANUAL } = require("../../utils/penilaianUjian");
+const { ujianMilik, bolehKelola } = require("../../utils/aksesUjian");
+
+// Durasi (menit) tidak boleh melebihi rentang waktu_mulai..waktu_selesai
+function validasiWaktuUjian(p) {
+  if (!p) return null;
+  const mulai = new Date(p.waktu_mulai);
+  const selesai = new Date(p.waktu_selesai);
+  if (p.waktu_mulai && p.waktu_selesai) {
+    if (isNaN(mulai) || isNaN(selesai)) return "Waktu mulai/selesai tidak valid";
+    if (selesai <= mulai) return "Waktu selesai harus setelah waktu mulai";
+    const rentang = Math.floor((selesai - mulai) / 60000);
+    if (p.durasi !== undefined && Number(p.durasi) > rentang) {
+      return `Durasi (${p.durasi} menit) melebihi rentang waktu ujian (${rentang} menit)`;
+    }
+  }
+  if (p.durasi !== undefined && (!Number.isFinite(Number(p.durasi)) || Number(p.durasi) <= 0)) {
+    return "Durasi harus lebih dari 0 menit";
+  }
+  return null;
+}
 
 const response = new RESPONSE_API();
 
+// Membuka ujian: status draft -> open, buat 1 baris nilai per siswa aktif.
+// Data diambil dari baris ujian (bukan body), idempoten, dalam transaksi.
 const createPenilaian = async (req, res) => {
   try {
-    // Hanya siswa yang AKTIF di kelas ini (status 0 = riwayat/pindah/alumni)
-    const student = await StudentModel.findAll({
-      where: {
-        kelas_id: req.body.kelas_id,
-        status: 1,
-      },
+    const ujian = await ujianMilik(req, req.body.id);
+    if (!ujian) {
+      return res.status(403).json({ status: "Fail", msg: "Ujian tidak ditemukan atau milik guru lain" });
+    }
+    if (ujian.status !== "draft") {
+      return res.status(422).json({ status: "Fail", msg: "Ujian sudah dibuka sebelumnya" });
+    }
+
+    // Hanya siswa yang AKTIF di kelas ujian (status 0 = riwayat/pindah/alumni)
+    let student = await StudentModel.findAll({
+      where: { kelas_id: ujian.kelas_id, status: 1 },
     });
+    // student_access (opsional): bila berisi daftar id siswa, hanya siswa tersebut
+    const akses = parseJSON(ujian.student_access, []).map(Number).filter(Boolean);
+    if (akses.length) student = student.filter((s) => akses.includes(Number(s.student_id)));
 
     if (student.length === 0) {
-      return res.status(422).json({
-        status: "Success",
-        msg: "Kelas ini tidak memili siswa",
-
-        // msg: `Berhasil upload ${success} soal dari ${total} soal`,
-      });
+      return res.status(422).json({ status: "Fail", msg: "Kelas ini tidak memiliki siswa" });
     }
-    await UjianController.update(
-      {
-        status: "open",
-      },
-      {
-        where: {
-          id: req.body.id,
-        },
-      }
-    );
 
-    await Promise.all(
-      student.map(async (data) => {
-        await NilaiController.create({
-          ujian_id: req.body.id,
-          mapel_id: req.body.mapel_id,
-          kelas_id: req.body.kelas_id,
-          jenis_ujian: req.body.jenis_ujian,
-          urutan: req.body.is_hirarki === 1 ? req.body.urutan : 0,
+    const dibuat = await models.sequelize.transaction(async (t) => {
+      // kunci baris ujian & pastikan masih draft (cegah klik ganda)
+      const [jumlah] = await UjianController.update(
+        { status: "open" },
+        { where: { id: ujian.id, status: "draft" }, transaction: t }
+      );
+      if (jumlah === 0) return null;
+
+      const sudahAda = new Set(
+        (
+          await NilaiController.findAll({
+            where: { ujian_id: ujian.id },
+            attributes: ["student_id"],
+            transaction: t,
+          })
+        ).map((r) => Number(r.student_id))
+      );
+
+      const baris = student
+        .filter((s) => !sudahAda.has(Number(s.student_id)))
+        .map((s) => ({
+          ujian_id: ujian.id,
+          mapel_id: ujian.mapel_id,
+          kelas_id: ujian.kelas_id,
+          jenis_ujian: ujian.jenis_ujian,
+          urutan: Number(ujian.is_hirarki) === 1 ? ujian.urutan : 0,
           exam_result: 0,
-          teacher_id: req.teacher_id,
-          student_id: data.student_id,
-          waktu_tersisa: req.body.durasi,
-          ta_id: req.body.ta_id,
-
+          teacher_id: ujian.teacher_id,
+          student_id: s.student_id,
+          waktu_tersisa: ujian.durasi,
+          ta_id: ujian.ta_id,
           status: "open",
-        });
-      })
-    );
+        }));
+      if (baris.length) await NilaiController.bulkCreate(baris, { transaction: t });
+      return baris.length;
+    });
+
+    if (dibuat === null) {
+      return res.status(422).json({ status: "Fail", msg: "Ujian sudah dibuka sebelumnya" });
+    }
 
     return res.status(201).json({
       status: "Success",
-      msg: "Berhasil membuat Penilaian Ujian",
-
-      // msg: `Berhasil upload ${success} soal dari ${total} soal`,
+      msg: `Berhasil membuka ujian untuk ${dibuat} siswa`,
     });
   } catch (err) {
     console.log(err);
-    return res.status(403).json({
-      status: "Fail",
-      msg: "Terjadi Kesalahan",
-    });
+    return res.status(500).json({ status: "Fail", msg: "Terjadi Kesalahan" });
   }
 };
 
 const createUjian = async (req, res) => {
   try {
     const payload = req.body.payload[0];
+
+    const errWaktu = validasiWaktuUjian(payload);
+    if (errWaktu) {
+      return res.status(422).json({ status: "Fail", msg: errWaktu });
+    }
 
     await UjianController.create({
       ...payload,
@@ -325,16 +363,15 @@ const detailUjian = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const ujian = await UjianController.findOne({
-      where: {
-        id: id,
-      },
-    });
+    const ujian = await ujianMilik(req, id);
+    if (!ujian) {
+      return res.status(403).json({ status: "Fail", msg: "Ujian tidak ditemukan atau milik guru lain" });
+    }
 
     let soal = await BankSoalController.findAll({
       where: {
         id: {
-          [Op.in]: JSON.parse(ujian.soal),
+          [Op.in]: parseJSON(ujian.soal, []),
         },
       },
     });
@@ -374,6 +411,19 @@ const updateUjian = async (req, res) => {
       });
     }
 
+    if (!bolehKelola(req, ujian.teacher_id)) {
+      return res.status(403).json({ status: "Fail", msg: "Ujian ini milik guru lain" });
+    }
+
+    const errWaktu = validasiWaktuUjian({
+      waktu_mulai: payload.waktu_mulai ?? ujian.waktu_mulai,
+      waktu_selesai: payload.waktu_selesai ?? ujian.waktu_selesai,
+      durasi: payload.durasi ?? ujian.durasi,
+    });
+    if (errWaktu) {
+      return res.status(422).json({ status: "Fail", msg: errWaktu });
+    }
+
     if (ujian.status === "open") {
       await UjianController.update(
         {
@@ -393,22 +443,15 @@ const updateUjian = async (req, res) => {
         msg: "Perbaharui Berhasil",
       });
     }
-    if (ujian.teacher_id !== req.teacher_id) {
-      return res.status(422).json({
-        status: "Fail",
-        msg: "Ujian ini milik guru lain",
-      });
-    }
-
-    console.log("pua", payload);
+    // status tidak boleh diubah lewat payload (membuka ujian hanya lewat createPenilaian)
+    const { status: _abaikan, id: _id, teacher_id: _t, ...data } = payload;
 
     await UjianController.update(
       {
-        ...payload,
-
+        ...data,
         soal: JSON.stringify(payload.soal),
         student_access: JSON.stringify(payload.student_access),
-        teacher_id: req.teacher_id,
+        teacher_id: ujian.teacher_id,
       },
       {
         where: {
@@ -481,16 +524,15 @@ const AnalisislUjian = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const ujian = await UjianController.findOne({
-      where: {
-        id: id,
-      },
-    });
+    const ujian = await ujianMilik(req, id);
+    if (!ujian) {
+      return res.status(403).json({ status: "Fail", msg: "Ujian tidak ditemukan atau milik guru lain" });
+    }
 
     let soal = await BankSoalController.findAll({
       where: {
         id: {
-          [Op.in]: JSON.parse(ujian.soal),
+          [Op.in]: parseJSON(ujian.soal, []),
         },
       },
     });
@@ -505,7 +547,7 @@ const AnalisislUjian = async (req, res) => {
     const jawabanJSON = jawaban.map((item) => {
       return {
         student_id: item.student_id,
-        jawaban: JSON.parse(item.jawaban),
+        jawaban: parseJSON(item.jawaban, []),
       };
     });
     ujian.soal = JSON.stringify(soal);
@@ -559,8 +601,9 @@ module.exports = {
 
 const analyzeAnswers = (data) => {
   const totalSiswa = data.siswa.length;
+  const persen = (n, d) => (d > 0 ? (n / d) * 100 : 0);
 
-  const analysis = data.soal.map((soal) => {
+  return data.soal.map((soal) => {
     const results = {
       id: soal.id,
       materi: soal.materi,
@@ -572,66 +615,56 @@ const analyzeAnswers = (data) => {
     };
 
     if (soal.tipe === "PG") {
-      const choices = JSON.parse(soal.soal);
+      const choices = parseJSON(soal.soal, {});
       ["a", "b", "c", "d", "e"].forEach((choice) => {
-        if (choices[choice]) {
-          results.pilihan[choice] = 0;
-        }
+        if (choices[choice]) results.pilihan[choice] = 0;
       });
     }
 
     data.siswa.forEach((siswa) => {
-      if (siswa.jawaban) {
-        const jawabanSiswa = siswa.jawaban.find((j) => j.id === soal.id);
-        if (jawabanSiswa) {
-          if (soal.tipe === "PG" || soal.tipe === "TF") {
-            if (jawabanSiswa.jawaban === soal.jawaban) {
-              results.benar++;
-            } else {
-              if (!!jawabanSiswa.jawaban === false) {
-                results.tidakMenjawab++;
-              } else {
-                results.salah++;
-              }
-            }
-            if (
-              soal.tipe === "PG" &&
-              results.pilihan[jawabanSiswa.jawaban.toLowerCase()] !== undefined
-            ) {
-              results.pilihan[jawabanSiswa.jawaban.toLowerCase()]++;
-            }
-          } else if (soal.tipe === "ES") {
-            if (jawabanSiswa.jawaban) {
-              results.benar++;
-            } else {
-              results.salah++;
-            }
-          }
-        } else {
-          results.tidakMenjawab++;
-        }
-      } else {
+      const list = Array.isArray(siswa.jawaban) ? siswa.jawaban : [];
+      // satu jawaban per soal (entri terakhir), konsisten dengan penilaian
+      const jawabanSiswa = [...list].reverse().find((j) => Number(j?.id) === Number(soal.id));
+      const isi = jawabanSiswa?.jawaban;
+      const kosong =
+        isi === undefined || isi === null || isi === "" || (Array.isArray(isi) && isi.length === 0);
+
+      if (!jawabanSiswa || kosong) {
         results.tidakMenjawab++;
+        return;
+      }
+
+      if (TIPE_MANUAL.includes(soal.tipe)) {
+        // essay/LV: "benar" bila guru memberi poin penuh
+        const p = Number(jawabanSiswa.point);
+        if (Number.isFinite(p) && p >= Number(soal.point)) results.benar++;
+        else results.salah++;
+      } else if (isBenar(soal.tipe, isi, soal.jawaban)) {
+        results.benar++;
+      } else {
+        results.salah++;
+      }
+
+      if (soal.tipe === "PG") {
+        const pil = String(isi).toLowerCase();
+        if (results.pilihan[pil] !== undefined) results.pilihan[pil]++;
       }
     });
 
-    results.persentaseBenar = (results.benar / totalSiswa) * 100;
-    results.persentaseSalah =
-      (results.salah / (totalSiswa - results.tidakMenjawab)) * 100;
-    results.persentaseTidakMenjawab =
-      (results.tidakMenjawab / totalSiswa) * 100;
+    const dijawab = totalSiswa - results.tidakMenjawab;
+    results.persentaseBenar = persen(results.benar, totalSiswa);
+    results.persentaseSalah = persen(results.salah, dijawab);
+    results.persentaseTidakMenjawab = persen(results.tidakMenjawab, totalSiswa);
 
     if (soal.tipe === "PG") {
       for (const choice in results.pilihan) {
         results.pilihan[choice] = {
           count: results.pilihan[choice],
-          persentase: (results.pilihan[choice] / totalSiswa) * 100,
+          persentase: persen(results.pilihan[choice], totalSiswa),
         };
       }
     }
 
     return results;
   });
-
-  return analysis;
 };

@@ -50,6 +50,9 @@ authRouter.get("/authme", jwtValidateMiddleware, authController.authme);
 authRouter.post("/google-register", authController.googleRegister);
 authRouter.post("/google-login", authController.googleLogin);
 authRouter.get("/logout", authController.logout);
+authRouter.post("/logout", authController.logout);
+// tukar refresh token -> access token baru (publik: dipanggil saat access token habis)
+authRouter.post("/refresh-token", authController.refreshAccessToken);
 authRouter.put(
   "/password/update",
   jwtValidateMiddleware,

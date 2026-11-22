@@ -22,6 +22,15 @@ const sendEmail = require("../mail");
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const crypto = require("crypto");
 const {
+  buildAccessPayload,
+  signAccess,
+  issueRefresh,
+  rotateRefresh,
+  revokeToken,
+  revokeAllUser,
+  userAman,
+} = require("../utils/tokenService");
+const {
   isAkunDiblokir,
   pesanAkunDiblokir,
 } = require("../utils/statusAkun");
@@ -56,7 +65,11 @@ async function login(req, res) {
       });
     }
 
+    loginAs = Number(loginAs);
     const roleName = await RolesModel.findByPk(loginAs);
+    if (!roleName) {
+      return res.status(422).json({ status: "Fail", msg: "Role login tidak valid" });
+    }
 
     const checkRole = await userRoleModel.findOne({
       attributes: ["id", "role_id"],
@@ -71,127 +84,31 @@ async function login(req, res) {
         msg: `Mohon Maaf anda tidak memiliki role sebagai ${roleName.role_name}  `,
       });
     }
-    let parent;
-    let KelasStudent;
-    let guru;
-    let siswa;
-    let allRole = [];
 
-    if (loginAs === 8) {
-      parent = await ParentModel.findOne({
-        attributes: [
-          "id",
-          "nama_wali",
-          "user_id",
-          "student_id",
-          "hubungan",
-          "nama_siswa",
-        ],
-        where: {
-          user_id: user.id,
-        },
-      });
-    } else if (loginAs === 9) {
-      siswa = await StudentModel.findOne({
-        attributes: ["id"],
-        where: {
-          user_id: user.id,
-        },
-      });
-    } else {
-      guru = await TeacherModel.findOne({
-        attributes: ["id"],
-        where: {
-          user_id: user.id,
-        },
-      });
+    // Isi access token dibangun di satu tempat (dipakai juga saat refresh token)
+    const { payload, extra } = await buildAccessPayload(user, loginAs);
 
-      allRole = await userRoleModel.findAll({
-        where: {
-          [Op.and]: [{ user_id: user.id }],
-        },
-
-        include: [
-          {
-            model: models.role,
-            require: true,
-            as: "role",
-          },
-        ],
-      });
-
-      const mapRole = allRole.map((item) => {
-        return item.role.role_name;
-      });
-
-      allRole = mapRole;
-
-      console.log("allRole", user);
-    }
-
-    if (parent !== null && parent !== undefined) {
-      KelasStudent = await sequelize.query(
-        `SELECT  
-            a.semester , 
-            b.nama_tahun_ajaran as ta_id  FROM kelas_students as a
-         LEFT JOIN ta AS b ON (a.ta_id = b.id)
-         WHERE 
-            student_id = ${parent?.student_id} AND status = 1`,
-        {
-          type: QueryTypes.SELECT,
-        }
-      );
-    }
-
-    const token = JWT.sign(
-      {
-        email: user.email,
-        name: user.name,
-        id: user.id,
-        role: roleName.role_name,
-        roleId: loginAs,
-        StudentId: parent?.student_id,
-        nama_siswa: parent?.nama_siswa,
-        student_id: siswa?.id,
-        teacher_id: guru?.id,
-        walsan_id : parent?.id,
-        allRole: allRole,
-        semesterAktif:
-          parent?.student_id !== undefined ? KelasStudent[0]?.semester : "",
-        tahunAjaranAktif:
-          parent?.student_id !== undefined ? KelasStudent[0]?.ta_id : "",
-      },
-      process.env.JWT_SECRET_ACCESS_TOKEN,
-      {
-        expiresIn: "360d",
-      }
-    );
-
-    if (loginAs === 8) {
-      if (!!parent?.student_id === false) {
-        return res.status(422).json({
-          status: "Fail",
-          msg: `Akun dalam proses mapping antara Wali dan Siswa`,
-        });
-      }
-
-      return res.status(200).json({
-        status: "Success",
-        msg: "Berhasil Login",
-        user: user,
-        role: roleName.role_name,
-        token: token,
-        semesterAktif: KelasStudent[0]?.semester,
-        tahunAjaranAktif: KelasStudent[0]?.ta_id,
+    if (loginAs === 8 && !extra.parent?.student_id) {
+      return res.status(422).json({
+        status: "Fail",
+        msg: `Akun dalam proses mapping antara Wali dan Siswa`,
       });
     }
+
+    const token = signAccess(payload);
+    const refreshToken = await issueRefresh(user.id, loginAs, req.headers["user-agent"]);
 
     return res.status(200).json({
       status: "Success",
       msg: "Berhasil Login",
-      user: user,
+      user: userAman(user),
       role: roleName.role_name,
       token: token,
+      refreshToken: refreshToken,
+      ...(loginAs === 8 && {
+        semesterAktif: extra.KelasStudent?.[0]?.semester,
+        tahunAjaranAktif: extra.KelasStudent?.[0]?.ta_id,
+      }),
     });
   } catch (err) {
     console.log(err);
@@ -531,31 +448,50 @@ async function googleLogin(req, res) {
     });
   }
 
-  const token = JWT.sign(
-    {
-      email: users.email,
-      name: users.name,
-      id: users.id,
-    },
-    process.env.JWT_SECRET_ACCESS_TOKEN,
-    {
-      expiresIn: "360d",
-    }
-  );
+  const { payload } = await buildAccessPayload(users, null);
+  const token = signAccess(payload);
+  const refreshToken = await issueRefresh(users.id, null, req.headers["user-agent"]);
 
   return res.status(200).json({
     status: "Success",
     msg: "Berhasil Login",
-    user: users,
+    user: userAman(users),
     token: token,
+    refreshToken: refreshToken,
   });
 }
 
 async function logout(req, res) {
+  try {
+    const refreshToken = req.body?.refreshToken || req.query?.refreshToken;
+    if (refreshToken) await revokeToken(refreshToken, "logout");
+  } catch (err) {
+    console.log(err);
+  }
   return res.clearCookie("refreshToken").status(200).json({
     status: "Success",
     message: "Anda telah berhasil logout",
   });
+}
+
+// POST /refresh-token  body: { refreshToken }
+// Menukar refresh token dengan access token baru + refresh token baru (rotasi).
+async function refreshAccessToken(req, res) {
+  try {
+    const hasil = await rotateRefresh(req.body?.refreshToken, req.headers["user-agent"]);
+    if (!hasil.ok) {
+      return res.status(hasil.code).json({ status: "fail", msg: hasil.msg });
+    }
+    const { payload } = await buildAccessPayload(hasil.user, hasil.loginAs);
+    return res.json({
+      status: "Success",
+      token: signAccess(payload),
+      refreshToken: hasil.refreshToken,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ status: "fail", msg: "Terjadi Kesalahan" });
+  }
 }
 async function resetPassword(req, res) {
   try {
@@ -586,7 +522,8 @@ async function resetPassword(req, res) {
       }
     );
 
-    console.log(update);
+    // Ganti password -> cabut semua sesi (refresh token); perangkat ini login ulang
+    await revokeAllUser(user.id, "password");
     return res.status(201).json({
       status: "Success",
       msg: "Password berhasil di perbaharui",
@@ -745,6 +682,8 @@ async function resetPasswordToken(req, res) {
     );
     await TokenModel.destroy({ where: { userId: user.id } });
     resetAttempts.delete(user.id);
+    // Reset password -> semua sesi lama (refresh token) dicabut
+    await revokeAllUser(user.id, "password");
 
     return res.status(201).json({
       status: "Success",
@@ -758,6 +697,7 @@ async function resetPasswordToken(req, res) {
 module.exports = {
   login,
   logout,
+  refreshAccessToken,
   register,
   authme,
   googleRegister,

@@ -33,6 +33,10 @@ const job = cron.schedule("06 00 * * *", scheduleKelas);
 const kehadiran_guru = cron.schedule("05 00 * * *", createKehadiran);
 const halaqoh = cron.schedule("02 00 * * *", scheduleHalaqoh);
 const notifikasi = cron.schedule("00 00 05 * *", createNotification);
+// bersihkan refresh token kedaluwarsa/dicabut setiap hari pukul 03:30
+const bersihkanToken = cron.schedule("30 03 * * *", () =>
+  require("./utils/tokenService").cleanupTokens().catch((e) => console.log("cleanup token", e?.message))
+);
 
 app.use(cors());
 app.use(express.json());

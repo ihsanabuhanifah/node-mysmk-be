@@ -8,6 +8,7 @@ const tahunAjaranModel = require('../../models').ta
 const ujianModel = require('../../models').ujian
 
 const listHasilUjain = async (req, res) => {
+  try {
 	let { page, pageSize, nama_mapel, judul_ujian, kelas } = req.query
 
 	let pageFromFE = parseFloat(req.page)
@@ -17,8 +18,7 @@ const listHasilUjain = async (req, res) => {
 			student_id: req.student_id,
 			status: 'finish',
 		},
-	 limit: pageSize,
-      offset: page,
+	 ...(pageSize && { limit: Number(pageSize), offset: Number(page) || 0 }),
     order: [['createdAt', 'DESC']],
 	
 		include: [
@@ -55,9 +55,8 @@ const listHasilUjain = async (req, res) => {
 			{
 				model: ujianModel,
 				as: 'ujian',
-				atrributes: {
-					include: ['judul_ujian'],
-				},
+				// hanya kolom yang dibutuhkan (sebelumnya typo "atrributes" -> semua kolom ikut terkirim)
+				attributes: ['id', 'judul_ujian', 'jenis_ujian', 'tipe_ujian', 'durasi', 'waktu_mulai', 'waktu_selesai'],
         where: {
           ...(checkQuery(judul_ujian) && {
 						judul_ujian: {
@@ -79,6 +78,10 @@ const listHasilUjain = async (req, res) => {
 		totalPage: Math.ceil(count / pageSize),
 		count: count,
 	})
+  } catch (err) {
+    console.log(err)
+    return res.status(500).json({ status: 'Fail', msg: 'Terjadi Kesalahan' })
+  }
 }
 
 module.exports = { listHasilUjain }

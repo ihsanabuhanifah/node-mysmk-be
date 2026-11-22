@@ -2,6 +2,7 @@ const BankSoalController = require("../../models").bank_soal;
 
 const { Op } = require("sequelize");
 const models = require("../../models");
+const { bolehKelola } = require("../../utils/aksesUjian");
 const { checkQuery } = require("../../utils/format");
 const createSoal = async (req, res) => {
   try {
@@ -154,6 +155,13 @@ const detailSoal = async (req, res) => {
         id: id,
       },
     });
+    // soal berisi kunci jawaban: hanya pemilik / pengelola
+    if (!soal || !bolehKelola(req, soal.teacher_id)) {
+      return res.status(403).json({
+        status: "Fail",
+        msg: "Soal tidak ditemukan atau milik guru lain",
+      });
+    }
     return res.json({
       status: "Success",
       msg: "Berhasil ditemukan",
@@ -185,19 +193,20 @@ const updateSoal = async (req, res) => {
         msg: "Soal Tidak Ditemukan",
       });
     }
-    if (soal.teacher_id !== req.teacher_id) {
+    if (!bolehKelola(req, soal.teacher_id)) {
       return res.status(422).json({
         status: "Fail",
         msg: "Soal ini milik guru lain",
       });
     }
 
-    payload.soal = JSON.stringify(payload.soal);
+    // id & pemilik tidak boleh diubah lewat payload
+    const { id: _id, teacher_id: _t, ...data } = payload;
+    data.soal = JSON.stringify(payload.soal);
 
     await BankSoalController.update({
-      ...payload,
-       jawaban: payload.jawaban.toString(),
-
+      ...data,
+      jawaban: String(payload.jawaban ?? ""),
     }, {
       where: {
         id,
@@ -216,35 +225,56 @@ const updateSoal = async (req, res) => {
   }
 };
 
+// Hapus soal: hanya milik sendiri (atau pengelola) dan belum dipakai di ujian mana pun
 const deleteSoal = async (req, res) => {
-  const { payload } = req.body;
-
-  console.log("pay", payload);
+  const ids = [...new Set((req.body?.payload || []).map(Number).filter(Boolean))];
   try {
+    const soal = await BankSoalController.findAll({
+      where: { id: ids },
+      attributes: ["id", "teacher_id"],
+    });
     let success = 0;
-    let gagal = 0;
-    let total = payload.length;
-    await Promise.all(
-      payload?.map(async (item) => {
-        try {
-          await BankSoalController.destroy({
-            where: {
-              id: item,
-            },
-          });
-          success = success + 1;
-        } catch {
-          gagal = gagal + 1;
-        }
-      })
-    );
+    const gagal = [];
+
+    for (const id of ids) {
+      const item = soal.find((x) => Number(x.id) === id);
+      if (!item) {
+        gagal.push({ id, alasan: "Soal tidak ditemukan" });
+        continue;
+      }
+      if (!bolehKelola(req, item.teacher_id)) {
+        gagal.push({ id, alasan: "Soal milik guru lain" });
+        continue;
+      }
+      const [{ n }] = await models.sequelize.query(
+        "SELECT COUNT(*) AS n FROM ujians WHERE JSON_VALID(soal) AND JSON_CONTAINS(soal, :id)",
+        { replacements: { id: String(id) }, type: models.Sequelize.QueryTypes.SELECT }
+      );
+      if (Number(n) > 0) {
+        gagal.push({ id, alasan: `Dipakai di ${n} ujian` });
+        continue;
+      }
+      await BankSoalController.destroy({ where: { id } });
+      success += 1;
+    }
+
+    if (success === 0 && gagal.length) {
+      return res.status(422).json({
+        status: "Fail",
+        msg: `Tidak ada soal yang dihapus: ${gagal[0].alasan}`,
+        gagal,
+      });
+    }
     return res.status(200).json({
       status: "Success",
-      msg: `Berhasil delete ${success} soal dari ${total} soal`,
+      msg:
+        `Berhasil delete ${success} soal dari ${ids.length} soal` +
+        (gagal.length ? `. ${gagal.length} tidak dihapus (milik guru lain / dipakai di ujian).` : ""),
+      gagal,
     });
   } catch (err) {
     console.log(err);
-    return res.status(403).json({
+    return res.status(500).json({
       status: "Fail",
       msg: "Terjadi Kesalahan",
     });
