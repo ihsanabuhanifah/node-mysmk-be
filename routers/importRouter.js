@@ -19,7 +19,6 @@ const {
 const {
   importGuru,
   importSiswa,
-  importWali,
 } = require("../controllers/ExportImport/importUserController");
 
 const {
@@ -36,7 +35,7 @@ importRouter.get("/import/referensi", importAuth, referensiImport);
 importRouter.post("/import/roles", importAuth, upload.single("file"), checkImportPassword, importRoles);
 importRouter.post("/import/guru", importAuth, upload.single("file"), checkImportPassword, importGuru);
 importRouter.post("/import/siswa", importAuth, upload.single("file"), checkImportPassword, importSiswa);
-importRouter.post("/import/wali", importAuth, upload.single("file"), checkImportPassword, importWali);
+// /import/wali dihapus: impor wali sekarang lewat POST /guru/admin-wali/import (halaman Daftar Wali)
 importRouter.post("/import/ta", importAuth, upload.single("file"), checkImportPassword, importTa);
 importRouter.post("/import/mapel", importAuth, upload.single("file"), checkImportPassword, importMapel);
 importRouter.post("/import/kelas", importAuth, upload.single("file"), checkImportPassword, importKelas);
