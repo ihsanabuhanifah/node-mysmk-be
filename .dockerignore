@@ -9,3 +9,6 @@ public/data/uploads
 .DS_Store
 .vscode
 .idea
+tests
+backups
+backup

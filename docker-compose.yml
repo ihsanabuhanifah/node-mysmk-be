@@ -22,3 +22,28 @@ services:
       options:
         max-size: "10m"
         max-file: "5"
+
+  # Backup database harian (mysqldump) -> ./backups di VPS (+ opsional salinan di luar VPS via rclone).
+  # Backup manual sekarang : docker compose run --rm backup /backup.sh
+  # Lihat log backup        : docker compose logs -f backup
+  backup:
+    build: ./backup
+    container_name: mysmk-backup
+    restart: unless-stopped
+    environment:
+      TZ: Asia/Jakarta
+      BACKUP_CRON: "0 2 * * *"        # setiap hari 02:00 WIB
+      BACKUP_KEEP_DAYS: "14"          # simpan 14 hari di VPS
+      # Salinan di luar VPS (opsional). Contoh: "gdrive:backup-mysmk" atau "s3:nama-bucket/mysmk".
+      # Buat remote dulu: docker compose run --rm backup rclone config --config /config/rclone/rclone.conf
+      BACKUP_RCLONE_REMOTE: ""
+      BACKUP_REMOTE_KEEP_DAYS: "60"
+    volumes:
+      - ./.env:/app/.env:ro
+      - ./backups:/backups
+      - ./backup/rclone:/config/rclone
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"

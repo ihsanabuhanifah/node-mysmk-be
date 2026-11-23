@@ -9,7 +9,7 @@ on:
 
 jobs:
   ci:
-    name: CI (install & cek sintaks)
+    name: CI (install, cek sintaks & test)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -26,6 +26,9 @@ jobs:
         run: |
           find . -name "*.js" -not -path "./node_modules/*" -print0 \
             | xargs -0 -n1 node --check
+
+      - name: Test otomatis (login/refresh token, impor wali, submit ujian)
+        run: npm test
 
   deploy:
     name: CD (docker compose lewat self-hosted runner)

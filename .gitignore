@@ -17,3 +17,7 @@ npm-debug.log
 yarn-error.log
 /.idea
 /.vscode
+
+# backup database (berisi data asli, JANGAN di-commit)
+/backups
+/backup/rclone

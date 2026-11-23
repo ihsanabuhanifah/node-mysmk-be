@@ -434,34 +434,20 @@ guru.put("/walisantri/update/:id", requireAdminMiddleware, updateWali);
 guru.get("/walisantri/detail/:id", requireAdminMiddleware, detailWali);
 
 // Pembayaran
-guru.get("/pembayaran/list", ListPembayaran);
-guru.post("/pembayaran/createKartu", createKartuSpp);
-guru.get("/pembayaran/detail/:id", detailPembayaran);
-guru.put("/pembayaran/update", updateResponse);
 
 // siswa
 
 
 // Notification
-guru.post("/pesan/create", createNotification);
 
 
 //Pembayaran PPDB
 guru.put("/pembayaran-ppdb/update/:id", updatePembayaranPpdb);
 guru.get("/pembayaran-ppdb/list", listPembayaran);
-guru.get("/walisantri/list", requireAdminMiddleware, getListWali);
-guru.put("/walisantri/update/:id", requireAdminMiddleware, updateWali);
-guru.get("/walisantri/detail/:id", requireAdminMiddleware, detailWali);
 
 // Laporan harian pkl
-guru.get("/laporan-harian-pkl/list", laporanPklList);
-guru.get("/laporan-harian-pkl/detail/:id", detailLaporanPkl);
 guru.get("/laporan-harian-pkl/list/pembimbing", laporanPklListForPembimbing);
 
-guru.get("/walisantri/list", requireAdminMiddleware, getListWali);
-guru.post("/walisantri/create", requireAdminMiddleware, createBulkWali);
-guru.get("/laporan-harian-pkl/list", laporanPklList);
-guru.get("/laporan-harian-pkl/detail/:id", detailLaporanPkl);
 
 
 module.exports = guru;

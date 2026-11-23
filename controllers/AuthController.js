@@ -558,18 +558,30 @@ async function refreshAccessToken(req, res) {
 }
 async function resetPassword(req, res) {
   try {
-    let { oldPassword, newPassword } = req.body;
+    let { oldPassword, newPassword } = req.body || {};
     let email = req.email;
+    if (!oldPassword || !newPassword) {
+      return res.status(422).json({ status: "fail", msg: "Password lama dan password baru wajib diisi" });
+    }
+    if (String(newPassword).length < 8) {
+      return res.status(422).json({ status: "fail", msg: "Password baru minimal 8 karakter" });
+    }
+    if (oldPassword === newPassword) {
+      return res.status(422).json({ status: "fail", msg: "Password baru harus berbeda dari password lama" });
+    }
     const user = await userModel.findOne({
       where: {
         email: email,
       },
     });
-    const verify = bcrypt.compareSync(oldPassword, user.password);
+    if (!user) {
+      return res.status(404).json({ status: "fail", msg: "Akun tidak ditemukan" });
+    }
+    const verify = bcrypt.compareSync(String(oldPassword), user.password);
     if (!verify) {
       return res.status(404).json({
         status: "fail",
-        msg: "Masukan Password Lama ",
+        msg: "Password lama salah",
       });
     }
 
