@@ -28,7 +28,7 @@ jobs:
             | xargs -0 -n1 node --check
 
   deploy:
-    name: CD (deploy lewat self-hosted runner)
+    name: CD (docker compose lewat self-hosted runner)
     needs: ci
     # deploy hanya saat push / manual ke main, bukan saat pull request
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
@@ -39,15 +39,16 @@ jobs:
       cancel-in-progress: false
     env:
       # Atur di GitHub: Settings > Secrets and variables > Actions > Variables
+      # folder clone repo backend di server (berisi .env & docker-compose.yml)
       APP_DIR: ${{ vars.APP_DIR }}
-      PM2_NAME: ${{ vars.PM2_NAME || 'mysmk-be' }}
     steps:
-      - name: Pastikan APP_DIR diisi
+      - name: Pastikan APP_DIR & .env ada
         run: |
           if [ -z "$APP_DIR" ]; then
-            echo "::error::Variable APP_DIR belum diisi (folder aplikasi di server, mis. /home/student/node-mysmk-be)"
+            echo "::error::Variable APP_DIR belum diisi (folder repo backend di server, mis. /home/student/node-mysmk-be)"
             exit 1
           fi
+          if [ ! -f "$APP_DIR/.env" ]; then echo "::error::$APP_DIR/.env tidak ditemukan"; exit 1; fi
 
       - name: Tarik kode terbaru
         working-directory: ${{ vars.APP_DIR }}
@@ -56,27 +57,30 @@ jobs:
           git checkout main
           git pull --ff-only origin main
 
-      - name: Install dependency (production)
+      - name: Build & jalankan container
         working-directory: ${{ vars.APP_DIR }}
-        run: npm ci --omit=dev
+        run: docker compose up -d --build --remove-orphans
 
       - name: Jalankan migrasi database
         working-directory: ${{ vars.APP_DIR }}
         run: |
           # pakai environment DB yang sama dengan aplikasi (APP_ENV di .env server)
-          DB_ENV=$(node -e 'require("dotenv").config(); process.stdout.write(process.env.APP_ENV || "")')
-          if [ -z "$DB_ENV" ]; then
-            echo "::error::APP_ENV tidak ditemukan di .env server"
-            exit 1
-          fi
-          npx sequelize-cli db:migrate --env "$DB_ENV"
+          docker compose exec -T api sh -c '
+            DB_ENV=$(node -p "require(\"dotenv\").config(); process.env.APP_ENV || \"\"")
+            if [ -z "$DB_ENV" ]; then echo "APP_ENV tidak ditemukan di .env"; exit 1; fi
+            npx sequelize-cli db:migrate --env "$DB_ENV"
+          '
 
-      - name: Restart aplikasi (PM2)
+      - name: Cek container berjalan
         working-directory: ${{ vars.APP_DIR }}
         run: |
-          if pm2 describe "$PM2_NAME" > /dev/null 2>&1; then
-            pm2 reload "$PM2_NAME" --update-env
-          else
-            pm2 start index.js --name "$PM2_NAME"
+          sleep 5
+          docker compose ps
+          if [ "$(docker inspect -f '{{.State.Running}}' mysmk-api)" != "true" ]; then
+            docker compose logs --tail=100 api
+            echo "::error::Container mysmk-api tidak berjalan"
+            exit 1
           fi
-          pm2 save
+
+      - name: Bersihkan image lama
+        run: docker image prune -f

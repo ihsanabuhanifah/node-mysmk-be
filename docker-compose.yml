@@ -1,0 +1,24 @@
+# Backend MySMK. Jalankan di VPS dari folder repo ini:
+#   docker compose up -d --build
+# Apache meneruskan https://api.../ ke 127.0.0.1:8080 (lihat konfigurasi reverse proxy).
+services:
+  api:
+    build: .
+    container_name: mysmk-api
+    restart: unless-stopped
+    environment:
+      TZ: Asia/Jakarta
+      PORT: 8080
+    # .env tidak dimasukkan ke image; dibaca dotenv langsung dari file di server
+    volumes:
+      - ./.env:/app/.env:ro
+      # file upload (bukti, foto, excel, dll) tetap ada walau container dibuat ulang
+      - ./public/data/uploads:/app/public/data/uploads
+    # hanya bisa diakses dari server itu sendiri (lewat Apache), bukan langsung dari internet
+    ports:
+      - "8080:8080"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
