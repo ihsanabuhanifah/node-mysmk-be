@@ -309,6 +309,17 @@ const {
 guru.get("/daftar-guru", listDaftarGuru);
 // Data master (Tahun Ajaran, Kelas, Mapel, Role) - khusus Admin
 const dataMaster = require("../../controllers/Admin/DataMasterController");
+// Manajemen wali santri (khusus admin)
+const adminWali = require("../../controllers/Guru/AdminWaliController");
+guru.get("/admin-wali/list", requireAdminMiddleware, adminWali.listWali);
+guru.get("/admin-wali/cari-santri", requireAdminMiddleware, adminWali.cariSantri);
+guru.post("/admin-wali/create", requireAdminMiddleware, adminWali.tambahWali);
+guru.post("/admin-wali/import", requireAdminMiddleware, adminWali.importWali);
+guru.put("/admin-wali/:id/hubungkan", requireAdminMiddleware, adminWali.hubungkan);
+guru.put("/admin-wali/:id/putuskan", requireAdminMiddleware, adminWali.putuskan);
+guru.put("/admin-wali/:id/reset-password", requireAdminMiddleware, adminWali.resetPassword);
+guru.put("/admin-wali/:id", requireAdminMiddleware, adminWali.ubahWali);
+
 guru.get("/master/:jenis", requireAdminMiddleware, dataMaster.list);
 guru.post("/master/:jenis", requireAdminMiddleware, dataMaster.create);
 guru.put("/master/:jenis/:id", requireAdminMiddleware, dataMaster.update);
@@ -417,10 +428,10 @@ guru.post("/pesan/create", createNotification);
 // Laporan harian pkl
 guru.get("/laporan-harian-pkl/list", laporanPklList);
 guru.get("/laporan-harian-pkl/detail/:id", detailLaporanPkl);
-guru.get("/walisantri/list", getListWali);
-guru.post("/walisantri/create", createBulkWali);
-guru.put("/walisantri/update/:id", updateWali);
-guru.get("/walisantri/detail/:id", detailWali);
+guru.get("/walisantri/list", requireAdminMiddleware, getListWali);
+guru.post("/walisantri/create", requireAdminMiddleware, createBulkWali);
+guru.put("/walisantri/update/:id", requireAdminMiddleware, updateWali);
+guru.get("/walisantri/detail/:id", requireAdminMiddleware, detailWali);
 
 // Pembayaran
 guru.get("/pembayaran/list", ListPembayaran);
@@ -438,17 +449,17 @@ guru.post("/pesan/create", createNotification);
 //Pembayaran PPDB
 guru.put("/pembayaran-ppdb/update/:id", updatePembayaranPpdb);
 guru.get("/pembayaran-ppdb/list", listPembayaran);
-guru.get("/walisantri/list", getListWali);
-guru.put("/walisantri/update/:id", updateWali);
-guru.get("/walisantri/detail/:id", detailWali);
+guru.get("/walisantri/list", requireAdminMiddleware, getListWali);
+guru.put("/walisantri/update/:id", requireAdminMiddleware, updateWali);
+guru.get("/walisantri/detail/:id", requireAdminMiddleware, detailWali);
 
 // Laporan harian pkl
 guru.get("/laporan-harian-pkl/list", laporanPklList);
 guru.get("/laporan-harian-pkl/detail/:id", detailLaporanPkl);
 guru.get("/laporan-harian-pkl/list/pembimbing", laporanPklListForPembimbing);
 
-guru.get("/walisantri/list", getListWali);
-guru.post("/walisantri/create", createBulkWali);
+guru.get("/walisantri/list", requireAdminMiddleware, getListWali);
+guru.post("/walisantri/create", requireAdminMiddleware, createBulkWali);
 guru.get("/laporan-harian-pkl/list", laporanPklList);
 guru.get("/laporan-harian-pkl/detail/:id", detailLaporanPkl);
 

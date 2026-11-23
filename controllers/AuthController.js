@@ -125,7 +125,7 @@ async function login(req, res) {
     if (loginAs === 8 && !extra.parent?.student_id) {
       return res.status(422).json({
         status: "Fail",
-        msg: `Akun dalam proses mapping antara Wali dan Siswa`,
+        msg: `Akun wali Anda belum dihubungkan dengan data santri. Mohon tunggu atau hubungi admin sekolah.`,
       });
     }
 
@@ -251,7 +251,13 @@ async function registerWali(req, res) {
       });
     }
 
-    const user = await userModel.create(payload);
+    // hanya field yang boleh diisi pendaftar (cegah mengisi status/role dsb.)
+    const user = await userModel.create({
+      name: payload.name,
+      email: payload.email,
+      password: payload.password,
+      no_hp: payload.no_hp,
+    });
 
     const userRole = await userRoleModel.create({
       user_id: user.id,
@@ -303,11 +309,12 @@ async function registerWali(req, res) {
     // });
     return res.status(201).json({
       status: "Success",
-      msg: "Registrasi Berhasil",
-      user: user,
+      msg: "Registrasi berhasil. Akun dapat dipakai setelah admin sekolah menghubungkannya dengan data santri.",
+      user: userAman(user),
     });
   } catch (err) {
     console.log(err);
+    return res.status(500).json({ status: "Fail", msg: "Registrasi gagal, coba lagi" });
   }
 }
 
