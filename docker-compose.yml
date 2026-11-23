@@ -16,7 +16,7 @@ services:
       - ./public/data/uploads:/app/public/data/uploads
     # hanya bisa diakses dari server itu sendiri (lewat Apache), bukan langsung dari internet
     ports:
-      - "8080:8080"
+      - "127.0.0.1:8080:8080"
     logging:
       driver: json-file
       options:
