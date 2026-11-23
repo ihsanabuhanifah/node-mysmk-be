@@ -8,16 +8,49 @@ const { check } = require("../../utils/paramsQuery");
 const { checkQuery } = require("../../utils/format");
 const excel = require("exceljs");
 const { RESPONSE_API } = require("../../utils/response");
+const { rapikanJadwal, cekBentrok } = require("../../utils/jadwal");
 
 const response = new RESPONSE_API();
 
 async function createJadwal(req, res) {
-  let { data } = req.body;
   try {
-    await JadwalModel.bulkCreate(data);
+    // hanya kolom jadwal yang diterima; isian wajib & bentrok dicek dulu
+    const { rows, errors } = rapikanJadwal(req.body?.data);
+    if (errors.length) {
+      return res.status(422).json({ status: "Fail", msg: "Periksa kembali isian jadwal", konflik: errors });
+    }
+
+    const ada = await JadwalModel.findAll({
+      where: {
+        status: 1,
+        hari: [...new Set(rows.map((r) => r.hari))],
+        ta_id: [...new Set(rows.map((r) => r.ta_id))],
+        [Op.or]: [
+          { kelas_id: [...new Set(rows.map((r) => r.kelas_id))] },
+          { teacher_id: [...new Set(rows.map((r) => r.teacher_id))] },
+        ],
+      },
+      include: [
+        { model: models.kelas, as: "kelas", attributes: ["nama_kelas"] },
+        { model: models.mapel, as: "mapel", attributes: ["nama_mapel"] },
+      ],
+    });
+    const konflik = cekBentrok(
+      rows,
+      ada.map((x) => ({
+        ...x.get({ plain: true }),
+        nama_kelas: x.kelas?.nama_kelas,
+        nama_mapel: x.mapel?.nama_mapel,
+      }))
+    );
+    if (konflik.length) {
+      return res.status(422).json({ status: "Fail", msg: "Ada jadwal yang bentrok", konflik });
+    }
+
+    await JadwalModel.bulkCreate(rows);
     return res.json({
       status: "Success",
-      msg: "Jadwal Berhasil ditambahkan",
+      msg: `${rows.length} jadwal berhasil ditambahkan`,
     });
   } catch (err) {
     console.log(err);
