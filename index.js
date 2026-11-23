@@ -37,6 +37,10 @@ const notifikasi = cron.schedule("00 00 05 * *", createNotification);
 const bersihkanToken = cron.schedule("30 03 * * *", () =>
   require("./utils/tokenService").cleanupTokens().catch((e) => console.log("cleanup token", e?.message))
 );
+// hapus audit log lebih lama dari AUDIT_LOG_DAYS hari (default 365) setiap hari pukul 03:45
+const bersihkanAuditLog = cron.schedule("45 03 * * *", () =>
+  require("./utils/auditLog").cleanupAuditLog().catch((e) => console.log("cleanup audit log", e?.message))
+);
 
 app.use(cors());
 app.use(express.json());

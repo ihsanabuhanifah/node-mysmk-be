@@ -1,43 +1,33 @@
 const KunjunganModel = require("../../models").penjengukan;
-const IzinModel = require("../../models").izn_pulang;
-const { default: axios } = require("axios");
+const { kirimWaGrup, isTanggal } = require("../../utils/waNotif");
 const dotenv = require("dotenv");
 dotenv.config();
 const { Op } = require("sequelize");
 const models = require("../../models");
 async function buatIzin(req, res) {
   try {
-    const payload = req.body;
-    (payload.user_id = req.id), (payload.student_id = req.StudentId);
-    payload.status_approval = "menunggu";
-    await KunjunganModel.create(payload);
+    const tanggal = req.body?.tanggal;
+    const kepentingan = String(req.body?.kepentingan ?? "").trim();
+    if (!isTanggal(tanggal) || !kepentingan) {
+      return res.status(422).json({ status: "Fail", msg: "Tanggal dan kepentingan wajib diisi" });
+    }
+    // hanya field milik wali; status & approval ditentukan server
+    await KunjunganModel.create({
+      tanggal,
+      kepentingan: kepentingan.slice(0, 255),
+      user_id: req.id,
+      student_id: req.StudentId,
+      status_approval: "menunggu",
+    });
 
-        const urlAPI = process.env.URL_WA;
-        const token = process.env.TOKEN_WA;
-        const nomer = process.env.GROUP_WA;
-        const pesan = `*SMK MQ NOTIF PERMINTAAN KUNJUNGAN*
+    kirimWaGrup(`*SMK MQ NOTIF PERMINTAAN KUNJUNGAN*
 
 Bismillah, ada wali santri yang mengisi data Tiket Kunjungan berikut data detailnya:
 Nama santri : ${req.nama_siswa}
-Tanggal Kunjungan : ${payload.tanggal}
-Kepentinggan : ${payload.kepentingan}
+Tanggal Kunjungan : ${tanggal}
+Kepentinggan : ${kepentingan}
 
-Untuk mengkonfirmasi silahkan buka website https://mysmk.smkmadinatulquran.sch.id/guru/perizinan-kunjungan`;
-
-        const dt = {
-          "phone": nomer,
-          "message": pesan,
-          "isGroup": true
-        };
-
-        console.log(dt);
-
-        const response = await axios.post(urlAPI, dt, {
-          headers: {
-            'Authorization': token,
-            'Content-Type': 'application/json'
-          }
-        });
+Untuk mengkonfirmasi silahkan buka website https://mysmk.smkmadinatulquran.sch.id/guru/perizinan-kunjungan`);
 
     return res.json({
       status: "Success",
@@ -161,10 +151,13 @@ async function updateIzin(req, res) {
       });
     }
 
+    if (tanggal !== undefined && !isTanggal(tanggal)) {
+      return res.status(422).json({ status: "Fail", msg: "Format tanggal tidak valid" });
+    }
     await KunjunganModel.update(
       {
-        tanggal,
-        kepentingan,
+        ...(tanggal !== undefined && { tanggal }),
+        ...(kepentingan !== undefined && { kepentingan: String(kepentingan).trim().slice(0, 255) }),
       },
       {
         where: {

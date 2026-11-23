@@ -26,6 +26,7 @@ router.get("/", (req, res) => {
 });
 const jwtValidateMiddleware = require("../middleware/jwtValidateMiddleware");
 const paginationMiddleware = require("../middleware/paginationMiddleware");
+const auditLogMiddleware = require("../middleware/auditLogMiddleware");
 const { createNotifPembayaran, detailPembayaranSiswa, ListPembayaran, createPembayaran } = require("../controllers/Wali/PembayaranController");
 
 
@@ -38,6 +39,8 @@ router.use(authRouter);
 router.use(importRouter);
 router.use(telegramRouter);
 router.use(jwtValidateMiddleware);
+// catat aktivitas staf (POST/PUT/PATCH/DELETE) ke audit_logs
+router.use(auditLogMiddleware);
 router.use(paginationMiddleware);
 router.use("/ppdb", ppdbRouter);
 router.use("/users", userRouter);

@@ -1,41 +1,38 @@
 const IzinModel = require("../../models").izin_pulang;
 const { Op } = require("sequelize");
 const models = require("../../models");
-const { default: axios } = require("axios");
+const { kirimWaGrup, isTanggal } = require("../../utils/waNotif");
 const dotenv = require("dotenv");
 dotenv.config();
 async function buatIzinPulang(req, res) {
   try {
-    const payload = req.body;
-    (payload.user_id = req.id), (payload.student_id = req.StudentId);
-    payload.status_approval = "menunggu";
-    await IzinModel.create(payload);
+    const { izin_dari, izin_sampai } = req.body || {};
+    const kepentingan = String(req.body?.kepentingan ?? "").trim();
+    if (!isTanggal(izin_dari) || !isTanggal(izin_sampai) || !kepentingan) {
+      return res.status(422).json({ status: "Fail", msg: "Tanggal jemput, tanggal antar, dan kepentingan wajib diisi" });
+    }
+    if (izin_sampai < izin_dari) {
+      return res.status(422).json({ status: "Fail", msg: "Tanggal antar tidak boleh sebelum tanggal jemput" });
+    }
+    // hanya field milik wali; status & approval ditentukan server
+    await IzinModel.create({
+      izin_dari,
+      izin_sampai,
+      kepentingan: kepentingan.slice(0, 255),
+      user_id: req.id,
+      student_id: req.StudentId,
+      status_approval: "menunggu",
+    });
 
-    const urlAPI = process.env.URL_WA;
-    const token = process.env.TOKEN_WA;
-    const nomer = process.env.GROUP_WA;
-    const pesan = `*SMK MQ NOTIF IZIN KEPULANGAN*
-    
+    kirimWaGrup(`*SMK MQ NOTIF IZIN KEPULANGAN*
+
 Bismillah, ada wali santri yang mengisi data Tiket Izin Kepulangan berikut data detailnya:
 Nama santri : ${req.nama_siswa}
-Tanggal Jemput : ${payload.izin_dari}
-Tanggal Antar : ${payload.izin_sampai}
-Kepentinggan : ${payload.kepentingan}
-    
-Untuk mengkonfirmasi silahkan buka website https://mysmk.smkmadinatulquran.sch.id/guru/perizinan-pulang`;
+Tanggal Jemput : ${izin_dari}
+Tanggal Antar : ${izin_sampai}
+Kepentinggan : ${kepentingan}
 
-    const data = {
-      "phone": nomer,
-      "message": pesan,
-      "isGroup": true
-    };
-
-    const response = await axios.post(urlAPI, data, {
-      headers: {
-        'Authorization': token,
-        'Content-Type': 'application/json'
-      }
-    });
+Untuk mengkonfirmasi silahkan buka website https://mysmk.smkmadinatulquran.sch.id/guru/perizinan-pulang`);
 
     return res.json({
       status: "Success",
@@ -137,7 +134,10 @@ async function detailIzinPulang(req, res) {
 async function updateIzinPulang(req, res) {
   try {
     const { id } = req.params;
-    const { tanggal, kepentingan } = req.body;
+    const { izin_dari, izin_sampai, kepentingan } = req.body || {};
+    if ((izin_dari !== undefined && !isTanggal(izin_dari)) || (izin_sampai !== undefined && !isTanggal(izin_sampai))) {
+      return res.status(422).json({ status: "Fail", msg: "Format tanggal tidak valid" });
+    }
     const detail = await IzinModel.findOne({
       where: {
         id: id,
@@ -159,10 +159,16 @@ async function updateIzinPulang(req, res) {
       });
     }
 
+    const dari = izin_dari ?? detail.izin_dari;
+    const sampai = izin_sampai ?? detail.izin_sampai;
+    if (String(sampai).slice(0, 10) < String(dari).slice(0, 10)) {
+      return res.status(422).json({ status: "Fail", msg: "Tanggal antar tidak boleh sebelum tanggal jemput" });
+    }
     await IzinModel.update(
       {
-        tanggal,
-        kepentingan,
+        izin_dari: dari,
+        izin_sampai: sampai,
+        ...(kepentingan !== undefined && { kepentingan: String(kepentingan).trim().slice(0, 255) }),
       },
       {
         where: {

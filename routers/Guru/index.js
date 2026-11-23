@@ -313,6 +313,12 @@ guru.get("/master/:jenis", requireAdminMiddleware, dataMaster.list);
 guru.post("/master/:jenis", requireAdminMiddleware, dataMaster.create);
 guru.put("/master/:jenis/:id", requireAdminMiddleware, dataMaster.update);
 guru.delete("/master/:jenis/:id", requireAdminMiddleware, dataMaster.destroy);
+// Audit log aktivitas staf - khusus Admin
+guru.get(
+  "/audit-log",
+  requireAdminMiddleware,
+  require("../../controllers/Guru/AuditLogController").listAuditLog
+);
 
 guru.get(
   "/dashboard",

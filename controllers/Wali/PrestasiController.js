@@ -1,60 +1,31 @@
-const prestasi = require("../../models").prestasi;
+// Prestasi santri untuk Wali (dibatasi ke req.StudentId, filter lewat replacements).
 const { sequelize } = require("../../models");
 const { QueryTypes } = require("sequelize");
-const dotenv = require("dotenv");
-
-dotenv.config();
-const { formatDate } = require("../../utils/format");
+const { arahUrut, paginasi, infoHalaman } = require("../../utils/sqlWali");
 
 async function listPrestasi(req, res) {
   try {
-    let {
-      tahunAjaran,
-      semester,
-      keyword,
-      dariTanggal,
-      sampaiTanggal,
-      page,
-      pageSize,
-      orderBy,
-    } = req.query;
+    const { tahunAjaran, semester, keyword, dariTanggal, sampaiTanggal } = req.query;
+    const orderBy = arahUrut(req.query.orderBy);
+    const pg = paginasi(req.query.page, req.query.pageSize);
 
-    if (tahunAjaran !== undefined) {
-      tahunAjaran = `AND c.nama_tahun_ajaran = '${tahunAjaran}'`;
-    } else {
-      tahunAjaran = "";
-    }
-    if (keyword === undefined || keyword === null) {
-        keyword = "";
-    } else {
-     
-      keyword = `AND a.prestasi  LIKE '%${keyword}%' OR a.kategori LIKE '%${keyword}%'`;
-    }
-
-    if (semester !== undefined ) {
-      semester = `AND a.semester = '${semester}'`;
-    } else {
-      semester = "";
-    }
-
+    const where = ["a.student_id = :studentId"];
+    const rep = { studentId: req.StudentId, ...pg.replacements };
     if (dariTanggal !== undefined && sampaiTanggal !== undefined) {
-      tanggal = `AND a.tanggal BETWEEN  '${dariTanggal}' AND '${sampaiTanggal}' `;
-    } else {
-      tanggal = "";
+      where.push("a.tanggal BETWEEN :dariTanggal AND :sampaiTanggal");
+      rep.dariTanggal = dariTanggal;
+      rep.sampaiTanggal = sampaiTanggal;
     }
-    let limit = "";
-    if (page !== undefined && pageSize !== undefined) {
-      limit = `LIMIT ${page}, ${pageSize}`;
+    if (semester !== undefined) { where.push("a.semester = :semester"); rep.semester = semester; }
+    if (tahunAjaran !== undefined) { where.push("c.nama_tahun_ajaran = :tahunAjaran"); rep.tahunAjaran = tahunAjaran; }
+    if (keyword !== undefined && keyword !== null && keyword !== "") {
+      // dikurung agar OR tidak membuka data santri lain
+      where.push("(a.prestasi LIKE :keyword OR a.kategori LIKE :keyword)");
+      rep.keyword = `%${keyword}%`;
     }
-    if (orderBy === undefined) {
-      orderBy = "desc";
-    }
-    try {
-      const absensi = await sequelize.query(
-        `
-        
-       
-        SELECT
+
+    const data = await sequelize.query(
+      `SELECT
         a.id,
         a.tanggal,
         b.nama_siswa,
@@ -62,53 +33,31 @@ async function listPrestasi(req, res) {
         a.kategori,
         a.semester,
         c.nama_tahun_ajaran AS tahun_ajaran
-    FROM prestasis AS a
-        LEFT JOIN students AS b ON (a.student_id = b.id)
-        LEFT JOIN ta AS c ON (a.ta_id = c.id)
-    WHERE a.student_id = ${req.StudentId} ${tanggal} ${semester} ${tahunAjaran}
-  ${keyword}
-    ORDER BY  a.tanggal ${orderBy}
-    ${limit}
-          ;`,
-        {
-          type: QueryTypes.SELECT,
-        }
-      );
+      FROM prestasis AS a
+      LEFT JOIN students AS b ON (a.student_id = b.id)
+      LEFT JOIN ta AS c ON (a.ta_id = c.id)
+      WHERE ${where.join(" AND ")}
+      ORDER BY a.tanggal ${orderBy}
+      ${pg.limit};`,
+      { type: QueryTypes.SELECT, replacements: rep }
+    );
 
-      if (absensi.length === 0) {
-        return res.json({
-          status: "Fail",
-          msg: "Tidak ditemukan absensi halaqoh pada periode yang dipilih",
-        });
-      }
-
+    if (data.length === 0) {
       return res.json({
-        status: "Success",
-        msg: "Data Pelanggaran ditemukan",
-        page: page + 1,
-        nextPage: page + 2,
-        previousPage: page + 1 - 1,
-        pageSize: pageSize,
-        totalData: absensi.length,
-
-        // page: page + 1,
-        // nextPage: page + 2,
-        // previousPage: page + 1 - 1,
-        // pageSize: pageSize,
-        // totalData: absensi.length,
-        data: absensi,
-      });
-    } catch (err) {
-      console.log(err);
-      res.status(403).json({
-        msg: "Terjadi Kesalahan",
+        status: "Fail",
+        msg: "Tidak ditemukan prestasi pada periode yang dipilih",
       });
     }
-  } catch (err) {
-    return res.status(403).json({
-      status: "Fail",
-      msg: "Terjadi Kesalahan",
+
+    return res.json({
+      status: "Success",
+      msg: "Data Prestasi ditemukan",
+      ...infoHalaman(pg, data.length),
+      data,
     });
+  } catch (err) {
+    console.log(err);
+    return res.status(403).json({ status: "Fail", msg: "Terjadi Kesalahan" });
   }
 }
 

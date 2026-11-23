@@ -34,6 +34,29 @@ const {
   isAkunDiblokir,
   pesanAkunDiblokir,
 } = require("../utils/statusAkun");
+const { catatAudit, infoRequest, isStaf } = require("../utils/auditLog");
+
+// Audit log login/logout (tidak di-await, tidak pernah melempar error).
+// LOGIN & LOGOUT hanya untuk staf; LOGIN_GAGAL dicatat untuk semua (hanya email, tanpa password).
+function auditAuth(req, action, status_code, { user, role, roleId, data } = {}) {
+  try {
+    if (action !== "LOGIN_GAGAL" && !isStaf(roleId)) return;
+    catatAudit({
+      user_id: user?.id ?? null,
+      user_name: user?.name ?? null,
+      user_email: user?.email ?? req.body?.email ?? null,
+      role: role ?? null,
+      action,
+      method: req.method,
+      path: req.baseUrl + (req.route?.path || req.path),
+      status_code,
+      data: data ? JSON.stringify(data) : null,
+      ...infoRequest(req),
+    });
+  } catch (e) {
+    console.log("audit log gagal", e?.message);
+  }
+}
 
 async function login(req, res) {
   try {
@@ -45,6 +68,9 @@ async function login(req, res) {
     });
 
     if (!user) {
+      auditAuth(req, "LOGIN_GAGAL", 404, {
+        data: { email, loginAs, alasan: "Email tidak ditemukan" },
+      });
       return res.status(404).json({
         status: "fail",
         msg: "Email tidak ditemukan",
@@ -52,6 +78,10 @@ async function login(req, res) {
     }
     const verify = bcrypt.compareSync(password, user.password);
     if (!verify) {
+      auditAuth(req, "LOGIN_GAGAL", 422, {
+        user,
+        data: { email, loginAs, alasan: "Password salah" },
+      });
       return res.status(422).json({
         status: "fail",
         msg: "Email dan Pasword tidak sama",
@@ -59,6 +89,10 @@ async function login(req, res) {
     }
 
     if (isAkunDiblokir(user.status)) {
+      auditAuth(req, "LOGIN_GAGAL", 403, {
+        user,
+        data: { email, loginAs, alasan: "Akun diblokir" },
+      });
       return res.status(403).json({
         status: "fail",
         msg: pesanAkunDiblokir(user.status),
@@ -97,6 +131,7 @@ async function login(req, res) {
 
     const token = signAccess(payload);
     const refreshToken = await issueRefresh(user.id, loginAs, req.headers["user-agent"]);
+    auditAuth(req, "LOGIN", 200, { user, role: roleName.role_name, roleId: loginAs });
 
     return res.status(200).json({
       status: "Success",
@@ -306,24 +341,22 @@ async function nisnCek(req, res) {
 async function authme(req, res) {
   let email = req.email;
   try {
-    const token = JWT.sign(
+    // umur token mengikuti access token biasa (bukan 360 hari) agar sistem refresh token tidak bisa dilewati
+    const token = signAccess(
       {
         email: req.email,
         name: req.name,
         id: req.id,
         role: req.role,
-        roleId: req.Role_id,
+        roleId: req.roleId,
         StudentId: req?.StudentId,
+        nama_siswa: req?.nama_siswa,
         student_id: req.student_id,
         teacher_id: req?.teacher_id,
         semesterAktif: req?.semesterAktif,
         tahunAjaranAktif: req?.tahunAjaranAktif,
         walsan_id : req?.walsan_id,
         allRole: req.allRole,
-      },
-      process.env.JWT_SECRET_ACCESS_TOKEN,
-      {
-        expiresIn: "360d",
       }
     );
 
@@ -336,7 +369,7 @@ async function authme(req, res) {
           name: req.name,
           id: req.id,
           role: req.role,
-          roleId: req.Role_id,
+          roleId: req.roleId,
         },
         role: req.role,
         token: token,
@@ -352,7 +385,7 @@ async function authme(req, res) {
         name: req.name,
         id: req.id,
         role: req.role,
-        roleId: req.Role_id,
+        roleId: req.roleId,
       },
       role: req.role,
       token: token,
@@ -464,7 +497,10 @@ async function googleLogin(req, res) {
 async function logout(req, res) {
   try {
     const refreshToken = req.body?.refreshToken || req.query?.refreshToken;
-    if (refreshToken) await revokeToken(refreshToken, "logout");
+    if (refreshToken) {
+      const dicabut = await revokeToken(refreshToken, "logout");
+      if (dicabut) auditLogout(req, refreshToken);
+    }
   } catch (err) {
     console.log(err);
   }
@@ -472,6 +508,26 @@ async function logout(req, res) {
     status: "Success",
     message: "Anda telah berhasil logout",
   });
+}
+
+// Cari pemilik refresh token (hanya baca) lalu catat LOGOUT. Tidak di-await.
+async function auditLogout(req, refreshToken) {
+  try {
+    const tokenHash = crypto.createHash("sha256").update(String(refreshToken)).digest("hex");
+    const row = await models.refresh_token.findOne({
+      where: { token_hash: tokenHash },
+      attributes: ["user_id", "login_as"],
+      raw: true,
+    });
+    if (!row || !isStaf(row.login_as)) return;
+    const [user, role] = await Promise.all([
+      userModel.findByPk(row.user_id, { attributes: ["id", "name", "email"], raw: true }),
+      row.login_as ? RolesModel.findByPk(row.login_as, { attributes: ["role_name"], raw: true }) : null,
+    ]);
+    auditAuth(req, "LOGOUT", 200, { user, role: role?.role_name, roleId: row.login_as });
+  } catch (e) {
+    console.log("audit log gagal", e?.message);
+  }
 }
 
 // POST /refresh-token  body: { refreshToken }

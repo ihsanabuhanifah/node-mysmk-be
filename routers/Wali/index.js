@@ -8,7 +8,7 @@ const {
   resultHalaqoh,
   rekapAbsensiKehadiran,
 } = require("../../controllers/Wali/AbsensiController");
-const { profile, create } = require("../../controllers/Wali/ProfileController");
+const { profile } = require("../../controllers/Wali/ProfileController");
 const {
   listPelanggaran,
 } = require("../../controllers/Wali/PelanggaranController");
@@ -31,6 +31,12 @@ const {
 } = require("../../controllers/noticeController");
 const { createPembayaran, ListPembayaran, detailPembayaran, createPembayaranOtomatis, createNotifPembayaran, daftarSiswa, detailPembayaranSiswa} = require("../../controllers/Wali/PembayaranController");
 
+const {
+  paksaSantriSendiri,
+  cekTagihanMilikSendiri,
+  daftarSiswaSendiri,
+} = require("../../middleware/waliPembayaranGuard");
+
 const { listRaport, listRaportDetail, listExam } = require("../../controllers/Wali/NilaiController");
 
 
@@ -38,7 +44,7 @@ wali.use(waliAccessMiddleware);
 wali.get("/absensi/kelas/list", list);
 wali.get("/absensi/halaqoh/list", listHalaqoh);
 wali.get("/halaqoh/result", resultHalaqoh);
-wali.post("/tambah", create);
+// POST /tambah dihapus: handler `create` kosong dan tidak pernah merespons
 wali.get("/profile", profile);
 wali.get("/rekap/absensi-kelas", rekapAbsensiKehadiran);
 wali.get("/pelanggaran/list", listPelanggaran);
@@ -56,12 +62,13 @@ wali.put("/pulang/update/:id", updateIzinPulang);
 //notice
 wali.get("/notice/list", getNotice);
 //Pembayaran
-wali.get("/pembayaran/listsiswa", daftarSiswa);
-wali.get("/pembayaran/detailSiswa/:student_id", detailPembayaranSiswa);
-wali.get("/pembayaran/list", ListPembayaran);
-wali.get("/pembayaran/detail/:id", detailPembayaran);
-wali.put("/pembayaran/bayar/:id", createPembayaran);
-wali.put("/pembayaran/otomatis/:id", createPembayaranOtomatis);
+wali.get("/pembayaran/listsiswa", daftarSiswaSendiri);
+wali.get("/pembayaran/detailSiswa/:student_id", paksaSantriSendiri, detailPembayaranSiswa);
+// dulu ListPembayaran (semua santri) -> sekarang hanya tagihan santri sendiri
+wali.get("/pembayaran/list", paksaSantriSendiri, detailPembayaranSiswa);
+wali.get("/pembayaran/detail/:id", cekTagihanMilikSendiri, detailPembayaran);
+wali.put("/pembayaran/bayar/:id", cekTagihanMilikSendiri, createPembayaran);
+wali.put("/pembayaran/otomatis/:id", cekTagihanMilikSendiri, createPembayaranOtomatis);
 
 
 
