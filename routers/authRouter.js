@@ -24,27 +24,8 @@ authRouter.post(
 
 authRouter.post("/register", registerValidation, authController.register);
 
-authRouter.post(
-  "/register/wali",
-
-  authController.registerWali
-);
-authRouter.post(
-  "/nisn/cek",
-
-  authController.nisnCek
-);
-
-authRouter.post(
-  "/register/wali",
-
-  authController.registerWali
-);
-authRouter.post(
-  "/nisn/cek",
-
-  authController.nisnCek
-);
+// Registrasi wali mandiri (/register/wali, /nisn/cek) dihapus:
+// akun wali hanya dibuat admin lewat halaman Daftar Wali.
 
 authRouter.get("/authme", jwtValidateMiddleware, authController.authme);
 authRouter.post("/google-register", authController.googleRegister);
