@@ -198,59 +198,58 @@ const detailSiswa = response.requestResponse(async (req, res) => {
 
 const updateSiswa = response.requestResponse(async (req, res) => {
   const { id } = req.params;
+  const body = req.body || {};
 
-  const {
+  // string kosong dari form -> null (kolom DATETIME / INT menolak '')
+  const val = (v) =>
+    v === undefined ? undefined : v === null || String(v).trim() === "" ? null : v;
+
+  const siswa = await StudentModel.findByPk(id);
+  if (!siswa) {
+    return { statusCode: 422, msg: "Siswa tidak ditemukan" };
+  }
+
+  const nama_siswa = val(body.nama_siswa);
+  const email = val(body.email);
+  if (!nama_siswa) return { statusCode: 422, msg: "Nama siswa wajib diisi" };
+  if (!email) return { statusCode: 422, msg: "Email wajib diisi" };
+
+  const emailDipakai = await UserModel.findOne({
+    where: { email, id: { [Op.ne]: siswa.user_id } },
+  });
+  if (emailDipakai) {
+    return { statusCode: 422, msg: "Email sudah dipakai akun lain" };
+  }
+
+  const dataSiswa = {
     nama_siswa,
-    nis,
-    nisn,
-    nik,
-    tempat_lahir,
-    tanggal_lahir,
-    alamat,
-    sekolah_asal,
-    anak_ke,
-    status,
-    angkatan,
-    tahub_ajaran,
-    keterangan,
-    user_id,
-    email,
-  } = req.body;
+    nis: val(body.nis),
+    nisn: val(body.nisn),
+    nik: val(body.nik),
+    tempat_lahir: val(body.tempat_lahir),
+    tanggal_lahir: val(body.tanggal_lahir),
+    jenis_kelamin: val(body.jenis_kelamin),
+    anak_ke: val(body.anak_ke),
+    alamat: val(body.alamat),
+    sekolah_asal: val(body.sekolah_asal),
+    tanggal_diterima: val(body.tanggal_diterima),
+    angkatan: val(body.angkatan),
+    tahun_ajaran: val(body.tahun_ajaran),
+    // status & keterangan hanya diubah bila dikirim (form lama)
+    ...(body.status ? { status: body.status } : {}),
+    ...(body.keterangan !== undefined ? { keterangan: val(body.keterangan) } : {}),
+  };
+  // field yang tidak dikirim sama sekali tidak ikut diubah
+  Object.keys(dataSiswa).forEach((k) => dataSiswa[k] === undefined && delete dataSiswa[k]);
 
-  await UserModel.update(
-    {
-      name: nama_siswa,
-      email: email,
-    },
-    {
-      where: {
-        id: user_id,
-      },
-    }
-  );
-
-  await StudentModel.update(
-    {
-      nama_siswa,
-      nis,
-      nisn,
-      nik,
-      tempat_lahir,
-      tanggal_lahir,
-      alamat,
-      sekolah_asal,
-      anak_ke,
-      status,
-      angkatan,
-      tahub_ajaran,
-      keterangan,
-    },
-    {
-      where: {
-        id: id,
-      },
-    }
-  );
+  await models.sequelize.transaction(async (transaction) => {
+    // user diambil dari data siswa, bukan dari body (cegah mengubah akun lain)
+    await UserModel.update(
+      { name: nama_siswa, email },
+      { where: { id: siswa.user_id }, transaction }
+    );
+    await StudentModel.update(dataSiswa, { where: { id }, transaction });
+  });
 
   return {
     msg: "Perbaharui data siswa berhasil",

@@ -6,17 +6,20 @@ services:
     build: .
     container_name: mysmk-api
     restart: unless-stopped
+    # sama dengan container lama: file upload di volume dimiliki uid 1001
+    user: "1001:1001"
     environment:
       TZ: Asia/Jakarta
       PORT: 8080
     # .env tidak dimasukkan ke image; dibaca dotenv langsung dari file di server
     volumes:
       - ./.env:/app/.env:ro
-      # file upload (bukti, foto, excel, dll) tetap ada walau container dibuat ulang
-      - ./public/data/uploads:/app/public/data/uploads
-    # hanya bisa diakses dari server itu sendiri (lewat Apache), bukan langsung dari internet
+      # file upload (bukti, foto, excel, dll): volume Docker yang SAMA dengan deploy lama
+      - mysmk_uploads:/app/public/data/uploads
+    # sama dengan deploy lama (API diakses langsung di port 8080).
+    # Setelah API lewat Apache + HTTPS, ganti jadi "127.0.0.1:8080:8080".
     ports:
-      - "127.0.0.1:8080:8080"
+      - "8080:8080"
     logging:
       driver: json-file
       options:
@@ -47,3 +50,9 @@ services:
       options:
         max-size: "5m"
         max-file: "3"
+
+volumes:
+  # Volume upload yang dibuat deploy lama (compose di ~/node-mysmk-be, proyek "node-mysmk-be").
+  # Nama bisa diganti lewat UPLOADS_VOLUME bila hasil `docker volume ls` berbeda.
+  mysmk_uploads:
+    name: ${UPLOADS_VOLUME:-node-mysmk-be_mysmk_uploads}
