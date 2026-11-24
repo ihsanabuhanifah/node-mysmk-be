@@ -218,7 +218,10 @@ const updateSiswa = response.requestResponse(async (req, res) => {
     where: { email, id: { [Op.ne]: siswa.user_id } },
   });
   if (emailDipakai) {
-    return { statusCode: 422, msg: "Email sudah dipakai akun lain" };
+    return {
+      statusCode: 422,
+      msg: `Email ${email} sudah dipakai akun lain: ${emailDipakai.name} (${emailDipakai.role || "-"})`,
+    };
   }
 
   const dataSiswa = {
